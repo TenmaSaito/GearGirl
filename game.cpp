@@ -72,10 +72,6 @@ void InitGame(void)
 		D3DXVECTOR3(0.0f, 0.0f, 0.0f),
 		D3DXVECTOR3(0.0f, 0.0f, D3DX_HALFPI),
 		viewport);
-
-	Thread t;
-
-	t.CreateThread(NULL, DEFAULT_PROC, false, NULL);
 }
 
 //==================================================================================
