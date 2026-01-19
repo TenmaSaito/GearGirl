@@ -1,0 +1,56 @@
+﻿  2Dpolygon.cpp
+  3Dmodel.cpp
+  camera.cpp
+  debugproc.cpp
+C:\Users\student\Desktop\3Dゲームチーム制作\GearGirl\debugproc.cpp(131,9): warning C4244: '=': 'double' から 'float' への変換です。データが失われる可能性があります。
+C:\Users\student\Desktop\3Dゲームチーム制作\GearGirl\debugproc.cpp(199,11): warning C4244: '=': 'double' から 'float' への変換です。データが失われる可能性があります。
+  fade.cpp
+  game.cpp
+C:\Users\student\Desktop\3Dゲームチーム制作\GearGirl\game.cpp(63,15): warning C4244: '=': 'float' から 'DWORD' への変換です。データが失われる可能性があります。
+C:\Users\student\Desktop\3Dゲームチーム制作\GearGirl\game.cpp(64,15): warning C4244: '=': 'float' から 'DWORD' への変換です。データが失われる可能性があります。
+  input.cpp
+C:\Users\student\Desktop\3Dゲームチーム制作\GearGirl\input.cpp(1323,42): warning C4244: 'return': 'float' から 'LONG' への変換です。データが失われる可能性があります。
+  light.cpp
+  main.cpp
+  mathUtil.cpp
+C:\Users\student\Desktop\3Dゲームチーム制作\GearGirl\mathUtil.cpp(582,11): warning C4244: '初期化中': 'int' から 'float' への変換です。データが失われる可能性があります。
+C:\Users\student\Desktop\3Dゲームチーム制作\GearGirl\mathUtil.cpp(702,39): warning C4244: '=': 'float' から 'int' への変換です。データが失われる可能性があります。
+C:\Users\student\Desktop\3Dゲームチーム制作\GearGirl\mathUtil.cpp(704,19): warning C4244: '=': 'int' から 'float' への変換です。データが失われる可能性があります。
+C:\Users\student\Desktop\3Dゲームチーム制作\GearGirl\mathUtil.cpp(765,9): warning C4244: '=': 'double' から 'float' への変換です。データが失われる可能性があります。
+C:\Users\student\Desktop\3Dゲームチーム制作\GearGirl\mathUtil.cpp(833,11): warning C4244: '=': 'double' から 'float' への変換です。データが失われる可能性があります。
+C:\Users\student\Desktop\3Dゲームチーム制作\GearGirl\mathUtil.cpp(967,9): warning C4244: '=': 'double' から 'float' への変換です。データが失われる可能性があります。
+C:\Users\student\Desktop\3Dゲームチーム制作\GearGirl\mathUtil.cpp(1035,11): warning C4244: '=': 'double' から 'float' への変換です。データが失われる可能性があります。
+  mode.cpp
+  Texture.cpp
+  thread.cpp
+  title.cpp
+  modeldata.cpp
+  コードを生成中...
+C:\Users\student\Desktop\3Dゲームチーム制作\GearGirl\mathUtil.cpp(919): warning C4172: ローカル変数またはテンポラリのアドレスを返します: aStrOut
+3Dmodel.obj : error LNK2019: 未解決の外部シンボル D3DXMatrixMultiply が関数 "void __cdecl Draw3DModel(void)" (?Draw3DModel@@YAXXZ) で参照されました
+3Dmodel.obj : error LNK2019: 未解決の外部シンボル D3DXMatrixTranslation が関数 "void __cdecl Draw3DModel(void)" (?Draw3DModel@@YAXXZ) で参照されました
+3Dmodel.obj : error LNK2019: 未解決の外部シンボル D3DXMatrixRotationYawPitchRoll が関数 "void __cdecl Draw3DModel(void)" (?Draw3DModel@@YAXXZ) で参照されました
+camera.obj : error LNK2019: 未解決の外部シンボル D3DXMatrixLookAtLH が関数 "void __cdecl SetCamera(int)" (?SetCamera@@YAXH@Z) で参照されました
+camera.obj : error LNK2019: 未解決の外部シンボル D3DXMatrixPerspectiveFovLH が関数 "void __cdecl SetCamera(int)" (?SetCamera@@YAXH@Z) で参照されました
+debugproc.obj : error LNK2019: 未解決の外部シンボル D3DXCreateFontA が関数 "void __cdecl InitDebugProc(void)" (?InitDebugProc@@YAXXZ) で参照されました
+input.obj : error LNK2019: 未解決の外部シンボル DirectInput8Create が関数 "long __cdecl InitKeyboard(struct HINSTANCE__ *,struct HWND__ *)" (?InitKeyboard@@YAJPEAUHINSTANCE__@@PEAUHWND__@@@Z) で参照されました
+input.obj : error LNK2019: 未解決の外部シンボル XInputGetState が関数 "void __cdecl UpdateJoypad(void)" (?UpdateJoypad@@YAXXZ) で参照されました
+input.obj : error LNK2019: 未解決の外部シンボル XInputSetState が関数 "int __cdecl SetVibration(int,int,int)" (?SetVibration@@YAHHHH@Z) で参照されました
+input.obj : error LNK2019: 未解決の外部シンボル XInputEnable が関数 "long __cdecl InitJoypad(void)" (?InitJoypad@@YAJXZ) で参照されました
+input.obj : error LNK2001: 外部シンボル IID_IDirectInput8A は未解決です
+input.obj : error LNK2001: 外部シンボル GUID_SysMouse は未解決です
+input.obj : error LNK2001: 外部シンボル GUID_SysKeyboard は未解決です
+input.obj : error LNK2001: 外部シンボル c_dfDIMouse は未解決です
+input.obj : error LNK2001: 外部シンボル c_dfDIKeyboard は未解決です
+light.obj : error LNK2019: 未解決の外部シンボル D3DXVec3Normalize が関数 "void __cdecl InitLight(void)" (?InitLight@@YAXXZ) で参照されました
+main.obj : error LNK2019: 未解決の外部シンボル Direct3DCreate9 が関数 "long __cdecl Init(struct HINSTANCE__ *,struct HWND__ *,int)" (?Init@@YAJPEAUHINSTANCE__@@PEAUHWND__@@H@Z) で参照されました
+Texture.obj : error LNK2019: 未解決の外部シンボル D3DXCreateTextureFromFileA が関数 "long __cdecl LoadTexture(char const *,int *)" (?LoadTexture@@YAJPEBDPEAH@Z) で参照されました
+modeldata.obj : error LNK2001: 外部シンボル D3DXCreateTextureFromFileA は未解決です
+modeldata.obj : error LNK2019: 未解決の外部シンボル D3DXLoadMeshFromXA が関数 "long __cdecl LoadModelData(char const *,int *)" (?LoadModelData@@YAJPEBDPEAH@Z) で参照されました
+modeldata.obj : error LNK2019: 未解決の外部シンボル D3DXGetFVFVertexSize が関数 "long __cdecl LoadModelData(char const *,int *)" (?LoadModelData@@YAJPEBDPEAH@Z) で参照されました
+C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86\d3d9.lib : warning LNK4272: ライブラリのコンピューターの種類 'x86' がターゲットのコンピューターの種類' x64' と競合しています
+C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86\d3dx9.lib : warning LNK4272: ライブラリのコンピューターの種類 'x86' がターゲットのコンピューターの種類' x64' と競合しています
+C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86\dxguid.lib : warning LNK4272: ライブラリのコンピューターの種類 'x86' がターゲットのコンピューターの種類' x64' と競合しています
+C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86\dinput8.lib : warning LNK4272: ライブラリのコンピューターの種類 'x86' がターゲットのコンピューターの種類' x64' と競合しています
+C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86\xinput.lib : warning LNK4272: ライブラリのコンピューターの種類 'x86' がターゲットのコンピューターの種類' x64' と競合しています
+C:\Users\student\Desktop\3Dゲームチーム制作\GearGirl\x64\Debug\GearGirl.exe : fatal error LNK1120: 20 件の未解決の外部参照
