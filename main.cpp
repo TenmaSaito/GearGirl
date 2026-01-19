@@ -31,9 +31,6 @@
 //**********************************************************************************
 bool InitWindow(HINSTANCE hInstance, RECT rect, LPWNDCLASSEX lpWcex, HWND *phWnd);
 void UninitWindow(LPWNDCLASSEX lpWcex);
-HWND InitDlgBox(HINSTANCE hInstance, int nIDD, HWND hWnd, DLGPROC dlgProc);
-void UninitDlgBox(HWND hDlgWnd);
-void UpdateDlgBoxPos(HWND hWnd, HWND hDlgWnd);
 void MessageLoop(LPMSG lpMsg);
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow);
@@ -41,7 +38,6 @@ void Uninit(void);
 void Update(void);
 void Draw(void);
 void ToggleFullscreen(HWND hWnd);
-CREATE_LOOPID(loopThread);
 
 //**********************************************************************************
 //*** グローバル変数 ***
@@ -273,47 +269,6 @@ bool InitWindow(HINSTANCE hInstance, RECT rect, LPWNDCLASSEX lpWcex, HWND* phWnd
 	if (phWnd != NULL) *phWnd = hWnd;
 
 	return true;
-}
-
-//================================================================================================================
-// --- エディットボックス作成 ---
-//================================================================================================================
-HWND InitDlgBox(HINSTANCE hInstance, int nIDD, HWND hWnd, DLGPROC dlgProc)
-{
-	HWND hDlgWnd = NULL;
-
-	hDlgWnd = CreateDialog(hInstance, MAKEINTRESOURCE(nIDD), hWnd, dlgProc);
-
-	UpdateDlgBoxPos(hWnd, hDlgWnd);
-
-	return hDlgWnd;
-}
-
-//================================================================================================================
-// --- エディットボックス削除 ---
-//================================================================================================================
-void UninitDlgBox(HWND hDlgWnd)
-{
-	ShowWindow(hDlgWnd, SW_HIDE);
-
-	DestroyWindow(hDlgWnd);
-}
-
-//================================================================================================================
-// --- エディットボックスの位置更新 ---
-//================================================================================================================
-void UpdateDlgBoxPos(HWND hWnd, HWND hDlgWnd)
-{
-	WINDOWINFO wInfo = {};
-	wInfo.cbSize = sizeof(WINDOWINFO);
-	GetWindowInfo(hWnd, &wInfo);
-
-	MoveWindow(hDlgWnd,
-		wInfo.rcWindow.left + 10,
-		wInfo.rcWindow.bottom - 50,
-		300,
-		40,
-		true);
 }
 
 //================================================================================================================
@@ -632,9 +587,4 @@ void ToggleFullscreen(HWND hWnd)
 	}
 
 	g_isFullscreen = !g_isFullscreen;
-}
-
-CREATE_LOOPID(loopThread)
-{
-
 }
