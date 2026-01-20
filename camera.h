@@ -45,4 +45,7 @@ int AddCamera(D3DXVECTOR3 posV, D3DXVECTOR3 posR, D3DXVECTOR3 rot, D3DVIEWPORT9 
 void RemoveCamera(int nIdxCamera);
 Camera *GetCamera(int nIdxCamera);
 int GetCameraNum(void);
+
+void SetUpPixelFog(D3DXCOLOR fogCol, float fStart, float fEnd);
+void CleanUpPixelFog(void);
 #endif

@@ -169,9 +169,9 @@ void UpdateCamera(int nIdxCamera)
 		}
 	}
 
-	pCamera->posV.x = pCamera->posR.x + (sinf(pCamera->rot.z) * cosf(pCamera->rot.y) * pCamera->fZlength);
-	pCamera->posV.y = pCamera->posR.y + (cosf(pCamera->rot.z) * pCamera->fZlength);
-	pCamera->posV.z = pCamera->posR.z + (sinf(pCamera->rot.z) * sinf(pCamera->rot.y) * pCamera->fZlength);
+	pCamera->posV.x = pCamera->posR.x + (sinf(pCamera->rot.z + D3DX_HALFPI) * cosf(pCamera->rot.y + D3DX_PI) * pCamera->fZlength);
+	pCamera->posV.y = pCamera->posR.y + (cosf(pCamera->rot.z + D3DX_HALFPI) * pCamera->fZlength);
+	pCamera->posV.z = pCamera->posR.z + (sinf(pCamera->rot.z + D3DX_HALFPI) * sinf(pCamera->rot.y + D3DX_PI) * pCamera->fZlength);
 }
 
 //================================================================================================================
@@ -277,4 +277,45 @@ Camera *GetCamera(int nIdxCamera)
 int GetCameraNum(void)
 {
 	return g_nNumCamera;
+}
+
+//================================================================================================================
+// --- ピクセルフォグの設定 ---
+//================================================================================================================
+void SetUpPixelFog(D3DXCOLOR fogCol, float fStart, float fEnd)
+{
+	// デバイスの取得開始
+	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+
+	float Start = fStart;		// フォグ開始地点
+	float End = fEnd;			// フォグ終了地点
+
+	// フォグブレンディングを有効化
+	pDevice->SetRenderState(D3DRS_FOGENABLE, TRUE);
+
+	// フォグカラ―を設定
+	pDevice->SetRenderState(D3DRS_FOGCOLOR, fogCol);
+
+	// フォグパラメータを設定
+	pDevice->SetRenderState(D3DRS_FOGTABLEMODE, D3DFOG_LINEAR);
+	pDevice->SetRenderState(D3DRS_FOGSTART, *(DWORD*)(&Start));
+	pDevice->SetRenderState(D3DRS_FOGEND, *(DWORD*)(&End));
+
+	// デバイスの取得終了
+	EndDevice();
+}
+
+//================================================================================================================
+// --- ピクセルフォグの終了 ---
+//================================================================================================================
+void CleanUpPixelFog(void)
+{
+	// デバイスの取得開始
+	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+
+	// フォグブレンディングを無効化
+	pDevice->SetRenderState(D3DRS_FOGENABLE, FALSE);
+
+	// デバイスの取得終了
+	EndDevice();
 }
