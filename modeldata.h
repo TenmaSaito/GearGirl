@@ -45,6 +45,6 @@ void InitModelData(void);
 void UninitModelData(void);
 void ResetModelData(void);
 
-HRESULT LoadModelData(const char* pXFileName, int *pOutnIdx);
+HRESULT LoadModelData(_In_ const char* pXFileName, int *pOutnIdx);
 LPMODELDATA GetModelData(int nType);
 #endif

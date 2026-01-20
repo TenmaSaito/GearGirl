@@ -107,7 +107,7 @@ HRESULT LoadModelData(_In_ const char* pXFileName, int *pOutnIdx)
 
 				EndDevice();
 
-				return E_FAIL;
+				return hr;
 			}
 
 			if (pOutnIdx)
