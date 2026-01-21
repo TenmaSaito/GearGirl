@@ -22,7 +22,7 @@ using namespace MyMathUtil;
 //*** グローバル変数 ***
 //*************************************************************************************************
 _3DMODEL g_aModel[MAX_3DMODEL];		// 3Dモデル情報
-int g_nNumModel;					// 設置した3Dモデルの数
+int g_nNum3DModel;					// 設置した3Dモデルの数
 
 //=================================================================================================
 // --- モデル初期化 ---
@@ -33,7 +33,7 @@ void Init3DModel(void)
 	ZeroMemory(&g_aModel[0], sizeof(_3DMODEL) * (MAX_3DMODEL));
 
 	// 設置したモデルの数を初期化
-	g_nNumModel = 0;
+	g_nNum3DModel = 0;
 }
 
 //=================================================================================================
@@ -139,7 +139,7 @@ int Set3DModel(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nIdxModelData)
 			p3DModel->pos = pos;
 			p3DModel->rot = rot;
 			p3DModel->bUse = true;
-			g_nNumModel++;
+			g_nNum3DModel++;
 
 			break;
 		}

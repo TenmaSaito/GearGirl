@@ -11,6 +11,7 @@
 #include "input.h"
 #include "camera.h"
 #include "fade.h"
+#include "model.h"
 #include "modeldata.h"
 #include "3Dmodel.h"
 #include "light.h"
@@ -46,6 +47,9 @@ void InitGame(void)
 	/*** 3Dモデルの初期化 ***/
 	Init3DModel();
 
+	/*** モデルの初期化 ***/
+	InitModel();
+
 	/*** ライトの初期化 ***/
 	InitLight();
 
@@ -56,6 +60,9 @@ void InitGame(void)
 		// モデルデータ使用した3Dモデルの配置
 		g_nIdx3DModel = Set3DModel(D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, nIdxModelData);
 	}
+
+	/*** モデルのスクリプト読み込み ***/
+	LoadModel();
 
 	D3DVIEWPORT9 viewport;
 
@@ -90,6 +97,9 @@ void UninitGame(void)
 	/*** 3Dモデルの終了 ***/
 	Uninit3DModel();
 
+	/*** モデルの終了 ***/
+	UninitModel();
+
 	/*** ライトの終了 ***/
 	UninitLight();
 }
@@ -118,6 +128,9 @@ void UpdateGame(void)
 	/*** 3Dモデルの更新 ***/
 	Update3DModel();
 
+	/*** モデルの更新 ***/
+	UpdateModel();
+
 	/*** ライトの更新 ***/
 	UpdateLight();
 }
@@ -138,6 +151,9 @@ void DrawGame(void)
 
 		/*** 3Dモデルの描画 ***/
 		Draw3DModel();
+
+		/*** モデルの描画 ***/
+		DrawModel();
 
 		// VERTEX_2D ============================================
 		/*** Aの描画 ***/

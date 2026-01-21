@@ -117,6 +117,9 @@
     <ClCompile Include="motion.cpp">
       <Filter>ソース ファイル\resouce</Filter>
     </ClCompile>
+    <ClCompile Include="model.cpp">
+      <Filter>ソース ファイル\resouce</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h">
@@ -165,6 +168,9 @@
       <Filter>ヘッダー ファイル\mode</Filter>
     </ClInclude>
     <ClInclude Include="motion.h">
+      <Filter>ヘッダー ファイル\resouce</Filter>
+    </ClInclude>
+    <ClInclude Include="model.h">
       <Filter>ヘッダー ファイル\resouce</Filter>
     </ClInclude>
   </ItemGroup>
