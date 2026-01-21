@@ -53,9 +53,9 @@ bool DeleteComments(char *pStr);
 //**********************************************************************************
 //*** グローバル変数 ***
 //**********************************************************************************
-MOTION_INFO g_aMotionInfo[MAX_MOTION];			// モーション情報
-PARTS_INFO g_aPartsInfo[MAX_MOTION];			// パーツ情報
-int g_nNumScriptInfo;							// 読み込んだスクリプトの数
+MOTIONSCRIPT_INFO g_aMotionInfo[MAX_MOTION];			// モーション情報
+PARTS_INFO g_aPartsInfo[MAX_MOTION];					// パーツ情報
+int g_nNumScriptInfo;									// 読み込んだスクリプトの数
 
 //==================================================================================
 // --- 初期化 ---
@@ -63,7 +63,7 @@ int g_nNumScriptInfo;							// 読み込んだスクリプトの数
 void InitMotion(void)
 {
 	// モーション情報の初期化
-	ZeroMemory(&g_aMotionInfo[0], sizeof(MOTION_INFO) * (MAX_MOTION));
+	ZeroMemory(&g_aMotionInfo[0], sizeof(MOTIONSCRIPT_INFO) * (MAX_MOTION));
 
 	// パーツ情報の初期化
 	ZeroMemory(&g_aPartsInfo[0], sizeof(PARTS_INFO) * (MAX_MOTION));
@@ -77,7 +77,7 @@ void InitMotion(void)
 //==================================================================================
 bool LoadMotion(_In_ const char* pMotionFileName, int* pOutIdx)
 {
-	LPMOTION_INFO pMotionInfo = &g_aMotionInfo[0];
+	LPMOTIONSCRIPT_INFO pMotionInfo = &g_aMotionInfo[0];
 
 	if (pOutIdx)
 	{ // エラー番号を格納
@@ -150,10 +150,10 @@ void UninitMotion(void)
 //==================================================================================
 // --- モーション情報の取得 ---
 //==================================================================================
-LPMOTION_INFO GetMotionInfo(_In_ int nType)
+LPMOTIONSCRIPT_INFO GetMotionScriptInfo(_In_ int nType)
 {
 	if (nType < 0 || nType >= MAX_MOTION) return NULL;
-	LPMOTION_INFO pMotionInfo = &g_aMotionInfo[nType];
+	LPMOTIONSCRIPT_INFO pMotionInfo = &g_aMotionInfo[nType];
 	if (pMotionInfo->bUse == true)
 	{
 		return pMotionInfo;
@@ -216,7 +216,7 @@ bool LoadFileFromMotionScript(const char* pMotionFileName)
 	float fMove = 0.0f;						// 移動量
 	float fJump = 0.0f;						// 跳躍力
 	LPPARTS_INFO pPInfo = &g_aPartsInfo[g_nNumScriptInfo];			// パーツ情報
-	LPMOTION_INFO pMInfo = &g_aMotionInfo[g_nNumScriptInfo];		// モーション情報
+	LPMOTIONSCRIPT_INFO pMInfo = &g_aMotionInfo[g_nNumScriptInfo];		// モーション情報
 	MOTIONTYPE mType = MOTIONTYPE_NEUTRAL;	// モーションタイプ
 	int nType = MOTIONTYPE_NEUTRAL;			// 現在設定中のモーションタイプ(キャスト及び判定用)
 
@@ -512,14 +512,14 @@ bool LoadFileFromMotionScript(const char* pMotionFileName)
 
 							bLoop = (nLoop > 0) ? true : false;
 
-							pMInfo->bLoop = bLoop;
+							pMInfo->aMotionInfo[mType].bLoop = bLoop;
 						}
 						else if (strstr(aStr, READ_NUMKEY) != NULL)
 						{
 							pStart = strchr(aStr, '=');
 
 							/** 移動量の読み込み **/
-							(void)sscanf(pStart + 1, "%d", &pMInfo->nNumKey);
+							(void)sscanf(pStart + 1, "%d", &pMInfo->aMotionInfo[mType].nNumKey);
 						}
 						else if (strcmp(aStr, READ_KEYSET) == NULL)
 						{
@@ -553,7 +553,7 @@ bool LoadFileFromMotionScript(const char* pMotionFileName)
 										pStart = strchr(aStr, '=');
 
 										/** 移動量の読み込み **/
-										(void)sscanf(pStart + 1, "%d", &pMInfo->aKeyInfo[nKeySet].nFrame);
+										(void)sscanf(pStart + 1, "%d", &pMInfo->aMotionInfo[mType].aKeyInfo[nKeySet].nFrame);
 									}
 									else if (strcmp(aStr, READ_KEY) == NULL)
 									{
@@ -587,9 +587,9 @@ bool LoadFileFromMotionScript(const char* pMotionFileName)
 
 													/** 位置の読み込み **/
 													(void)sscanf(pStart + 1, "%f %f %f",
-														&pMInfo->aKeyInfo[nKeySet].aKey[nKey].pos.x,
-														&pMInfo->aKeyInfo[nKeySet].aKey[nKey].pos.y,
-														&pMInfo->aKeyInfo[nKeySet].aKey[nKey].pos.z);
+														&pMInfo->aMotionInfo[mType].aKeyInfo[nKeySet].aKey[nKey].pos.x,
+														&pMInfo->aMotionInfo[mType].aKeyInfo[nKeySet].aKey[nKey].pos.y,
+														&pMInfo->aMotionInfo[mType].aKeyInfo[nKeySet].aKey[nKey].pos.z);
 												}
 												else if (strstr(aStr, READ_ROT) != NULL)
 												{
@@ -597,9 +597,9 @@ bool LoadFileFromMotionScript(const char* pMotionFileName)
 
 													/** 角度の読み込み **/
 													(void)sscanf(pStart + 1, "%f %f %f",
-														&pMInfo->aKeyInfo[nKeySet].aKey[nKey].rot.x,
-														&pMInfo->aKeyInfo[nKeySet].aKey[nKey].rot.y,
-														&pMInfo->aKeyInfo[nKeySet].aKey[nKey].rot.z);
+														&pMInfo->aMotionInfo[mType].aKeyInfo[nKeySet].aKey[nKey].rot.x,
+														&pMInfo->aMotionInfo[mType].aKeyInfo[nKeySet].aKey[nKey].rot.y,
+														&pMInfo->aMotionInfo[mType].aKeyInfo[nKeySet].aKey[nKey].rot.z);
 												}
 											}
 										}
