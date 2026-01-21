@@ -249,7 +249,7 @@ void ResetModelData(void)
 //================================================================================================================
 // --- オブジェクト情報の取得 ---
 //================================================================================================================
-LPMODELDATA GetModelData(_In_ int nType)
+LPMODELDATA GetModelData(int nType)
 {
 	LPMODELDATA pModelData = &g_aModelData[nType];
 	if (pModelData->bSafe == true)
