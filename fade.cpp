@@ -123,8 +123,8 @@ void UpdateFade(void)
 
 			// タイトル画面のフェードでエンターが押されたとき
 			if ((GetKeyboardTrigger(DIK_RETURN) == true
-				|| GetJoypadTrigger(JOYKEY_A) == true
-				|| GetJoypadTrigger(JOYKEY_START) == true) 
+				|| GetJoypadTrigger(0, JOYKEY_A) == true
+				|| GetJoypadTrigger(0, JOYKEY_START) == true) 
 				&& g_modeNext == MODE_TITLE)
 			{
 				g_colorFade.a = 0.0f;		// フェードをスキップ

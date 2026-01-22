@@ -377,12 +377,12 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 		return E_FAIL;
 	}
 
-	// マウスの初期化処理
-	if (FAILED(InitMouse(hWnd)))
-	{
-		MessageBox(hWnd, "InitMouseに失敗しました。", "Error (2)", MB_ICONERROR);
-		return E_FAIL;
-	}
+	//// マウスの初期化処理
+	//if (FAILED(InitMouse(hWnd)))
+	//{
+	//	MessageBox(hWnd, "InitMouseに失敗しました。", "Error (2)", MB_ICONERROR);
+	//	return E_FAIL;
+	//}
 
 	// デバッグフォント作成
 	InitDebugProc();
@@ -419,7 +419,7 @@ void Uninit(void)
 	UninitJoypad();
 
 	// マウスの終了処理
-	UninitMouse();
+	//UninitMouse();
 
 	// デバッグフォント削除
 	UninitDebugProc();
@@ -449,7 +449,7 @@ void Update(void)
 	UpdateJoypad();
 
 	// マウスの更新処理
-	UpdateMouse();
+	//UpdateMouse();
 
 	// デバッグ表示更新
 	UpdateDebugProc();
