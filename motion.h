@@ -58,7 +58,7 @@ typedef struct
 } KEY_INFO;
 
 //**********************************************************************************
-//*** モデル情報構造体の定義 ***
+//*** モ―ション情報構造体の定義 ***
 //**********************************************************************************
 typedef struct MOTION_INFO
 {
@@ -70,6 +70,19 @@ typedef struct MOTION_INFO
 } MOTION_INFO;
 
 typedef MOTION_INFO *LPMOTION_INFO;
+
+//**********************************************************************************
+//*** モ―ションスクリプト情報構造体の定義 ***
+//**********************************************************************************
+typedef struct MOTIONSCRIPT_INFO
+{
+	MOTION_INFO aMotionInfo[MOTIONTYPE_MAX];	// モーション情報
+	int nNumMotion;								// モーションの総数
+	bool bUse;									// 使用しているか
+	char aFileName[MAX_PATH];					// モーションファイル名
+} MOTIONSCRIPT_INFO;
+
+typedef MOTIONSCRIPT_INFO *LPMOTIONSCRIPT_INFO;
 
 //**********************************************************************************
 //*** パーツ構造体の定義 ***
@@ -105,6 +118,6 @@ void InitMotion(void);
 void UninitMotion(void);
 
 bool LoadMotion(_In_ const char* pMotionFileName, int* pOutIdx);
-LPMOTION_INFO GetMotionInfo(_In_ int nType);
-LPPARTS_INFO GetPartsInfo(_In_ int nType);
+LPMOTIONSCRIPT_INFO GetMotionScriptInfo(int nType);
+LPPARTS_INFO GetPartsInfo(int nType);
 #endif

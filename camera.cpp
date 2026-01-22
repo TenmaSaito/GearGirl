@@ -8,6 +8,7 @@
 //*** インクルードファイル ***
 //**********************************************************************************
 #include "camera.h"
+#include "debugproc.h"
 #include "mathUtil.h"
 
 //*************************************************************************************************
@@ -17,6 +18,8 @@
 #define CAMERA_SPD			(2.0f)			// カメラの移動速度
 #define CAMERA_ROTSPD		(0.05f)			// カメラの移動速度
 #define MAX_CAMERA			(4)				// カメラの最大数
+#define CAMERA_MAXANGLE		(D3DX_PI * 0.9f)		// カメラの最大角度
+#define CAMERA_MINANGLE		(D3DX_PI * 0.001f)		// カメラの最小角度
 
 //*************************************************************************************************
 //*** グローバル変数 ***
@@ -58,67 +61,84 @@ void UpdateCamera(int nIdxCamera)
 	{ // Wを押したとき
 		/** 追加入力 **/
 		if (GetKeyboardPress(DIK_A))
-		{// Aを押したとき
-			pCamera->posV.x += sinf(pCamera->rot.y + (D3DX_PI * 1.75f)) * CAMERA_SPD;
-			pCamera->posV.z += cosf(pCamera->rot.y + (D3DX_PI * 1.75f)) * CAMERA_SPD;
-			pCamera->posR.x += sinf(pCamera->rot.y + (D3DX_PI * 1.75f)) * CAMERA_SPD;
-			pCamera->posR.z += cosf(pCamera->rot.y + (D3DX_PI * 1.75f)) * CAMERA_SPD;
-
+		{ // Aを押したとき
+			pCamera->posV.x += cosf(pCamera->rot.y + (D3DX_PI * 0.25f)) * CAMERA_SPD;
+			pCamera->posV.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
+			pCamera->posV.z += sinf(pCamera->rot.y + (D3DX_PI * 0.25f)) * CAMERA_SPD;
+			pCamera->posR.x += cosf(pCamera->rot.y + (D3DX_PI * 0.25f)) * CAMERA_SPD;
+			pCamera->posR.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
+			pCamera->posR.z += sinf(pCamera->rot.y + (D3DX_PI * 0.25f)) * CAMERA_SPD;
 		}
 		else if (GetKeyboardPress(DIK_D))
-		{ // Dを押したとき
-			pCamera->posV.x += sinf(pCamera->rot.y + (D3DX_PI * 0.25f)) * CAMERA_SPD;
-			pCamera->posV.z += cosf(pCamera->rot.y + (D3DX_PI * 0.25f)) * CAMERA_SPD;
-			pCamera->posR.x += sinf(pCamera->rot.y + (D3DX_PI * 0.25f)) * CAMERA_SPD;
-			pCamera->posR.z += cosf(pCamera->rot.y + (D3DX_PI * 0.25f)) * CAMERA_SPD;
+		{// Dを押したとき
+			pCamera->posV.x += cosf(pCamera->rot.y + (D3DX_PI * 1.75f)) * CAMERA_SPD;
+			pCamera->posV.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
+			pCamera->posV.z += sinf(pCamera->rot.y + (D3DX_PI * 1.75f)) * CAMERA_SPD;
+			pCamera->posR.x += cosf(pCamera->rot.y + (D3DX_PI * 1.75f)) * CAMERA_SPD;
+			pCamera->posR.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
+			pCamera->posR.z += sinf(pCamera->rot.y + (D3DX_PI * 1.75f)) * CAMERA_SPD;
 		}
 		else
 		{ // 純粋なW入力時
-			pCamera->posV.x += sinf(pCamera->rot.y) * CAMERA_SPD;
-			pCamera->posV.z += cosf(pCamera->rot.y) * CAMERA_SPD;
-			pCamera->posR.x += sinf(pCamera->rot.y) * CAMERA_SPD;
-			pCamera->posR.z += cosf(pCamera->rot.y) * CAMERA_SPD;
+			pCamera->posV.x += cosf(pCamera->rot.y) * CAMERA_SPD;
+			pCamera->posV.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
+			pCamera->posV.z += sinf(pCamera->rot.y) * CAMERA_SPD;
+			pCamera->posR.x += cosf(pCamera->rot.y) * CAMERA_SPD;
+			pCamera->posR.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
+			pCamera->posR.z += sinf(pCamera->rot.y) * CAMERA_SPD;
+
+			PrintDebugProc("CameraYaw : %f\n", pCamera->rot.x);
 		}
 	}
 	else if (GetKeyboardPress(DIK_S))
 	{ // Sを押したとき
 		/** 追加入力 **/
 		if (GetKeyboardPress(DIK_A))
-		{// Aを押したとき
-			pCamera->posV.x += sinf(pCamera->rot.y + (D3DX_PI * 1.25f)) * CAMERA_SPD;
-			pCamera->posV.z += cosf(pCamera->rot.y + (D3DX_PI * 1.25f)) * CAMERA_SPD;
-			pCamera->posR.x += sinf(pCamera->rot.y + (D3DX_PI * 1.25f)) * CAMERA_SPD;
-			pCamera->posR.z += cosf(pCamera->rot.y + (D3DX_PI * 1.25f)) * CAMERA_SPD;
-
+		{ // Aを押したとき
+			pCamera->posV.x += cosf(pCamera->rot.y + (D3DX_PI * 0.75f)) * CAMERA_SPD;
+			pCamera->posV.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
+			pCamera->posV.z += sinf(pCamera->rot.y + (D3DX_PI * 0.75f)) * CAMERA_SPD;
+			pCamera->posR.x += cosf(pCamera->rot.y + (D3DX_PI * 0.75f)) * CAMERA_SPD;
+			pCamera->posR.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
+			pCamera->posR.z += sinf(pCamera->rot.y + (D3DX_PI * 0.75f)) * CAMERA_SPD;
 		}
 		else if (GetKeyboardPress(DIK_D))
-		{ // Dを押したとき
-			pCamera->posV.x += sinf(pCamera->rot.y + (D3DX_PI * 0.75f)) * CAMERA_SPD;
-			pCamera->posV.z += cosf(pCamera->rot.y + (D3DX_PI * 0.75f)) * CAMERA_SPD;
-			pCamera->posR.x += sinf(pCamera->rot.y + (D3DX_PI * 0.75f)) * CAMERA_SPD;
-			pCamera->posR.z += cosf(pCamera->rot.y + (D3DX_PI * 0.75f)) * CAMERA_SPD;
+		{// Dを押したとき
+			pCamera->posV.x += cosf(pCamera->rot.y + (D3DX_PI * 1.25f)) * CAMERA_SPD;
+			pCamera->posV.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
+			pCamera->posV.z += sinf(pCamera->rot.y + (D3DX_PI * 1.25f)) * CAMERA_SPD;
+			pCamera->posR.x += cosf(pCamera->rot.y + (D3DX_PI * 1.25f)) * CAMERA_SPD;
+			pCamera->posR.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
+			pCamera->posR.z += sinf(pCamera->rot.y + (D3DX_PI * 1.25f)) * CAMERA_SPD;
+
 		}
 		else
 		{ // 純粋なS入力時
-			pCamera->posV.x += sinf(pCamera->rot.y + D3DX_PI) * CAMERA_SPD;
-			pCamera->posV.z += cosf(pCamera->rot.y + D3DX_PI) * CAMERA_SPD;
-			pCamera->posR.x += sinf(pCamera->rot.y + D3DX_PI) * CAMERA_SPD;
-			pCamera->posR.z += cosf(pCamera->rot.y + D3DX_PI) * CAMERA_SPD;
+			pCamera->posV.x += cosf(pCamera->rot.y + D3DX_PI) * CAMERA_SPD;
+			pCamera->posV.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
+			pCamera->posV.z += sinf(pCamera->rot.y + D3DX_PI) * CAMERA_SPD;
+			pCamera->posR.x += cosf(pCamera->rot.y + D3DX_PI) * CAMERA_SPD;
+			pCamera->posR.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
+			pCamera->posR.z += sinf(pCamera->rot.y + D3DX_PI) * CAMERA_SPD;
 		}
 	}
 	else if (GetKeyboardPress(DIK_A))
 	{ // Aを押したとき
-		pCamera->posV.x += sinf(pCamera->rot.y + (D3DX_PI * 1.5f)) * CAMERA_SPD;
-		pCamera->posV.z += cosf(pCamera->rot.y + (D3DX_PI * 1.5f)) * CAMERA_SPD;
-		pCamera->posR.x += sinf(pCamera->rot.y + (D3DX_PI * 1.5f)) * CAMERA_SPD;
-		pCamera->posR.z += cosf(pCamera->rot.y + (D3DX_PI * 1.5f)) * CAMERA_SPD;
+		pCamera->posV.x += cosf(pCamera->rot.y + (D3DX_PI * 0.5f)) * CAMERA_SPD;
+		pCamera->posV.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
+		pCamera->posV.z += sinf(pCamera->rot.y + (D3DX_PI * 0.5f)) * CAMERA_SPD;
+		pCamera->posR.x += cosf(pCamera->rot.y + (D3DX_PI * 0.5f)) * CAMERA_SPD;
+		pCamera->posR.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
+		pCamera->posR.z += sinf(pCamera->rot.y + (D3DX_PI * 0.5f)) * CAMERA_SPD;
 	}
 	else if (GetKeyboardPress(DIK_D))
 	{ // Dを押したとき
-		pCamera->posV.x += sinf(pCamera->rot.y + (D3DX_PI * 0.5f)) * CAMERA_SPD;
-		pCamera->posV.z += cosf(pCamera->rot.y + (D3DX_PI * 0.5f)) * CAMERA_SPD;
-		pCamera->posR.x += sinf(pCamera->rot.y + (D3DX_PI * 0.5f)) * CAMERA_SPD;
-		pCamera->posR.z += cosf(pCamera->rot.y + (D3DX_PI * 0.5f)) * CAMERA_SPD;
+		pCamera->posV.x += cosf(pCamera->rot.y + (D3DX_PI * 1.5f)) * CAMERA_SPD;
+		pCamera->posV.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
+		pCamera->posV.z += sinf(pCamera->rot.y + (D3DX_PI * 1.5f)) * CAMERA_SPD;
+		pCamera->posR.x += cosf(pCamera->rot.y + (D3DX_PI * 1.5f)) * CAMERA_SPD;
+		pCamera->posR.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
+		pCamera->posR.z += sinf(pCamera->rot.y + (D3DX_PI * 1.5f)) * CAMERA_SPD;
 	}
 
 	/*** カメラの回転！(注視点中心) ***/
@@ -152,26 +172,26 @@ void UpdateCamera(int nIdxCamera)
 	// カメラの上下回転！
 	if (GetKeyboardPress(DIK_Y))
 	{
-		pCamera->rot.z -= CAMERA_ROTSPD;
+		pCamera->rot.x -= CAMERA_ROTSPD;
 
-		if (pCamera->rot.z < 0.05f)
+		if (pCamera->rot.x < CAMERA_MINANGLE)
 		{
-			pCamera->rot.z = 0.05f;
+			pCamera->rot.x = CAMERA_MINANGLE;
 		}
 	}
 	else if (GetKeyboardPress(DIK_N))
 	{
-		pCamera->rot.z += CAMERA_ROTSPD;
+		pCamera->rot.x += CAMERA_ROTSPD;
 
-		if (pCamera->rot.z >= D3DX_PI * 0.9f)
+		if (pCamera->rot.x >= CAMERA_MAXANGLE)
 		{
-			pCamera->rot.z = D3DX_PI * 0.9f;
+			pCamera->rot.x = CAMERA_MAXANGLE;
 		}
 	}
 
-	pCamera->posV.x = pCamera->posR.x + (sinf(pCamera->rot.z + D3DX_HALFPI) * cosf(pCamera->rot.y + D3DX_PI) * pCamera->fZlength);
-	pCamera->posV.y = pCamera->posR.y + (cosf(pCamera->rot.z + D3DX_HALFPI) * pCamera->fZlength);
-	pCamera->posV.z = pCamera->posR.z + (sinf(pCamera->rot.z + D3DX_HALFPI) * sinf(pCamera->rot.y + D3DX_PI) * pCamera->fZlength);
+	pCamera->posV.x = pCamera->posR.x + (sinf(pCamera->rot.x) * cosf(pCamera->rot.y - D3DX_PI) * pCamera->fZlength);
+	pCamera->posV.y = pCamera->posR.y + (cosf(pCamera->rot.x) * pCamera->fZlength);
+	pCamera->posV.z = pCamera->posR.z + (sinf(pCamera->rot.x) * sinf(pCamera->rot.y - D3DX_PI) * pCamera->fZlength);
 }
 
 //================================================================================================================
