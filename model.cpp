@@ -154,6 +154,9 @@ void DrawModel(void)
 			pDevice->SetMaterial(&matDef);
 		}
 	}
+
+	// デバイスの破棄
+	EndDevice();
 }
 
 // =================================================
@@ -483,8 +486,13 @@ bool LoadModel(void)
 	}
 	else
 	{// ファイルオープン失敗時
+		// デバイスの破棄
+		EndDevice();
 		return false;
 	}
+
+	// デバイスの破棄
+	EndDevice();
 
 	return true;
 }
