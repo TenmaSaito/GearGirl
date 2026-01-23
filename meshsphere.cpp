@@ -25,13 +25,13 @@ void InitMeshSphere(void)
 	//**************************************************************
 	// 変数宣言
 	P_MESH pMesh = GetMeshSphere();
-	LPDIRECT3DDEVICE9	pDevice = GetDevice();			//--------- デバイス取得 ---------//
+	LPDIRECT3DDEVICE9	pDevice = GetDevice();			// デバイス取得
 
 	//**************************************************************
 	// 構造体初期化
 	memset(pMesh, 0, sizeof(MeshInfo) * MAX_MESHSPHERE);
 
-	EndDevice();										//--------- デバイス取得終了 ---------//
+	EndDevice();										// デバイス取得終了
 }
 
 //=========================================================================================
@@ -127,6 +127,8 @@ void DrawMeshSphere(void)
 			pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, 0, 0, g_aMeshSphere[nCntMeshSphere].nVerti, 0, g_aMeshSphere[nCntMeshSphere].nPrim);
 		}
 	}
+
+	EndDevice();	// デバイス取得終了
 }
 
 //=========================================================================================
@@ -246,7 +248,7 @@ void SetMeshSphere(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int n
 		}
 	}
 
-	EndDevice();										//--------- デバイス取得終了 ---------//
+	EndDevice();										// デバイス取得終了
 }
 
 //=========================================================================================
