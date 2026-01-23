@@ -16,6 +16,7 @@
 #include "Texture.h"
 #include "3Dmodel.h"
 #include "field.h"
+#include "player.h"
 #include "light.h"
 #include "thread.h"
 
@@ -57,6 +58,9 @@ void InitGame(void)
 
 	/*** モデルの初期化 ***/
 	InitModel();
+
+	/*** プレイヤーの初期化 ***/
+	InitPlayer();
 
 	/*** ライトの初期化 ***/
 	InitLight();
@@ -105,6 +109,9 @@ void UninitGame(void)
 	/*** モデルの終了 ***/
 	UninitModel();
 
+	/*** プレイヤーの終了 ***/
+	UninitPlayer();
+
 	/*** ライトの終了 ***/
 	UninitLight();
 }
@@ -139,6 +146,9 @@ void UpdateGame(void)
 	/*** モデルの更新 ***/
 	UpdateModel();
 
+	/*** プレイヤーの更新 ***/
+	UpdatePlayer();
+
 	/*** ライトの更新 ***/
 	UpdateLight();
 }
@@ -162,6 +172,9 @@ void DrawGame(void)
 
 		/*** モデルの描画 ***/
 		DrawModel();
+
+		/*** プレイヤーの描画 ***/
+		DrawPlayer();
 
 		/*** 床の描画  ***/
 		DrawField();

@@ -31,19 +31,9 @@
 
 // =================================================
 // グローバル変数
-LPDIRECT3DTEXTURE9 g_apTexturePlayer[MAX_TEX];	// テクスチャへのポインタ
-LPD3DXMESH g_pMeshPlayer;			// メッシュ(頂点情報)へのポインタ
-LPD3DXBUFFER g_pBuffMatPlayer;		// マテリアルのポインタ
-DWORD g_dwNumMatPlayer = 0;			// マテリアルの数
 Player g_Player[PLAYERTYPE_MAX];	// プレイヤーの樹応報
 int g_IdxShadowPlayer = -1;			// 使用する影の番号
 float g_sinrot = 0;					// sinカーブを用いると起用の変数
-char g_ModelName[MAX_PART][128];	// モデルのファイル名を保存
-int g_nNumModel = 0;				// モデル数
-int g_nNumKey = 0;					// 総キー数数
-int g_nCntKey = 0;					// 代入したキーをカウント
-int g_nCntKeyFrame = 0;				// キーごとのフレーム数を代入した際にカウント
-int g_nCntMotion = 0;				// モーションを読み込むときのカウンタ
 int g_nNumPlayer = 0;				// プレイヤーのアクティブ人数
 int g_ActivePlayer = 0;				// 操作しているプレイヤータイプ
 
@@ -57,6 +47,7 @@ void InitPlayer(void)
 	// デバイスの取得
 	pDevice = GetDevice();
 
+	// モーション情報のインデックスを格納
 	int aIdxMotion[PLAYERTYPE_MAX] = {};
 
 	// 各種変数を初期化(0固定)
@@ -70,28 +61,29 @@ void InitPlayer(void)
 		g_Player[nCntPlayer].bJump = false;
 		g_Player[nCntPlayer].nCounterMotion = 0;
 		g_Player[nCntPlayer].nKey = 0;
-		g_Player[nCntPlayer].nNumKey = g_nNumKey;
 		g_Player[nCntPlayer].state = PLAYERSTATE_NEUTRAL;
 		g_Player[nCntPlayer].bFinishMotion = true;
 		g_Player[nCntPlayer].nIdxCamera = GetCamera();
 	}
 
-	// 少女のパーツを読み込む
+	// 少女のパーツ、モーションを読み込む
 	LoadMotion("data\\motion.txt", &aIdxMotion[PLAYERTYPE_GIRL]);			// モーションスクリプトを読み込む
-	LPPARTS_INFO pPartsInfo = GetPartsInfo(aIdxMotion[PLAYERTYPE_GIRL]);	// パーツ情報のアドレスを取得
-	g_Player[PLAYERTYPE_GIRL].PartsInfo = *pPartsInfo;						// アドレスの中身のみをコピー
+	LPPARTS_INFO pPartsInfoGirl = GetPartsInfo(aIdxMotion[PLAYERTYPE_GIRL]);	// パーツ情報のアドレスを取得
+	LPMOTIONSCRIPT_INFO pMotionInfoGirl = GetMotionScriptInfo(aIdxMotion[PLAYERTYPE_GIRL]);	// モーション情報のアドレスを取得
+	g_Player[PLAYERTYPE_GIRL].PartsInfo = *pPartsInfoGirl;						// アドレスの中身のみをコピー
 
-	// ネズミのパーツを読み込む
+	// ネズミのパーツ、モーションを読み込む
 	LoadMotion("data\\motionmouse.txt", &aIdxMotion[PLAYERTYPE_MOUSE]);		// モーションスクリプトを読み込む
-	LPPARTS_INFO pPartsInfo = GetPartsInfo(aIdxMotion[PLAYERTYPE_MOUSE]);	// パーツ情報のアドレスを取得
-	g_Player[PLAYERTYPE_MOUSE].PartsInfo = *pPartsInfo;						// アドレスの中身のみをコピー
+	LPPARTS_INFO pPartsInfoMouse = GetPartsInfo(aIdxMotion[PLAYERTYPE_MOUSE]);	// パーツ情報のアドレスを取得
+	LPMOTIONSCRIPT_INFO pMotionInfoMouse = GetMotionScriptInfo(aIdxMotion[PLAYERTYPE_MOUSE]);	// モーション情報のアドレスを取得
+	g_Player[PLAYERTYPE_MOUSE].PartsInfo = *pPartsInfoMouse;						// アドレスの中身のみをコピー
 
-	g_nNumModel = 0;
-	g_nNumKey = 0;
-	g_nCntKey = 0;
-	g_nCntKeyFrame = 0;
-	g_nCntMotion = 0;
-
+	// モーションのキー、フレーム情報を代入する
+	for (int nCntMotion = 0; nCntMotion < MOTIONTYPE_MAX; nCntMotion++)
+	{
+		g_Player[PLAYERTYPE_GIRL].aMotionInfo[nCntMotion] = pMotionInfoGirl->aMotionInfo[nCntMotion];
+		g_Player[PLAYERTYPE_MOUSE].aMotionInfo[nCntMotion] = pMotionInfoMouse->aMotionInfo[nCntMotion];
+	}
 
 	// 影を設定
 	//g_IdxShadowPlayer = SetShadow();
@@ -174,7 +166,11 @@ void UpdatePlayer(void)
 		pPlayer->move.x += (0.0f - pPlayer->move.x) * (PLAYER_INI * 1.5f);
 		pPlayer->move.z += (0.0f - pPlayer->move.z) * (PLAYER_INI * 1.5f);
 
+		// カメラに使用しているインデックスを渡して追従させる
 		SetPotisionCamera(pPlayer->nIdxCamera, pPlayer->pos);
+
+		// カメラを有効化させる
+		CameraEnable(pPlayer->nIdxCamera);
 
 		//// 地面に埋まった時の処理
 		//if (CollisionMeshField(&pPlayer->pos, &pPlayer->posOld) == true)
