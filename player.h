@@ -98,9 +98,10 @@ void SetKey(D3DXVECTOR3 pos, D3DXVECTOR3 rot);	// キー毎の位置、向きの設定
 void SetKeyInfo(int nFrame);					// 一つ一つキーの設定
 void SetMotionInfo(int nLoop, int NumKey);		// モーション情報の設定
 void SetMotion(MOTIONTYPE motionType, bool bUseBrend, int nBlendFrame, PlayerType Playertype);	// モーションの呼び出し処理
-int GetNumPlayer(void);		// プレイ人数情報を渡す
-int GetActivePlayer(void);	// 操作しているプレイヤー情報を渡す
+int GetNumPlayer(void);			// プレイ人数情報を渡す
+int GetActivePlayer(void);		// 操作しているプレイヤー情報を渡す
 void SetPlayer(D3DXVECTOR3* pPosGirl, D3DXVECTOR3* pPosMouse);	// プレイヤーの位置情報を渡す
-void ChangeNumPlayer(void);	// プレイ人数を切り替える(デバッグ用)
+void ChangeNumPlayer(void);		// プレイ人数を切り替える(デバッグ用)
+void RotRepair(int nPlayer);	// rotにおける逆回りを防ぐ補正
 
 #endif

@@ -148,7 +148,7 @@ void UpdatePlayer(void)
 			}
 		}
 
-		//pPlayer->move.y += GRAVITY;	// 重力をかけ続ける
+		pPlayer->move.y += GRAVITY;	// 重力をかけ続ける
 
 		// 移動量の更新
 		pPlayer->pos += pPlayer->move;
@@ -156,6 +156,12 @@ void UpdatePlayer(void)
 		// 慣性を掛ける
 		pPlayer->move.x += (0.0f - pPlayer->move.x) * (PLAYER_INI * 1.5f);
 		pPlayer->move.z += (0.0f - pPlayer->move.z) * (PLAYER_INI * 1.5f);
+
+		// 地面に沈んだ時
+		if (pPlayer->pos.y < 100.0f)
+		{
+			pPlayer->pos.y = 100.0f;
+		}
 
 		// カメラに使用しているインデックスを渡して追従させる
 		SetPotisionCamera(pPlayer->nIdxCamera, pPlayer->pos);
@@ -166,11 +172,7 @@ void UpdatePlayer(void)
 		// モデルとの当たり判定
 		CollisionModel(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move);
 
-		// 地面に沈んだ時
-		if (pPlayer->pos.y < 100.0f)
-		{
-			pPlayer->pos.y = 100.0f;
-		}
+
 
 		//UpdateMotion();
 	}
@@ -1499,5 +1501,43 @@ void ChangeNumPlayer(void)
 		{
 			g_nNumPlayer = 1;
 		}
+	}
+}
+
+// =================================================
+// rotにおける逆回りを防ぐ補正
+// =================================================
+void RotRepair(int nPlayer)
+{
+	// プレイヤー構造体をポインタ化
+	Player* pPlayer = &g_Player[nPlayer];
+
+	// カメラの向きを保存する
+	vec3 Camerarot;
+
+	// カメラの情報を取得
+	GetCameraRot(nPlayer, &Camerarot);
+
+	// もし、差分がπを超えたら
+	if (pPlayer->rotDiff.y > D3DX_PI)
+	{
+		pPlayer->rotDiff.y -= D3DX_PI * 2;
+	}
+	else if (pPlayer->rotDiff.y < -D3DX_PI)
+	{
+		pPlayer->rotDiff.y += D3DX_PI * 2;
+	}
+
+	// 回転に補正を掛ける
+	pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
+
+	// もし、現在の角度がπを超えたら
+	if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
+	{
+		pPlayer->rot.y -= D3DX_PI * 2;
+	}
+	else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
+	{
+		pPlayer->rot.y += D3DX_PI * 2;
 	}
 }
