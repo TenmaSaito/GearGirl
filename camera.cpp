@@ -15,10 +15,11 @@
 //**************************************************************
 // グローバル変数宣言
 Camera g_aCamera[MAX_CAMERA];
-int		g_nEnableCamera;
+int		g_nEnableCamera;				// 起動させるカメラの数
 
 //**************************************************************
 // プロトタイプ宣言
+void SetCameraOption(void);					// カメラ設定
 void CameraFollow(P_CAMERA pCamera);		// プレイヤーに追従移動
 void CameraRotation(P_CAMERA pCamera);		// プレイヤーと同じ向きに回転
 void CameraOrbit(P_CAMERA pCamera);			// オービット処理
@@ -35,9 +36,11 @@ void InitCamera(void)
 
 	//**************************************************************
 	// 各値の初期化
-	g_nEnableCamera = 2;					// 起動しているカメラの数
+	SetCameraOption();
+
 	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCamera++)
 	{
+		// カメラ座標等
 		pCamera->posV = D3DXVECTOR3 CAMERA_V_DEFPOS;							// 視点
 		pCamera->posR = D3DXVECTOR3 CAMERA_R_DEFPOS;							// 注視点
 		pCamera->posRDest = D3DXVECTOR3 CAMERA_R_DEFPOS;						// 目的の注視点
@@ -45,10 +48,12 @@ void InitCamera(void)
 		pCamera->rot = D3DXVECTOR3(D3DX_PI * 0.2f, 0.0f, 0.0f);					// カメラの角度
 		pCamera->fDist = CAMERA_DISTANS;										// 視点と注視点の距離
 
+		// 画面設定等
 		pCamera->viewport.X = SCREEN_WIDTH * 0.5f * nCntCamera;					// 画面左上 X 座標
 		pCamera->viewport.Y = 0.0f;												// 画面左上 Y 座標
 		pCamera->viewport.Width = SCREEN_WIDTH * 0.5f;							// 表示画面の横幅
 		pCamera->viewport.Height = SCREEN_HEIGHT;								// 表示画面の高さ
+
 		pCamera->viewport.MinZ = 0.0f;											
 		pCamera->viewport.MaxZ = 1.0f;
 		pCamera->bAoutRot = false;												// 自動で回り込みOFF
@@ -57,6 +62,17 @@ void InitCamera(void)
 		pCamera->bEnable = false;
 
 	}
+}
+
+//=========================================================================================
+// カメラ設定
+void SetCameraOption(void)
+{
+	//**************************************************************
+	// 変数宣言
+	g_nEnableCamera = 2/* GetNumPlayer()*/;	// プレイヤー数
+
+
 }
 
 //=========================================================================================
@@ -75,6 +91,7 @@ void UpdateCamera(void)
 	//**************************************************************
 	// 変数宣言
 	P_CAMERA pCamera = GetCameraArray();
+
 
 #if 0
 	// プレイヤーが停止していたら回り込み/////////////////////////////////OFF
