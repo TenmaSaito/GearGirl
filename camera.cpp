@@ -42,7 +42,7 @@ void InitCamera(void)
 		pCamera->posR = D3DXVECTOR3 CAMERA_R_DEFPOS;							// 注視点
 		pCamera->posRDest = D3DXVECTOR3 CAMERA_R_DEFPOS;						// 目的の注視点
 		pCamera->vecU = D3DXVECTOR3(0.0f, 1.0f, 0.0f);							// 上方向ベクトル
-		pCamera->rot = D3DXVECTOR3(D3DX_PI * 0.2f, D3DX_PI * 0.5f, 0.0f);		// カメラの角度
+		pCamera->rot = D3DXVECTOR3(D3DX_PI * 0.2f, 0.0f, 0.0f);					// カメラの角度
 		pCamera->fDist = CAMERA_DISTANS;										// 視点と注視点の距離
 
 		pCamera->viewport.X = SCREEN_WIDTH * 0.5f * nCntCamera;					// 画面左上 X 座標
@@ -159,6 +159,7 @@ void UpdateCamera(void)
 			pCamera->posV.y = pCamera->posR.y - cosf(D3DX_PI - pCamera->rot.x) * pCamera->fDist;
 			pCamera->posV.z = pCamera->posR.z - sinf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
 			PrintDebugProc("CAMERA %d\nposV : %~3f\nposR : %~3f\n", nCntCamera, pCamera->posV.x, pCamera->posV.y, pCamera->posV.z, pCamera->posR.x, pCamera->posR.y, pCamera->posR.z);
+			PrintDebugProc("rot  : %~3f\n", pCamera->rot.x, pCamera->rot.y, pCamera->rot.z);
 		}
 	}
 }
@@ -434,7 +435,7 @@ int GetCamera(void)
 	// 変数宣言
 	P_CAMERA pCam = GetCameraArray();
 
-	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++)
+	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++,pCam++)
 	{
 		if (pCam->bUse == false)
 		{
@@ -501,7 +502,6 @@ void GetCameraRot(int nCamNum, vec3* pRot)
 	}
 
 	*pRot = rot;
-
 }
 
 //=========================================================================================
