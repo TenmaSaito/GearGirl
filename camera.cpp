@@ -130,12 +130,19 @@ void UpdateCamera(void)
 	if (g_camera.bAoutRot)
 		CameraRotation();	// ©“®‚Å‰ñ‚è‚İ////////////////////////////////////////// OFF
 
+
+		for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCamera++)
+	{
+		if (pCamera->bUse)
+		{
+			CameraFollow(pCamera);		// ’Ç]
+		}
+	}
+
 #endif
-
-	CameraFollow(pCamera);		// ’Ç]
-
 	//**************************************************************
 	// ’‹“_‚©‚ç‹“_‚ğ‹‚ß‚é
+	pCamera = GetCamera();
 	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCamera++)
 	{
 		pCamera->posV.x = pCamera->posR.x - cosf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
