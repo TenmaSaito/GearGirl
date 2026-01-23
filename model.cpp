@@ -348,72 +348,74 @@ bool LoadModel(void)
 							"Xファイルの読み込みに失敗しました!\n対象パス : %s",
 							&g_ModelName[nCntModel][0]);
 					}
-
-					//マテリアルデータへのポインタを取得
-					pMat = (D3DXMATERIAL*)g_Model[nCntModel].pBuffMat->GetBufferPointer();
-
-					for (int nCntMat = 0; nCntMat < (int)g_Model[nCntModel].dwNumMat; nCntMat++)
+					else
 					{
-						if (pMat[nCntMat].pTextureFilename != NULL)
-						{// テクスチャファイルが存在する
-							 //テクスチャを読み込む
-							D3DXCreateTextureFromFile(pDevice,
-								pMat[nCntMat].pTextureFilename,
-								&g_Model[nCntModel].apTexture[nCntMat]);
+						//マテリアルデータへのポインタを取得
+						pMat = (D3DXMATERIAL*)g_Model[nCntModel].pBuffMat->GetBufferPointer();
+
+						for (int nCntMat = 0; nCntMat < (int)g_Model[nCntModel].dwNumMat; nCntMat++)
+						{
+							if (pMat[nCntMat].pTextureFilename != NULL)
+							{// テクスチャファイルが存在する
+								 //テクスチャを読み込む
+								D3DXCreateTextureFromFile(pDevice,
+									pMat[nCntMat].pTextureFilename,
+									&g_Model[nCntModel].apTexture[nCntMat]);
+							}
 						}
+
+						//モデル構造体の中身の初期化
+						g_Model[nCntModel].vtxMin = D3DXVECTOR3(10000, 10000, 10000);
+						g_Model[nCntModel].vtxMax = D3DXVECTOR3(-10000, -10000, -10000);
+
+						//頂点数を取得
+						nNumVtx[nCntModel] = g_Model[nCntModel].pMesh->GetNumVertices();
+
+						// 頂点フォーマットのサイズを取得
+						dwSizeFVF[nCntModel] = D3DXGetFVFVertexSize(g_Model[nCntModel].pMesh->GetFVF());
+
+						//頂点バッファをロック
+						g_Model[nCntModel].pMesh->LockVertexBuffer(D3DLOCK_READONLY, (void**)&pVtxBuff);
+
+						for (int nCntVtx = 0; nCntVtx < nNumVtx[nCntModel]; nCntVtx++)
+						{
+							D3DXVECTOR3 vtx = *(D3DXVECTOR3*)pVtxBuff;
+
+							// すべての頂点を比較してモデルの最小値、最大値を抜き出す
+							// 最小値
+							if (vtx.x <= g_Model[nCntModel].vtxMin.x)
+							{
+								g_Model[nCntModel].vtxMin.x = vtx.x;
+							}
+							if (vtx.y <= g_Model[nCntModel].vtxMin.y)
+							{
+								g_Model[nCntModel].vtxMin.y = vtx.y;
+							}
+							if (vtx.z <= g_Model[nCntModel].vtxMin.z)
+							{
+								g_Model[nCntModel].vtxMin.z = vtx.z;
+							}
+							// 最大値
+							if (vtx.x >= g_Model[nCntModel].vtxMax.x)
+							{
+								g_Model[nCntModel].vtxMax.x = vtx.x;
+							}
+							if (vtx.y >= g_Model[nCntModel].vtxMax.y)
+							{
+								g_Model[nCntModel].vtxMax.y = vtx.y;
+							}
+							if (vtx.z >= g_Model[nCntModel].vtxMax.z)
+							{
+								g_Model[nCntModel].vtxMax.z = vtx.z;
+							}
+
+							// 頂点フォーマットのサイズ分進める
+							pVtxBuff += dwSizeFVF[nCntModel];
+						}
+
+						//頂点バッファをアンロック
+						g_Model[nCntModel].pMesh->UnlockVertexBuffer();
 					}
-
-					//モデル構造体の中身の初期化
-					g_Model[nCntModel].vtxMin = D3DXVECTOR3(10000, 10000, 10000);
-					g_Model[nCntModel].vtxMax = D3DXVECTOR3(-10000, -10000, -10000);
-
-					//頂点数を取得
-					nNumVtx[nCntModel] = g_Model[nCntModel].pMesh->GetNumVertices();
-
-					// 頂点フォーマットのサイズを取得
-					dwSizeFVF[nCntModel] = D3DXGetFVFVertexSize(g_Model[nCntModel].pMesh->GetFVF());
-
-					//頂点バッファをロック
-					g_Model[nCntModel].pMesh->LockVertexBuffer(D3DLOCK_READONLY, (void**)&pVtxBuff);
-
-					for (int nCntVtx = 0; nCntVtx < nNumVtx[nCntModel]; nCntVtx++)
-					{
-						D3DXVECTOR3 vtx = *(D3DXVECTOR3*)pVtxBuff;
-
-						// すべての頂点を比較してモデルの最小値、最大値を抜き出す
-						// 最小値
-						if (vtx.x <= g_Model[nCntModel].vtxMin.x)
-						{
-							g_Model[nCntModel].vtxMin.x = vtx.x;
-						}
-						if (vtx.y <= g_Model[nCntModel].vtxMin.y)
-						{
-							g_Model[nCntModel].vtxMin.y = vtx.y;
-						}
-						if (vtx.z <= g_Model[nCntModel].vtxMin.z)
-						{
-							g_Model[nCntModel].vtxMin.z = vtx.z;
-						}
-						// 最大値
-						if (vtx.x >= g_Model[nCntModel].vtxMax.x)
-						{
-							g_Model[nCntModel].vtxMax.x = vtx.x;
-						}
-						if (vtx.y >= g_Model[nCntModel].vtxMax.y)
-						{
-							g_Model[nCntModel].vtxMax.y = vtx.y;
-						}
-						if (vtx.z >= g_Model[nCntModel].vtxMax.z)
-						{
-							g_Model[nCntModel].vtxMax.z = vtx.z;
-						}
-
-						// 頂点フォーマットのサイズ分進める
-						pVtxBuff += dwSizeFVF[nCntModel];
-					}
-
-					//頂点バッファをアンロック
-					g_Model[nCntModel].pMesh->UnlockVertexBuffer();
 
 					nCntModel++;
 				}
