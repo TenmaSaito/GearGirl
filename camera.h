@@ -1,51 +1,87 @@
-//================================================================================================================
+//==================================================================================================================================
 //
-// DirectXのカメラ用ヘッダファイル [camera.h]
-// Author : TENMA
-//
-//================================================================================================================
+//			カメラ処理 [camera.h]
+//			Author : ENDO HIDETO
+// 
+//==================================================================================================================================
 #ifndef _CAMERA_H_
 #define _CAMERA_H_
 
-//**********************************************************************************
-//*** インクルードファイル ***
-//**********************************************************************************
+//==============================================================
+// ヘッダーインクルード
 #include "main.h"
-#include "input.h"
+#include "endomacro.h"
 
-//**********************************************************************************
-//*** マクロ定義 ***
-//**********************************************************************************
+//=========================================================================================
+// マクロ定義
+//=========================================================================================
+#define VIEW_RADIAN				(45.0f)					// 視野角
+#define VIEW_MINDEPTH			(10.0f)					// 最小描画距離
+#define VIEW_MAXDEPTH			(10000.0f)				// 最大描画距離
+#define CAMERA_V_DEFPOS			(500.0f, 350.0f, 0.0f)	// 視点のデフォ位置
+#define CAMERA_R_DEFPOS			(0.0f, 0.0f, 0.0f)		// 注視点のデフォ位置
+#define CAMERA_DISTANS			(700.0f)				// カメラと注視点の距離
+#define CAMERA_MOVE				(10.0f)					// カメラの移動速度
+#define CAMERA_SPIN				(0.01f)					// カメラの回転速度
+#define CAMERA_FOLLOW_FACTOR	(0.15f)					// カメラが追従移動する時の補正
+#define CAMERA_ROTET_FACTOR		(0.01f)					// カメラが追従回転する時の補正
+#define CAMERA_PLAYER_FRONT		(50.0f)					// 注視点をプレイヤーより少し先にする
 
-//**********************************************************************************
-//*** カメラ情報構造体 ***
-//**********************************************************************************
-typedef struct
+//**************************************************************
+// カメラ操作
+#define CAM_RESET		DIK_TAB					// カメラ位置角度リセット
+#define CAM_MOVE_UP		DIK_W					// カメラ移動　前
+#define CAM_MOVE_DW		DIK_S					// カメラ移動　後
+#define CAM_MOVE_L		DIK_A					// カメラ移動　左
+#define CAM_MOVE_R		DIK_D					// カメラ移動　右
+
+#define CAM_ORBIT_UP	DIK_T					// カメラ移動回転　上
+#define CAM_ORBIT_DW	DIK_B					// カメラ移動回転　下
+#define CAM_ORBIT_L		DIK_Z					// カメラ移動回転　左
+#define CAM_ORBIT_R		DIK_C					// カメラ移動回転　右
+
+#define CAM_ZOOM		DIK_SPACE				// ズームアウト
+#define CAM_ZOOM_IN		DIK_LSHIFT				// ズームイン (+スペース
+
+#define MAX_CAMERA		2						// カメラの数
+
+//==============================================================
+// 列挙型
+//==============================================================
+
+//==============================================================
+// カメラの構造体定義
+//==============================================================
+typedef struct Camera
 {
-	D3DXVECTOR3 posV;			// 視点
-	D3DXVECTOR3 posR;			// 注視点
-	D3DXVECTOR3 vecU;			// 上方向ベクトル
-	D3DXVECTOR3 rot;			// 向き
-	D3DXMATRIX mtxProjection;	// プロジェクションマトリックス
-	D3DXMATRIX mtxView;			// ビューマトリックス
-	float fZlength;				// 注視点との距離
-	D3DVIEWPORT9 viewport;		// ビューポート
-	bool bUse;					// 使われているか
-} Camera;
+	D3DXVECTOR3 posV;					// 視点	
+	D3DXVECTOR3 posR;					// 注視点
+	D3DXVECTOR3 posRDest;				// 目的の注視点
+	D3DXVECTOR3 rot;					// 向き
+	float fDist;						// 視点と注視点の距離
+	D3DXVECTOR3 vecU;					// 上方向ベクトル
+	D3DXMATRIX mtxProjection;			// プロジェクションマトリックス
+	D3DXMATRIX mtxView;					// ビューマトリックス
+	D3DVIEWPORT9 viewport;				// ビューポート
 
-//**********************************************************************************
-//*** プロトタイプ宣言 ***
-//**********************************************************************************
+	bool bAoutRot;						// 自動で回り込み
+	int nCntAoutRot;					// 自動で回り込むまでのカウンタ
+	float fPlayerFront;					// プレイヤーより少し前
+	float fPlayerMoveRot;				// プレイヤーの移動方向
+	bool bUse;							// 使っているか
+}Camera;
+POINTER(Camera, P_CAMERA);
+
+//=========================================================================================
+//プロトタイプ宣言
+//=========================================================================================
 void InitCamera(void);
 void UninitCamera(void);
-void UpdateCamera(int nIdxCamera);
-void SetCamera(int nIdxCamera);
+void UpdateCamera(void);
+void SetCamera(P_CAMERA pCamera);					// カメラを設置（mainのDrawの最初にする）
+P_CAMERA GetCamera(void);							// カメラの情報を取得
+void GetCameraPos(int nCamNum, vec3* pPos);			// カメラの位置情報を取得
+void GetCameraRot(int nCamNum, vec3* pRot);			// カメラの角度情報を取得
+void CameraReset(P_CAMERA pCamera);					// カメラリセット
 
-int AddCamera(D3DXVECTOR3 posV, D3DXVECTOR3 posR, D3DXVECTOR3 rot, D3DVIEWPORT9 viewport);
-void RemoveCamera(int nIdxCamera);
-Camera *GetCamera(int nIdxCamera);
-int GetCameraNum(void);
-
-void SetUpPixelFog(D3DXCOLOR fogCol, float fStart, float fEnd);
-void CleanUpPixelFog(void);
-#endif
+#endif// !_CAMERA_H_

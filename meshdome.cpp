@@ -7,12 +7,12 @@
 //**************************************************************
 // インクルード
 #include "input.h"
-#include "meshdome.h"
+#include "mesh.h"
 
 //**************************************************************
 // グローバル変数
 LPDIRECT3DTEXTURE9			g_pTextureMeshDome = NULL;			// テクスチャへのポインタ
-MeshDome				g_aMeshDome[MAX_MESHDOME];		// メッシュ壁情報
+MeshInfo				g_aMeshDome[MAX_MESHDOME];		// メッシュ壁情報
 
 //**************************************************************
 // プロトタイプ宣言
@@ -34,24 +34,23 @@ void InitMeshDome(void)
 	// 位置・サイズの初期化
 	for (int nCntMeshDome = 0; nCntMeshDome < MAX_MESHDOME; nCntMeshDome++)
 	{
-		g_aMeshDome[nCntMeshDome].pos = VECTOR3_ZERO;
-		g_aMeshDome[nCntMeshDome].rot = VECTOR3_ZERO;
+		g_aMeshDome[nCntMeshDome].pos = D3DXVECTOR3_NULL;
+		g_aMeshDome[nCntMeshDome].rot = D3DXVECTOR3_NULL;
 		//g_aMeshDome[nCntMeshDome].fSize = VECTOR3_ZERO;
-		g_aMeshDome[nCntMeshDome].angle = VECTOR3_ZERO;
 		g_aMeshDome[nCntMeshDome].pVtxBuff = NULL;
 		g_aMeshDome[nCntMeshDome].pIdxBuffer = NULL;
 		g_aMeshDome[nCntMeshDome].nHeightDivision = 0;
 		g_aMeshDome[nCntMeshDome].nCircleDivision = 0;
 		g_aMeshDome[nCntMeshDome].nVerti = 0;
 		g_aMeshDome[nCntMeshDome].nPrim = 0;
-		g_aMeshDome[nCntMeshDome].bInside = false;
-		g_aMeshDome[nCntMeshDome].bOutside = false;
+		g_aMeshDome[nCntMeshDome].bInner = false;
+		g_aMeshDome[nCntMeshDome].bOuter = false;
 		g_aMeshDome[nCntMeshDome].bUse = false;
 	}
 
 	// 壁の設置
 
-	SetMeshDome(D3DXVECTOR3(300.0f, 0.0f, 300.0f),  D3DXVECTOR3(0.0f, 0.0f, 0.0f), 100.0f,8, 32,true,true);
+	//SetMeshDome(D3DXVECTOR3(300.0f, 0.0f, 300.0f),  D3DXVECTOR3(0.0f, 0.0f, 0.0f), 100.0f,8, 32,true,true);
 	//SetMeshDome(D3DXVECTOR3(FIELD_SIZE, 0.0, 0.0f),  D3DXVECTOR3(0.0f, D3DX_PI * 0.5f, 0.0f), D3DXVECTOR3(1000.0f, 200.0f, 0.0f)	,2, 2);
 	//SetMeshDome(D3DXVECTOR3(0.0f, 0.0, -FIELD_SIZE), D3DXVECTOR3(0.0f, -D3DX_PI, 0.0f), D3DXVECTOR3(1000.0f, 200.0f, 0.0f)			,3, 3);
 	//SetMeshDome(D3DXVECTOR3(-FIELD_SIZE, 0.0, 0.0f), D3DXVECTOR3(0.0f, -D3DX_PI * 0.5f, 0.0f), D3DXVECTOR3(1000.0f, 200.0f, 0.0f)	,4, 4);
@@ -182,13 +181,13 @@ void SetMeshDome(D3DXVECTOR3 pos, D3DXVECTOR3 rot, float fSize, int nHeightDivis
 			//g_aMeshDome[nCntMeshDome].fSize = fSize;
 			g_aMeshDome[nCntMeshDome].nHeightDivision = nHeightDivision;
 			g_aMeshDome[nCntMeshDome].nCircleDivision = nCircleDivision;
-			g_aMeshDome[nCntMeshDome].angle = D3DXVECTOR3((float)D3DX_PI / nHeightDivision * 0.5f,(float)(2 * D3DX_PI / nCircleDivision),(float)D3DX_PI / nHeightDivision);
+			//g_aMeshDome[nCntMeshDome].angle = D3DXVECTOR3((float)D3DX_PI / nHeightDivision * 0.5f,(float)(2 * D3DX_PI / nCircleDivision),(float)D3DX_PI / nHeightDivision);
 			g_aMeshDome[nCntMeshDome].nVerti = nHeightVerti * nCircleVerti;
 			g_aMeshDome[nCntMeshDome].nPrim = (nHeightDivision * (nCircleDivision + 2) - 2) * 2;
-			g_aMeshDome[nCntMeshDome].bInside = bInside;
+			g_aMeshDome[nCntMeshDome].bInner = bInside;
 			if (bInside)
 				nBoth++;
-			g_aMeshDome[nCntMeshDome].bOutside = bOutside;
+			g_aMeshDome[nCntMeshDome].bOuter = bOutside;
 			if (bOutside)
 				nBoth++;
 
@@ -276,7 +275,7 @@ void SetMeshDome(D3DXVECTOR3 pos, D3DXVECTOR3 rot, float fSize, int nHeightDivis
 //=========================================================================================
 // フィールド情報を取得
 //=========================================================================================
-MeshDome* GetMeshDome(void)
+P_MESH GetMeshDome(void)
 {
 	return &g_aMeshDome[0];
 }
