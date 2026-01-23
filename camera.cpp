@@ -29,7 +29,7 @@ void InitCamera(void)
 {
 	//**************************************************************
 	// 変数宣言
-	P_CAMERA pCamera = GetCamera();
+	P_CAMERA pCamera = GetCameraArray();
 
 	//**************************************************************
 	// 各値の初期化
@@ -68,7 +68,7 @@ void UpdateCamera(void)
 {
 	//**************************************************************
 	// 変数宣言
-	P_CAMERA pCamera = GetCamera();
+	P_CAMERA pCamera = GetCameraArray();
 
 #if 0
 	// プレイヤーが停止していたら回り込み/////////////////////////////////OFF
@@ -142,7 +142,7 @@ void UpdateCamera(void)
 #endif
 	//**************************************************************
 	// 注視点から視点を求める
-	pCamera = GetCamera();
+	pCamera = GetCameraArray();
 	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCamera++)
 	{
 		pCamera->posV.x = pCamera->posR.x - cosf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
@@ -367,9 +367,47 @@ void SetCamera(P_CAMERA pCamera)
 }
 
 //=========================================================================================
+// カメラの位置を更新
+//=========================================================================================
+void SetPotisionCamera(int nIdx, vec3 pos)
+{
+	//**************************************************************
+	// 変数宣言
+	P_CAMERA pCam = GetCameraArray();
+
+	if (-1 < nIdx && nIdx < MAX_CAMERA)
+	{
+		pCam += nIdx;
+		if (pCam->bUse)
+		{
+			pCam->posR = pos;
+		}
+	}
+}
+
+//=========================================================================================
+// カメラ番号を取得
+//=========================================================================================
+int GetCamera(void)
+{
+	//**************************************************************
+	// 変数宣言
+	P_CAMERA pCam = GetCameraArray();
+
+	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++)
+	{
+		if (pCam->bUse == false)
+		{
+			return nCntCamera;
+		}
+	}
+	return -1;
+}
+
+//=========================================================================================
 // カメラの情報を取得
 //=========================================================================================
-P_CAMERA GetCamera(void)
+P_CAMERA GetCameraArray(void)
 {
 	return &g_aCamera[0];
 }

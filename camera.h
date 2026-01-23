@@ -78,10 +78,12 @@ POINTER(Camera, P_CAMERA);
 void InitCamera(void);
 void UninitCamera(void);
 void UpdateCamera(void);
-void SetCamera(P_CAMERA pCamera);					// カメラを設置（mainのDrawの最初にする）
-P_CAMERA GetCamera(void);							// カメラの情報を取得
-void GetCameraPos(int nCamNum, vec3* pPos);			// カメラの位置情報を取得
-void GetCameraRot(int nCamNum, vec3* pRot);			// カメラの角度情報を取得
-void CameraReset(P_CAMERA pCamera);					// カメラリセット
+void SetCamera(P_CAMERA pCamera);							// カメラを設置（mainのDrawの最初にする）
+void SetPotisionCamera(int nIdx, vec3 pos);					// カメラの位置更新
+int GetCamera(void);										// まだ未使用のカメラ番号を取得
+P_CAMERA GetCameraArray(void);								// カメラ除法配列の先頭アドレスを取得
+void GetCameraPos(int nCamNum, vec3* pPosV, vec3* pPosR);	// カメラの位置情報を取得
+void GetCameraRot(int nCamNum, vec3* pRot);					// カメラの角度情報を取得
+void CameraReset(P_CAMERA pCamera);							// カメラリセット
 
 #endif// !_CAMERA_H_
