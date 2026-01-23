@@ -18,7 +18,7 @@
 #define VIEW_RADIAN				(45.0f)					// 視野角
 #define VIEW_MINDEPTH			(10.0f)					// 最小描画距離
 #define VIEW_MAXDEPTH			(10000.0f)				// 最大描画距離
-#define CAMERA_V_DEFPOS			(500.0f, 350.0f, 0.0f)	// 視点のデフォ位置
+#define CAMERA_V_DEFPOS			(0.0f, 350.0f, -500.0f)	// 視点のデフォ位置
 #define CAMERA_R_DEFPOS			(0.0f, 0.0f, 0.0f)		// 注視点のデフォ位置
 #define CAMERA_DISTANS			(700.0f)				// カメラと注視点の距離
 #define CAMERA_MOVE				(10.0f)					// カメラの移動速度
