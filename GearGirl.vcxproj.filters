@@ -129,6 +129,9 @@
     <ClCompile Include="camera.cpp">
       <Filter>ソース ファイル\main\DirectX\3D</Filter>
     </ClCompile>
+    <ClCompile Include="field.cpp">
+      <Filter>ソース ファイル\object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h">
@@ -187,6 +190,9 @@
     </ClInclude>
     <ClInclude Include="camera.h">
       <Filter>ヘッダー ファイル\main\DirectX\3D</Filter>
+    </ClInclude>
+    <ClInclude Include="field.h">
+      <Filter>ヘッダー ファイル\object</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
