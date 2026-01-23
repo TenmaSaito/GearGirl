@@ -6,19 +6,13 @@
 // =================================================
 #include<stdio.h>
 #include "main.h"
-#include "bullet.h"
 #include "camera.h"
 #include "debugproc.h"
-#include "explosion.h"
 #include "game.h"
-#include "gimicck.h"
 #include "input.h"
-#include "meshfield.h"
-#include "meshwall.h"
 #include "model.h"
+#include "motion.h"
 #include "player.h"
-#include "shadow.h"
-#include "sound.h"
 
 // =================================================
 // マクロ定義
@@ -77,8 +71,6 @@ void InitPlayer(void)
 		g_Player[nCntPlayer].nNumModel = MAX_PART;
 		g_Player[nCntPlayer].state = PLAYERSTATE_NEUTRAL;
 		g_Player[nCntPlayer].bFinishMotion = true;
-		g_Player[nCntPlayer].dir = PLAYERDIRECTION_SOUTH;
-
 	}
 
 	g_nNumModel = 0;
@@ -88,7 +80,7 @@ void InitPlayer(void)
 	g_nCntMotion = 0;
 
 	// 影を設定
-	g_IdxShadowPlayer = SetShadow();
+	//g_IdxShadowPlayer = SetShadow();
 }
 
 // =================================================
@@ -104,15 +96,6 @@ void UninitPlayer(void)
 // =================================================
 void UpdatePlayer(void)
 {
-	// カメラの情報を取得
-	Camera* pCamera = GetCamera();
-
-	// ギミックの情報を取得
-	Gimicck* pGimicck = GetGimicck();
-
-	// ゲーム状態柄尾取得
-	GAMESTATE pGame = GetGameState();
-
 	// プレイヤー構造体をポインタ化
 	Player* pPlayer = &g_Player[0];
 
@@ -125,9 +108,9 @@ void UpdatePlayer(void)
 		{// 待機モーションを再生
 		}
 
-		MovePlayer();	// 移動に関する処理
+		MovePlayer(nCntPlayer);	// 移動に関する処理
 
-		JumpPlayer();	// ジャンプに関する処理
+		//JumpPlayer();	// ジャンプに関する処理
 
 	//
 	//// 突進と同時にposを移動する
@@ -166,233 +149,7 @@ void UpdatePlayer(void)
 	//	{
 	//		g_Player.move.x -= ATTACK_MOVE;
 	//		g_Player.move.z -= ATTACK_MOVE;
-	//	}
-
-		// 押した方向に慣性を付けながら向く
-		if (pPlayer->dir == PLAYERDIRECTION_NORTHWEST)
-		{
-			pPlayer->rotDest.y = D3DX_PI * 0.75f + pCamera->rot.y;	// 目標の角度を設定
-			pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-			// もし、差分がπを超えたら
-			if (pPlayer->rotDiff.y > D3DX_PI)
-			{
-				pPlayer->rotDiff.y -= D3DX_PI * 2;
-			}
-			else if (pPlayer->rotDiff.y < -D3DX_PI)
-			{
-				pPlayer->rotDiff.y += D3DX_PI * 2;
-			}
-
-			// 回転に補正を掛ける
-			pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI * 0.6f;
-
-			// もし、現在の角度がπを超えたら
-			if (pPlayer->rot.y > D3DX_PI + pCamera->rot.y)
-			{
-				pPlayer->rot.y -= D3DX_PI * 2;
-			}
-			else if (pPlayer->rot.y < -D3DX_PI + pCamera->rot.y)
-			{
-				pPlayer->rot.y += D3DX_PI * 2;
-			}
-		}
-		else if (pPlayer->dir == PLAYERDIRECTION_EAST)
-		{
-			pPlayer->rotDest.y = -D3DX_PI * 0.5f + pCamera->rot.y;	// 目標の角度を設定
-			pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-			// もし、差分がπを超えたら
-			if (pPlayer->rotDiff.y > D3DX_PI)
-			{
-				pPlayer->rotDiff.y -= D3DX_PI * 2;
-			}
-			else if (pPlayer->rotDiff.y < -D3DX_PI)
-			{
-				pPlayer->rotDiff.y += D3DX_PI * 2;
-			}
-
-			// 回転に補正を掛ける
-			pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI * 0.6f;
-
-			// もし、現在の角度がπを超えたら
-			if (pPlayer->rot.y > D3DX_PI + pCamera->rot.y)
-			{
-				pPlayer->rot.y -= D3DX_PI * 2;
-			}
-			else if (pPlayer->rot.y < -D3DX_PI + pCamera->rot.y)
-			{
-				pPlayer->rot.y += D3DX_PI * 2;
-			}
-		}
-		else if (pPlayer->dir == PLAYERDIRECTION_WEST)
-		{
-			pPlayer->rotDest.y = D3DX_PI * 0.5f + pCamera->rot.y;	// 目標の角度を設定
-			pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-			// もし、差分がπを超えたら
-			if (pPlayer->rotDiff.y > D3DX_PI)
-			{
-				pPlayer->rotDiff.y -= D3DX_PI * 2;
-			}
-			else if (pPlayer->rotDiff.y < -D3DX_PI)
-			{
-				pPlayer->rotDiff.y += D3DX_PI * 2;
-			}
-
-			// 回転に補正を掛ける
-			pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI * 0.6f;
-
-			// もし、現在の角度がπを超えたら
-			if (pPlayer->rot.y > D3DX_PI + pCamera->rot.y)
-			{
-				pPlayer->rot.y -= D3DX_PI * 2;
-			}
-			else if (pPlayer->rot.y < -D3DX_PI + pCamera->rot.y)
-			{
-				pPlayer->rot.y += D3DX_PI * 2;
-			}
-		}
-		else if (pPlayer->dir == PLAYERDIRECTION_NORTH)
-		{
-			pPlayer->rotDest.y = D3DX_PI + pCamera->rot.y;	// 目標の角度を設定
-			pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-			// もし、差分がπを超えたら
-			if (pPlayer->rotDiff.y > D3DX_PI)
-			{
-				pPlayer->rotDiff.y -= D3DX_PI * 2;
-			}
-			else if (pPlayer->rotDiff.y < -D3DX_PI)
-			{
-				pPlayer->rotDiff.y += D3DX_PI * 2;
-			}
-
-			// 回転に補正を掛ける
-			pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI * 0.6f;
-
-			// もし、現在の角度がπを超えたら
-			if (pPlayer->rot.y > D3DX_PI + pCamera->rot.y)
-			{
-				pPlayer->rot.y -= D3DX_PI * 2;
-			}
-			else if (pPlayer->rot.y < -D3DX_PI + pCamera->rot.y)
-			{
-				pPlayer->rot.y += D3DX_PI * 2;
-			}
-		}
-		else if (pPlayer->dir == PLAYERDIRECTION_SOUTH)
-		{
-			pPlayer->rotDest.y = pCamera->rot.y;	// 目標の角度を設定
-			pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-			// もし、差分がπを超えたら
-			if (pPlayer->rotDiff.y > D3DX_PI)
-			{
-				pPlayer->rotDiff.y -= D3DX_PI * 2;
-			}
-			else if (pPlayer->rotDiff.y < -D3DX_PI)
-			{
-				pPlayer->rotDiff.y += D3DX_PI * 2;
-			}
-
-			// 回転に補正を掛ける
-			pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI * 0.6f;
-
-			// もし、現在の角度がπを超えたら
-			if (pPlayer->rot.y > D3DX_PI + pCamera->rot.y)
-			{
-				pPlayer->rot.y -= D3DX_PI * 2;
-			}
-			else if (pPlayer->rot.y < -D3DX_PI + pCamera->rot.y)
-			{
-				pPlayer->rot.y += D3DX_PI * 2;
-			}
-		}
-		else if (pPlayer->dir == PLAYERDIRECTION_NORTHEAST)
-		{
-			pPlayer->rotDest.y = -D3DX_PI * 0.75f + pCamera->rot.y;	// 目標の角度を設定
-			pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-			// もし、差分がπを超えたら
-			if (pPlayer->rotDiff.y > D3DX_PI)
-			{
-				pPlayer->rotDiff.y -= D3DX_PI * 2;
-			}
-			else if (pPlayer->rotDiff.y < -D3DX_PI)
-			{
-				pPlayer->rotDiff.y += D3DX_PI * 2;
-			}
-
-			// 回転に補正を掛ける
-			pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI * 0.6f;
-
-			// もし、現在の角度がπを超えたら
-			if (pPlayer->rot.y > D3DX_PI + pCamera->rot.y)
-			{
-				pPlayer->rot.y -= D3DX_PI * 2;
-			}
-			else if (pPlayer->rot.y < -D3DX_PI + pCamera->rot.y)
-			{
-				pPlayer->rot.y += D3DX_PI * 2;
-			}
-		}
-		else if (pPlayer->dir == PLAYERDIRECTION_SOUTHEAST)
-		{
-			pPlayer->rotDest.y = -D3DX_PI * 0.25f + pCamera->rot.y;	// 目標の角度を設定
-			pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-			// もし、差分がπを超えたら
-			if (pPlayer->rotDiff.y > D3DX_PI)
-			{
-				pPlayer->rotDiff.y -= D3DX_PI * 2;
-			}
-			else if (pPlayer->rotDiff.y < -D3DX_PI)
-			{
-				pPlayer->rotDiff.y += D3DX_PI * 2;
-			}
-
-			// 回転に補正を掛ける
-			pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI * 0.6f;
-
-			// もし、現在の角度がπを超えたら
-			if (pPlayer->rot.y > D3DX_PI + pCamera->rot.y)
-			{
-				pPlayer->rot.y -= D3DX_PI * 2;
-			}
-			else if (pPlayer->rot.y < -D3DX_PI + pCamera->rot.y)
-			{
-				pPlayer->rot.y += D3DX_PI * 2;
-			}
-		}
-		else if (pPlayer->dir == PLAYERDIRECTION_SOUTHWEST)
-		{
-			pPlayer->rotDest.y = D3DX_PI * 0.25f + pCamera->rot.y;	// 目標の角度を設定
-			pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-			// もし、差分がπを超えたら
-			if (pPlayer->rotDiff.y > D3DX_PI)
-			{
-				pPlayer->rotDiff.y -= D3DX_PI * 2;
-			}
-			else if (pPlayer->rotDiff.y < -D3DX_PI)
-			{
-				pPlayer->rotDiff.y += D3DX_PI * 2;
-			}
-
-			// 回転に補正を掛ける
-			pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI * 0.6f;
-
-			// もし、現在の角度がπを超えたら
-			if (pPlayer->rot.y > D3DX_PI + pCamera->rot.y)
-			{
-				pPlayer->rot.y -= D3DX_PI * 2;
-			}
-			else if (pPlayer->rot.y < -D3DX_PI + pCamera->rot.y)
-			{
-				pPlayer->rot.y += D3DX_PI * 2;
-			}
-		}
+	//	}く
 
 		pPlayer->move.y += GRAVITY;	// 重力をかけ続ける
 
@@ -403,34 +160,34 @@ void UpdatePlayer(void)
 		pPlayer->move.x += (0.0f - pPlayer->move.x) * (PLAYER_INI * 1.5f);
 		pPlayer->move.z += (0.0f - pPlayer->move.z) * (PLAYER_INI * 1.5f);
 
-		// 地面に埋まった時の処理
-		if (CollisionMeshField(&pPlayer->pos, &pPlayer->posOld) == true)
-		{
-			if ((pPlayer->state == PLAYERSTATE_WALK || pPlayer->state == PLAYERSTATE_JUMP) && pPlayer->bJump == true)
-			{
-				PlaySound(SOUND_LABEL_LAND);
-			}
+		//// 地面に埋まった時の処理
+		//if (CollisionMeshField(&pPlayer->pos, &pPlayer->posOld) == true)
+		//{
+		//	if ((pPlayer->state == PLAYERSTATE_WALK || pPlayer->state == PLAYERSTATE_JUMP) && pPlayer->bJump == true)
+		//	{
+		//		PlaySound(SOUND_LABEL_LAND);
+		//	}
 
-			pPlayer->bJump = false;
-		}
-		else
-		{
-			pPlayer->bJump = true;
-		}
+		//	pPlayer->bJump = false;
+		//}
+		//else
+		//{
+		//	pPlayer->bJump = true;
+		//}
 
-		// モデルとの当たり判定
-		if (CollisionGimicck(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move) == true)
-		{
-			// 影の位置設定
-			SetPositionShadow(g_IdxShadowPlayer, D3DXVECTOR3(pPlayer->pos.x, pGimicck->vtxMax.y + 10, pPlayer->pos.z), 30, 30);
-		}
-		else if (CollisionGimicck(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move) == false)
-		{
-			// 影の位置設定
-			SetPositionShadow(g_IdxShadowPlayer, D3DXVECTOR3(pPlayer->pos.x, 5.0f, pPlayer->pos.z), 30, 30);
-		}
+		//// モデルとの当たり判定
+		//if (CollisionGimicck(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move) == true)
+		//{
+		//	// 影の位置設定
+		//	SetPositionShadow(g_IdxShadowPlayer, D3DXVECTOR3(pPlayer->pos.x, pGimicck->vtxMax.y + 10, pPlayer->pos.z), 30, 30);
+		//}
+		//else if (CollisionGimicck(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move) == false)
+		//{
+		//	// 影の位置設定
+		//	SetPositionShadow(g_IdxShadowPlayer, D3DXVECTOR3(pPlayer->pos.x, 5.0f, pPlayer->pos.z), 30, 30);
+		//}
 
-		UpdateMotion();
+		//UpdateMotion();
 	}
 
 
@@ -456,6 +213,8 @@ void DrawPlayer(void)
 	D3DMATERIAL9 matDef;			// 現在のマテリアル保存用
 	D3DXMATERIAL* pMat;				// マテリアルデータへのポインタ
 
+
+
 	for (int nCntPlayer = 0; nCntPlayer < PLAYERTYPE_MAX; nCntPlayer++, pPlayer++)
 	{
 		// プレイヤーのワールドマトリックスの初期化
@@ -480,6 +239,9 @@ void DrawPlayer(void)
 		// 全モデル(パーツ)の描画
 		for (int nCntModel = 0; nCntModel < pPlayer->nNumModel; nCntModel++)
 		{
+			LPPARTS_INFO pPartsInfo = GetPartsInfo(0);	// パーツ情報のアドレスを取得
+			PARTS_INFO PartsInfo = *pPartsInfo;			// アドレスの中身のみをコピー
+
 			D3DXMATRIX mtxRotModel, mtxTransModel;	// 計算用マトリックス
 			D3DXMATRIX mtxParent;	// 親のマトリックス
 
@@ -548,323 +310,384 @@ Player* GetPlayer(void)
 // =================================================
 // プレイヤーの行動関数
 // =================================================
-void MovePlayer(void)
+void MovePlayer(int nPlayer)
 {
 	// プレイヤー構造体をポインタ化
-	Player* pPlayer = &g_Player[0];
+	Player* pPlayer = &g_Player[nPlayer];
 
 	// カメラの情報を取得
-	Camera* pCamera = GetCamera();
+	Camera* pCamera = GetCamera(0);
 
-	// 左スティックの情報を取得
-	D3DXVECTOR2 gamepadStickDir = GetGamepadStickDir(STICK_TYPE_LEFT);
+	if (nPlayer == 0)
+	{// 少女の操作
+		if (GetKeyboardPress(DIK_A) == true || GetJoypadPress(nPlayer, JOYKEY_LEFT) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_LEFT))
+		{//Aキーが押される	
 
-	for (int nCntPlayer = 0; nCntPlayer < PLAYERTYPE_MAX; nCntPlayer++, pPlayer++)
-	{
-		if (pPlayer->motionType != MOTIONTYPEPLAYER_ATTACK)
-		{
-			if (GetKeyboardPress(DIK_A) == true || GetJoypadPress(JOYKEY_LEFT) == true || gamepadStickDir.x < -STICK_DEADAREA)
-			{//Aキーが押される	
-
-				if (pPlayer->bFinishMotion == true || pPlayer->motionType == MOTIONTYPEPLAYER_LAND || pPlayer->motionType == MOTIONTYPEPLAYER_NEUTRAL || pPlayer->motionType == MOTIONTYPEPLAYER_WALK)
-				{// 移動モーションの再生
-					PlaySound(SOUND_LABEL_DASH);
-					pPlayer->state = PLAYERSTATE_WALK;
-				}
-
-				if (GetKeyboardPress(DIK_W) == true || GetJoypadPress(JOYKEY_UP) == true || gamepadStickDir.y > STICK_DEADAREA)
-				{// WとA(左上)の入力
-					pPlayer->dir = PLAYERDIRECTION_NORTHWEST;	// 左上向き
-
-					if (pPlayer->bJump == true)
-					{// 上空での移動速度
-						pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
-						pPlayer->move.z += cosf(-pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
-					}
-					else
-					{// 地上での移動速度
-						pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.25f) * PLAYER_MOVE;
-						pPlayer->move.z += cosf(-pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
-					}
-				}
-				else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(JOYKEY_DOWN) == true || gamepadStickDir.y < -STICK_DEADAREA)
-				{// SとA(左下)の入力
-					pPlayer->dir = PLAYERDIRECTION_SOUTHWEST;	// 左下向き
-
-					if (pPlayer->bJump == true)
-					{// 上空での移動速度
-						pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
-						pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
-					}
-					else
-					{// 地上での移動速度
-						pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
-						pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
-					}
-				}
-				else
-				{// A単体の入力
-					pPlayer->dir = PLAYERDIRECTION_WEST;	// 左向き
-
-					if (pPlayer->bJump == true)
-					{// 上空での移動速度
-						pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
-						pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
-					}
-					else
-					{// 地上での移動速度
-						pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
-						pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
-					}
-				}
-			}
-			else if (GetKeyboardPress(DIK_D) == true || GetJoypadPress(JOYKEY_RIGHT) == true || gamepadStickDir.x > STICK_DEADAREA)
-			{//Dキーが押される
-
-				if (pPlayer->bFinishMotion == true || pPlayer->state == PLAYERSTATE_NEUTRAL || pPlayer->motionType == MOTIONTYPEPLAYER_LAND || pPlayer->motionType == MOTIONTYPEPLAYER_NEUTRAL || pPlayer->motionType == MOTIONTYPEPLAYER_WALK)
-				{// 移動モーションの再生
-					PlaySound(SOUND_LABEL_DASH);
-					pPlayer->state = PLAYERSTATE_WALK;
-				}
-
-				if (GetKeyboardPress(DIK_W) == true || GetJoypadPress(JOYKEY_UP) == true || gamepadStickDir.y > STICK_DEADAREA)
-				{// WとD(右上)の入力
-					pPlayer->dir = PLAYERDIRECTION_NORTHEAST;	// 右上向き
-
-					if (pPlayer->bJump == true)
-					{// 上空での移動速度
-						pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
-						pPlayer->move.z += cosf(pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
-					}
-					else
-					{// 地上での移動速度
-						pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
-						pPlayer->move.z += cosf(pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
-					}
-				}
-				else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(JOYKEY_DOWN) == true || gamepadStickDir.y < -STICK_DEADAREA)
-				{// SとD(右下)の入力
-					pPlayer->dir = PLAYERDIRECTION_SOUTHEAST;	// 右下向き
-
-					if (pPlayer->bJump == true)
-					{// 上空での移動速度
-						pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
-						pPlayer->move.z += cosf(-pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
-					}
-					else
-					{// 地上での移動速度
-						pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.75f) * PLAYER_MOVE;
-						pPlayer->move.z += cosf(-pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
-					}
-				}
-				else
-				{// Dだけの入力
-					pPlayer->dir = PLAYERDIRECTION_EAST;	// 右向き
-
-					if (pPlayer->bJump == true)
-					{// 上空での移動速度
-						pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
-						pPlayer->move.z += cosf(pCamera->rot.y + D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
-					}
-					else
-					{// 地上での移動速度
-						pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
-						pPlayer->move.z += cosf(pCamera->rot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
-					}
-				}
-			}
-			else if (GetKeyboardPress(DIK_W) == true || GetJoypadPress(JOYKEY_UP) == true || gamepadStickDir.y > STICK_DEADAREA)
-			{//Wキーが押される
-				pPlayer->dir = PLAYERDIRECTION_NORTH;	// 上向き
-
-				if (pPlayer->bFinishMotion == true || pPlayer->state == PLAYERSTATE_NEUTRAL || pPlayer->motionType == MOTIONTYPEPLAYER_LAND || pPlayer->motionType == MOTIONTYPEPLAYER_NEUTRAL || pPlayer->motionType == MOTIONTYPEPLAYER_WALK)
-				{// 移動モーションの再生
-					PlaySound(SOUND_LABEL_DASH);
-					pPlayer->state = PLAYERSTATE_WALK;
-				}
+			if (GetKeyboardPress(DIK_W) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
+			{// WとA(左上)の入力
 
 				if (pPlayer->bJump == true)
 				{// 上空での移動速度
-					pPlayer->move.z += cosf(pCamera->rot.y) * PLAYER_MOVE * 0.7f;
-					pPlayer->move.x += sinf(pCamera->rot.y) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.z += cosf(-pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
 				}
 				else
 				{// 地上での移動速度
-					pPlayer->move.z += cosf(pCamera->rot.y) * PLAYER_MOVE;
-					pPlayer->move.x += sinf(pCamera->rot.y) * PLAYER_MOVE;
+					pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.25f) * PLAYER_MOVE;
+					pPlayer->move.z += cosf(-pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
 				}
 			}
-			else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(JOYKEY_DOWN) == true || gamepadStickDir.y < -STICK_DEADAREA)
-			{//Sキーが押される
-				pPlayer->dir = PLAYERDIRECTION_SOUTH;	// 下向き
-
-				if (pPlayer->bFinishMotion == true || pPlayer->state == PLAYERSTATE_NEUTRAL || pPlayer->motionType == MOTIONTYPEPLAYER_LAND || pPlayer->motionType == MOTIONTYPEPLAYER_NEUTRAL || pPlayer->motionType == MOTIONTYPEPLAYER_WALK)
-				{// 移動モーションの再生
-					PlaySound(SOUND_LABEL_DASH);
-					pPlayer->state = PLAYERSTATE_WALK;
-				}
+			else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
+			{// SとA(左下)の入力
 
 				if (pPlayer->bJump == true)
 				{// 上空での移動速度
-					pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI) * PLAYER_MOVE * 0.7f;
-					pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
 				}
 				else
 				{// 地上での移動速度
-					pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI) * PLAYER_MOVE;
-					pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI) * PLAYER_MOVE;
+					pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
+					pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
 				}
 			}
+			else
+			{// A単体の入力
 
-			// スティックでの操作
-			if (gamepadStickDir.x <= STICK_DEADAREA && gamepadStickDir.x > 5000)
-			{// 右
-				pPlayer->move.x += gamepadStickDir.x / 10000;
-
-				if (pPlayer->bFinishMotion == true || pPlayer->state != PLAYERSTATE_WALK || pPlayer->motionType == MOTIONTYPEPLAYER_LAND || pPlayer->motionType == MOTIONTYPEPLAYER_NEUTRAL)
-				{// 移動モーションの再生
-					PlaySound(SOUND_LABEL_DASH);
-					pPlayer->state = PLAYERSTATE_WALK;
+				if (pPlayer->bJump == true)
+				{// 上空での移動速度
+					pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
 				}
-
-				pPlayer->rotDest.y = -D3DX_PI * 0.5f + pCamera->rot.y;	// 目標の角度を設定
-				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-				// もし、差分がπを超えたら
-				if (pPlayer->rotDiff.y > D3DX_PI)
-				{
-					pPlayer->rotDiff.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rotDiff.y < -D3DX_PI)
-				{
-					pPlayer->rotDiff.y += D3DX_PI * 2;
-				}
-
-				// 回転に補正を掛ける
-				pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
-
-				// もし、現在の角度がπを超えたら
-				if (pPlayer->rot.y > D3DX_PI + pCamera->rot.y)
-				{
-					pPlayer->rot.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rot.y < -D3DX_PI + pCamera->rot.y)
-				{
-					pPlayer->rot.y += D3DX_PI * 2;
-				}
-			}
-			if (gamepadStickDir.x >= -STICK_DEADAREA && gamepadStickDir.x < -5000)
-			{// 左
-				pPlayer->move.x += gamepadStickDir.x / 10000;
-
-				if (pPlayer->bFinishMotion == true || pPlayer->state != PLAYERSTATE_WALK || pPlayer->motionType == MOTIONTYPEPLAYER_LAND || pPlayer->motionType == MOTIONTYPEPLAYER_NEUTRAL)
-				{// 移動モーションの再生
-					PlaySound(SOUND_LABEL_DASH);
-					pPlayer->state = PLAYERSTATE_WALK;
-				}
-
-				pPlayer->rotDest.y = D3DX_PI * 0.5f + pCamera->rot.y;	// 目標の角度を設定
-				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-				// もし、差分がπを超えたら
-				if (pPlayer->rotDiff.y > D3DX_PI)
-				{
-					pPlayer->rotDiff.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rotDiff.y < -D3DX_PI)
-				{
-					pPlayer->rotDiff.y += D3DX_PI * 2;
-				}
-
-				// 回転に補正を掛ける
-				pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
-
-				// もし、現在の角度がπを超えたら
-				if (pPlayer->rot.y > D3DX_PI + pCamera->rot.y)
-				{
-					pPlayer->rot.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rot.y < -D3DX_PI + pCamera->rot.y)
-				{
-					pPlayer->rot.y += D3DX_PI * 2;
-				}
-			}
-			if (gamepadStickDir.y <= STICK_DEADAREA && gamepadStickDir.y > 5000)
-			{// 上
-				pPlayer->move.z += gamepadStickDir.y / 10000;
-
-				if (pPlayer->bFinishMotion == true || pPlayer->state != PLAYERSTATE_WALK || pPlayer->motionType == MOTIONTYPEPLAYER_LAND || pPlayer->motionType == MOTIONTYPEPLAYER_NEUTRAL)
-				{// 移動モーションの再生
-					PlaySound(SOUND_LABEL_DASH);
-					pPlayer->state = PLAYERSTATE_WALK;
-				}
-
-				pPlayer->rotDest.y = D3DX_PI + pCamera->rot.y;	// 目標の角度を設定
-				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-				// もし、差分がπを超えたら
-				if (pPlayer->rotDiff.y > D3DX_PI)
-				{
-					pPlayer->rotDiff.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rotDiff.y < -D3DX_PI)
-				{
-					pPlayer->rotDiff.y += D3DX_PI * 2;
-				}
-
-				// 回転に補正を掛ける
-				pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
-
-				// もし、現在の角度がπを超えたら
-				if (pPlayer->rot.y > D3DX_PI + pCamera->rot.y)
-				{
-					pPlayer->rot.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rot.y < -D3DX_PI + pCamera->rot.y)
-				{
-					pPlayer->rot.y += D3DX_PI * 2;
-				}
-			}
-			if (gamepadStickDir.y >= -STICK_DEADAREA && gamepadStickDir.y < -5000)
-			{// 下
-				pPlayer->move.z += gamepadStickDir.y / 10000;
-
-				if (pPlayer->bFinishMotion == true || pPlayer->state != PLAYERSTATE_WALK || pPlayer->motionType == MOTIONTYPEPLAYER_LAND || pPlayer->motionType == MOTIONTYPEPLAYER_NEUTRAL)
-				{// 移動モーションの再生
-					PlaySound(SOUND_LABEL_DASH);
-					pPlayer->state = PLAYERSTATE_WALK;
-				}
-
-				pPlayer->rotDest.y = pCamera->rot.y;	// 目標の角度を設定
-				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-				// もし、差分がπを超えたら
-				if (pPlayer->rotDiff.y > D3DX_PI)
-				{
-					pPlayer->rotDiff.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rotDiff.y < -D3DX_PI)
-				{
-					pPlayer->rotDiff.y += D3DX_PI * 2;
-				}
-
-				// 回転に補正を掛ける
-				pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
-
-				// もし、現在の角度がπを超えたら
-				if (pPlayer->rot.y > D3DX_PI + pCamera->rot.y)
-				{
-					pPlayer->rot.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rot.y < -D3DX_PI + pCamera->rot.y)
-				{
-					pPlayer->rot.y += D3DX_PI * 2;
+				else
+				{// 地上での移動速度
+					pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
+					pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
 				}
 			}
 		}
+		else if (GetKeyboardPress(DIK_D) == true || GetJoypadPress(nPlayer, JOYKEY_RIGHT) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_RIGHT))
+		{//Dキーが押される
+
+			if (GetKeyboardPress(DIK_W) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
+			{// WとD(右上)の入力
+
+				if (pPlayer->bJump == true)
+				{// 上空での移動速度
+					pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.z += cosf(pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
+				}
+				else
+				{// 地上での移動速度
+					pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
+					pPlayer->move.z += cosf(pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
+				}
+			}
+			else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
+			{// SとD(右下)の入力
+
+				if (pPlayer->bJump == true)
+				{// 上空での移動速度
+					pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.z += cosf(-pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
+				}
+				else
+				{// 地上での移動速度
+					pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.75f) * PLAYER_MOVE;
+					pPlayer->move.z += cosf(-pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
+				}
+			}
+			else
+			{// Dだけの入力
+
+				if (pPlayer->bJump == true)
+				{// 上空での移動速度
+					pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.z += cosf(pCamera->rot.y + D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
+				}
+				else
+				{// 地上での移動速度
+					pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
+					pPlayer->move.z += cosf(pCamera->rot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
+				}
+			}
+		}
+		else if (GetKeyboardPress(DIK_W) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
+		{//Wキーが押される
+
+			if (pPlayer->bJump == true)
+			{// 上空での移動速度
+				pPlayer->move.z += cosf(pCamera->rot.y) * PLAYER_MOVE * 0.7f;
+				pPlayer->move.x += sinf(pCamera->rot.y) * PLAYER_MOVE * 0.7f;
+			}
+			else
+			{// 地上での移動速度
+				pPlayer->move.z += cosf(pCamera->rot.y) * PLAYER_MOVE;
+				pPlayer->move.x += sinf(pCamera->rot.y) * PLAYER_MOVE;
+			}
+		}
+		else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
+		{//Sキーが押される
+
+			if (pPlayer->bJump == true)
+			{// 上空での移動速度
+				pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI) * PLAYER_MOVE * 0.7f;
+				pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI) * PLAYER_MOVE * 0.7f;
+			}
+			else
+			{// 地上での移動速度
+				pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI) * PLAYER_MOVE;
+				pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI) * PLAYER_MOVE;
+			}
+		}
+	}
+	else
+	{// ネズミの操作
+		if (GetKeyboardPress(DIK_LEFT) == true || GetJoypadPress(nPlayer, JOYKEY_LEFT) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_LEFT))
+		{//左矢印キーが押される	
+
+			if (GetKeyboardPress(DIK_UP) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
+			{// 左上の入力
+
+				if (pPlayer->bJump == true)
+				{// 上空での移動速度
+					pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.z += cosf(-pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
+				}
+				else
+				{// 地上での移動速度
+					pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.25f) * PLAYER_MOVE;
+					pPlayer->move.z += cosf(-pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
+				}
+			}
+			else if (GetKeyboardPress(DIK_DOWN) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
+			{// 左下の入力
+
+				if (pPlayer->bJump == true)
+				{// 上空での移動速度
+					pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
+				}
+				else
+				{// 地上での移動速度
+					pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
+					pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
+				}
+			}
+			else
+			{// 上矢印単体の入力
+
+				if (pPlayer->bJump == true)
+				{// 上空での移動速度
+					pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
+				}
+				else
+				{// 地上での移動速度
+					pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
+					pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
+				}
+			}
+		}
+		else if (GetKeyboardPress(DIK_RIGHT) == true || GetJoypadPress(nPlayer, JOYKEY_RIGHT) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_RIGHT))
+		{// 右矢印が押される
+
+			if (GetKeyboardPress(DIK_UP) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
+			{// 右上の入力
+
+				if (pPlayer->bJump == true)
+				{// 上空での移動速度
+					pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.z += cosf(pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
+				}
+				else
+				{// 地上での移動速度
+					pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
+					pPlayer->move.z += cosf(pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
+				}
+			}
+			else if (GetKeyboardPress(DIK_DOWN) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
+			{// 右下の入力
+
+				if (pPlayer->bJump == true)
+				{// 上空での移動速度
+					pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.z += cosf(-pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
+				}
+				else
+				{// 地上での移動速度
+					pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.75f) * PLAYER_MOVE;
+					pPlayer->move.z += cosf(-pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
+				}
+			}
+			else
+			{// 右だけの入力
+
+				if (pPlayer->bJump == true)
+				{// 上空での移動速度
+					pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.z += cosf(pCamera->rot.y + D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
+				}
+				else
+				{// 地上での移動速度
+					pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
+					pPlayer->move.z += cosf(pCamera->rot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
+				}
+			}
+		}
+		else if (GetKeyboardPress(DIK_UP) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
+		{//Wキーが押される
+
+			if (pPlayer->bJump == true)
+			{// 上空での移動速度
+				pPlayer->move.z += cosf(pCamera->rot.y) * PLAYER_MOVE * 0.7f;
+				pPlayer->move.x += sinf(pCamera->rot.y) * PLAYER_MOVE * 0.7f;
+			}
+			else
+			{// 地上での移動速度
+				pPlayer->move.z += cosf(pCamera->rot.y) * PLAYER_MOVE;
+				pPlayer->move.x += sinf(pCamera->rot.y) * PLAYER_MOVE;
+			}
+		}
+		else if (GetKeyboardPress(DIK_DOWN) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
+		{//Sキーが押される
+
+			if (pPlayer->bJump == true)
+			{// 上空での移動速度
+				pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI) * PLAYER_MOVE * 0.7f;
+				pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI) * PLAYER_MOVE * 0.7f;
+			}
+			else
+			{// 地上での移動速度
+				pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI) * PLAYER_MOVE;
+				pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI) * PLAYER_MOVE;
+			}
+		}
+	}
+
+	// スティックでの操作
+	if (GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_RIGHT))
+	{// 右
+		pPlayer->move.x += PLAYER_MOVE;
+
+		pPlayer->rotDest.y = -D3DX_PI * 0.5f + pCamera->rot.y;	// 目標の角度を設定
+		pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
+
+		// もし、差分がπを超えたら
+		if (pPlayer->rotDiff.y > D3DX_PI)
+		{
+			pPlayer->rotDiff.y -= D3DX_PI * 2;
+		}
+		else if (pPlayer->rotDiff.y < -D3DX_PI)
+		{
+			pPlayer->rotDiff.y += D3DX_PI * 2;
+		}
+
+		// 回転に補正を掛ける
+		pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
+
+		// もし、現在の角度がπを超えたら
+		if (pPlayer->rot.y > D3DX_PI + pCamera->rot.y)
+		{
+			pPlayer->rot.y -= D3DX_PI * 2;
+		}
+		else if (pPlayer->rot.y < -D3DX_PI + pCamera->rot.y)
+		{
+			pPlayer->rot.y += D3DX_PI * 2;
+		}
+	}
+	if (GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_LEFT))
+	{// 左
+		pPlayer->move.x += PLAYER_MOVE;
+
+		pPlayer->rotDest.y = D3DX_PI * 0.5f + pCamera->rot.y;	// 目標の角度を設定
+		pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
+
+		// もし、差分がπを超えたら
+		if (pPlayer->rotDiff.y > D3DX_PI)
+		{
+			pPlayer->rotDiff.y -= D3DX_PI * 2;
+		}
+		else if (pPlayer->rotDiff.y < -D3DX_PI)
+		{
+			pPlayer->rotDiff.y += D3DX_PI * 2;
+		}
+
+		// 回転に補正を掛ける
+		pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
+
+		// もし、現在の角度がπを超えたら
+		if (pPlayer->rot.y > D3DX_PI + pCamera->rot.y)
+		{
+			pPlayer->rot.y -= D3DX_PI * 2;
+		}
+		else if (pPlayer->rot.y < -D3DX_PI + pCamera->rot.y)
+		{
+			pPlayer->rot.y += D3DX_PI * 2;
+		}
+	}
+	if (GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
+	{// 上
+		pPlayer->move.z += PLAYER_MOVE;
+
+		pPlayer->rotDest.y = D3DX_PI + pCamera->rot.y;	// 目標の角度を設定
+		pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
+
+		// もし、差分がπを超えたら
+		if (pPlayer->rotDiff.y > D3DX_PI)
+		{
+			pPlayer->rotDiff.y -= D3DX_PI * 2;
+		}
+		else if (pPlayer->rotDiff.y < -D3DX_PI)
+		{
+			pPlayer->rotDiff.y += D3DX_PI * 2;
+		}
+
+		// 回転に補正を掛ける
+		pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
+
+		// もし、現在の角度がπを超えたら
+		if (pPlayer->rot.y > D3DX_PI + pCamera->rot.y)
+		{
+			pPlayer->rot.y -= D3DX_PI * 2;
+		}
+		else if (pPlayer->rot.y < -D3DX_PI + pCamera->rot.y)
+		{
+			pPlayer->rot.y += D3DX_PI * 2;
+		}
+	}
+	if (GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
+	{// 下
+		pPlayer->move.z += PLAYER_MOVE;
+
+		pPlayer->rotDest.y = pCamera->rot.y;	// 目標の角度を設定
+		pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
+
+		// もし、差分がπを超えたら
+		if (pPlayer->rotDiff.y > D3DX_PI)
+		{
+			pPlayer->rotDiff.y -= D3DX_PI * 2;
+		}
+		else if (pPlayer->rotDiff.y < -D3DX_PI)
+		{
+			pPlayer->rotDiff.y += D3DX_PI * 2;
+		}
+
+		// 回転に補正を掛ける
+		pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
+
+		// もし、現在の角度がπを超えたら
+		if (pPlayer->rot.y > D3DX_PI + pCamera->rot.y)
+		{
+			pPlayer->rot.y -= D3DX_PI * 2;
+		}
+		else if (pPlayer->rot.y < -D3DX_PI + pCamera->rot.y)
+		{
+			pPlayer->rot.y += D3DX_PI * 2;
+		}
 	}
 }
-
+#if 0
 // =================================================
 // プレイヤーのジャンプ関数
 // =================================================
@@ -992,7 +815,7 @@ void UpdateMotion(void)
 
 		// ブレンドモーションのフレーム数のポインタ
 		KEY_INFO* pKeyFrameBlend = &pPlayer->aMotionInfo[pPlayer->motionTypeBlend].aKeyInfo[pPlayer->nKeyBlend];
-		
+
 		// 全モデル(パーツ)の更新
 		for (int nCntModel = 0; nCntModel < pPlayer->nNumModel; nCntModel++)
 		{
@@ -1247,7 +1070,7 @@ void UpdateMotion(void)
 // =================================================
 // モーションの設定処理
 // =================================================
-void SetMotion(MOTIONTYPEPLAYER motionType, bool bUseBrend, int nBlendFrame, PlayerType PlayerType)
+void SetMotion(MOTIONTYPE motionType, bool bUseBrend, int nBlendFrame, PlayerType PlayerType)
 {
 	g_Player[PlayerType].bBlendMotion = bUseBrend;	// モーションブレンドするかどうか
 
@@ -1362,7 +1185,7 @@ void SetMotion(MOTIONTYPEPLAYER motionType, bool bUseBrend, int nBlendFrame, Pla
 	}
 
 }
-
+#endif
 // =================================================
 // プレイ人数情報を渡す
 // =================================================

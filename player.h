@@ -8,25 +8,11 @@
 #define _PLAYER_H_
 
 #include"model.h"
+#include"motion.h"
 
 // =================================================
 // マクロ定義
 #define	MAX_PART		(6)		// パーツの最大数
-
-// =================================================
-// プレイヤーの向いている方向
-typedef enum
-{
-	PLAYERDIRECTION_EAST = 0,	// 右
-	PLAYERDIRECTION_WEST,		// 左
-	PLAYERDIRECTION_SOUTH,		// 下
-	PLAYERDIRECTION_NORTH,		// 上
-	PLAYERDIRECTION_NORTHEAST,	// 右上
-	PLAYERDIRECTION_NORTHWEST,	// 左上
-	PLAYERDIRECTION_SOUTHEAST,	// 右下
-	PLAYERDIRECTION_SOUTHWEST,	// 左下
-	PLAYERDIRECTION_MAX
-}PlayerDir;
 
 // =================================================
 // プレイヤータイプ
@@ -72,12 +58,11 @@ typedef struct
 	Model aModel[MAX_PART];		// モデル(パーツ)
 	int nNumModel;				// モデルの総数(パーツ数)
 	Playerstate state;			// プレイヤーの状態
-	PlayerDir dir;				// プレイヤーの向いている方向
 
 	// モーションの要素
-	MOTION_INFO aMotionInfo[MOTIONTYPEPLAYER_MAX];	// モーション情報
+	MOTION_INFO aMotionInfo[MOTIONTYPE_MAX];	// モーション情報
 	int nNumMotion;			// 現在のモーションの総数
-	MOTIONTYPEPLAYER motionType;	// 現在のモーションの種類
+	MOTIONTYPE motionType;	// 現在のモーションの種類
 	bool bLoopMotion;		// ループするかどうか
 	int nNumKey;			// 現在のモーションのキーの総数
 	int nKey;				// 現在のモーションの現在のキーNo.
@@ -87,7 +72,7 @@ typedef struct
 
 	// モーションブレンドの要素
 	bool bBlendMotion;			// ブレンドモーションするかどうか
-	MOTIONTYPEPLAYER motionTypeBlend;	// ブレンドモーションの種類
+	MOTIONTYPE motionTypeBlend;	// ブレンドモーションの種類
 	bool bLoopMotionBlend;		// ブレンドモーションがループするか
 	int nNumKeyBlend;			// ブレンドモーションの総キー数
 	int nKeyBlend;				// ブレンドモーションの現在のキーNo.
@@ -105,13 +90,13 @@ void UninitPlayer(void);	// 終了処理
 void UpdatePlayer(void);	// 更新処理
 void DrawPlayer(void);		// 描画処理
 Player *GetPlayer(void);	// プレイヤー情報を渡す
-void MovePlayer(void);		// プレイヤーの移動関数
-void JumpPlayer(void);		// プレイヤーのジャンプ関数
+void MovePlayer(int nPlayer);	// プレイヤーの移動関数
+void JumpPlayer(void);			// プレイヤーのジャンプ関数
 void SetModel(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int NumIdx, int Parent, int nParts);	// モデルの設置処理
 void UpdateMotion(void);	// モーションの更新
 void SetKey(D3DXVECTOR3 pos, D3DXVECTOR3 rot);	// キー毎の位置、向きの設定
 void SetKeyInfo(int nFrame);					// 一つ一つキーの設定
 void SetMotionInfo(int nLoop, int NumKey);		// モーション情報の設定
-void SetMotion(MOTIONTYPEPLAYER motionType, bool bUseBrend, int nBlendFrame, PlayerType Playertype);	// モーションの呼び出し処理
+void SetMotion(MOTIONTYPE motionType, bool bUseBrend, int nBlendFrame, PlayerType Playertype);	// モーションの呼び出し処理
 
 #endif
