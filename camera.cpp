@@ -47,7 +47,7 @@ void InitCamera(void)
 		pCamera->viewport.X = SCREEN_WIDTH * 0.5f * nCntCamera;					// 画面左上 X 座標
 		pCamera->viewport.Y = 0.0f;												// 画面左上 Y 座標
 		pCamera->viewport.Width = SCREEN_WIDTH * 0.5f;							// 表示画面の横幅
-		pCamera->viewport.Height = SCREEN_HEIGHT;						// 表示画面の高さ
+		pCamera->viewport.Height = SCREEN_HEIGHT;								// 表示画面の高さ
 		pCamera->viewport.MinZ = 0.0f;											
 		pCamera->viewport.MaxZ = 1.0f;
 		pCamera->bAoutRot = false;												// 自動で回り込みOFF
@@ -376,6 +376,7 @@ void SetCamera(void)
 			EndDevice();// デバイス取得終了
 
 			pCam->bEnable = false;	// 描画に使用したので更新されるまで更新されるまで描画に使用しない
+			return;
 		}
 	}
 }
@@ -415,8 +416,6 @@ void CameraEnable(int nIdx)
 			g_aCamera[nIdx].bEnable = true;
 		}
 	}
-
-
 }
 
 //=========================================================================================
