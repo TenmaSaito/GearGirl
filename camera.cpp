@@ -8,6 +8,7 @@
 // インクルード
 #include "camera.h"
 #include "input.h"
+#include "debugproc.h"
 
 #include "player.h"
 
@@ -145,14 +146,20 @@ void UpdateCamera(void)
 	}
 
 #endif
+
+
 	//**************************************************************
 	// 注視点から視点を求める
 	pCamera = GetCameraArray();
 	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCamera++)
 	{
-		pCamera->posV.x = pCamera->posR.x - cosf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
-		pCamera->posV.y = pCamera->posR.y - cosf(D3DX_PI - pCamera->rot.x) * pCamera->fDist;
-		pCamera->posV.z = pCamera->posR.z - sinf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
+		if (pCamera->bUse)
+		{
+			pCamera->posV.x = pCamera->posR.x - cosf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
+			pCamera->posV.y = pCamera->posR.y - cosf(D3DX_PI - pCamera->rot.x) * pCamera->fDist;
+			pCamera->posV.z = pCamera->posR.z - sinf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
+			PrintDebugProc("CAMERA %d\n posV : %~3f\nposV : %~3f\n", nCntCamera, pCamera->posV.x, pCamera->posV.y, pCamera->posV.z, pCamera->posR.x, pCamera->posR.y, pCamera->posR.z);
+		}
 	}
 }
 
@@ -419,7 +426,7 @@ void CameraEnable(int nIdx)
 }
 
 //=========================================================================================
-// カメラ番号を取得
+// カメラ番号を取得7
 //=========================================================================================
 int GetCamera(void)
 {
