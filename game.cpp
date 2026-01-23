@@ -71,9 +71,6 @@ void InitGame(void)
 	/*** テクスチャの読み込み ***/
 	int nIdxTexture;
 	LoadTexture("data\\TEXTURE\\sea000.jpg", &nIdxTexture);
-
-	/*** 床設置 ***/
-	SetField(D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, 1000.0f, 1000.0f, nIdxTexture, 16, 16, D3DCULL_CCW);
 }
 
 //==================================================================================
