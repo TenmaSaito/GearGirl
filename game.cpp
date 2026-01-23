@@ -65,14 +65,6 @@ void InitGame(void)
 	/*** ライトの初期化 ***/
 	InitLight();
 
-	/*** Xファイルの読み込み ***/
-	int nIdxModelData;		// モデルデータへのインデックス
-	if (SUCCEEDED(LoadModelData("data/MODEL/XmasTree.x", &nIdxModelData)))
-	{
-		// モデルデータ使用した3Dモデルの配置
-		g_nIdx3DModel = Set3DModel(D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, nIdxModelData);
-	}
-
 	/*** モデルのスクリプト読み込み ***/
 	LoadModel();
 
