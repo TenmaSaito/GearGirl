@@ -54,7 +54,7 @@ void InitPlayer(void)
 	for (int nCntPlayer = 0; nCntPlayer < PLAYERTYPE_MAX; nCntPlayer++)
 	{
 		g_Player[nCntPlayer].posOri = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		g_Player[nCntPlayer].pos = D3DXVECTOR3(0.0f, 0.0f, 1010.0f);
+		g_Player[nCntPlayer].pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_Player[nCntPlayer].posOld = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_Player[nCntPlayer].rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_Player[nCntPlayer].bDisp = true;
@@ -67,22 +67,33 @@ void InitPlayer(void)
 	}
 
 	// 少女のパーツ、モーションを読み込む
-	LoadMotion("data\\motion.txt", &aIdxMotion[PLAYERTYPE_GIRL]);			// モーションスクリプトを読み込む
+	LoadMotion("data\\Scripts\\motion.txt", &aIdxMotion[PLAYERTYPE_GIRL]);			// モーションスクリプトを読み込む
 	LPPARTS_INFO pPartsInfoGirl = GetPartsInfo(aIdxMotion[PLAYERTYPE_GIRL]);	// パーツ情報のアドレスを取得
 	LPMOTIONSCRIPT_INFO pMotionInfoGirl = GetMotionScriptInfo(aIdxMotion[PLAYERTYPE_GIRL]);	// モーション情報のアドレスを取得
-	g_Player[PLAYERTYPE_GIRL].PartsInfo = *pPartsInfoGirl;						// アドレスの中身のみをコピー
+	if (pPartsInfoGirl != NULL)
+	{// NULLじゃなかったとき
+		g_Player[PLAYERTYPE_GIRL].PartsInfo = *pPartsInfoGirl;		// アドレスの中身のみをコピー
+	}
 
 	// ネズミのパーツ、モーションを読み込む
-	LoadMotion("data\\motionmouse.txt", &aIdxMotion[PLAYERTYPE_MOUSE]);		// モーションスクリプトを読み込む
+	LoadMotion("data\\Scripts\\motionmouse.txt", &aIdxMotion[PLAYERTYPE_MOUSE]);		// モーションスクリプトを読み込む
 	LPPARTS_INFO pPartsInfoMouse = GetPartsInfo(aIdxMotion[PLAYERTYPE_MOUSE]);	// パーツ情報のアドレスを取得
 	LPMOTIONSCRIPT_INFO pMotionInfoMouse = GetMotionScriptInfo(aIdxMotion[PLAYERTYPE_MOUSE]);	// モーション情報のアドレスを取得
-	g_Player[PLAYERTYPE_MOUSE].PartsInfo = *pPartsInfoMouse;						// アドレスの中身のみをコピー
-
+	if (pPartsInfoMouse != NULL)
+	{// NULLじゃなかったとき
+		g_Player[PLAYERTYPE_MOUSE].PartsInfo = *pPartsInfoMouse;	// アドレスの中身のみをコピー
+	}
 	// モーションのキー、フレーム情報を代入する
 	for (int nCntMotion = 0; nCntMotion < MOTIONTYPE_MAX; nCntMotion++)
 	{
-		g_Player[PLAYERTYPE_GIRL].aMotionInfo[nCntMotion] = pMotionInfoGirl->aMotionInfo[nCntMotion];
-		g_Player[PLAYERTYPE_MOUSE].aMotionInfo[nCntMotion] = pMotionInfoMouse->aMotionInfo[nCntMotion];
+		if (pMotionInfoGirl != NULL)
+		{// NULLじゃなかったとき
+			g_Player[PLAYERTYPE_GIRL].aMotionInfo[nCntMotion] = pMotionInfoGirl->aMotionInfo[nCntMotion];
+		}
+		if (pMotionInfoMouse != NULL)
+		{// NULLじゃなかったとき
+			g_Player[PLAYERTYPE_MOUSE].aMotionInfo[nCntMotion] = pMotionInfoMouse->aMotionInfo[nCntMotion];
+		}
 	}
 
 	// 影を設定
@@ -158,6 +169,12 @@ void UpdatePlayer(void)
 	//	}く
 
 		pPlayer->move.y += GRAVITY;	// 重力をかけ続ける
+
+		// 地面に沈んだ時
+		if (pPlayer->pos.y < 0.0f)
+		{
+			pPlayer->pos.y = 0.0f;
+		}
 
 		// 移動量の更新
 		pPlayer->pos += pPlayer->move;
@@ -1208,9 +1225,9 @@ void SetMotion(MOTIONTYPE motionType, bool bUseBrend, int nBlendFrame, PlayerTyp
 		g_Player[PlayerType].nCounterBlend = 0;
 		g_Player[PlayerType].nCounterMotionBlend = 0;
 		g_Player[PlayerType].bFinishMotion = false;		// モーションが終了したかどうか
-	}
+		}
 
-}
+	}
 #endif
 // =================================================
 // プレイ人数情報を渡す
