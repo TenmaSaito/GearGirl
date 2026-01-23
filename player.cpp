@@ -132,8 +132,7 @@ void UpdatePlayer(void)
 
 		//JumpPlayer();	// ジャンプに関する処理
 
-		// モデルとの当たり判定
-		CollisionModel(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move);
+
 
 	//
 	//// 突進と同時にposを移動する
@@ -194,6 +193,9 @@ void UpdatePlayer(void)
 
 		// カメラを有効化させる
 		CameraEnable(pPlayer->nIdxCamera);
+
+		// モデルとの当たり判定
+		CollisionModel(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move);
 
 		//// 地面に埋まった時の処理
 		//if (CollisionMeshField(&pPlayer->pos, &pPlayer->posOld) == true)
