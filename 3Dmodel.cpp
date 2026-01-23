@@ -138,6 +138,7 @@ int Set3DModel(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nIdxModelData)
 		{ // ‚à‚µŽg‚í‚ê‚Ä‚¢‚È‚¯‚ê‚Î
 			p3DModel->pos = pos;
 			p3DModel->rot = rot;
+			p3DModel->nIdx3Dmodel = nIdxModelData;
 			p3DModel->bUse = true;
 			g_nNum3DModel++;
 

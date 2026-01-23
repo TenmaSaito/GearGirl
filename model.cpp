@@ -19,7 +19,7 @@
 
 // =================================================
 // マクロ定義
-#define	MODEL_TXT	"data\\model.txt"	// モデルの外部ファイル
+#define	MODEL_TXT	"data\\Scripts\\model.txt"	// モデルの外部ファイル
 #define STR_SUCCESS(Realize)			(Realize != NULL)	// strstrでの成功判定
 
 // =================================================
