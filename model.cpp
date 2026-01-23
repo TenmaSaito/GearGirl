@@ -11,11 +11,15 @@
 #include "camera.h"
 #include "debugproc.h"
 #include "fade.h"
+#include "field.h"
 #include "game.h"
 #include "model.h"
 #include "input.h"
 #include "mathUtil.h"
 #include "3Dmodel.h"
+#include "texture.h"
+
+using  namespace MyMathUtil;
 
 // =================================================
 // マクロ定義
@@ -212,8 +216,15 @@ ModelInfo* GetModelInfo(void)
 // モデルの読み込む処理
 // =================================================
 bool LoadModel(void)
-{
-	// モデル用の変数を用意
+{	
+	// === フィールドの情報を格納する変数 === //
+	int nIdxTexField = 0;	// テクスチャのタイプ
+	int aIdxTexture[100] = {};	// テクスチャのタイプ
+	int Xdevide, Ydevide = 0;	// フィールドの分割数
+	int Xsize, Ysize = 0;		// フィールドのサイズ
+	int nCntField = 0;
+
+	// === モデル用の変数を用意 === //
 	MyMathUtil::INT_VECTOR3 pos;
 	MyMathUtil::INT_VECTOR3 rot;
 
@@ -271,7 +282,6 @@ bool LoadModel(void)
 				{// テクスチャのファイル名を代入
 					while (1)
 					{
-
 						if (nCntTexture < g_nNumTexture)
 						{// 上で代入したテクスチャ数よりも、読み込んだファイル数が少ないとき
 							// 「=」の場所を見つける
@@ -284,6 +294,8 @@ bool LoadModel(void)
 
 								// テクスチャの数を読み込む
 								(void)sscanf(pEqual, "%s", &g_TextureName[nCntTexture][0]);
+
+								LoadTexture(&g_TextureName[nCntTexture][0], &aIdxTexture[nCntTexture]);
 
 								// テクスチャの読み込み
 								D3DXCreateTextureFromFile(pDevice,
@@ -298,6 +310,87 @@ bool LoadModel(void)
 						}
 					}
 				}
+			}
+			if (strstr(&Realize[0], "FIELDSET") != NULL)
+			{// フィールドの情報を代入
+				while (1)
+				{
+					fgets(&Realize[0], sizeof Realize, pFile);	// 最初に比較用文字の読み込み
+
+					if (strstr(&Realize[0], "TEXTYPE") != NULL)
+					{
+						// 「=」の場所を見つける
+						pEqual = strstr(Realize, "=");
+
+						if (pEqual != NULL)
+						{
+							// アドレスを1こずらす
+							pEqual++;
+
+							// テクスチャの数を読み込む
+							(void)sscanf(pEqual, "%d", &nIdxTexField);
+						}
+					}
+					if (strstr(&Realize[0], "POS") != NULL)
+					{
+						pEqual = strstr(Realize, "=");
+
+						if (pEqual != NULL)
+						{
+							// アドレスを1こずらす
+							pEqual++;
+
+							// モデルの数を読み込む
+							(void)sscanf(pEqual, "%d %d %d", &pos.x, &pos.y, &pos.z);
+						}
+					}
+					if (strstr(&Realize[0], "ROT") != NULL)
+					{
+						pEqual = strstr(Realize, "=");
+
+						if (pEqual != NULL)
+						{
+							// アドレスを1こずらす
+							pEqual++;
+
+							// モデルの数を読み込む
+							(void)sscanf(pEqual, "%d %d %d", &rot.x, &rot.y, &rot.z);
+						}
+					}
+					if (strstr(&Realize[0], "BLOCK") != NULL)
+					{
+						pEqual = strstr(Realize, "=");
+
+						if (pEqual != NULL)
+						{
+							// アドレスを1こずらす
+							pEqual++;
+
+							// モデルの数を読み込む
+							(void)sscanf(pEqual, "%d %d", &Xdevide, &Ydevide);
+						}
+					}
+					if (strstr(&Realize[0], "SIZE") != NULL)
+					{
+						pEqual = strstr(Realize, "=");
+
+						if (pEqual != NULL)
+						{
+							// アドレスを1こずらす
+							pEqual++;
+
+							// モデルの数を読み込む
+							(void)sscanf(pEqual, "%d %d", &Xsize, &Ysize);
+						}
+					}
+					if (strstr(&Realize[0], "END_FIELDSET") != NULL)
+					{
+						SetField(INTToFloat(pos), VECNULL, INTToFloat(rot), (float)Xsize, (float)Ysize, aIdxTexture[nIdxTexField], (float)Xdevide, (float)Ydevide,D3DCULL_CCW);
+						nCntField++;
+						break;
+					}
+				}
+
 			}
 			if (strstr(&Realize[0], "NUM_MODEL") != NULL)
 			{// モデルの数を代入
