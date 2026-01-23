@@ -471,7 +471,7 @@ bool LoadModel(void)
 						if (strstr(&Realize[0], "END_MODELSET") != NULL)
 						{
 							//Set3DModel
-							SetModel(MyMathUtil::INTToFloat(pos),MyMathUtil::DegreeToRadian(MyMathUtil::INTToFloat(rot)), nNumIdx, nUseShadow);
+							SetModel(MyMathUtil::INTToFloat(pos), MyMathUtil::DegreeToRadian(MyMathUtil::INTToFloat(rot)), nNumIdx, nUseShadow);
 							break;
 						}
 					}
@@ -547,4 +547,56 @@ bool JudgeComent(char* pStr)
 	{// コメントアウト、改行が文頭だった場合
 		return false;
 	}
+}
+
+// =================================================
+// モデルの当たり判定
+// =================================================
+bool CollisionModel(D3DXVECTOR3* pPos, D3DXVECTOR3* pPosOld, D3DXVECTOR3* pMove)
+{
+	// 当たっているかどうかをbool 型で返す
+	bool bLand = false;
+
+	for (int nCntModel = 0; nCntModel < g_nNumModel; nCntModel++)
+	{
+		if (g_ModelInfo[nCntModel].bUse == true)
+		{
+			/*** オブジェクトにめり込んでるか判定 ***/
+			if (pPos->x >= g_ModelInfo[nCntModel].pos.x + g_Model[g_ModelInfo[nCntModel].nType].vtxMin.x && pPos->x <= g_ModelInfo[nCntModel].pos.x + g_Model[g_ModelInfo[nCntModel].nType].vtxMax.x
+				&& pPos->y <= g_ModelInfo[nCntModel].pos.y + g_Model[g_ModelInfo[nCntModel].nType].vtxMax.y && pPos->y >= g_ModelInfo[nCntModel].pos.y + g_Model[g_ModelInfo[nCntModel].nType].vtxMin.y
+				&& pPos->z >= g_ModelInfo[nCntModel].pos.z + g_Model[g_ModelInfo[nCntModel].nType].vtxMin.z && pPos->z <= g_ModelInfo[nCntModel].pos.z + g_Model[g_ModelInfo[nCntModel].nType].vtxMax.z)
+			{
+				if (pPosOld->x <= g_ModelInfo[nCntModel].pos.x + g_Model[g_ModelInfo[nCntModel].nType].vtxMin.x)
+				{/** 過去の位置が、モデルのXの最小値よりも小さい位置にいた場合 **/
+					pPos->x = g_ModelInfo[nCntModel].pos.x + g_Model[g_ModelInfo[nCntModel].nType].vtxMin.x;
+				}
+				else if (pPosOld->x >= g_ModelInfo[nCntModel].pos.x + g_Model[g_ModelInfo[nCntModel].nType].vtxMax.x)
+				{/** 過去の位置が、モデルのXの最大値よりも大さい位置にいた場合 **/
+					pPos->x = g_ModelInfo[nCntModel].pos.x + g_Model[g_ModelInfo[nCntModel].nType].vtxMax.x;
+				}
+
+				if (pPosOld->y < g_ModelInfo[nCntModel].pos.y + g_Model[g_ModelInfo[nCntModel].nType].vtxMin.y)
+				{/** 過去の位置が、モデルのYの最小値よりも小さい位置にいた場合 **/
+					pPos->y = g_ModelInfo[nCntModel].pos.y + g_Model[g_ModelInfo[nCntModel].nType].vtxMin.y;
+				}
+				else if (pPosOld->y >= g_ModelInfo[nCntModel].pos.y + g_Model[g_ModelInfo[nCntModel].nType].vtxMax.y)
+				{/** 過去の位置が、モデルのYの最大値よりも大さい位置にいた場合 **/
+					pPos->y = g_ModelInfo[nCntModel].pos.y + g_Model[g_ModelInfo[nCntModel].nType].vtxMax.y;
+					bLand = true;
+					pMove->y = 0.0f;
+				}
+
+				if (pPosOld->z <= g_ModelInfo[nCntModel].pos.z + g_Model[g_ModelInfo[nCntModel].nType].vtxMin.z)
+				{/** 過去の位置が、モデルのZの最小値よりも小さい位置にいた場合 **/
+					pPos->z = g_ModelInfo[nCntModel].pos.z + g_Model[g_ModelInfo[nCntModel].nType].vtxMin.z;
+				}
+				else if (pPosOld->z >= g_ModelInfo[nCntModel].pos.z + g_Model[g_ModelInfo[nCntModel].nType].vtxMax.z)
+				{/** 過去の位置が、モデルのZの最大値よりも大さい位置にいた場合 **/
+					pPos->z = g_ModelInfo[nCntModel].pos.z + g_Model[g_ModelInfo[nCntModel].nType].vtxMax.z;
+				}
+			}
+		}
+	}
+
+	return bLand;
 }

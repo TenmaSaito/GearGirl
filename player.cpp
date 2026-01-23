@@ -123,11 +123,15 @@ void UpdatePlayer(void)
 
 		if (g_Player->bFinishMotion == true)
 		{// 待機モーションを再生
+
 		}
 
 		MovePlayer(nCntPlayer);	// 移動に関する処理
 
 		//JumpPlayer();	// ジャンプに関する処理
+
+		// モデルとの当たり判定
+		CollisionModel(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move);
 
 	//
 	//// 突進と同時にposを移動する
@@ -1518,4 +1522,13 @@ int GetNumPlayer(void)
 int GetActivePlayer(void)
 {
 	return g_ActivePlayer;
+}
+
+// =================================================
+// プレイヤーの位置情報を渡す
+// =================================================
+void SetPlayer(D3DXVECTOR3 *pPosGirl, D3DXVECTOR3 *pPosMouse)
+{
+	*pPosGirl = g_Player[PLAYERTYPE_GIRL].pos;
+	*pPosMouse = g_Player[PLAYERTYPE_MOUSE].pos;
 }

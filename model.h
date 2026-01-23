@@ -59,14 +59,15 @@ typedef enum
 
 // =================================================
 // プロトタイプ宣言
-void InitModel(void);		// 初期化処理
+void InitModel(void);	// 初期化処理
 void UninitModel(void);	// 終了処理
 void UpdateModel(void);	// 更新処理
-void DrawModel(void);		// 描画処理
+void DrawModel(void);	// 描画処理
 void SetModel(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nType, int nUseShadow);		// モデルの設定処理
 Model* GetModel(void);			// モデル情報の譲渡
 ModelInfo* GetModelInfo(void);	// ゴールモデル情報の譲渡
-bool LoadModel(void);				// モデルの読み込み処理
-bool JudgeComent(char* pStr);		// スクリプト読み込みでのコメントアウトの処理
+bool LoadModel(void);			// モデルの読み込み処理
+bool JudgeComent(char* pStr);	// スクリプト読み込みでのコメントアウトの処理
+bool CollisionModel(D3DXVECTOR3* pPos, D3DXVECTOR3* pPosOld, D3DXVECTOR3* pMove);	// モデルとの当たり判定
 
 #endif
