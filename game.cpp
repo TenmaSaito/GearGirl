@@ -111,8 +111,8 @@ void UpdateGame(void)
 {
 	// ÉÇÅ[ÉhïœçX
 	if (GetKeyboardTrigger(DIK_RETURN)
-		|| GetJoypadTrigger(JOYKEY_A)
-		|| GetJoypadTrigger(JOYKEY_START))
+		|| GetJoypadTrigger(0, JOYKEY_A)
+		|| GetJoypadTrigger(0, JOYKEY_START))
 	{
 		if (GetFade() == FADE_NONE)
 		{
