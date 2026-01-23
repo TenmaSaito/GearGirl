@@ -57,6 +57,7 @@ typedef struct
 	bool bJump;					// ジャンプ中かどうか
 	PARTS_INFO PartsInfo;		// プレイヤーのパーツの情報
 	Playerstate state;			// プレイヤーの状態
+	int nIdxCamera;				// 使用するカメラのインデックス
 
 	// モーションの要素
 	MOTION_INFO aMotionInfo[MOTIONTYPE_MAX];	// モーション情報

@@ -73,6 +73,7 @@ void InitPlayer(void)
 		g_Player[nCntPlayer].nNumKey = g_nNumKey;
 		g_Player[nCntPlayer].state = PLAYERSTATE_NEUTRAL;
 		g_Player[nCntPlayer].bFinishMotion = true;
+		g_Player[nCntPlayer].nIdxCamera = GetCamera();
 	}
 
 	// 少女のパーツを読み込む
@@ -172,6 +173,8 @@ void UpdatePlayer(void)
 		// 慣性を掛ける
 		pPlayer->move.x += (0.0f - pPlayer->move.x) * (PLAYER_INI * 1.5f);
 		pPlayer->move.z += (0.0f - pPlayer->move.z) * (PLAYER_INI * 1.5f);
+
+		SetPotisionCamera(pPlayer->nIdxCamera, pPlayer->pos);
 
 		//// 地面に埋まった時の処理
 		//if (CollisionMeshField(&pPlayer->pos, &pPlayer->posOld) == true)
