@@ -7,12 +7,12 @@
 //**************************************************************
 // インクルード
 #include "input.h"
-#include "meshsphere.h"
+#include "mesh.h"
+#include "Texture.h"
 
 //**************************************************************
 // グローバル変数
-LPDIRECT3DTEXTURE9			g_pTextureMeshSphere = NULL;			// テクスチャへのポインタ
-MeshSphere				g_aMeshSphere[MAX_MESHSPHERE];		// メッシュスフィア情報
+MeshInfo				g_aMeshSphere[MAX_MESHSPHERE];		// メッシュスフィア情報
 
 //**************************************************************
 // プロトタイプ宣言
@@ -24,36 +24,14 @@ void InitMeshSphere(void)
 {
 	//**************************************************************
 	// 変数宣言
-	LPDIRECT3DDEVICE9	pDevice = GetDevice();		// デバイスへのポインタ
+	P_MESH pMesh = GetMeshSphere();
+	LPDIRECT3DDEVICE9	pDevice = GetDevice();			//--------- デバイス取得 ---------//
 
 	//**************************************************************
-	// テクスチャ読み込み
-	D3DXCreateTextureFromFile(pDevice,"data\\TEXTURE\\object\\block002.jpg",&g_pTextureMeshSphere);
+	// 構造体初期化
+	memset(pMesh, 0, sizeof(MeshInfo) * MAX_MESHSPHERE);
 
-	//**************************************************************
-	// 位置・サイズの初期化
-	for (int nCntMeshSphere = 0; nCntMeshSphere < MAX_MESHSPHERE; nCntMeshSphere++)
-	{
-		g_aMeshSphere[nCntMeshSphere].pos = VECTOR3_ZERO;
-		g_aMeshSphere[nCntMeshSphere].rot = VECTOR3_ZERO;
-		//g_aMeshSphere[nCntMeshSphere].fSize = VECTOR3_ZERO;
-		g_aMeshSphere[nCntMeshSphere].angle = VECTOR3_ZERO;
-		g_aMeshSphere[nCntMeshSphere].pVtxBuff = NULL;
-		g_aMeshSphere[nCntMeshSphere].pIdxBuffer = NULL;
-		g_aMeshSphere[nCntMeshSphere].nHeightDivision = 0;
-		g_aMeshSphere[nCntMeshSphere].nCircleDivision = 0;
-		g_aMeshSphere[nCntMeshSphere].nVerti = 0;
-		g_aMeshSphere[nCntMeshSphere].nPrim = 0;
-		g_aMeshSphere[nCntMeshSphere].bInside = false;
-		g_aMeshSphere[nCntMeshSphere].bOutside = false;
-		g_aMeshSphere[nCntMeshSphere].bUse = false;
-	}
-
-	// 壁の設置
-	SetMeshSphere(D3DXVECTOR3(-300.0f, 100.0f, 300.0f),  D3DXVECTOR3(0.0f, 0.0f, 0.0f), 100.0f,8, 32,true,true);
-	//SetMeshSphere(D3DXVECTOR3(FIELD_SIZE, 0.0, 0.0f),  D3DXVECTOR3(0.0f, D3DX_PI * 0.5f, 0.0f), D3DXVECTOR3(1000.0f, 200.0f, 0.0f)	,2, 2);
-	//SetMeshSphere(D3DXVECTOR3(0.0f, 0.0, -FIELD_SIZE), D3DXVECTOR3(0.0f, -D3DX_PI, 0.0f), D3DXVECTOR3(1000.0f, 200.0f, 0.0f)			,3, 3);
-	//SetMeshSphere(D3DXVECTOR3(-FIELD_SIZE, 0.0, 0.0f), D3DXVECTOR3(0.0f, -D3DX_PI * 0.5f, 0.0f), D3DXVECTOR3(1000.0f, 200.0f, 0.0f)	,4, 4);
+	EndDevice();										//--------- デバイス取得終了 ---------//
 }
 
 //=========================================================================================
@@ -62,29 +40,25 @@ void InitMeshSphere(void)
 void UninitMeshSphere(void)
 {
 	//**************************************************************
-	// テクスチャの破棄
-	if (g_pTextureMeshSphere != NULL)
-	{
-		g_pTextureMeshSphere->Release();
-		g_pTextureMeshSphere = NULL;
-	}
+	// 変数宣言
+	P_MESH pMesh = GetMeshSphere();
 
-	for (int nCntMeshSphere = 0; nCntMeshSphere < MAX_MESHSPHERE; nCntMeshSphere++)
+	for (int nCntMeshSphere = 0; nCntMeshSphere < MAX_MESHSPHERE; nCntMeshSphere++, pMesh++)
 	{
 		//**************************************************************
 		// 頂点バッファの破棄
-		if (g_aMeshSphere[nCntMeshSphere].pVtxBuff != NULL)
+		if (pMesh->pVtxBuff != NULL)
 		{
-			g_aMeshSphere[nCntMeshSphere].pVtxBuff->Release();
-			g_aMeshSphere[nCntMeshSphere].pVtxBuff = NULL;
+			pMesh->pVtxBuff->Release();
+			pMesh->pVtxBuff = NULL;
 		}
 
 		//**************************************************************
 		// インデックスバッファの破棄
-		if (g_aMeshSphere[nCntMeshSphere].pIdxBuffer != NULL)
+		if (pMesh->pIdxBuffer != NULL)
 		{
-			g_aMeshSphere[nCntMeshSphere].pIdxBuffer->Release();
-			g_aMeshSphere[nCntMeshSphere].pIdxBuffer = NULL;
+			pMesh->pIdxBuffer->Release();
+			pMesh->pIdxBuffer = NULL;
 		}
 	}
 }
@@ -105,39 +79,40 @@ void DrawMeshSphere(void)
 	//**************************************************************
 	// 変数宣言
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();		// デバイスへのポインタ
+	P_MESH				pMesh = GetMeshSphere();
 	D3DXMATRIX mtxRot, mtxTrans;					// マトリックス計算用
 
-	for (int nCntMeshSphere = 0; nCntMeshSphere < MAX_MESHSPHERE; nCntMeshSphere++)
+	for (int nCntMeshSphere = 0; nCntMeshSphere < MAX_MESHSPHERE; nCntMeshSphere++, pMesh++)
 	{
-		if (g_aMeshSphere[nCntMeshSphere].bUse)
+		if (pMesh->bUse)
 		{
 			//**************************************************************
 			// ワールドマトリックスの初期化
-			D3DXMatrixIdentity(&g_aMeshSphere[nCntMeshSphere].mtxWorld);
+			D3DXMatrixIdentity(&pMesh->mtxWorld);
 
 			//**************************************************************
 			// 向きを反映
-			D3DXMatrixRotationYawPitchRoll(&mtxRot, g_aMeshSphere[nCntMeshSphere].rot.y, g_aMeshSphere[nCntMeshSphere].rot.x, g_aMeshSphere[nCntMeshSphere].rot.z);
-			D3DXMatrixMultiply(&g_aMeshSphere[nCntMeshSphere].mtxWorld, &g_aMeshSphere[nCntMeshSphere].mtxWorld, &mtxRot);
+			D3DXMatrixRotationYawPitchRoll(&mtxRot, pMesh->rot.y, pMesh->rot.x, pMesh->rot.z);
+			D3DXMatrixMultiply(&pMesh->mtxWorld, &pMesh->mtxWorld, &mtxRot);
 
 			//**************************************************************
 			// 位置を反映
-			D3DXMatrixTranslation(&mtxTrans, g_aMeshSphere[nCntMeshSphere].pos.x, g_aMeshSphere[nCntMeshSphere].pos.y, g_aMeshSphere[nCntMeshSphere].pos.z);
-			D3DXMatrixMultiply(&g_aMeshSphere[nCntMeshSphere].mtxWorld, &g_aMeshSphere[nCntMeshSphere].mtxWorld, &mtxTrans);
+			D3DXMatrixTranslation(&mtxTrans, pMesh->pos.x, pMesh->pos.y, pMesh->pos.z);
+			D3DXMatrixMultiply(&pMesh->mtxWorld, &pMesh->mtxWorld, &mtxTrans);
 
 			//**************************************************************
 			// ワールドマトリックスの設定
-			pDevice->SetTransform(D3DTS_WORLD, &g_aMeshSphere[nCntMeshSphere].mtxWorld);
+			pDevice->SetTransform(D3DTS_WORLD, &pMesh->mtxWorld);
 
 			//**************************************************************
 			// 頂点バッファをデータストリームに設定
 			pDevice->SetStreamSource(0,
-				g_aMeshSphere[nCntMeshSphere].pVtxBuff,
+				pMesh->pVtxBuff,
 				0,
 				sizeof(VERTEX_3D));
 
 			// インデックスバッファを設定
-			pDevice->SetIndices(g_aMeshSphere[nCntMeshSphere].pIdxBuffer);
+			pDevice->SetIndices(pMesh->pIdxBuffer);
 
 			//**************************************************************
 			// 頂点フォーマットの設定
@@ -145,7 +120,7 @@ void DrawMeshSphere(void)
 
 			//**************************************************************
 			// テクスチャの設定
-			pDevice->SetTexture(0, g_pTextureMeshSphere);
+			pDevice->SetTexture(0, GetTexture(pMesh->nIdxTexture));
 
 			//**************************************************************
 			// スフィアの描画
@@ -157,19 +132,20 @@ void DrawMeshSphere(void)
 //=========================================================================================
 // スフィアを設置
 //=========================================================================================
-void SetMeshSphere(D3DXVECTOR3 pos, D3DXVECTOR3 rot, float fSize, int nHeightDivision, int nCircleDivision,bool bInside, bool bOutside)
+void SetMeshSphere(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int nCircleDivision, bool bInner, bool bOuter, int nTex)
 {
 	//**************************************************************
 	// 変数宣言
-	LPDIRECT3DDEVICE9	pDevice = GetDevice();				// デバイスへのポインタ
+	LPDIRECT3DDEVICE9	pDevice = GetDevice();			//--------- デバイス取得 ---------//
 	VERTEX_3D*			pVtx;								// 頂点情報へのポインタ
 	WORD*				pIdx;								// インデックス情報へのポインタ
 	D3DXVECTOR3			vecDir;								// 法線ベクトル（計算用
-	float				fRadius;							// 計算用半径
-	float				fHeight;							// 計算用高さ
+	float				fRadiusCal;							// 計算用半径
+	float				fHeightCal;							// 計算用高さ
 	int					nHeightVerti = nHeightDivision + 1,
 						nCircleVerti = nCircleDivision + 1;	// 縦頂点数と横頂点数
 	int					nBoth = 0;
+	vec3 angle = D3DXVECTOR3_NULL;
 
 	for (int nCntMeshSphere = 0; nCntMeshSphere < MAX_MESHSPHERE; nCntMeshSphere++)
 	{
@@ -180,14 +156,14 @@ void SetMeshSphere(D3DXVECTOR3 pos, D3DXVECTOR3 rot, float fSize, int nHeightDiv
 			g_aMeshSphere[nCntMeshSphere].rot = rot;
 			g_aMeshSphere[nCntMeshSphere].nHeightDivision = nHeightDivision;
 			g_aMeshSphere[nCntMeshSphere].nCircleDivision = nCircleDivision;
-			g_aMeshSphere[nCntMeshSphere].angle = D3DXVECTOR3((float)D3DX_PI / nHeightDivision,(float)(2 * D3DX_PI / nCircleDivision),(float)D3DX_PI / nHeightDivision);
+			angle = D3DXVECTOR3((float)D3DX_PI / nHeightDivision,(float)(2 * D3DX_PI / nCircleDivision),(float)D3DX_PI / nHeightDivision);
 			g_aMeshSphere[nCntMeshSphere].nVerti = nHeightVerti * nCircleVerti;
 			g_aMeshSphere[nCntMeshSphere].nPrim = (nHeightDivision * (nCircleDivision + 2) - 2) * 2;
-			g_aMeshSphere[nCntMeshSphere].bInside = bInside;
-			if (bInside)
+			g_aMeshSphere[nCntMeshSphere].bInner = bInner;
+			if (bInner)
 				nBoth++;
-			g_aMeshSphere[nCntMeshSphere].bOutside = bOutside;
-			if (bOutside)
+			g_aMeshSphere[nCntMeshSphere].bOuter = bOuter;
+			if (bOuter)
 				nBoth++;
 
 			//**************************************************************
@@ -214,15 +190,15 @@ void SetMeshSphere(D3DXVECTOR3 pos, D3DXVECTOR3 rot, float fSize, int nHeightDiv
 
 			for (int nCntHeight = 0, nCntVer = 0; nCntHeight <= nHeightDivision; nCntHeight++)
 			{
-				fRadius = fSize * sinf(g_aMeshSphere[nCntMeshSphere].angle.x * nCntHeight);
-				fHeight = fSize * cosf(g_aMeshSphere[nCntMeshSphere].angle.x * nCntHeight);
+				fRadiusCal = fRadius * sinf(angle.x * nCntHeight);
+				fHeightCal = fRadius * cosf(angle.x * nCntHeight);
 
 				for (int nCntCircle = 0; nCntCircle <= nCircleDivision; nCntCircle++, nCntVer++)
 				{
 					// 頂点座標を設定
-					pVtx[nCntVer].pos = D3DXVECTOR3(fRadius * -sinf(g_aMeshSphere[nCntMeshSphere].angle.y * nCntCircle),
-						fHeight,
-						fRadius * cosf(g_aMeshSphere[nCntMeshSphere].angle.y * nCntCircle));
+					pVtx[nCntVer].pos = D3DXVECTOR3(fRadius * -sinf(angle.y * nCntCircle),
+						fRadius,
+						fRadius * cosf(angle.y * nCntCircle));
 
 					// 法線ベクトルの設定(正規化)
 					vecDir = D3DXVECTOR3(pVtx[nCntVer].pos.x, 0.0f, pVtx[nCntVer].pos.z); // 頂点座標<=真横なのでYだけ消す
@@ -269,12 +245,14 @@ void SetMeshSphere(D3DXVECTOR3 pos, D3DXVECTOR3 rot, float fSize, int nHeightDiv
 			break;
 		}
 	}
+
+	EndDevice();										//--------- デバイス取得終了 ---------//
 }
 
 //=========================================================================================
 // スフィア情報を取得
 //=========================================================================================
-MeshSphere* GetMeshSphere(void)
+P_MESH GetMeshSphere(void)
 {
 	return &g_aMeshSphere[0];
 }

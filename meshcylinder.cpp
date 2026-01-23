@@ -7,7 +7,7 @@
 //**************************************************************
 // インクルード
 #include "input.h"
-#include "meshcylinder.h"
+#include "mesh.h"
 
 //**************************************************************
 // グローバル変数
@@ -270,7 +270,7 @@ void SetMeshCylinder(D3DXVECTOR3 pos, D3DXVECTOR3 rot, D3DXVECTOR3 size, int nHe
 //=========================================================================================
 // フィールド情報を取得
 //=========================================================================================
-MeshCylinder* GetMeshCylinder(void)
+P_MESH GetMeshCylinder(void)
 {
 	return &g_aMeshCylinder[0];
 }

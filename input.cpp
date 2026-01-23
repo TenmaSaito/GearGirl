@@ -6,31 +6,43 @@
 //=========================================================
 #include "main.h"
 #include "input.h"
+#include "mathUtil.h"
 
 //=========================================================
-//マクロ定義
+// マクロ定義
 //=========================================================
+#define NUM_MOUSE_MAX		(5)				// ボタンの最大数
 
 //=========================================================
-//グローバル変数
+// グローバル変数
 //=========================================================
-LPDIRECTINPUT8			g_pInput = NULL;			//DirectInputオブジェクトのポインタ
-LPDIRECTINPUTDEVICE8	g_pDevKeyboard = NULL;			//入力デバイス(キーボード)へのポインタ
-BYTE					g_aKeyState[NUM_KEY_MAX];			//キーボードのプレス情報
-BYTE					g_aKeyStateTrigger[NUM_KEY_MAX];	//キーボードのトリガー情報
-int 					g_nKeyStateRepeat[NUM_KEY_MAX] = {};//キーボードのリピート情報
-BYTE 					g_aKeyStateRelease[NUM_KEY_MAX];	//キーボードのリリース情報
-
-XINPUT_PAD				g_Joypad[MAX_PLAYER];				//パッドの情報
+LPDIRECTINPUT8			g_pInput = NULL;					// DirectInputオブジェクトのポインタ
+LPDIRECTINPUTDEVICE8	g_pDevKeyboard = NULL;				// 入力デバイス(キーボード)へのポインタ
+BYTE					g_aKeyState[NUM_KEY_MAX];			// キーボードのプレス情報
+BYTE					g_aKeyStateTrigger[NUM_KEY_MAX];	// キーボードのトリガー情報
+int 					g_nKeyStateRepeat[NUM_KEY_MAX] = {};// キーボードのリピート情報
+BYTE 					g_aKeyStateRelease[NUM_KEY_MAX];	// キーボードのリリース情報
+															   
+XINPUT_PAD				g_Joypad[MAX_PLAYER];				// パッドの情報
 int						g_nTime;
 int						g_nPlayer;
 
+LPDIRECTINPUTDEVICE8 g_pDevMouse = NULL;		// 入力デバイス(マウス)へのポインタ
+DIMOUSESTATE g_CurrentMouseState;				// マウスの入力情報
+DIMOUSESTATE g_PrevMouseState;					// マウスの過去の入力情報
+BYTE g_aMouseState[NUM_MOUSE_MAX];				// マウスのプレス情報
+BYTE g_aMouseStateTrigger[NUM_MOUSE_MAX];		// マウスのトリガー情報
+BYTE g_aMouseStateRelease[NUM_MOUSE_MAX];		// マウスのリリース情報
+POINT g_mousePos = {};							// マウスの位置
+LONG g_alMouseMoveExacLast[MOUSESLOPE_MAX];		// 過去のマウスのホイールの回転量
+LONG g_alMouseMoveCurrent[MOUSESLOPE_MAX];		// 現在のマウスホイールの回転量
+
 //=========================================================================================================
-//キーボードの初期化処理
+// キーボードの初期化処理
 //=========================================================================================================
 HRESULT InitKeyboard(HINSTANCE hInstance, HWND hWnd)
 {
-	//DirectInputオブジェクトの作成
+	// DirectInputオブジェクトの作成
 	if (FAILED(DirectInput8Create(hInstance,
 		DIRECTINPUT_VERSION,
 		IID_IDirectInput8,
@@ -40,25 +52,25 @@ HRESULT InitKeyboard(HINSTANCE hInstance, HWND hWnd)
 		return E_FAIL;
 	}
 
-	//入力デバイス(キーボード)の設定
+	// 入力デバイス(キーボード)の設定
 	if (FAILED(g_pInput->CreateDevice(GUID_SysKeyboard, &g_pDevKeyboard, NULL)))
 	{
 		return E_FAIL;
 	}
 
-	//データフォーマットを設定
+	// データフォーマットを設定
 	if (FAILED(g_pDevKeyboard->SetDataFormat(&c_dfDIKeyboard)))
 	{
 		return E_FAIL;
 	}
 
-	//協調モードを設定
+	// 協調モードを設定
 	if (FAILED(g_pDevKeyboard->SetCooperativeLevel(hWnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE)))
 	{
 		return E_FAIL;
 	}
 
-	//キーボードへのアクセス権を取得
+	// キーボードへのアクセス権を取得
 	g_pDevKeyboard->Acquire();
 
 	return S_OK;
@@ -86,7 +98,7 @@ void UninitKeyboard(void)
 }
 
 //=========================================================
-//キーボードの更新処理
+// キーボードの更新処理
 //=========================================================
 void UpdateKeyboard(void)
 {
@@ -164,7 +176,7 @@ bool GetKeyboardRepeat(int nKey)
 //=========================================================================================================
 HRESULT InitJoypad(void)
 {
-	//メモリのクリア
+	// メモリのクリア
 	for (int nCntPad = 0; nCntPad < MAX_PLAYER; nCntPad++)
 	{
 		memset(&g_Joypad[nCntPad].joykeyState, 0, sizeof(XINPUT_STATE));
@@ -172,10 +184,10 @@ HRESULT InitJoypad(void)
 		memset(&g_Joypad[nCntPad].vibration, 0, sizeof(XINPUT_VIBRATION));
 	}
 
-	//XInputのステートを設定(有効にする)
+	// XInputのステートを設定(有効にする)
 	XInputEnable(true);
 
-	//振動時間の初期化
+	// 振動時間の初期化
 	g_nTime = 10;
 	g_nPlayer = 0;
 
@@ -187,7 +199,7 @@ HRESULT InitJoypad(void)
 //=========================================================
 void UninitJoypad(void)
 {
-	//XInputのステートを設定(無効にする)
+	// XInputのステートを設定(無効にする)
 	XInputEnable(false);
 }
 
@@ -196,25 +208,25 @@ void UninitJoypad(void)
 //=========================================================
 void UpdateJoypad(void)
 {
-	XINPUT_STATE joykeyState;							//ジョイパッドの入力情報
+	XINPUT_STATE joykeyState;							// ジョイパッドの入力情報
 
 	for (int nCntPad = 0; nCntPad < MAX_PLAYER; nCntPad++)
 	{
-		//ジョイパッドの状態を取得
+		// ジョイパッドの状態を取得
 		if (XInputGetState(nCntPad, &joykeyState) == ERROR_SUCCESS)
 		{
-			//ジョイパッドのリリース情報を保存
+			// ジョイパッドのリリース情報を保存
 			g_Joypad[nCntPad].joykeyStateRelease->Gamepad.wButtons = g_Joypad[nCntPad].joykeyState.Gamepad.wButtons & (joykeyState.Gamepad.wButtons ^ joykeyState.Gamepad.wButtons);
 
-			//ジョイパッドのトリガー情報を保存
+			// ジョイパッドのトリガー情報を保存
 			g_Joypad[nCntPad].joykeyStateTrigger.Gamepad.wButtons = (g_Joypad[nCntPad].joykeyState.Gamepad.wButtons ^ joykeyState.Gamepad.wButtons) & joykeyState.Gamepad.wButtons;
 
-			//ジョイパッドの情報を保存
+			// ジョイパッドの情報を保存
 			g_Joypad[nCntPad].joykeyState = joykeyState;
 
 			for (int nCntJoy = 0; nCntJoy < NUM_JOY_MAX; nCntJoy++)
 			{
-				//ジョイパッドのリピート情報
+				// ジョイパッドのリピート情報
 				if (GetJoypadPress(nCntPad, (JOYKEY)nCntJoy))
 				{
 					g_Joypad[nCntPad].nJoykeyStateRepeat[nCntJoy]++;
@@ -227,7 +239,7 @@ void UpdateJoypad(void)
 		}
 	}
 
-	//振動時間の減り
+	// 振動時間の減り
 	g_nTime--;
 
 	if (g_nTime <= 0)
@@ -238,7 +250,7 @@ void UpdateJoypad(void)
 }
 
 //=========================================================
-//ジョイパッドのプレス情報を取得
+// ジョイパッドのプレス情報を取得
 //=========================================================
 bool GetJoypadPress(int nPlayer, JOYKEY key)
 {
@@ -246,7 +258,7 @@ bool GetJoypadPress(int nPlayer, JOYKEY key)
 }
 
 //=========================================================
-//ジョイパッドのトリガー情報を取得
+// ジョイパッドのトリガー情報を取得
 //=========================================================
 bool GetJoypadTrigger(int nPlayer, JOYKEY key)
 {
@@ -262,7 +274,7 @@ bool GetJoypadRelease(int nPlayer, JOYKEY Key)
 }
 
 //=========================================================
-//ジョイパッドのリピート情報を取得
+// ジョイパッドのリピート情報を取得
 //=========================================================
 bool GetJoypadRepeat(int nPlayer, JOYKEY key)
 {
@@ -279,7 +291,7 @@ bool GetJoypadRepeat(int nPlayer, JOYKEY key)
 }
 
 //=========================================================
-//ジョイパッドの左スティック情報を取得
+// ジョイパッドの左スティック情報を取得
 //=========================================================
 bool GetJoypadStickLeft(int nPlayer, JOYKEY key)
 {
@@ -307,15 +319,15 @@ bool GetJoypadStickLeft(int nPlayer, JOYKEY key)
 }
 
 //=========================================================================================================
-//振動の情報
+// 振動の情報
 //=========================================================================================================
 XINPUT_VIBRATION* GetXInput(void)
 {
-	return &g_Joypad[0].vibration;					//振動情報の先頭アドレスを返す
+	return &g_Joypad[0].vibration;					// 振動情報の先頭アドレスを返す
 }
 
 //=========================================================
-//振動をスタートする処理
+// 振動をスタートする処理
 //=========================================================
 void SetVibration(int nPlayer, int nLeftMotor, int nRightMotor, int nTime)
 {
@@ -323,13 +335,13 @@ void SetVibration(int nPlayer, int nLeftMotor, int nRightMotor, int nTime)
 	g_nPlayer = nPlayer;
 
 	g_Joypad[nPlayer].vibration.wLeftMotorSpeed = nLeftMotor;		// use any value between 0-65535 here
-	g_Joypad[nPlayer].vibration.wRightMotorSpeed = nRightMotor;	// use any value between 0-65535 here
+	g_Joypad[nPlayer].vibration.wRightMotorSpeed = nRightMotor;		// use any value between 0-65535 here
 
 	XInputSetState(0, &g_Joypad[nPlayer].vibration);
 }
 
 //=========================================================
-//振動をストップする処理
+// 振動をストップする処理
 //=========================================================
 void StopVibration(int nPlayer)
 {
@@ -337,4 +349,145 @@ void StopVibration(int nPlayer)
 	g_Joypad[nPlayer].vibration.wRightMotorSpeed = 0;		// use any value between 0-65535 here
 
 	XInputSetState(0, &g_Joypad[nPlayer].vibration);
+}
+
+//================================================================================================================
+// マウスの初期化処理
+//================================================================================================================
+HRESULT InitMouse(HWND hWnd)
+{
+	/*** 変数の初期化 ***/
+	ZeroMemory(&g_alMouseMoveCurrent, sizeof(LONG) * MOUSESLOPE_MAX);
+	ZeroMemory(&g_alMouseMoveExacLast, sizeof(LONG) * MOUSESLOPE_MAX);
+
+	// 入力デバイス(マウス)の生成
+	if (FAILED(g_pInput->CreateDevice(GUID_SysMouse,
+		&g_pDevMouse,
+		NULL)))
+	{
+		MyMathUtil::GenerateMessageBox(MB_ICONERROR, "Error (0)", "入力デバイス(マウス)の生成に失敗しました。");
+		return E_FAIL;
+	}
+
+	// データフォーマットを設定
+	if (FAILED(g_pDevMouse->SetDataFormat(&c_dfDIMouse)))
+	{
+		MyMathUtil::GenerateMessageBox(MB_ICONERROR, "Error (0)", "データフォーマットの設定に失敗しました。");
+		return E_FAIL;
+	}
+
+	// 協調モードを設定
+	if (FAILED(g_pDevMouse->SetCooperativeLevel(hWnd,
+		(DISCL_FOREGROUND | DISCL_NONEXCLUSIVE))))
+	{
+		MyMathUtil::GenerateMessageBox(MB_ICONERROR, "Error (0)", "協調モードの設定に失敗しました。");
+		return E_FAIL;
+	}
+
+	// マウスへのアクセス権を獲得
+	g_pDevMouse->Acquire();
+
+	return S_OK;
+}
+
+//================================================================================================================
+// マウスの終了処理
+//================================================================================================================
+void UninitMouse(void)
+{
+	// 入力デバイス(マウス)の破棄
+	if (g_pDevMouse != NULL)
+	{
+		g_pDevMouse->Unacquire();
+		g_pDevMouse->Release();
+		g_pDevMouse = NULL;
+	}
+}
+
+//================================================================================================================
+// マウスの更新処理
+//================================================================================================================
+void UpdateMouse(void)
+{
+	BYTE aMouseState[NUM_MOUSE_MAX];			// マウスの入力情報
+
+	// 更新前に過去の入力情報(マウス)を保存
+	g_PrevMouseState = g_CurrentMouseState;
+	g_alMouseMoveExacLast[0] = g_CurrentMouseState.lX;
+	g_alMouseMoveExacLast[1] = g_CurrentMouseState.lY;
+	g_alMouseMoveExacLast[2] = g_CurrentMouseState.lZ;
+
+	// 現在のマウスの入力情報を取得
+	if (SUCCEEDED(g_pDevMouse->GetDeviceState(sizeof(DIMOUSESTATE), &g_CurrentMouseState)))
+	{
+		g_alMouseMoveCurrent[0] = g_CurrentMouseState.lX;
+		g_alMouseMoveCurrent[1] = g_CurrentMouseState.lY;
+		g_alMouseMoveCurrent[2] = g_CurrentMouseState.lZ;
+
+		for (int nCntMouse = 0; nCntMouse < NUM_MOUSE_MAX; nCntMouse++)
+		{
+			aMouseState[nCntMouse] = g_CurrentMouseState.rgbButtons[nCntMouse];
+			g_aMouseStateTrigger[nCntMouse] = ((aMouseState[nCntMouse] ^ g_aMouseState[nCntMouse]) & aMouseState[nCntMouse]);
+			g_aMouseStateRelease[nCntMouse] = (g_aMouseState[nCntMouse] & (g_aMouseState[nCntMouse] ^ aMouseState[nCntMouse]));
+			g_aMouseState[nCntMouse] = aMouseState[nCntMouse];
+		}
+	}
+	else
+	{
+		g_pDevMouse->Acquire();			// マウスへのアクセス権を取得
+	}
+}
+
+//================================================================================================================
+// マウスのプレス情報を取得
+//================================================================================================================
+bool GetMousePress(int nButton)
+{
+	return (g_aMouseState[nButton] & 0x80) ? true : false;
+}
+
+//================================================================================================================
+// マウスのトリガー情報を取得
+//================================================================================================================
+bool GetMouseTrigger(int nButton)
+{
+	return (g_aMouseStateTrigger[nButton] & 0x80) ? true : false;
+}
+
+//================================================================================================================
+// マウスのリリース情報を取得
+//================================================================================================================
+bool GetMouseRelease(int nButton)
+{
+	return (g_aMouseStateRelease[nButton] & 0x80) ? true : false;
+}
+
+//================================================================================================================
+// マウスの位置情報を取得
+//================================================================================================================
+POINT GetMousePos(void)
+{
+	POINT mousePos;
+
+	// マウスの位置を取得
+	if (GetCursorPos(&mousePos) != TRUE)
+	{// 取得失敗
+		g_pDevMouse->Acquire();			// マウスへのアクセス権を取得
+	}
+	else
+	{// 取得成功
+		// 取得した座標をウィンドウ内の座標に変換
+		ScreenToClient(GetHandleWindow(), &mousePos);
+		g_mousePos = mousePos;			// 現在の位置を保存
+	}
+
+	return g_mousePos;
+}
+
+//================================================================================================================
+// マウスの過去からの回転情報を取得
+//================================================================================================================
+LONG GetMouseMove(MOUSESLOPE slope)
+{
+	return (float)g_alMouseMoveCurrent[slope];
 }

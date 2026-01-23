@@ -1,341 +1,437 @@
-//================================================================================================================
+//==================================================================================================================================
 //
-// DirectXのカメラ処理 [camera.cpp]
-// Author : Endo Hideto
-//
-//================================================================================================================
-//**********************************************************************************
-//*** インクルードファイル ***
-//**********************************************************************************
+//			カメラ処理 [camera.cpp]
+//			Author : ENDO HIDETO
+// 
+//==================================================================================================================================
+//**************************************************************
+// インクルード
 #include "camera.h"
-#include "debugproc.h"
-#include "mathUtil.h"
+#include "input.h"
 
-//*************************************************************************************************
-//*** マクロ定義 ***
-//*************************************************************************************************
-#define CAMERA_ZLENGTH		(300.0f)		// カメラの注視点との距離
-#define CAMERA_SPD			(2.0f)			// カメラの移動速度
-#define CAMERA_ROTSPD		(0.05f)			// カメラの移動速度
-#define MAX_CAMERA			(4)				// カメラの最大数
-#define CAMERA_MAXANGLE		(D3DX_PI * 0.9f)		// カメラの最大角度
-#define CAMERA_MINANGLE		(D3DX_PI * 0.001f)		// カメラの最小角度
+#include "player.h"
 
-//*************************************************************************************************
-//*** グローバル変数 ***
-//*************************************************************************************************
-Camera g_aCamera[MAX_CAMERA];		// カメラの情報
-int g_nNumCamera;					// カメラの数
+//**************************************************************
+// グローバル変数宣言
+Camera g_aCamera[MAX_CAMERA];
 
-//================================================================================================================
-// --- カメラの初期化 ---
-//================================================================================================================
+//**************************************************************
+// プロトタイプ宣言
+void CameraFollow(P_CAMERA pCamera);		// プレイヤーに追従移動
+void CameraRotation(P_CAMERA pCamera);		// プレイヤーと同じ向きに回転
+void CameraOrbit(P_CAMERA pCamera);			// オービット処理
+void CameraMove(P_CAMERA pCamera);			// カメラ移動（ポーズ中のみ
+
+//=========================================================================================
+// カメラ初期化
+//=========================================================================================
 void InitCamera(void)
 {
-	Camera* pCamera = &g_aCamera[0];
+	//**************************************************************
+	// 変数宣言
+	P_CAMERA pCamera = GetCamera();
 
-	// カメラの初期化
-	ZeroMemory(&g_aCamera[0], sizeof(Camera) * MAX_CAMERA);
-
-	// カメラの数の初期化
-	g_nNumCamera = 0;
+	//**************************************************************
+	// 各値の初期化
+	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCamera++)
+	{
+		pCamera->posV = D3DXVECTOR3 CAMERA_V_DEFPOS;							// 視点
+		pCamera->posR = D3DXVECTOR3 CAMERA_R_DEFPOS;							// 注視点
+		pCamera->posRDest = D3DXVECTOR3 CAMERA_R_DEFPOS;						// 目的の注視点
+		pCamera->vecU = D3DXVECTOR3(0.0f, 1.0f, 0.0f);							// 上方向ベクトル
+		pCamera->rot = D3DXVECTOR3(D3DX_PI * 0.2f, D3DX_PI * 0.5f, 0.0f);		// カメラの角度
+		pCamera->fDist = CAMERA_DISTANS;										// 視点と注視点の距離
+		pCamera->viewport.X = SCREEN_WIDTH * 0.5f * nCntCamera;					// 画面左上 X 座標
+		pCamera->viewport.Y = 0.0f;												// 画面左上 Y 座標
+		pCamera->viewport.Width = SCREEN_WIDTH * 0.5f;							// 表示画面の横幅
+		pCamera->viewport.Height = SCREEN_HEIGHT;						// 表示画面の高さ
+		pCamera->viewport.MinZ = 0.0f;											
+		pCamera->viewport.MaxZ = 1.0f;
+		pCamera->bAoutRot = false;												// 自動で回り込みOFF
+		pCamera->nCntAoutRot = 0;												//		〃		 ONにするまでのカウンタ
+		pCamera->bUse = true;
+	}
 }
 
-//================================================================================================================
-// --- カメラの終了 ---
-//================================================================================================================
+//=========================================================================================
+// カメラ終了
+//=========================================================================================
 void UninitCamera(void)
 {
 
 }
 
-//================================================================================================================
-// --- カメラの更新 ---
-//================================================================================================================
-void UpdateCamera(int nIdxCamera)
+//=========================================================================================
+// カメラ更新
+//=========================================================================================
+void UpdateCamera(void)
 {
-	Camera *pCamera = &g_aCamera[nIdxCamera];
+	//**************************************************************
+	// 変数宣言
+	P_CAMERA pCamera = GetCamera();
 
-	/*** 視点の平行移動！ ***/
-	if (GetKeyboardPress(DIK_W))
-	{ // Wを押したとき
-		/** 追加入力 **/
-		if (GetKeyboardPress(DIK_A))
-		{ // Aを押したとき
-			pCamera->posV.x += cosf(pCamera->rot.y + (D3DX_PI * 0.25f)) * CAMERA_SPD;
-			pCamera->posV.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
-			pCamera->posV.z += sinf(pCamera->rot.y + (D3DX_PI * 0.25f)) * CAMERA_SPD;
-			pCamera->posR.x += cosf(pCamera->rot.y + (D3DX_PI * 0.25f)) * CAMERA_SPD;
-			pCamera->posR.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
-			pCamera->posR.z += sinf(pCamera->rot.y + (D3DX_PI * 0.25f)) * CAMERA_SPD;
-		}
-		else if (GetKeyboardPress(DIK_D))
-		{// Dを押したとき
-			pCamera->posV.x += cosf(pCamera->rot.y + (D3DX_PI * 1.75f)) * CAMERA_SPD;
-			pCamera->posV.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
-			pCamera->posV.z += sinf(pCamera->rot.y + (D3DX_PI * 1.75f)) * CAMERA_SPD;
-			pCamera->posR.x += cosf(pCamera->rot.y + (D3DX_PI * 1.75f)) * CAMERA_SPD;
-			pCamera->posR.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
-			pCamera->posR.z += sinf(pCamera->rot.y + (D3DX_PI * 1.75f)) * CAMERA_SPD;
-		}
-		else
-		{ // 純粋なW入力時
-			pCamera->posV.x += cosf(pCamera->rot.y) * CAMERA_SPD;
-			pCamera->posV.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
-			pCamera->posV.z += sinf(pCamera->rot.y) * CAMERA_SPD;
-			pCamera->posR.x += cosf(pCamera->rot.y) * CAMERA_SPD;
-			pCamera->posR.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
-			pCamera->posR.z += sinf(pCamera->rot.y) * CAMERA_SPD;
-
-			PrintDebugProc("CameraYaw : %f\n", pCamera->rot.x);
-		}
-	}
-	else if (GetKeyboardPress(DIK_S))
-	{ // Sを押したとき
-		/** 追加入力 **/
-		if (GetKeyboardPress(DIK_A))
-		{ // Aを押したとき
-			pCamera->posV.x += cosf(pCamera->rot.y + (D3DX_PI * 0.75f)) * CAMERA_SPD;
-			pCamera->posV.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
-			pCamera->posV.z += sinf(pCamera->rot.y + (D3DX_PI * 0.75f)) * CAMERA_SPD;
-			pCamera->posR.x += cosf(pCamera->rot.y + (D3DX_PI * 0.75f)) * CAMERA_SPD;
-			pCamera->posR.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
-			pCamera->posR.z += sinf(pCamera->rot.y + (D3DX_PI * 0.75f)) * CAMERA_SPD;
-		}
-		else if (GetKeyboardPress(DIK_D))
-		{// Dを押したとき
-			pCamera->posV.x += cosf(pCamera->rot.y + (D3DX_PI * 1.25f)) * CAMERA_SPD;
-			pCamera->posV.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
-			pCamera->posV.z += sinf(pCamera->rot.y + (D3DX_PI * 1.25f)) * CAMERA_SPD;
-			pCamera->posR.x += cosf(pCamera->rot.y + (D3DX_PI * 1.25f)) * CAMERA_SPD;
-			pCamera->posR.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
-			pCamera->posR.z += sinf(pCamera->rot.y + (D3DX_PI * 1.25f)) * CAMERA_SPD;
-
-		}
-		else
-		{ // 純粋なS入力時
-			pCamera->posV.x += cosf(pCamera->rot.y + D3DX_PI) * CAMERA_SPD;
-			pCamera->posV.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
-			pCamera->posV.z += sinf(pCamera->rot.y + D3DX_PI) * CAMERA_SPD;
-			pCamera->posR.x += cosf(pCamera->rot.y + D3DX_PI) * CAMERA_SPD;
-			pCamera->posR.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
-			pCamera->posR.z += sinf(pCamera->rot.y + D3DX_PI) * CAMERA_SPD;
-		}
-	}
-	else if (GetKeyboardPress(DIK_A))
-	{ // Aを押したとき
-		pCamera->posV.x += cosf(pCamera->rot.y + (D3DX_PI * 0.5f)) * CAMERA_SPD;
-		pCamera->posV.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
-		pCamera->posV.z += sinf(pCamera->rot.y + (D3DX_PI * 0.5f)) * CAMERA_SPD;
-		pCamera->posR.x += cosf(pCamera->rot.y + (D3DX_PI * 0.5f)) * CAMERA_SPD;
-		pCamera->posR.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
-		pCamera->posR.z += sinf(pCamera->rot.y + (D3DX_PI * 0.5f)) * CAMERA_SPD;
-	}
-	else if (GetKeyboardPress(DIK_D))
-	{ // Dを押したとき
-		pCamera->posV.x += cosf(pCamera->rot.y + (D3DX_PI * 1.5f)) * CAMERA_SPD;
-		pCamera->posV.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
-		pCamera->posV.z += sinf(pCamera->rot.y + (D3DX_PI * 1.5f)) * CAMERA_SPD;
-		pCamera->posR.x += cosf(pCamera->rot.y + (D3DX_PI * 1.5f)) * CAMERA_SPD;
-		pCamera->posR.y += sinf(pCamera->rot.x - D3DX_HALFPI) * CAMERA_SPD;
-		pCamera->posR.z += sinf(pCamera->rot.y + (D3DX_PI * 1.5f)) * CAMERA_SPD;
-	}
-
-	/*** カメラの回転！(注視点中心) ***/
-	if (GetKeyboardPress(DIK_Z))
+#if 0
+	// プレイヤーが停止していたら回り込み/////////////////////////////////OFF
+	if (GetPlayer()->state == PLAYERSTATE_WAIT && 0)
 	{
-		pCamera->rot.y -= CAMERA_ROTSPD;
-
-		if (pCamera->rot.y < -D3DX_PI)
-		{
-			pCamera->rot.y += D3DX_PI * 2.0f;
-		}
-		else if (pCamera->rot.y >= D3DX_PI)
-		{
-			pCamera->rot.y -= D3DX_PI * 2.0f;
-		}
+		g_camera.nCntAoutRot++;
+		if (60 < g_camera.nCntAoutRot)
+			g_camera.bAoutRot = true;
 	}
-	else if (GetKeyboardPress(DIK_C))
+	else
 	{
-		pCamera->rot.y += CAMERA_ROTSPD;
-
-		if (pCamera->rot.y < -D3DX_PI)
-		{
-			pCamera->rot.y += D3DX_PI * 2.0f;
-		}
-		else if (pCamera->rot.y >= D3DX_PI)
-		{
-			pCamera->rot.y -= D3DX_PI * 2.0f;
-		}
+		g_camera.nCntAoutRot = 0;
+		g_camera.bAoutRot = false;
 	}
 
-	// カメラの上下回転！
-	if (GetKeyboardPress(DIK_Y))
+	//**************************************************************
+	// カメラの位置をリセット
+	if (GetKeyboardTrigger(CAM_RESET) && 0)/////////////////////////////////OFF
 	{
-		pCamera->rot.x -= CAMERA_ROTSPD;
-
-		if (pCamera->rot.x < CAMERA_MINANGLE)
-		{
-			pCamera->rot.x = CAMERA_MINANGLE;
-		}
+		g_camera.posV = D3DXVECTOR3 CAMERA_V_DEFPOS;				// 視点
+		g_camera.posR = D3DXVECTOR3 CAMERA_R_DEFPOS;				// 注視点
+		g_camera.posRDest = D3DXVECTOR3 CAMERA_R_DEFPOS;			// 目的の注視点
+		g_camera.rot = D3DXVECTOR3(0.0f, D3DX_PI * 0.5f, 0.0f);		// カメラの角度
+		g_camera.fDist = CAMERA_DISTANS;							// カメラと注視点の距離
 	}
-	else if (GetKeyboardPress(DIK_N))
+
+	//**************************************************************
+	// 移動
+	if (GetPause() == false)
 	{
-		pCamera->rot.x += CAMERA_ROTSPD;
+		CameraFollow();		// 追従
+	}
+	else if (GetView() || GetEdit(EDIT_MAX))
+	{
+		if (GetView())
+			CameraMove();		// 操作
+		else if (GetEdit(EDIT_MAX))
+			CameraFollow();		// 追従
 
-		if (pCamera->rot.x >= CAMERA_MAXANGLE)
+		//**************************************************************
+		// 視点,注視点間の距離を変える
+		if (GetKeyboardRepeat(CAM_ZOOM))
 		{
-			pCamera->rot.x = CAMERA_MAXANGLE;
+			if (GetKeyboardPress(CAM_ZOOM_IN))
+			{
+				g_camera.fDist -= CAMERA_MOVE;
+			}
+			else
+			{
+				g_camera.fDist += CAMERA_MOVE;
+			}
 		}
+
+		//**************************************************************
+		// 回転
+		CameraOrbit();		// 注視点で回転
 	}
 
-	pCamera->posV.x = pCamera->posR.x + (sinf(pCamera->rot.x) * cosf(pCamera->rot.y - D3DX_PI) * pCamera->fZlength);
-	pCamera->posV.y = pCamera->posR.y + (cosf(pCamera->rot.x) * pCamera->fZlength);
-	pCamera->posV.z = pCamera->posR.z + (sinf(pCamera->rot.x) * sinf(pCamera->rot.y - D3DX_PI) * pCamera->fZlength);
+	if (g_camera.bAoutRot)
+		CameraRotation();	// 自動で回り込み////////////////////////////////////////// OFF
+
+#endif
+
+	CameraFollow(pCamera);		// 追従
+
+	//**************************************************************
+	// 注視点から視点を求める
+	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCamera++)
+	{
+		pCamera->posV.x = pCamera->posR.x - cosf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
+		pCamera->posV.y = pCamera->posR.y - cosf(D3DX_PI - pCamera->rot.x) * pCamera->fDist;
+		pCamera->posV.z = pCamera->posR.z - sinf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
+	}
 }
 
-//================================================================================================================
-// --- カメラの設置 ---
-//================================================================================================================
-void SetCamera(int nIdxCamera)
+//==============================================================
+//	プレイヤーに追従
+void CameraFollow(P_CAMERA pCamera)
 {
-	Camera* pCamera = &g_aCamera[nIdxCamera];
+	//if (GetPause() == false)
+	//{
+		//**************************************************************
+		// 変数宣言
+		Player* pPlayer = GetPlayer();				// プレイヤー情報
+		float fPlayerFront = CAMERA_PLAYER_FRONT;	// プレイヤーより前
+		static float fPlayerMoveRot = atan2f(-pPlayer->move.x, -pPlayer->move.z);
+		//**************************************************************
+		// プレイヤーに追従
+		if (pPlayer->move.x != 0 || pPlayer->move.z != 0)
+		{// カメラを少し先へ
+			fPlayerMoveRot = atan2f(-pPlayer->move.x, -pPlayer->move.z);
+		}
+		pCamera->posRDest.x = pPlayer->pos.x - fPlayerFront * sinf(fPlayerMoveRot);
+		pCamera->posRDest.y = pPlayer->pos.y;
+		pCamera->posRDest.z = pPlayer->pos.z - fPlayerFront * cosf(fPlayerMoveRot);
+#if 0
+	}
+	else
+	{
+		//**************************************************************
+		// 変数宣言
+		vec3 pos = GetAnchor();
+		g_camera.posRDest = pos;
+	}
+#endif
+	//**************************************************************
+	// カメラの位置を補正
+	pCamera->posR.x += (pCamera->posRDest.x - pCamera->posR.x) * CAMERA_FOLLOW_FACTOR;
+	pCamera->posR.y += (pCamera->posRDest.y - pCamera->posR.y) * CAMERA_FOLLOW_FACTOR;
+	pCamera->posR.z += (pCamera->posRDest.z - pCamera->posR.z) * CAMERA_FOLLOW_FACTOR;			
+}
 
-	/*** デバイスの取得 ***/
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+//==============================================================
+// カメラ移動（ポーズ中のみ
+void CameraMove(P_CAMERA pCamera)
+{
+	//**************************************************************
+	//移動
+	if (GetKeyboardRepeat(CAM_MOVE_UP) == true)
+	{// 前
+		  pCamera->posR.z += -sinf(-pCamera->rot.y) * 5;
+		  pCamera->posR.x += -cosf(-pCamera->rot.y) * 5;
+	}
+	if (GetKeyboardRepeat(CAM_MOVE_DW) == true)
+	{// 手前
+		pCamera->posR.z += sinf(-pCamera->rot.y) * 5;
+		pCamera->posR.x += cosf(-pCamera->rot.y) * 5;
+	}
+	if (GetKeyboardRepeat(CAM_MOVE_L) == true)
+	{// 左
+		 pCamera->posR.z += -sinf(D3DX_PI * 0.5f - pCamera->rot.y) * 5;
+		 pCamera->posR.x += -cosf(D3DX_PI * 0.5f - pCamera->rot.y) * 5;
+	}
+	if (GetKeyboardRepeat(CAM_MOVE_R) == true)
+	{// 右
+		 pCamera->posR.z += sinf(D3DX_PI * 0.5f - pCamera->rot.y) * 5;
+		 pCamera->posR.x += cosf(D3DX_PI * 0.5f - pCamera->rot.y) * 5;
+	}
+}
 
-	// ビューポート設定
+//==============================================================
+// 自動回転
+void CameraRotation(P_CAMERA pCamera)
+{
+	//**************************************************************
+	// 変数宣言
+	bool bUse = false;
+	Player* pPlayer = GetPlayer();
+	float fRotMove =  pPlayer->rot.y - pCamera->rot.y - D3DX_PI * 0.5f;	// 変化させる角度(目的値と現在値の差)
+
+	//**************************************************************
+	// 回転方向正規化
+	if (0 < fRotMove)
+	{
+		if (D3DX_PI < fRotMove)
+		{
+			fRotMove -= D3DX_PI * 2;
+		}
+	}
+	else if (fRotMove < 0)
+	{
+		if (fRotMove < -D3DX_PI)
+		{
+			fRotMove += D3DX_PI * 2;
+		}
+	}
+	// 補正しカメラを回転
+	pCamera->rot.y += fRotMove * CAMERA_ROTET_FACTOR;
+
+	//**************************************************************
+	// 異常な角度(X_PIを超える)値を修正
+	if (pCamera->rot.y < -D3DX_PI)
+		pCamera->rot.y += D3DX_PI * 2;
+	else if (pCamera->rot.y > D3DX_PI)
+		pCamera->rot.y += -D3DX_PI * 2;
+}
+
+//==============================================================
+// 注視点を中心に手動で回転
+void CameraOrbit(P_CAMERA pCamera)
+{
+	//**************************************************************
+	// 変数宣言
+	bool bUse = false;
+	vec3 rightStick;
+
+	//**************************************************************
+	// 注視点のまわりを回転
+	// キーボード操作
+	if (GetKeyboardRepeat(CAM_ORBIT_R))
+	{
+		pCamera->rot.y -= CAMERA_SPIN;
+		bUse = true;
+	}
+	if (GetKeyboardRepeat(CAM_ORBIT_L))
+	{
+		pCamera->rot.y += CAMERA_SPIN;
+		bUse = true;
+	}
+	if (GetKeyboardRepeat(CAM_ORBIT_UP))
+	{
+		pCamera->rot.x -= CAMERA_SPIN;
+		pCamera->posV.x = pCamera->posR.x - cosf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
+		pCamera->posV.y = pCamera->posR.y - cosf(D3DX_PI - pCamera->rot.x) * pCamera->fDist;
+		pCamera->posV.z = pCamera->posR.z + sinf(D3DX_PI - pCamera->rot.x) * pCamera->fDist;
+
+	}
+	if (GetKeyboardRepeat(CAM_ORBIT_DW))
+	{
+		pCamera->rot.x += CAMERA_SPIN;
+		pCamera->posV.x = pCamera->posR.x - cosf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
+		pCamera->posV.y = pCamera->posR.y - cosf(D3DX_PI - pCamera->rot.x) * pCamera->fDist;
+		pCamera->posV.z = pCamera->posR.z + sinf(D3DX_PI - pCamera->rot.x) * pCamera->fDist;
+	}
+
+	// コントローラー操作
+	//if (GetJoypadRightStick(&rightStick))
+	//{
+	//	pCamera->rot.y += rightStick.x * REV_PLAYER;
+	//	bUse = true;
+	//}
+
+
+	//**************************************************************
+	// -πからπまでにする	
+	if (pCamera->rot.x < -D3DX_PI)
+		pCamera->rot.x = D3DX_PI;
+	else if (D3DX_PI < pCamera->rot.x)
+		pCamera->rot.x = -D3DX_PI;
+
+	if (pCamera->rot.y < -D3DX_PI)
+		pCamera->rot.y = D3DX_PI;
+	else if (D3DX_PI < pCamera->rot.y)
+		pCamera->rot.y = -D3DX_PI;
+
+	if (pCamera->rot.z < -D3DX_PI)
+		pCamera->rot.z = D3DX_PI;
+	else if (D3DX_PI < pCamera->rot.z)
+		pCamera->rot.z = -D3DX_PI;
+
+	//**************************************************************
+	// 視点から注視点を求める
+	if (bUse)
+	{
+		pCamera->posV.x = pCamera->posR.x - cosf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
+		pCamera->posV.y = pCamera->posR.y - cosf(D3DX_PI - pCamera->rot.x) * pCamera->fDist;
+		pCamera->posV.z = pCamera->posR.z - sinf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
+	}
+}
+
+//=========================================================================================
+// カメラ設置
+//=========================================================================================
+void SetCamera(P_CAMERA pCamera)
+{
+	//**************************************************************
+	// 変数宣言
+	LPDIRECT3DDEVICE9 pDevice = GetDevice();		// デバイスへのポインタ
+
+	//**************************************************************
+	// ビューポートの設定
 	pDevice->SetViewport(&pCamera->viewport);
 
-	/*** プロジェクションマトリックスの初期化 ***/
+	//**************************************************************
+	// プロジェクションマトリックスの初期化
 	D3DXMatrixIdentity(&pCamera->mtxProjection);
-
-	/*** プロジェクションマトリックスの作成 ***/
+	
+	// プロジェクションマトリックスを作成
 	D3DXMatrixPerspectiveFovLH(&pCamera->mtxProjection,
-		D3DXToRadian(45.0f),							// 視野角
-		(float)pCamera->viewport.Width / (float)pCamera->viewport.Height,		// モニターのアスペクト比
-		10.0f,					// カメラの描画最小範囲
-		10000.0f);				// カメラの描画最大範囲
+								D3DXToRadian(VIEW_RADIAN),					// 視野角
+								(float)pCamera->viewport.Width/(float)pCamera->viewport.Height,	// アスペクト比
+								VIEW_MINDEPTH,								// 最短描画距離
+								VIEW_MAXDEPTH);								// 最大描画距離
 
-	/*** プロジェクションマトリックスの設定 ***/
-	pDevice->SetTransform(D3DTS_PROJECTION, &pCamera->mtxProjection);
+	// プロジェクションマトリックスを設定
+	pDevice->SetTransform(D3DTS_PROJECTION,&pCamera->mtxProjection);
 
-	/*** ビューマトリックスの初期化 ***/
+	//**************************************************************
+	// ビューマトリックスの初期化
 	D3DXMatrixIdentity(&pCamera->mtxView);
 
-	/*** ビューマトリックスの作成 ***/
-	D3DXMatrixLookAtLH(&pCamera->mtxView,
-		&pCamera->posV,		// 視点
-		&pCamera->posR,		// 注視点
-		&pCamera->vecU);	// 上方向ベクトル
-
-	/*** ビューマトリックスの設定 ***/
+	// ビューマトリックスの作成
+	D3DXMatrixLookAtLH(&pCamera->mtxView, &pCamera->posV, &pCamera->posR, &pCamera->vecU);
+	
+	// ビューマトリックスの設定
 	pDevice->SetTransform(D3DTS_VIEW, &pCamera->mtxView);
 
-	// デバイスの取得の終了
-	EndDevice();
+	EndDevice();// デバイス取得終了
 }
 
-//================================================================================================================
-// --- カメラの追加 ---
-//================================================================================================================
-int AddCamera(D3DXVECTOR3 posV, D3DXVECTOR3 posR, D3DXVECTOR3 rot, D3DVIEWPORT9 viewport)
+//=========================================================================================
+// カメラの情報を取得
+//=========================================================================================
+P_CAMERA GetCamera(void)
 {
-	Camera *pCamera = &g_aCamera[0];
-	D3DXVECTOR3 diff = {};		// 2点間の差分
-	int nCntCamera;
+	return &g_aCamera[0];
+}
 
-	for (nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCamera++)
+//=========================================================================================
+// カメラの位置情報を取得
+//=========================================================================================
+void GetCameraPos(int nCamNum, vec3* pPosV, vec3* pPosR)
+{
+	//**************************************************************
+	// 変数宣言
+	P_CAMERA pCam;
+	vec3 posV = D3DXVECTOR3_NULL, posR = D3DXVECTOR3_NULL;
+
+	// カメラ数が範囲内なら
+	if (0 <= nCamNum && nCamNum < MAX_CAMERA)
 	{
-		if (pCamera->bUse == false)
-		{ // カメラが使われていなければ
-			pCamera->posV = posV;			// カメラの位置
-			pCamera->posR = posR;			// 注視点の位置
-			pCamera->vecU = D3DXVECTOR3(0.0f, 1.0f, 0.0f);	// 上方向ベクトル
-			pCamera->rot = rot;				// カメラの向き
-			diff = posV - posR;				// 差分
+		pCam = &g_aCamera[nCamNum];
 
-			pCamera->fZlength = D3DXVec3Length(&diff);		// 長さを計算
-			pCamera->viewport = viewport;	// ビューポート
-			pCamera->bUse = true;			// カメラを使用済みに
-			g_nNumCamera++;					// カメラ設置数を増加
-
-			break;
+		if (pCam->bUse)
+		{
+			posV = pCam->posV;
+			posR = pCam->posR;
 		}
 	}
 	
-	if (nCntCamera >= MAX_CAMERA) nCntCamera = -1;
-
-	return nCntCamera;
+	*pPosV = posV;
+	*pPosR = posR;
 }
 
-//================================================================================================================
-// --- カメラの削除 ---
-//================================================================================================================
-void RemoveCamera(int nIdxCamera)
+//=========================================================================================
+// カメラの角度情報を取得
+//=========================================================================================
+void GetCameraRot(int nCamNum, vec3* pRot)
 {
-	if (nIdxCamera < 0 || nIdxCamera >= MAX_CAMERA) return;
-	if (g_nNumCamera <= 0) return;
+	//**************************************************************
+	// 変数宣言
+	P_CAMERA pCam;
+	vec3 rot = D3DXVECTOR3_NULL;
 
-	g_aCamera[nIdxCamera].bUse = false;		// 未使用に
-	g_nNumCamera--;							// カメラの設置数を減らす
+	// カメラ数が範囲内なら
+	if (0 <= nCamNum && nCamNum < MAX_CAMERA)
+	{
+		pCam = &g_aCamera[nCamNum];
+
+		if (pCam->bUse)
+		{
+			rot = pCam->rot;
+		}
+	}
+
+	*pRot = rot;
+
 }
 
-//================================================================================================================
-// --- カメラの取得 ---
-//================================================================================================================
-Camera *GetCamera(int nIdxCamera)
+//=========================================================================================
+// カメラリセット
+//=========================================================================================
+void CameraReset(P_CAMERA pCamera)
 {
-	if (nIdxCamera < 0 || nIdxCamera >= MAX_CAMERA) return NULL;
+	//**************************************************************
+	// 注視点
+	pCamera->posR = GetPlayer()->pos;
 
-	return &g_aCamera[nIdxCamera];
-}
-
-//================================================================================================================
-// --- カメラの数 ---
-//================================================================================================================
-int GetCameraNum(void)
-{
-	return g_nNumCamera;
-}
-
-//================================================================================================================
-// --- ピクセルフォグの設定 ---
-//================================================================================================================
-void SetUpPixelFog(D3DXCOLOR fogCol, float fStart, float fEnd)
-{
-	// デバイスの取得開始
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-
-	float Start = fStart;		// フォグ開始地点
-	float End = fEnd;			// フォグ終了地点
-
-	// フォグブレンディングを有効化
-	pDevice->SetRenderState(D3DRS_FOGENABLE, TRUE);
-
-	// フォグカラ―を設定
-	pDevice->SetRenderState(D3DRS_FOGCOLOR, fogCol);
-
-	// フォグパラメータを設定
-	pDevice->SetRenderState(D3DRS_FOGTABLEMODE, D3DFOG_LINEAR);
-	pDevice->SetRenderState(D3DRS_FOGSTART, *(DWORD*)(&Start));
-	pDevice->SetRenderState(D3DRS_FOGEND, *(DWORD*)(&End));
-
-	// デバイスの取得終了
-	EndDevice();
-}
-
-//================================================================================================================
-// --- ピクセルフォグの終了 ---
-//================================================================================================================
-void CleanUpPixelFog(void)
-{
-	// デバイスの取得開始
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-
-	// フォグブレンディングを無効化
-	pDevice->SetRenderState(D3DRS_FOGENABLE, FALSE);
-
-	// デバイスの取得終了
-	EndDevice();
+	//**************************************************************
+	// 注視点から視点を求める
+	pCamera->fDist = CAMERA_DISTANS;										// 視点と注視点の距離
+	pCamera->rot = vec3(D3DX_PI * 0.2f, D3DX_PI * 0.5f, 0.0f);				// カメラの角度
+	pCamera->posV.x = pCamera->posR.x - cosf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
+	pCamera->posV.y = pCamera->posR.y - cosf(D3DX_PI - pCamera->rot.x) * pCamera->fDist;
+	pCamera->posV.z = pCamera->posR.z - sinf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
 }

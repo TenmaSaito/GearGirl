@@ -13,7 +13,9 @@
 #include "fade.h"
 #include "model.h"
 #include "modeldata.h"
+#include "Texture.h"
 #include "3Dmodel.h"
+#include "field.h"
 #include "light.h"
 #include "thread.h"
 
@@ -44,8 +46,14 @@ void InitGame(void)
 	/*** モデルデータの初期化 ***/
 	InitModelData();
 
+	/*** テクスチャの初期化 ***/
+	InitTexture();
+
 	/*** 3Dモデルの初期化 ***/
 	Init3DModel();
+
+	/*** 床の初期化 ***/
+	InitField();
 
 	/*** モデルの初期化 ***/
 	InitModel();
@@ -63,6 +71,13 @@ void InitGame(void)
 
 	/*** モデルのスクリプト読み込み ***/
 	LoadModel();
+
+	/*** テクスチャの読み込み ***/
+	int nIdxTexture;
+	LoadTexture("data\\TEXTURE\\sea000.jpg", &nIdxTexture);
+
+	/*** 床設置 ***/
+	SetField(D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, 1000.0f, 1000.0f, nIdxTexture, 16, 16, D3DCULL_CCW);
 
 	D3DVIEWPORT9 viewport;
 
@@ -94,8 +109,14 @@ void UninitGame(void)
 	/*** モデルデータの終了 ***/
 	UninitModelData();
 
+	/*** テクスチャの終了 ***/
+	UninitTexture();
+
 	/*** 3Dモデルの終了 ***/
 	Uninit3DModel();
+
+	/*** 床の終了 ***/
+	UninitField();
 
 	/*** モデルの終了 ***/
 	UninitModel();
@@ -128,6 +149,9 @@ void UpdateGame(void)
 	/*** 3Dモデルの更新 ***/
 	Update3DModel();
 
+	/*** 床の更新 ***/
+	UpdateField();
+
 	/*** モデルの更新 ***/
 	UpdateModel();
 
@@ -154,6 +178,9 @@ void DrawGame(void)
 
 		/*** モデルの描画 ***/
 		DrawModel();
+
+		/*** 床の描画  ***/
+		DrawField();
 
 		// VERTEX_2D ============================================
 		/*** Aの描画 ***/

@@ -1,56 +1,85 @@
 //==================================================================================================================================
 //
-//			空の処理 [sky.h]
+//			メッシュの処理 [mesh.h]
 //			Author : ENDO HIDETO
 // 
 //==================================================================================================================================
-#ifndef _SKY_H_
-#define _SKY_H_	//2重インクルード防止
+#ifndef _MESH_H_
+#define _MESH_H_	//2重インクルード防止
 
 //==============================================================
 // ヘッダーインクルード
 #include "main.h"
-#include "game.h"
+#include "endomacro.h"
 
 //=========================================================================================
 // マクロ定義
 //=========================================================================================
-#define MAX_TEX_SKY			(2)						// テクスチャ数
-#define MAX_SKY				(16)					// 最大枚数
-#define SKY_SIZE			(1000.0f)				// サイズ
-#define SKY_SIZE_ADD		(1.0f)					// サイズ変更幅
-#define REV_SKY				(0.01f)					// 回転速度
-#define MOVE_SKY			(10.0f)					// 移動速度
-#define SKY_REPET			(10.0f)					// 繰り返し数
+#define MAX_TEX_MESH			(2)						// テクスチャ数
+#define MAX_MESHSPHERE			(16)					// スフィア
+#define MAX_MESHDOME			(16)					// ドーム
+#define MAX_MESHCYLINDER		(16)					// シリンダー
+#define MAX_MESHRING			(64)					// リング
+#define MAX_MESH				(MAX_MESHSPHERE + MAX_MESHDOME + MAX_MESHCYLINDER + MAX_MESHRING)
 
 //==============================================================
-// メッシュスフィアの情報構造体
+// メッシュ基本情報の構造体
 //==============================================================
-typedef struct
+typedef struct MeshInfo
 {
-	D3DXVECTOR3				pos;					// 位置
-	D3DXVECTOR3				rot;					// 向き
-	D3DXVECTOR3				angle;					// 一辺ごとの角度
-	D3DXMATRIX				mtxWorld;				// ワールドマトリックス
-	LPDIRECT3DVERTEXBUFFER9	pVtxBuff;				// 頂点バッファ
-	LPDIRECT3DINDEXBUFFER9	pIdxBuffer;				// インデックスバッファ
-	int						nHeightDivision;		// 縦分割数
-	int						nCircleDivision;		// 円周分割数
-	int						nVerti;					// 全頂点数
-	int						nPrim;					// プリミティブ数
-	int						nTex;					// テクスチャ番号
-	bool					bInside;				// 内側を描画する
-	bool					bOutside;				// 外側を描画する
-	bool					bUse;					// 使ってる
-}Sky;
+	vec3					pos;				// 位置
+	vec3					rot;				// 向き
+	vec3					size;				// 大きさ
+	int						nCircleDivision;	// U (円)分割数
+	int						nHeightDivision;	// V (高さ)分割数
+
+	int						nVerti;				// 全頂点数
+	int						nPrim;				// プリミティブ数
+	D3DXMATRIX				mtxWorld;			// ワールドマトリックス
+	LPDIRECT3DVERTEXBUFFER9	pVtxBuff;			// 頂点バッファ
+	LPDIRECT3DINDEXBUFFER9	pIdxBuffer;			// インデックスバッファ
+	int						nIdxTexture;		// テスクチャ番号
+
+	bool					bInner;				// 内面カリング
+	bool					bOuter;				// 外面カリング
+	bool					bUse;				// 使ってるか
+}MeshInfo;
+POINTER(MeshInfo, P_MESH);
 
 //=========================================================================================
 // プロトタイプ宣言
 //=========================================================================================
-void InitSky(void);
-void UninitSky(void);
-void UpdateSky(void);
-void DrawSky(void);
-void SetSky(D3DXVECTOR3 pos, D3DXVECTOR3 rot, float fSize, int nHeightDivision, int nCircleDivision,int nTex,bool bInside,bool bOutside);
-Sky* GetSky(void);					// 情報の取得
-#endif // !_SKY_H_
+void InitMesh(void);
+void InitMeshSphere(void);
+void InitMeshDome(void);
+void InitMeshCylinder(void);
+void InitMeshRing(void);
+
+void UninitMesh(void);
+void UninitMeshSphere(void);
+void UninitMeshDome(void);
+void UninitMeshCylinder(void);
+void UninitMeshRing(void);
+
+void UpdateMesh(void);
+void UpdateMeshSphere(void);
+void UpdateMeshDome(void);
+void UpdateMeshCylinder(void);
+void UpdateMeshRingg(void);
+
+void DrawMesh(void);
+void DrawMeshSphere(void);
+void DrawMeshDome(void);
+void DrawMeshCylinder(void);
+void DrawMeshRing(void);
+
+void SetMeshSphere	(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int nCircleDivision, bool bInner, bool bOuter, int nTex = -1);
+void SetMeshDome	(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int nCircleDivision, bool bInner, bool bOuter, int nTex = -1);
+void SetMeshCylinder(vec3 pos, vec3 rot, float fRadius,float fHeight, int nHeightDivision, int nCircleDivision, bool bInner = false, bool bOuter = true, int nTex = -1);
+void SetMeshRing	(vec3 pos, vec3 rot, float fInner, float fOuter, int nHeightDivision, int nCircleDivision, bool bInner = false, bool bOuter = true, int nTex = -1);
+
+P_MESH GetMeshSphere(void);
+P_MESH GetMeshDome(void);
+P_MESH GetMeshCylinder(void);
+P_MESH GetMeshRing(void);
+#endif // !_MESH_H_

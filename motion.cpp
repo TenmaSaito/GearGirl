@@ -47,8 +47,8 @@
 //**********************************************************************************
 //*** プロトタイプ宣言 ***
 //**********************************************************************************
-bool LoadFileFromMotionScript(const char *pMotionFileName);
-bool DeleteComments(char *pStr);
+bool LoadFileFromMotionScript(const char* pMotionFileName);
+bool DeleteComments(char* pStr);
 
 //**********************************************************************************
 //*** グローバル変数 ***
@@ -108,7 +108,7 @@ bool LoadMotion(_In_ const char* pMotionFileName, int* pOutIdx)
 			// 使用状態に
 			pMotionInfo->bUse = true;
 
-			if (LoadFileFromMotionScript(pMotionFileName))
+			if (LoadFileFromMotionScript(pMotionFileName) == false)
 			{ // 読み込み失敗時
 				MyMathUtil::GenerateMessageBox(MB_ICONERROR,
 					"MotionLoadError",
@@ -150,7 +150,7 @@ void UninitMotion(void)
 //==================================================================================
 // --- モーション情報の取得 ---
 //==================================================================================
-LPMOTIONSCRIPT_INFO GetMotionScriptInfo(_In_ int nType)
+LPMOTIONSCRIPT_INFO GetMotionScriptInfo(int nType)
 {
 	if (nType < 0 || nType >= MAX_MOTION) return NULL;
 	LPMOTIONSCRIPT_INFO pMotionInfo = &g_aMotionInfo[nType];
@@ -167,7 +167,7 @@ LPMOTIONSCRIPT_INFO GetMotionScriptInfo(_In_ int nType)
 //==================================================================================
 // --- パーツ情報の取得 ---
 //==================================================================================
-LPPARTS_INFO GetPartsInfo(_In_ int nType)
+LPPARTS_INFO GetPartsInfo(int nType)
 {
 	if (nType < 0 || nType >= MAX_MOTION) return NULL;
 	LPPARTS_INFO pPartsInfo = &g_aPartsInfo[nType];
@@ -332,6 +332,8 @@ bool LoadFileFromMotionScript(const char* pMotionFileName)
 			}
 			else if (strstr(aStr, READ_CHARACTER) != NULL)
 			{
+				pPInfo->bUse = true;
+
 				while (1)
 				{
 					memset(aStr, NULL, sizeof(aStr));					// 文字列を初期化
@@ -418,6 +420,7 @@ bool LoadFileFromMotionScript(const char* pMotionFileName)
 										// パーツ情報を渡す
 
 										nParts++;
+										pPInfo->nNumParts++;
 										break;
 									}
 									else if (strstr(aStr, READ_INDEX) != NULL)
@@ -500,6 +503,7 @@ bool LoadFileFromMotionScript(const char* pMotionFileName)
 							}
 
 							mType = (MOTIONTYPE)nType;
+							pMInfo->nNumMotion++;
 
 							break;
 						}
@@ -623,7 +627,7 @@ bool LoadFileFromMotionScript(const char* pMotionFileName)
 //==================================================================================
 // --- コメントアウト消去処理 ---
 //==================================================================================
-bool DeleteComments(char *pStr)
+bool DeleteComments(char* pStr)
 {
 	char* PosTrash;					// ゴミ捨て場(コメント消去用変数)
 

@@ -67,6 +67,9 @@
     <Filter Include="ヘッダー ファイル\mode\game">
       <UniqueIdentifier>{c774c72d-4b80-4da7-be20-23983d09bcd6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\object\Mesh">
+      <UniqueIdentifier>{2d8c68d9-1a7c-451d-bc9c-fce9026e4907}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Texture.cpp">
@@ -83,9 +86,6 @@
     </ClCompile>
     <ClCompile Include="game.cpp">
       <Filter>ソース ファイル\mode\game</Filter>
-    </ClCompile>
-    <ClCompile Include="camera.cpp">
-      <Filter>ソース ファイル\main\DirectX\3D</Filter>
     </ClCompile>
     <ClCompile Include="light.cpp">
       <Filter>ソース ファイル\main\DirectX\3D</Filter>
@@ -120,6 +120,18 @@
     <ClCompile Include="model.cpp">
       <Filter>ソース ファイル\resouce</Filter>
     </ClCompile>
+    <ClCompile Include="mesh.cpp">
+      <Filter>ソース ファイル\object\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="meshsphere.cpp">
+      <Filter>ソース ファイル\object\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="camera.cpp">
+      <Filter>ソース ファイル\main\DirectX\3D</Filter>
+    </ClCompile>
+    <ClCompile Include="field.cpp">
+      <Filter>ソース ファイル\object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h">
@@ -135,9 +147,6 @@
       <Filter>ヘッダー ファイル\mode\game</Filter>
     </ClInclude>
     <ClInclude Include="light.h">
-      <Filter>ヘッダー ファイル\main\DirectX\3D</Filter>
-    </ClInclude>
-    <ClInclude Include="camera.h">
       <Filter>ヘッダー ファイル\main\DirectX\3D</Filter>
     </ClInclude>
     <ClInclude Include="3Dmodel.h">
@@ -172,6 +181,18 @@
     </ClInclude>
     <ClInclude Include="model.h">
       <Filter>ヘッダー ファイル\resouce</Filter>
+    </ClInclude>
+    <ClInclude Include="mesh.h">
+      <Filter>ヘッダー ファイル\object</Filter>
+    </ClInclude>
+    <ClInclude Include="endomacro.h">
+      <Filter>ヘッダー ファイル\resouce</Filter>
+    </ClInclude>
+    <ClInclude Include="camera.h">
+      <Filter>ヘッダー ファイル\main\DirectX\3D</Filter>
+    </ClInclude>
+    <ClInclude Include="field.h">
+      <Filter>ヘッダー ファイル\object</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
