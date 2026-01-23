@@ -67,10 +67,6 @@ void InitGame(void)
 
 	/*** モデルのスクリプト読み込み ***/
 	LoadModel();
-
-	/*** テクスチャの読み込み ***/
-	int nIdxTexture;
-	LoadTexture("data\\TEXTURE\\sea000.jpg", &nIdxTexture);
 }
 
 //==================================================================================
