@@ -19,6 +19,7 @@
 #include "player.h"
 #include "light.h"
 #include "thread.h"
+#include "motion.h"
 
 //**********************************************************************************
 //*** マクロ定義 ***
@@ -49,6 +50,9 @@ void InitGame(void)
 
 	/*** テクスチャの初期化 ***/
 	InitTexture();
+
+	/*** モーションの初期化 ***/
+	InitMotion();
 
 	/*** 3Dモデルの初期化 ***/
 	Init3DModel();
@@ -84,6 +88,9 @@ void UninitGame(void)
 
 	/*** テクスチャの終了 ***/
 	UninitTexture();
+
+	/*** モーションの終了 ***/
+	UninitMotion();
 
 	/*** 3Dモデルの終了 ***/
 	Uninit3DModel();
