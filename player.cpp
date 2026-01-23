@@ -19,7 +19,7 @@
 // ƒ}ƒNƒ’è‹`
 #define	MAX_PLAYER		(2)				// ƒvƒŒƒCƒ„[‚ÌÅ‘å”
 #define	MAX_TEX			(16)			// ƒeƒNƒXƒ`ƒƒ‚ÌÅ‘å”
-#define	PLAYER_MOVE		(2)				// ƒvƒŒƒCƒ„[‚ÌˆÚ“®‘¬“x
+#define	PLAYER_MOVE		(0.5)				// ƒvƒŒƒCƒ„[‚ÌˆÚ“®‘¬“x
 #define	ATTACK_MOVE		(1.0f)			// “Ëi‚ÌˆÚ“®‘¬“x
 #define	PLAYER_ROTMOVE	(0.3f)			// ƒvƒŒƒCƒ„[‚Ì‰ñ“]‘¬“x
 #define	PLAYER_INI		(0.2f)			// ƒvƒŒƒCƒ„[‚ÌŠµ«
@@ -170,14 +170,14 @@ void UpdatePlayer(void)
 
 		pPlayer->move.y += GRAVITY;	// d—Í‚ð‚©‚¯‘±‚¯‚é
 
+		// ˆÚ“®—Ê‚ÌXV
+		pPlayer->pos += pPlayer->move;
+
 		// ’n–Ê‚É’¾‚ñ‚¾Žž
 		if (pPlayer->pos.y < 0.0f)
 		{
 			pPlayer->pos.y = 0.0f;
 		}
-
-		// ˆÚ“®—Ê‚ÌXV
-		pPlayer->pos += pPlayer->move;
 
 		// Šµ«‚ðŠ|‚¯‚é
 		pPlayer->move.x += (0.0f - pPlayer->move.x) * (PLAYER_INI * 1.5f);
@@ -379,6 +379,32 @@ void MovePlayer(int nPlayer)
 					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.25f) * PLAYER_MOVE;
 					pPlayer->move.z += cosf(-Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
 				}
+
+				pPlayer->rotDest.y = D3DX_PI * 0.75f + Camerarot.y;	// –Ú•W‚ÌŠp“x‚ðÝ’è
+				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// Œ»Ý‚Æ–Ú•W‚ÌŠp“x‚Ì·•ª‚ðŽZo
+
+				// ‚à‚µA·•ª‚ªƒÎ‚ð’´‚¦‚½‚ç
+				if (pPlayer->rotDiff.y > D3DX_PI)
+				{
+					pPlayer->rotDiff.y -= D3DX_PI * 2;
+				}
+				else if (pPlayer->rotDiff.y < -D3DX_PI)
+				{
+					pPlayer->rotDiff.y += D3DX_PI * 2;
+				}
+
+				// ‰ñ“]‚É•â³‚ðŠ|‚¯‚é
+				pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
+
+				// ‚à‚µAŒ»Ý‚ÌŠp“x‚ªƒÎ‚ð’´‚¦‚½‚ç
+				if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
+				{
+					pPlayer->rot.y -= D3DX_PI * 2;
+				}
+				else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
+				{
+					pPlayer->rot.y += D3DX_PI * 2;
+				}
 			}
 			else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
 			{// S‚ÆA(¶‰º)‚Ì“ü—Í
@@ -393,6 +419,32 @@ void MovePlayer(int nPlayer)
 					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
 					pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
 				}
+
+				pPlayer->rotDest.y = D3DX_PI * 0.25f + Camerarot.y;	// –Ú•W‚ÌŠp“x‚ðÝ’è
+				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// Œ»Ý‚Æ–Ú•W‚ÌŠp“x‚Ì·•ª‚ðŽZo
+
+				// ‚à‚µA·•ª‚ªƒÎ‚ð’´‚¦‚½‚ç
+				if (pPlayer->rotDiff.y > D3DX_PI)
+				{
+					pPlayer->rotDiff.y -= D3DX_PI * 2;
+				}
+				else if (pPlayer->rotDiff.y < -D3DX_PI)
+				{
+					pPlayer->rotDiff.y += D3DX_PI * 2;
+				}
+
+				// ‰ñ“]‚É•â³‚ðŠ|‚¯‚é
+				pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
+
+				// ‚à‚µAŒ»Ý‚ÌŠp“x‚ªƒÎ‚ð’´‚¦‚½‚ç
+				if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
+				{
+					pPlayer->rot.y -= D3DX_PI * 2;
+				}
+				else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
+				{
+					pPlayer->rot.y += D3DX_PI * 2;
+				}
 			}
 			else
 			{// A’P‘Ì‚Ì“ü—Í
@@ -406,6 +458,32 @@ void MovePlayer(int nPlayer)
 				{// ’nã‚Å‚ÌˆÚ“®‘¬“x
 					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
 					pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
+				}
+
+				pPlayer->rotDest.y = D3DX_PI * 0.5f + Camerarot.y;	// –Ú•W‚ÌŠp“x‚ðÝ’è
+				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// Œ»Ý‚Æ–Ú•W‚ÌŠp“x‚Ì·•ª‚ðŽZo
+
+				// ‚à‚µA·•ª‚ªƒÎ‚ð’´‚¦‚½‚ç
+				if (pPlayer->rotDiff.y > D3DX_PI)
+				{
+					pPlayer->rotDiff.y -= D3DX_PI * 2;
+				}
+				else if (pPlayer->rotDiff.y < -D3DX_PI)
+				{
+					pPlayer->rotDiff.y += D3DX_PI * 2;
+				}
+
+				// ‰ñ“]‚É•â³‚ðŠ|‚¯‚é
+				pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
+
+				// ‚à‚µAŒ»Ý‚ÌŠp“x‚ªƒÎ‚ð’´‚¦‚½‚ç
+				if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
+				{
+					pPlayer->rot.y -= D3DX_PI * 2;
+				}
+				else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
+				{
+					pPlayer->rot.y += D3DX_PI * 2;
 				}
 			}
 		}
@@ -425,6 +503,32 @@ void MovePlayer(int nPlayer)
 					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
 					pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
 				}
+
+				pPlayer->rotDest.y = -D3DX_PI * 0.75f + Camerarot.y;	// –Ú•W‚ÌŠp“x‚ðÝ’è
+				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// Œ»Ý‚Æ–Ú•W‚ÌŠp“x‚Ì·•ª‚ðŽZo
+
+				// ‚à‚µA·•ª‚ªƒÎ‚ð’´‚¦‚½‚ç
+				if (pPlayer->rotDiff.y > D3DX_PI)
+				{
+					pPlayer->rotDiff.y -= D3DX_PI * 2;
+				}
+				else if (pPlayer->rotDiff.y < -D3DX_PI)
+				{
+					pPlayer->rotDiff.y += D3DX_PI * 2;
+				}
+
+				// ‰ñ“]‚É•â³‚ðŠ|‚¯‚é
+				pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
+
+				// ‚à‚µAŒ»Ý‚ÌŠp“x‚ªƒÎ‚ð’´‚¦‚½‚ç
+				if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
+				{
+					pPlayer->rot.y -= D3DX_PI * 2;
+				}
+				else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
+				{
+					pPlayer->rot.y += D3DX_PI * 2;
+				}
 			}
 			else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
 			{// S‚ÆD(‰E‰º)‚Ì“ü—Í
@@ -439,6 +543,32 @@ void MovePlayer(int nPlayer)
 					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.75f) * PLAYER_MOVE;
 					pPlayer->move.z += cosf(-Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
 				}
+
+				pPlayer->rotDest.y = -D3DX_PI * 0.25f + Camerarot.y;	// –Ú•W‚ÌŠp“x‚ðÝ’è
+				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// Œ»Ý‚Æ–Ú•W‚ÌŠp“x‚Ì·•ª‚ðŽZo
+
+				// ‚à‚µA·•ª‚ªƒÎ‚ð’´‚¦‚½‚ç
+				if (pPlayer->rotDiff.y > D3DX_PI)
+				{
+					pPlayer->rotDiff.y -= D3DX_PI * 2;
+				}
+				else if (pPlayer->rotDiff.y < -D3DX_PI)
+				{
+					pPlayer->rotDiff.y += D3DX_PI * 2;
+				}
+
+				// ‰ñ“]‚É•â³‚ðŠ|‚¯‚é
+				pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
+
+				// ‚à‚µAŒ»Ý‚ÌŠp“x‚ªƒÎ‚ð’´‚¦‚½‚ç
+				if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
+				{
+					pPlayer->rot.y -= D3DX_PI * 2;
+				}
+				else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
+				{
+					pPlayer->rot.y += D3DX_PI * 2;
+				}
 			}
 			else
 			{// D‚¾‚¯‚Ì“ü—Í
@@ -452,6 +582,32 @@ void MovePlayer(int nPlayer)
 				{// ’nã‚Å‚ÌˆÚ“®‘¬“x
 					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
 					pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
+				}
+
+				pPlayer->rotDest.y = -D3DX_PI * 0.5f + Camerarot.y;	// –Ú•W‚ÌŠp“x‚ðÝ’è
+				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// Œ»Ý‚Æ–Ú•W‚ÌŠp“x‚Ì·•ª‚ðŽZo
+
+				// ‚à‚µA·•ª‚ªƒÎ‚ð’´‚¦‚½‚ç
+				if (pPlayer->rotDiff.y > D3DX_PI)
+				{
+					pPlayer->rotDiff.y -= D3DX_PI * 2;
+				}
+				else if (pPlayer->rotDiff.y < -D3DX_PI)
+				{
+					pPlayer->rotDiff.y += D3DX_PI * 2;
+				}
+
+				// ‰ñ“]‚É•â³‚ðŠ|‚¯‚é
+				pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
+
+				// ‚à‚µAŒ»Ý‚ÌŠp“x‚ªƒÎ‚ð’´‚¦‚½‚ç
+				if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
+				{
+					pPlayer->rot.y -= D3DX_PI * 2;
+				}
+				else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
+				{
+					pPlayer->rot.y += D3DX_PI * 2;
 				}
 			}
 		}
@@ -468,6 +624,32 @@ void MovePlayer(int nPlayer)
 				pPlayer->move.z += cosf(Camerarot.y) * PLAYER_MOVE;
 				pPlayer->move.x += sinf(Camerarot.y) * PLAYER_MOVE;
 			}
+
+			pPlayer->rotDest.y = D3DX_PI + Camerarot.y;	// –Ú•W‚ÌŠp“x‚ðÝ’è
+			pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// Œ»Ý‚Æ–Ú•W‚ÌŠp“x‚Ì·•ª‚ðŽZo
+
+			// ‚à‚µA·•ª‚ªƒÎ‚ð’´‚¦‚½‚ç
+			if (pPlayer->rotDiff.y > D3DX_PI)
+			{
+				pPlayer->rotDiff.y -= D3DX_PI * 2;
+			}
+			else if (pPlayer->rotDiff.y < -D3DX_PI)
+			{
+				pPlayer->rotDiff.y += D3DX_PI * 2;
+			}
+
+			// ‰ñ“]‚É•â³‚ðŠ|‚¯‚é
+			pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
+
+			// ‚à‚µAŒ»Ý‚ÌŠp“x‚ªƒÎ‚ð’´‚¦‚½‚ç
+			if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
+			{
+				pPlayer->rot.y -= D3DX_PI * 2;
+			}
+			else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
+			{
+				pPlayer->rot.y += D3DX_PI * 2;
+			}
 		}
 		else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
 		{//SƒL[‚ª‰Ÿ‚³‚ê‚é
@@ -481,6 +663,32 @@ void MovePlayer(int nPlayer)
 			{// ’nã‚Å‚ÌˆÚ“®‘¬“x
 				pPlayer->move.z += cosf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
 				pPlayer->move.x += sinf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
+			}
+
+			pPlayer->rotDest.y = Camerarot.y;	// –Ú•W‚ÌŠp“x‚ðÝ’è
+			pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// Œ»Ý‚Æ–Ú•W‚ÌŠp“x‚Ì·•ª‚ðŽZo
+
+			// ‚à‚µA·•ª‚ªƒÎ‚ð’´‚¦‚½‚ç
+			if (pPlayer->rotDiff.y > D3DX_PI)
+			{
+				pPlayer->rotDiff.y -= D3DX_PI * 2;
+			}
+			else if (pPlayer->rotDiff.y < -D3DX_PI)
+			{
+				pPlayer->rotDiff.y += D3DX_PI * 2;
+			}
+
+			// ‰ñ“]‚É•â³‚ðŠ|‚¯‚é
+			pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
+
+			// ‚à‚µAŒ»Ý‚ÌŠp“x‚ªƒÎ‚ð’´‚¦‚½‚ç
+			if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
+			{
+				pPlayer->rot.y -= D3DX_PI * 2;
+			}
+			else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
+			{
+				pPlayer->rot.y += D3DX_PI * 2;
 			}
 		}
 	}
@@ -502,6 +710,32 @@ void MovePlayer(int nPlayer)
 					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.25f) * PLAYER_MOVE;
 					pPlayer->move.z += cosf(-Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
 				}
+
+				pPlayer->rotDest.y = D3DX_PI * 0.75f + Camerarot.y;	// –Ú•W‚ÌŠp“x‚ðÝ’è
+				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// Œ»Ý‚Æ–Ú•W‚ÌŠp“x‚Ì·•ª‚ðŽZo
+
+				// ‚à‚µA·•ª‚ªƒÎ‚ð’´‚¦‚½‚ç
+				if (pPlayer->rotDiff.y > D3DX_PI)
+				{
+					pPlayer->rotDiff.y -= D3DX_PI * 2;
+				}
+				else if (pPlayer->rotDiff.y < -D3DX_PI)
+				{
+					pPlayer->rotDiff.y += D3DX_PI * 2;
+				}
+
+				// ‰ñ“]‚É•â³‚ðŠ|‚¯‚é
+				pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
+
+				// ‚à‚µAŒ»Ý‚ÌŠp“x‚ªƒÎ‚ð’´‚¦‚½‚ç
+				if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
+				{
+					pPlayer->rot.y -= D3DX_PI * 2;
+				}
+				else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
+				{
+					pPlayer->rot.y += D3DX_PI * 2;
+				}
 			}
 			else if (GetKeyboardPress(DIK_DOWN) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
 			{// ¶‰º‚Ì“ü—Í
@@ -516,6 +750,32 @@ void MovePlayer(int nPlayer)
 					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
 					pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
 				}
+
+				pPlayer->rotDest.y = D3DX_PI * 0.25f + Camerarot.y;	// –Ú•W‚ÌŠp“x‚ðÝ’è
+				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// Œ»Ý‚Æ–Ú•W‚ÌŠp“x‚Ì·•ª‚ðŽZo
+
+				// ‚à‚µA·•ª‚ªƒÎ‚ð’´‚¦‚½‚ç
+				if (pPlayer->rotDiff.y > D3DX_PI)
+				{
+					pPlayer->rotDiff.y -= D3DX_PI * 2;
+				}
+				else if (pPlayer->rotDiff.y < -D3DX_PI)
+				{
+					pPlayer->rotDiff.y += D3DX_PI * 2;
+				}
+
+				// ‰ñ“]‚É•â³‚ðŠ|‚¯‚é
+				pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
+
+				// ‚à‚µAŒ»Ý‚ÌŠp“x‚ªƒÎ‚ð’´‚¦‚½‚ç
+				if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
+				{
+					pPlayer->rot.y -= D3DX_PI * 2;
+				}
+				else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
+				{
+					pPlayer->rot.y += D3DX_PI * 2;
+				}
 			}
 			else
 			{// ã–îˆó’P‘Ì‚Ì“ü—Í
@@ -529,6 +789,32 @@ void MovePlayer(int nPlayer)
 				{// ’nã‚Å‚ÌˆÚ“®‘¬“x
 					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
 					pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
+				}
+
+				pPlayer->rotDest.y = D3DX_PI * 0.5f + Camerarot.y;	// –Ú•W‚ÌŠp“x‚ðÝ’è
+				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// Œ»Ý‚Æ–Ú•W‚ÌŠp“x‚Ì·•ª‚ðŽZo
+
+				// ‚à‚µA·•ª‚ªƒÎ‚ð’´‚¦‚½‚ç
+				if (pPlayer->rotDiff.y > D3DX_PI)
+				{
+					pPlayer->rotDiff.y -= D3DX_PI * 2;
+				}
+				else if (pPlayer->rotDiff.y < -D3DX_PI)
+				{
+					pPlayer->rotDiff.y += D3DX_PI * 2;
+				}
+
+				// ‰ñ“]‚É•â³‚ðŠ|‚¯‚é
+				pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
+
+				// ‚à‚µAŒ»Ý‚ÌŠp“x‚ªƒÎ‚ð’´‚¦‚½‚ç
+				if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
+				{
+					pPlayer->rot.y -= D3DX_PI * 2;
+				}
+				else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
+				{
+					pPlayer->rot.y += D3DX_PI * 2;
 				}
 			}
 		}
@@ -548,6 +834,32 @@ void MovePlayer(int nPlayer)
 					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
 					pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
 				}
+
+				pPlayer->rotDest.y = -D3DX_PI * 0.75f + Camerarot.y;	// –Ú•W‚ÌŠp“x‚ðÝ’è
+				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// Œ»Ý‚Æ–Ú•W‚ÌŠp“x‚Ì·•ª‚ðŽZo
+
+				// ‚à‚µA·•ª‚ªƒÎ‚ð’´‚¦‚½‚ç
+				if (pPlayer->rotDiff.y > D3DX_PI)
+				{
+					pPlayer->rotDiff.y -= D3DX_PI * 2;
+				}
+				else if (pPlayer->rotDiff.y < -D3DX_PI)
+				{
+					pPlayer->rotDiff.y += D3DX_PI * 2;
+				}
+
+				// ‰ñ“]‚É•â³‚ðŠ|‚¯‚é
+				pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
+
+				// ‚à‚µAŒ»Ý‚ÌŠp“x‚ªƒÎ‚ð’´‚¦‚½‚ç
+				if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
+				{
+					pPlayer->rot.y -= D3DX_PI * 2;
+				}
+				else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
+				{
+					pPlayer->rot.y += D3DX_PI * 2;
+				}
 			}
 			else if (GetKeyboardPress(DIK_DOWN) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
 			{// ‰E‰º‚Ì“ü—Í
@@ -562,6 +874,32 @@ void MovePlayer(int nPlayer)
 					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.75f) * PLAYER_MOVE;
 					pPlayer->move.z += cosf(-Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
 				}
+
+				pPlayer->rotDest.y = -D3DX_PI * 0.25f + Camerarot.y;	// –Ú•W‚ÌŠp“x‚ðÝ’è
+				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// Œ»Ý‚Æ–Ú•W‚ÌŠp“x‚Ì·•ª‚ðŽZo
+
+				// ‚à‚µA·•ª‚ªƒÎ‚ð’´‚¦‚½‚ç
+				if (pPlayer->rotDiff.y > D3DX_PI)
+				{
+					pPlayer->rotDiff.y -= D3DX_PI * 2;
+				}
+				else if (pPlayer->rotDiff.y < -D3DX_PI)
+				{
+					pPlayer->rotDiff.y += D3DX_PI * 2;
+				}
+
+				// ‰ñ“]‚É•â³‚ðŠ|‚¯‚é
+				pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
+
+				// ‚à‚µAŒ»Ý‚ÌŠp“x‚ªƒÎ‚ð’´‚¦‚½‚ç
+				if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
+				{
+					pPlayer->rot.y -= D3DX_PI * 2;
+				}
+				else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
+				{
+					pPlayer->rot.y += D3DX_PI * 2;
+				}
 			}
 			else
 			{// ‰E‚¾‚¯‚Ì“ü—Í
@@ -575,6 +913,32 @@ void MovePlayer(int nPlayer)
 				{// ’nã‚Å‚ÌˆÚ“®‘¬“x
 					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
 					pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
+				}
+
+				pPlayer->rotDest.y = -D3DX_PI * 0.5f + Camerarot.y;	// –Ú•W‚ÌŠp“x‚ðÝ’è
+				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// Œ»Ý‚Æ–Ú•W‚ÌŠp“x‚Ì·•ª‚ðŽZo
+
+				// ‚à‚µA·•ª‚ªƒÎ‚ð’´‚¦‚½‚ç
+				if (pPlayer->rotDiff.y > D3DX_PI)
+				{
+					pPlayer->rotDiff.y -= D3DX_PI * 2;
+				}
+				else if (pPlayer->rotDiff.y < -D3DX_PI)
+				{
+					pPlayer->rotDiff.y += D3DX_PI * 2;
+				}
+
+				// ‰ñ“]‚É•â³‚ðŠ|‚¯‚é
+				pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
+
+				// ‚à‚µAŒ»Ý‚ÌŠp“x‚ªƒÎ‚ð’´‚¦‚½‚ç
+				if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
+				{
+					pPlayer->rot.y -= D3DX_PI * 2;
+				}
+				else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
+				{
+					pPlayer->rot.y += D3DX_PI * 2;
 				}
 			}
 		}
@@ -591,6 +955,33 @@ void MovePlayer(int nPlayer)
 				pPlayer->move.z += cosf(Camerarot.y) * PLAYER_MOVE;
 				pPlayer->move.x += sinf(Camerarot.y) * PLAYER_MOVE;
 			}
+
+			pPlayer->rotDest.y = D3DX_PI + Camerarot.y;	// –Ú•W‚ÌŠp“x‚ðÝ’è
+			pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// Œ»Ý‚Æ–Ú•W‚ÌŠp“x‚Ì·•ª‚ðŽZo
+
+			// ‚à‚µA·•ª‚ªƒÎ‚ð’´‚¦‚½‚ç
+			if (pPlayer->rotDiff.y > D3DX_PI)
+			{
+				pPlayer->rotDiff.y -= D3DX_PI * 2;
+			}
+			else if (pPlayer->rotDiff.y < -D3DX_PI)
+			{
+				pPlayer->rotDiff.y += D3DX_PI * 2;
+			}
+
+			// ‰ñ“]‚É•â³‚ðŠ|‚¯‚é
+			pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
+
+			// ‚à‚µAŒ»Ý‚ÌŠp“x‚ªƒÎ‚ð’´‚¦‚½‚ç
+			if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
+			{
+				pPlayer->rot.y -= D3DX_PI * 2;
+			}
+			else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
+			{
+				pPlayer->rot.y += D3DX_PI * 2;
+			}
+
 		}
 		else if (GetKeyboardPress(DIK_DOWN) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
 		{//SƒL[‚ª‰Ÿ‚³‚ê‚é
@@ -604,6 +995,32 @@ void MovePlayer(int nPlayer)
 			{// ’nã‚Å‚ÌˆÚ“®‘¬“x
 				pPlayer->move.z += cosf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
 				pPlayer->move.x += sinf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
+			}
+
+			pPlayer->rotDest.y = Camerarot.y;	// –Ú•W‚ÌŠp“x‚ðÝ’è
+			pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// Œ»Ý‚Æ–Ú•W‚ÌŠp“x‚Ì·•ª‚ðŽZo
+
+			// ‚à‚µA·•ª‚ªƒÎ‚ð’´‚¦‚½‚ç
+			if (pPlayer->rotDiff.y > D3DX_PI)
+			{
+				pPlayer->rotDiff.y -= D3DX_PI * 2;
+			}
+			else if (pPlayer->rotDiff.y < -D3DX_PI)
+			{
+				pPlayer->rotDiff.y += D3DX_PI * 2;
+			}
+
+			// ‰ñ“]‚É•â³‚ðŠ|‚¯‚é
+			pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
+
+			// ‚à‚µAŒ»Ý‚ÌŠp“x‚ªƒÎ‚ð’´‚¦‚½‚ç
+			if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
+			{
+				pPlayer->rot.y -= D3DX_PI * 2;
+			}
+			else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
+			{
+				pPlayer->rot.y += D3DX_PI * 2;
 			}
 		}
 	}
