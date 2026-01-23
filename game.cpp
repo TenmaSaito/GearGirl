@@ -78,22 +78,6 @@ void InitGame(void)
 
 	/*** 床設置 ***/
 	SetField(D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, 1000.0f, 1000.0f, nIdxTexture, 16, 16, D3DCULL_CCW);
-
-	D3DVIEWPORT9 viewport;
-
-	// ビューポートの設定
-	viewport.X = 0.0f;
-	viewport.Y = 0.0f;
-	viewport.Width = SCREEN_WIDTH;
-	viewport.Height = SCREEN_HEIGHT;
-	viewport.MinZ = 0.0f;
-	viewport.MaxZ = 1.0f;
-
-	// カメラの設置
-	g_nIdxCamera = AddCamera(D3DXVECTOR3(0.0f, 75.0f, -300.0f),
-		D3DXVECTOR3(0.0f, 0.0f, 0.0f),
-		D3DXVECTOR3(0.0f, 0.0f, D3DX_HALFPI),
-		viewport);
 }
 
 //==================================================================================
@@ -144,7 +128,7 @@ void UpdateGame(void)
 	/*** Aの更新 ***/
 
 	/*** カメラの更新 ***/
-	UpdateCamera(g_nIdxCamera);
+	UpdateCamera();
 
 	/*** 3Dモデルの更新 ***/
 	Update3DModel();
@@ -166,9 +150,9 @@ void DrawGame(void)
 {
 	// カメラの数分だけ描画
 	for (int nCntDraw = 0; nCntDraw < GetCameraNum(); nCntDraw++)
-	{
+	{		
 		/*** カメラの設置 ***/
-		SetCamera(nCntDraw);
+		SetCamera();
 
 		// VERTEX_3D ============================================
 		/*** Aの描画 ***/

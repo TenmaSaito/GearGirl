@@ -14,6 +14,7 @@
 //**************************************************************
 // グローバル変数宣言
 Camera g_aCamera[MAX_CAMERA];
+int		g_nEnableCamera;
 
 //**************************************************************
 // プロトタイプ宣言
@@ -33,6 +34,7 @@ void InitCamera(void)
 
 	//**************************************************************
 	// 各値の初期化
+	g_nEnableCamera = 2;					// 起動しているカメラの数
 	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCamera++)
 	{
 		pCamera->posV = D3DXVECTOR3 CAMERA_V_DEFPOS;							// 視点
@@ -41,6 +43,7 @@ void InitCamera(void)
 		pCamera->vecU = D3DXVECTOR3(0.0f, 1.0f, 0.0f);							// 上方向ベクトル
 		pCamera->rot = D3DXVECTOR3(D3DX_PI * 0.2f, D3DX_PI * 0.5f, 0.0f);		// カメラの角度
 		pCamera->fDist = CAMERA_DISTANS;										// 視点と注視点の距離
+
 		pCamera->viewport.X = SCREEN_WIDTH * 0.5f * nCntCamera;					// 画面左上 X 座標
 		pCamera->viewport.Y = 0.0f;												// 画面左上 Y 座標
 		pCamera->viewport.Width = SCREEN_WIDTH * 0.5f;							// 表示画面の横幅
@@ -49,7 +52,9 @@ void InitCamera(void)
 		pCamera->viewport.MaxZ = 1.0f;
 		pCamera->bAoutRot = false;												// 自動で回り込みOFF
 		pCamera->nCntAoutRot = 0;												//		〃		 ONにするまでのカウンタ
-		pCamera->bUse = true;
+		pCamera->bUse = false;
+		pCamera->bEnable = false;
+
 	}
 }
 
@@ -329,41 +334,50 @@ void CameraOrbit(P_CAMERA pCamera)
 //=========================================================================================
 // カメラ設置
 //=========================================================================================
-void SetCamera(P_CAMERA pCamera)
+void SetCamera(void)
 {
 	//**************************************************************
 	// 変数宣言
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();		// デバイスへのポインタ
+	P_CAMERA			pCam = GetCameraArray();
 
-	//**************************************************************
-	// ビューポートの設定
-	pDevice->SetViewport(&pCamera->viewport);
+	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCam++)
+	{
+		if (pCam->bUse && pCam->bEnable)
+		{
+			//**************************************************************
+			// ビューポートの設定
+			pDevice->SetViewport(&pCam->viewport);
 
-	//**************************************************************
-	// プロジェクションマトリックスの初期化
-	D3DXMatrixIdentity(&pCamera->mtxProjection);
-	
-	// プロジェクションマトリックスを作成
-	D3DXMatrixPerspectiveFovLH(&pCamera->mtxProjection,
-								D3DXToRadian(VIEW_RADIAN),					// 視野角
-								(float)pCamera->viewport.Width/(float)pCamera->viewport.Height,	// アスペクト比
-								VIEW_MINDEPTH,								// 最短描画距離
-								VIEW_MAXDEPTH);								// 最大描画距離
+			//**************************************************************
+			// プロジェクションマトリックスの初期化
+			D3DXMatrixIdentity(&pCam->mtxProjection);
 
-	// プロジェクションマトリックスを設定
-	pDevice->SetTransform(D3DTS_PROJECTION,&pCamera->mtxProjection);
+			// プロジェクションマトリックスを作成
+			D3DXMatrixPerspectiveFovLH(&pCam->mtxProjection,
+				D3DXToRadian(VIEW_RADIAN),					// 視野角
+				(float)pCam->viewport.Width / (float)pCam->viewport.Height,	// アスペクト比
+				VIEW_MINDEPTH,								// 最短描画距離
+				VIEW_MAXDEPTH);								// 最大描画距離
 
-	//**************************************************************
-	// ビューマトリックスの初期化
-	D3DXMatrixIdentity(&pCamera->mtxView);
+			// プロジェクションマトリックスを設定
+			pDevice->SetTransform(D3DTS_PROJECTION, &pCam->mtxProjection);
 
-	// ビューマトリックスの作成
-	D3DXMatrixLookAtLH(&pCamera->mtxView, &pCamera->posV, &pCamera->posR, &pCamera->vecU);
-	
-	// ビューマトリックスの設定
-	pDevice->SetTransform(D3DTS_VIEW, &pCamera->mtxView);
+			//**************************************************************
+			// ビューマトリックスの初期化
+			D3DXMatrixIdentity(&pCam->mtxView);
 
-	EndDevice();// デバイス取得終了
+			// ビューマトリックスの作成
+			D3DXMatrixLookAtLH(&pCam->mtxView, &pCam->posV, &pCam->posR, &pCam->vecU);
+
+			// ビューマトリックスの設定
+			pDevice->SetTransform(D3DTS_VIEW, &pCam->mtxView);
+
+			EndDevice();// デバイス取得終了
+
+			pCam->bEnable = false;	// 描画に使用したので更新されるまで更新されるまで描画に使用しない
+		}
+	}
 }
 
 //=========================================================================================
@@ -375,7 +389,7 @@ void SetPotisionCamera(int nIdx, vec3 pos)
 	// 変数宣言
 	P_CAMERA pCam = GetCameraArray();
 
-	if (-1 < nIdx && nIdx < MAX_CAMERA)
+	CAMERA_NULLCHECK(nIdx)
 	{
 		pCam += nIdx;
 		if (pCam->bUse)
@@ -383,6 +397,26 @@ void SetPotisionCamera(int nIdx, vec3 pos)
 			pCam->posR = pos;
 		}
 	}
+}
+
+//=========================================================================================
+// カメラを描画に使用
+//=========================================================================================
+void CameraEnable(int nIdx)
+{
+	//**************************************************************
+	// 変数宣言
+	P_CAMERA pCam;
+
+	CAMERA_NULLCHECK(nIdx)
+	{
+		if (g_aCamera[nIdx].bUse)
+		{
+			g_aCamera[nIdx].bEnable = true;
+		}
+	}
+
+
 }
 
 //=========================================================================================
@@ -461,6 +495,14 @@ void GetCameraRot(int nCamNum, vec3* pRot)
 
 	*pRot = rot;
 
+}
+
+//=========================================================================================
+// 使用中のカメラの数を取得
+//=========================================================================================
+int GetCameraNum(void)
+{
+	return g_nEnableCamera;
 }
 
 //=========================================================================================
