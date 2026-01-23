@@ -101,5 +101,6 @@ void SetMotion(MOTIONTYPE motionType, bool bUseBrend, int nBlendFrame, PlayerTyp
 int GetNumPlayer(void);		// プレイ人数情報を渡す
 int GetActivePlayer(void);	// 操作しているプレイヤー情報を渡す
 void SetPlayer(D3DXVECTOR3* pPosGirl, D3DXVECTOR3* pPosMouse);	// プレイヤーの位置情報を渡す
+void ChangeNumPlayer(void);	// プレイ人数を切り替える(デバッグ用)
 
 #endif

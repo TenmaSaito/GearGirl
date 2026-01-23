@@ -133,15 +133,18 @@ void UpdatePlayer(void)
 		//JumpPlayer();	// ジャンプに関する処理
 
 		// 操作する対象を切り替える
-		if (GetJoypadPress(nCntPlayer, JOYKEY_LB) == true || GetJoypadPress(nCntPlayer, JOYKEY_RB) == true)
-		{
-			if (g_ActivePlayer == 1)
-			{// ネズミ→少女
-				g_ActivePlayer = 0;
-			}
-			else
-			{// 少女→ネズミ
-				g_ActivePlayer = 1;
+		if (g_nNumPlayer == 0)
+		{// シングルプレイ時
+			if (GetJoypadPress(nCntPlayer, JOYKEY_LB) == true || GetJoypadPress(nCntPlayer, JOYKEY_RB) == true)
+			{
+				if (g_ActivePlayer == 1)
+				{// ネズミ→少女
+					g_ActivePlayer = 0;
+				}
+				else
+				{// 少女→ネズミ
+					g_ActivePlayer = 1;
+				}
 			}
 		}
 
@@ -171,6 +174,9 @@ void UpdatePlayer(void)
 
 		//UpdateMotion();
 	}
+
+	// デバッグ用のプレイ人数切り替え処理
+	ChangeNumPlayer();
 }
 
 // =================================================
@@ -1450,7 +1456,7 @@ void SetMotion(MOTIONTYPE motionType, bool bUseBrend, int nBlendFrame, PlayerTyp
 		g_Player[PlayerType].bFinishMotion = false;		// モーションが終了したかどうか
 	}
 
-}
+	}
 #endif
 // =================================================
 // プレイ人数情報を渡す
@@ -1475,4 +1481,23 @@ void SetPlayer(D3DXVECTOR3* pPosGirl, D3DXVECTOR3* pPosMouse)
 {
 	*pPosGirl = g_Player[PLAYERTYPE_GIRL].pos;
 	*pPosMouse = g_Player[PLAYERTYPE_MOUSE].pos;
+}
+
+// =================================================
+// プレイ人数を切り替える(デバッグ用)
+// =================================================
+void ChangeNumPlayer(void)
+{
+	// 1を押して、シングル・マルチプレイを切り替える
+	if (GetKeyboardTrigger(DIK_1) == true)
+	{
+		if (g_nNumPlayer == 1)
+		{
+			g_nNumPlayer = 0;
+		}
+		else
+		{
+			g_nNumPlayer = 1;
+		}
+	}
 }
