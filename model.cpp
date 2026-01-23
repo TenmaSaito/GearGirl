@@ -321,6 +321,8 @@ bool LoadModel(void)
 
 				if (pEqual != NULL)
 				{
+					HRESULT hr;		// エラー文用
+
 					// アドレスを1こずらす
 					pEqual++;
 
@@ -330,7 +332,7 @@ bool LoadModel(void)
 					g_Model[nCntModel].dwNumMat = 0;
 
 					//Xファイルの読み込み
-					D3DXLoadMeshFromX(&g_ModelName[nCntModel][0],
+					hr = D3DXLoadMeshFromX(&g_ModelName[nCntModel][0],
 						D3DXMESH_SYSTEMMEM,
 						pDevice,
 						NULL,
@@ -338,6 +340,14 @@ bool LoadModel(void)
 						NULL,
 						&g_Model[nCntModel].dwNumMat,
 						&g_Model[nCntModel].pMesh);
+
+					if (FAILED(hr))
+					{ // 読み込み失敗時
+						MyMathUtil::GenerateMessageBox(MB_ICONERROR,
+							"ERROR!",
+							"Xファイルの読み込みに失敗しました!\n対象パス : %s",
+							&g_ModelName[nCntModel][0]);
+					}
 
 					//マテリアルデータへのポインタを取得
 					pMat = (D3DXMATERIAL*)g_Model[nCntModel].pBuffMat->GetBufferPointer();
