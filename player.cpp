@@ -145,7 +145,7 @@ void UpdatePlayer(void)
 			}
 		}
 
-		pPlayer->move.y += GRAVITY;	// 重力をかけ続ける
+		//pPlayer->move.y += GRAVITY;	// 重力をかけ続ける
 
 		// 移動量の更新
 		pPlayer->pos += pPlayer->move;
