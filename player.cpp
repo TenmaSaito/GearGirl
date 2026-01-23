@@ -368,17 +368,8 @@ void MovePlayer(int nPlayer)
 
 			if (GetKeyboardPress(DIK_W) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
 			{// WとA(左上)の入力
-
-				if (pPlayer->bJump == true)
-				{// 上空での移動速度
-					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
-					pPlayer->move.z += cosf(-Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
-				}
-				else
-				{// 地上での移動速度
-					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.25f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(-Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
-				}
+				pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.25f) * PLAYER_MOVE;
+				pPlayer->move.z += cosf(-Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
 
 				pPlayer->rotDest.y = D3DX_PI * 0.75f + Camerarot.y;	// 目標の角度を設定
 				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
@@ -408,17 +399,8 @@ void MovePlayer(int nPlayer)
 			}
 			else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
 			{// SとA(左下)の入力
-
-				if (pPlayer->bJump == true)
-				{// 上空での移動速度
-					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
-					pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
-				}
-				else
-				{// 地上での移動速度
-					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
-				}
+				pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
+				pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
 
 				pPlayer->rotDest.y = D3DX_PI * 0.25f + Camerarot.y;	// 目標の角度を設定
 				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
@@ -448,17 +430,8 @@ void MovePlayer(int nPlayer)
 			}
 			else
 			{// A単体の入力
-
-				if (pPlayer->bJump == true)
-				{// 上空での移動速度
-					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
-					pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
-				}
-				else
-				{// 地上での移動速度
-					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
-				}
+				pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
+				pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
 
 				pPlayer->rotDest.y = D3DX_PI * 0.5f + Camerarot.y;	// 目標の角度を設定
 				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
@@ -492,17 +465,8 @@ void MovePlayer(int nPlayer)
 
 			if (GetKeyboardPress(DIK_W) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
 			{// WとD(右上)の入力
-
-				if (pPlayer->bJump == true)
-				{// 上空での移動速度
-					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
-					pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
-				}
-				else
-				{// 地上での移動速度
-					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
-				}
+				pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
+				pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
 
 				pPlayer->rotDest.y = -D3DX_PI * 0.75f + Camerarot.y;	// 目標の角度を設定
 				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
@@ -532,17 +496,8 @@ void MovePlayer(int nPlayer)
 			}
 			else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
 			{// SとD(右下)の入力
-
-				if (pPlayer->bJump == true)
-				{// 上空での移動速度
-					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
-					pPlayer->move.z += cosf(-Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
-				}
-				else
-				{// 地上での移動速度
-					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.75f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(-Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
-				}
+				pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.75f) * PLAYER_MOVE;
+				pPlayer->move.z += cosf(-Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
 
 				pPlayer->rotDest.y = -D3DX_PI * 0.25f + Camerarot.y;	// 目標の角度を設定
 				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
@@ -572,17 +527,8 @@ void MovePlayer(int nPlayer)
 			}
 			else
 			{// Dだけの入力
-
-				if (pPlayer->bJump == true)
-				{// 上空での移動速度
-					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
-					pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
-				}
-				else
-				{// 地上での移動速度
-					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
-				}
+				pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
+				pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
 
 				pPlayer->rotDest.y = -D3DX_PI * 0.5f + Camerarot.y;	// 目標の角度を設定
 				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
@@ -613,17 +559,8 @@ void MovePlayer(int nPlayer)
 		}
 		else if (GetKeyboardPress(DIK_W) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
 		{//Wキーが押される
-
-			if (pPlayer->bJump == true)
-			{// 上空での移動速度
-				pPlayer->move.z += cosf(Camerarot.y) * PLAYER_MOVE * 0.7f;
-				pPlayer->move.x += sinf(Camerarot.y) * PLAYER_MOVE * 0.7f;
-			}
-			else
-			{// 地上での移動速度
-				pPlayer->move.z += cosf(Camerarot.y) * PLAYER_MOVE;
-				pPlayer->move.x += sinf(Camerarot.y) * PLAYER_MOVE;
-			}
+			pPlayer->move.z += cosf(Camerarot.y) * PLAYER_MOVE;
+			pPlayer->move.x += sinf(Camerarot.y) * PLAYER_MOVE;
 
 			pPlayer->rotDest.y = D3DX_PI + Camerarot.y;	// 目標の角度を設定
 			pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
@@ -653,17 +590,8 @@ void MovePlayer(int nPlayer)
 		}
 		else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
 		{//Sキーが押される
-
-			if (pPlayer->bJump == true)
-			{// 上空での移動速度
-				pPlayer->move.z += cosf(Camerarot.y - D3DX_PI) * PLAYER_MOVE * 0.7f;
-				pPlayer->move.x += sinf(Camerarot.y - D3DX_PI) * PLAYER_MOVE * 0.7f;
-			}
-			else
-			{// 地上での移動速度
-				pPlayer->move.z += cosf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
-				pPlayer->move.x += sinf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
-			}
+			pPlayer->move.z += cosf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
+			pPlayer->move.x += sinf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
 
 			pPlayer->rotDest.y = Camerarot.y;	// 目標の角度を設定
 			pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
@@ -695,10 +623,10 @@ void MovePlayer(int nPlayer)
 	else
 	{// ネズミの操作
 		if (GetKeyboardPress(DIK_LEFT) == true || GetJoypadPress(nPlayer, JOYKEY_LEFT) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_LEFT))
-		{//左矢印キーが押される	
-			if (GetKeyboardPress(DIK_UP) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
-			{// 左上の入力
+		{//Aキーが押される	
 
+			if (GetKeyboardPress(DIK_UP) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
+			{// WとA(左上)の入力
 				pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.25f) * PLAYER_MOVE;
 				pPlayer->move.z += cosf(-Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
 
@@ -729,7 +657,7 @@ void MovePlayer(int nPlayer)
 				}
 			}
 			else if (GetKeyboardPress(DIK_DOWN) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
-			{// 左下の入力
+			{// SとA(左下)の入力
 				pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
 				pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
 
@@ -760,8 +688,7 @@ void MovePlayer(int nPlayer)
 				}
 			}
 			else
-			{// 左矢印単体の入力
-
+			{// A単体の入力
 				pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
 				pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
 
@@ -793,11 +720,9 @@ void MovePlayer(int nPlayer)
 			}
 		}
 		else if (GetKeyboardPress(DIK_RIGHT) == true || GetJoypadPress(nPlayer, JOYKEY_RIGHT) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_RIGHT))
-		{// 右矢印が押される
-
+		{//Dキーが押される
 			if (GetKeyboardPress(DIK_UP) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
-			{// 右上の入力
-
+			{// WとD(右上)の入力
 				pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
 				pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
 
@@ -828,8 +753,7 @@ void MovePlayer(int nPlayer)
 				}
 			}
 			else if (GetKeyboardPress(DIK_DOWN) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
-			{// 右下の入力
-
+			{// SとD(右下)の入力
 				pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.75f) * PLAYER_MOVE;
 				pPlayer->move.z += cosf(-Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
 
@@ -860,8 +784,7 @@ void MovePlayer(int nPlayer)
 				}
 			}
 			else
-			{// 右だけの入力
-
+			{// Dだけの入力
 				pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
 				pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
 
@@ -894,7 +817,6 @@ void MovePlayer(int nPlayer)
 		}
 		else if (GetKeyboardPress(DIK_UP) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
 		{//Wキーが押される
-
 			pPlayer->move.z += cosf(Camerarot.y) * PLAYER_MOVE;
 			pPlayer->move.x += sinf(Camerarot.y) * PLAYER_MOVE;
 
@@ -925,8 +847,7 @@ void MovePlayer(int nPlayer)
 			}
 		}
 		else if (GetKeyboardPress(DIK_DOWN) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
-		{//Sキーが押される
-
+		{//下矢印が押される
 			pPlayer->move.z += cosf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
 			pPlayer->move.x += sinf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
 
