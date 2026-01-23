@@ -53,8 +53,8 @@ void InitPlayer(void)
 	// Šeí•Ï”‚ğ‰Šú‰»(0ŒÅ’è)
 	for (int nCntPlayer = 0; nCntPlayer < PLAYERTYPE_MAX; nCntPlayer++)
 	{
-		g_Player[nCntPlayer].posOri = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		g_Player[nCntPlayer].pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		g_Player[nCntPlayer].posOri = D3DXVECTOR3(0.0f, 100.0f, 0.0f);
+		g_Player[nCntPlayer].pos = D3DXVECTOR3(0.0f, 100.0f, 0.0f);
 		g_Player[nCntPlayer].posOld = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_Player[nCntPlayer].rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_Player[nCntPlayer].bDisp = true;
@@ -178,9 +178,9 @@ void UpdatePlayer(void)
 		pPlayer->pos += pPlayer->move;
 
 		// ’n–Ê‚É’¾‚ñ‚¾
-		if (pPlayer->pos.y < 0.0f)
+		if (pPlayer->pos.y < 100.0f)
 		{
-			pPlayer->pos.y = 0.0f;
+			pPlayer->pos.y = 100.0f;
 		}
 
 		// Šµ«‚ğŠ|‚¯‚é
