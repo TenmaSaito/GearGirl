@@ -158,7 +158,7 @@ void UpdateCamera(void)
 			pCamera->posV.x = pCamera->posR.x - cosf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
 			pCamera->posV.y = pCamera->posR.y - cosf(D3DX_PI - pCamera->rot.x) * pCamera->fDist;
 			pCamera->posV.z = pCamera->posR.z - sinf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
-			PrintDebugProc("CAMERA %d\n posV : %~3f\nposV : %~3f\n", nCntCamera, pCamera->posV.x, pCamera->posV.y, pCamera->posV.z, pCamera->posR.x, pCamera->posR.y, pCamera->posR.z);
+			PrintDebugProc("CAMERA %d\nposV : %~3f\nposR : %~3f\n", nCntCamera, pCamera->posV.x, pCamera->posV.y, pCamera->posV.z, pCamera->posR.x, pCamera->posR.y, pCamera->posR.z);
 		}
 	}
 }
@@ -438,6 +438,7 @@ int GetCamera(void)
 	{
 		if (pCam->bUse == false)
 		{
+			pCam->bUse = true;
 			return nCntCamera;
 		}
 	}
