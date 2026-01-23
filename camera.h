@@ -20,7 +20,7 @@
 #define VIEW_MAXDEPTH			(10000.0f)				// 最大描画距離
 #define CAMERA_V_DEFPOS			(0.0f, 350.0f, 500.0f)	// 視点のデフォ位置
 #define CAMERA_R_DEFPOS			(0.0f, 0.0f, 0.0f)		// 注視点のデフォ位置
-#define CAMERA_DISTANS			(700.0f)				// カメラと注視点の距離
+#define CAMERA_DISTANS			(200.0f)				// カメラと注視点の距離
 #define CAMERA_MOVE				(10.0f)					// カメラの移動速度
 #define CAMERA_SPIN				(0.01f)					// カメラの回転速度
 #define CAMERA_FOLLOW_FACTOR	(0.15f)					// カメラが追従移動する時の補正
