@@ -67,7 +67,7 @@ void InitPlayer(void)
 	}
 
 	// 少女のパーツ、モーションを読み込む
-	LoadMotion("data\\Scripts\\motion.txt", &aIdxMotion[PLAYERTYPE_GIRL]);			// モーションスクリプトを読み込む
+	LoadMotion("data\\Scripts\\mouse.txt", &aIdxMotion[PLAYERTYPE_GIRL]);			// モーションスクリプトを読み込む
 	LPPARTS_INFO pPartsInfoGirl = GetPartsInfo(aIdxMotion[PLAYERTYPE_GIRL]);	// パーツ情報のアドレスを取得
 	LPMOTIONSCRIPT_INFO pMotionInfoGirl = GetMotionScriptInfo(aIdxMotion[PLAYERTYPE_GIRL]);	// モーション情報のアドレスを取得
 	if (pPartsInfoGirl != NULL)
@@ -76,7 +76,7 @@ void InitPlayer(void)
 	}
 
 	// ネズミのパーツ、モーションを読み込む
-	LoadMotion("data\\Scripts\\motionmouse.txt", &aIdxMotion[PLAYERTYPE_MOUSE]);		// モーションスクリプトを読み込む
+	LoadMotion("data\\Scripts\\mouse.txt", &aIdxMotion[PLAYERTYPE_MOUSE]);		// モーションスクリプトを読み込む
 	LPPARTS_INFO pPartsInfoMouse = GetPartsInfo(aIdxMotion[PLAYERTYPE_MOUSE]);	// パーツ情報のアドレスを取得
 	LPMOTIONSCRIPT_INFO pMotionInfoMouse = GetMotionScriptInfo(aIdxMotion[PLAYERTYPE_MOUSE]);	// モーション情報のアドレスを取得
 	if (pPartsInfoMouse != NULL)
