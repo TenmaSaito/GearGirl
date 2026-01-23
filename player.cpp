@@ -11,6 +11,7 @@
 #include "game.h"
 #include "input.h"
 #include "model.h"
+#include "modeldata.h"
 #include "motion.h"
 #include "player.h"
 
@@ -56,6 +57,8 @@ void InitPlayer(void)
 	// デバイスの取得
 	pDevice = GetDevice();
 
+	int aIdxMotion[PLAYERTYPE_MAX] = {};
+
 	// 各種変数を初期化(0固定)
 	for (int nCntPlayer = 0; nCntPlayer < PLAYERTYPE_MAX; nCntPlayer++)
 	{
@@ -68,16 +71,26 @@ void InitPlayer(void)
 		g_Player[nCntPlayer].nCounterMotion = 0;
 		g_Player[nCntPlayer].nKey = 0;
 		g_Player[nCntPlayer].nNumKey = g_nNumKey;
-		g_Player[nCntPlayer].nNumModel = MAX_PART;
 		g_Player[nCntPlayer].state = PLAYERSTATE_NEUTRAL;
 		g_Player[nCntPlayer].bFinishMotion = true;
 	}
+
+	// 少女のパーツを読み込む
+	LoadMotion("data\\motion.txt", &aIdxMotion[PLAYERTYPE_GIRL]);			// モーションスクリプトを読み込む
+	LPPARTS_INFO pPartsInfo = GetPartsInfo(aIdxMotion[PLAYERTYPE_GIRL]);	// パーツ情報のアドレスを取得
+	g_Player[PLAYERTYPE_GIRL].PartsInfo = *pPartsInfo;						// アドレスの中身のみをコピー
+
+	// ネズミのパーツを読み込む
+	LoadMotion("data\\motionmouse.txt", &aIdxMotion[PLAYERTYPE_MOUSE]);		// モーションスクリプトを読み込む
+	LPPARTS_INFO pPartsInfo = GetPartsInfo(aIdxMotion[PLAYERTYPE_MOUSE]);	// パーツ情報のアドレスを取得
+	g_Player[PLAYERTYPE_MOUSE].PartsInfo = *pPartsInfo;						// アドレスの中身のみをコピー
 
 	g_nNumModel = 0;
 	g_nNumKey = 0;
 	g_nCntKey = 0;
 	g_nCntKeyFrame = 0;
 	g_nCntMotion = 0;
+
 
 	// 影を設定
 	//g_IdxShadowPlayer = SetShadow();
@@ -213,8 +226,6 @@ void DrawPlayer(void)
 	D3DMATERIAL9 matDef;			// 現在のマテリアル保存用
 	D3DXMATERIAL* pMat;				// マテリアルデータへのポインタ
 
-
-
 	for (int nCntPlayer = 0; nCntPlayer < PLAYERTYPE_MAX; nCntPlayer++, pPlayer++)
 	{
 		// プレイヤーのワールドマトリックスの初期化
@@ -237,31 +248,38 @@ void DrawPlayer(void)
 		pDevice->GetMaterial(&matDef);
 
 		// 全モデル(パーツ)の描画
-		for (int nCntModel = 0; nCntModel < pPlayer->nNumModel; nCntModel++)
+		for (int nCntModel = 0; nCntModel < pPlayer->PartsInfo.nNumParts; nCntModel++)
 		{
-			LPPARTS_INFO pPartsInfo = GetPartsInfo(0);	// パーツ情報のアドレスを取得
-			PARTS_INFO PartsInfo = *pPartsInfo;			// アドレスの中身のみをコピー
-
 			D3DXMATRIX mtxRotModel, mtxTransModel;	// 計算用マトリックス
 			D3DXMATRIX mtxParent;	// 親のマトリックス
 
 			// パーツのワールドマトリックス初期化
-			D3DXMatrixIdentity(&pPlayer->aModel[nCntModel].mtxWorld);
+			D3DXMatrixIdentity(&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld);
 
 			// パーツの向きを反映
 			D3DXMatrixRotationYawPitchRoll(&mtxRotModel,
-				pPlayer->aModel[nCntModel].rot.y, pPlayer->aModel[nCntModel].rot.x, pPlayer->aModel[nCntModel].rot.z);
-			D3DXMatrixMultiply(&pPlayer->aModel[nCntModel].mtxWorld, &pPlayer->aModel[nCntModel].mtxWorld, &mtxRotModel);	// かけ合わせる
+				pPlayer->PartsInfo.aParts[nCntModel].rot.y,
+				pPlayer->PartsInfo.aParts[nCntModel].rot.x,
+				pPlayer->PartsInfo.aParts[nCntModel].rot.z);
+			// かけ合わせる
+			D3DXMatrixMultiply(&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
+				&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
+				&mtxRotModel);
 
 			// パーツの位置(オフセット)を反映
 			D3DXMatrixTranslation(&mtxTransModel,
-				pPlayer->aModel[nCntModel].pos.x, pPlayer->aModel[nCntModel].pos.y, pPlayer->aModel[nCntModel].pos.z);
-			D3DXMatrixMultiply(&pPlayer->aModel[nCntModel].mtxWorld, &pPlayer->aModel[nCntModel].mtxWorld, &mtxTransModel);	// かけ合わせる
+				pPlayer->PartsInfo.aParts[nCntModel].posLocal.x,
+				pPlayer->PartsInfo.aParts[nCntModel].posLocal.y,
+				pPlayer->PartsInfo.aParts[nCntModel].posLocal.z);
+			// かけ合わせる
+			D3DXMatrixMultiply(&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
+				&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
+				&mtxTransModel);
 
 			// パーツの「親マトリックス」の設定
-			if (pPlayer->aModel[nCntModel].nIdxModelParent != -1)
+			if (pPlayer->PartsInfo.aParts[nCntModel].nIdxModelParent != -1)
 			{// 親モデルが存在する
-				mtxParent = pPlayer->aModel[pPlayer->aModel[nCntModel].nIdxModelParent].mtxWorld;
+				mtxParent = pPlayer->PartsInfo.aParts[pPlayer->PartsInfo.aParts[nCntModel].nIdxModelParent].mtxWorld;
 			}
 			else
 			{// 親モデルが存在しない
@@ -269,34 +287,40 @@ void DrawPlayer(void)
 			}
 
 			// 算出した「パーツのワールドマトリックス」と「親のマトリックス」をかけ合わせる
-			D3DXMatrixMultiply(&pPlayer->aModel[nCntModel].mtxWorld,
-				&pPlayer->aModel[nCntModel].mtxWorld,
+			D3DXMatrixMultiply(&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
+				&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
 				&mtxParent);
 
 			// パーツのワールドマトリックスの設定
 			pDevice->SetTransform(D3DTS_WORLD,
-				&pPlayer->aModel[nCntModel].mtxWorld);
+				&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld);
 
-			// パーツの描画	
-			// マテリアルデータへのポインタを取得
-			pMat = (D3DXMATERIAL*)pPlayer->aModel[nCntModel].pBuffMat->GetBufferPointer();
-
-			for (int nCntMat = 0; nCntMat < (int)pPlayer->aModel[nCntModel].dwNumMat; nCntMat++)
+			LPMODELDATA pModelData = GetModelData(pPlayer->PartsInfo.aParts[nCntModel].nIdxModel);
+			if (pModelData != NULL)
 			{
-				// マテリアルの設定
-				pDevice->SetMaterial(&pMat[nCntMat].MatD3D);
+				// パーツの描画	
+					// マテリアルデータへのポインタを取得
+				pMat = (D3DXMATERIAL*)pModelData->pBuffMat->GetBufferPointer();
 
-				// テクスチャの設定
-				pDevice->SetTexture(0, pPlayer->aModel[nCntModel].apTexture[nCntMat]);
+				for (int nCntMat = 0; nCntMat < (int)pModelData->dwNumMat; nCntMat++)
+				{
+					// マテリアルの設定
+					pDevice->SetMaterial(&pMat[nCntMat].MatD3D);
 
-				// モデル(パーツ)の描画
-				pPlayer->aModel[nCntModel].pMesh->DrawSubset(nCntMat);
+					// テクスチャの設定
+					pDevice->SetTexture(0, pModelData->apTexture[nCntMat]);
+
+					// モデル(パーツ)の描画
+					pModelData->pMesh->DrawSubset(nCntMat);
+				}
 			}
 		}
 
 		// 保存していたマテリアルを戻す
 		pDevice->SetMaterial(&matDef);
 	}
+	// デバイスの破棄
+	EndDevice();
 }
 
 // =================================================
@@ -315,8 +339,11 @@ void MovePlayer(int nPlayer)
 	// プレイヤー構造体をポインタ化
 	Player* pPlayer = &g_Player[nPlayer];
 
+	// カメラの向きを保存する
+	vec3 Camerarot;
+
 	// カメラの情報を取得
-	Camera* pCamera = GetCamera(0);
+	GetCameraRot(nPlayer, &Camerarot);
 
 	if (nPlayer == 0)
 	{// 少女の操作
@@ -328,13 +355,13 @@ void MovePlayer(int nPlayer)
 
 				if (pPlayer->bJump == true)
 				{// 上空での移動速度
-					pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
-					pPlayer->move.z += cosf(-pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.z += cosf(-Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
 				}
 				else
 				{// 地上での移動速度
-					pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.25f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(-pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
+					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.25f) * PLAYER_MOVE;
+					pPlayer->move.z += cosf(-Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
 				}
 			}
 			else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
@@ -342,13 +369,13 @@ void MovePlayer(int nPlayer)
 
 				if (pPlayer->bJump == true)
 				{// 上空での移動速度
-					pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
-					pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
 				}
 				else
 				{// 地上での移動速度
-					pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
+					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
+					pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
 				}
 			}
 			else
@@ -356,13 +383,13 @@ void MovePlayer(int nPlayer)
 
 				if (pPlayer->bJump == true)
 				{// 上空での移動速度
-					pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
-					pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
 				}
 				else
 				{// 地上での移動速度
-					pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
+					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
+					pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
 				}
 			}
 		}
@@ -374,13 +401,13 @@ void MovePlayer(int nPlayer)
 
 				if (pPlayer->bJump == true)
 				{// 上空での移動速度
-					pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
-					pPlayer->move.z += cosf(pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
 				}
 				else
 				{// 地上での移動速度
-					pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
+					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
+					pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
 				}
 			}
 			else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
@@ -388,13 +415,13 @@ void MovePlayer(int nPlayer)
 
 				if (pPlayer->bJump == true)
 				{// 上空での移動速度
-					pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
-					pPlayer->move.z += cosf(-pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.z += cosf(-Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
 				}
 				else
 				{// 地上での移動速度
-					pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.75f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(-pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
+					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.75f) * PLAYER_MOVE;
+					pPlayer->move.z += cosf(-Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
 				}
 			}
 			else
@@ -402,13 +429,13 @@ void MovePlayer(int nPlayer)
 
 				if (pPlayer->bJump == true)
 				{// 上空での移動速度
-					pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
-					pPlayer->move.z += cosf(pCamera->rot.y + D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
 				}
 				else
 				{// 地上での移動速度
-					pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(pCamera->rot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
+					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
+					pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
 				}
 			}
 		}
@@ -417,13 +444,13 @@ void MovePlayer(int nPlayer)
 
 			if (pPlayer->bJump == true)
 			{// 上空での移動速度
-				pPlayer->move.z += cosf(pCamera->rot.y) * PLAYER_MOVE * 0.7f;
-				pPlayer->move.x += sinf(pCamera->rot.y) * PLAYER_MOVE * 0.7f;
+				pPlayer->move.z += cosf(Camerarot.y) * PLAYER_MOVE * 0.7f;
+				pPlayer->move.x += sinf(Camerarot.y) * PLAYER_MOVE * 0.7f;
 			}
 			else
 			{// 地上での移動速度
-				pPlayer->move.z += cosf(pCamera->rot.y) * PLAYER_MOVE;
-				pPlayer->move.x += sinf(pCamera->rot.y) * PLAYER_MOVE;
+				pPlayer->move.z += cosf(Camerarot.y) * PLAYER_MOVE;
+				pPlayer->move.x += sinf(Camerarot.y) * PLAYER_MOVE;
 			}
 		}
 		else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
@@ -431,13 +458,13 @@ void MovePlayer(int nPlayer)
 
 			if (pPlayer->bJump == true)
 			{// 上空での移動速度
-				pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI) * PLAYER_MOVE * 0.7f;
-				pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI) * PLAYER_MOVE * 0.7f;
+				pPlayer->move.z += cosf(Camerarot.y - D3DX_PI) * PLAYER_MOVE * 0.7f;
+				pPlayer->move.x += sinf(Camerarot.y - D3DX_PI) * PLAYER_MOVE * 0.7f;
 			}
 			else
 			{// 地上での移動速度
-				pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI) * PLAYER_MOVE;
-				pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI) * PLAYER_MOVE;
+				pPlayer->move.z += cosf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
+				pPlayer->move.x += sinf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
 			}
 		}
 	}
@@ -451,13 +478,13 @@ void MovePlayer(int nPlayer)
 
 				if (pPlayer->bJump == true)
 				{// 上空での移動速度
-					pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
-					pPlayer->move.z += cosf(-pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.z += cosf(-Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
 				}
 				else
 				{// 地上での移動速度
-					pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.25f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(-pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
+					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.25f) * PLAYER_MOVE;
+					pPlayer->move.z += cosf(-Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
 				}
 			}
 			else if (GetKeyboardPress(DIK_DOWN) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
@@ -465,13 +492,13 @@ void MovePlayer(int nPlayer)
 
 				if (pPlayer->bJump == true)
 				{// 上空での移動速度
-					pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
-					pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
 				}
 				else
 				{// 地上での移動速度
-					pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
+					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
+					pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
 				}
 			}
 			else
@@ -479,13 +506,13 @@ void MovePlayer(int nPlayer)
 
 				if (pPlayer->bJump == true)
 				{// 上空での移動速度
-					pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
-					pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
 				}
 				else
 				{// 地上での移動速度
-					pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
+					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
+					pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
 				}
 			}
 		}
@@ -497,13 +524,13 @@ void MovePlayer(int nPlayer)
 
 				if (pPlayer->bJump == true)
 				{// 上空での移動速度
-					pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
-					pPlayer->move.z += cosf(pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE * 0.7f;
 				}
 				else
 				{// 地上での移動速度
-					pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(pCamera->rot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
+					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
+					pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
 				}
 			}
 			else if (GetKeyboardPress(DIK_DOWN) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
@@ -511,13 +538,13 @@ void MovePlayer(int nPlayer)
 
 				if (pPlayer->bJump == true)
 				{// 上空での移動速度
-					pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
-					pPlayer->move.z += cosf(-pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.z += cosf(-Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE * 0.7f;
 				}
 				else
 				{// 地上での移動速度
-					pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.75f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(-pCamera->rot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
+					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.75f) * PLAYER_MOVE;
+					pPlayer->move.z += cosf(-Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
 				}
 			}
 			else
@@ -525,13 +552,13 @@ void MovePlayer(int nPlayer)
 
 				if (pPlayer->bJump == true)
 				{// 上空での移動速度
-					pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
-					pPlayer->move.z += cosf(pCamera->rot.y + D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
+					pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE * 0.7f;
 				}
 				else
 				{// 地上での移動速度
-					pPlayer->move.x += sinf(pCamera->rot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(pCamera->rot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
+					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
+					pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
 				}
 			}
 		}
@@ -540,13 +567,13 @@ void MovePlayer(int nPlayer)
 
 			if (pPlayer->bJump == true)
 			{// 上空での移動速度
-				pPlayer->move.z += cosf(pCamera->rot.y) * PLAYER_MOVE * 0.7f;
-				pPlayer->move.x += sinf(pCamera->rot.y) * PLAYER_MOVE * 0.7f;
+				pPlayer->move.z += cosf(Camerarot.y) * PLAYER_MOVE * 0.7f;
+				pPlayer->move.x += sinf(Camerarot.y) * PLAYER_MOVE * 0.7f;
 			}
 			else
 			{// 地上での移動速度
-				pPlayer->move.z += cosf(pCamera->rot.y) * PLAYER_MOVE;
-				pPlayer->move.x += sinf(pCamera->rot.y) * PLAYER_MOVE;
+				pPlayer->move.z += cosf(Camerarot.y) * PLAYER_MOVE;
+				pPlayer->move.x += sinf(Camerarot.y) * PLAYER_MOVE;
 			}
 		}
 		else if (GetKeyboardPress(DIK_DOWN) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
@@ -554,13 +581,13 @@ void MovePlayer(int nPlayer)
 
 			if (pPlayer->bJump == true)
 			{// 上空での移動速度
-				pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI) * PLAYER_MOVE * 0.7f;
-				pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI) * PLAYER_MOVE * 0.7f;
+				pPlayer->move.z += cosf(Camerarot.y - D3DX_PI) * PLAYER_MOVE * 0.7f;
+				pPlayer->move.x += sinf(Camerarot.y - D3DX_PI) * PLAYER_MOVE * 0.7f;
 			}
 			else
 			{// 地上での移動速度
-				pPlayer->move.z += cosf(pCamera->rot.y - D3DX_PI) * PLAYER_MOVE;
-				pPlayer->move.x += sinf(pCamera->rot.y - D3DX_PI) * PLAYER_MOVE;
+				pPlayer->move.z += cosf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
+				pPlayer->move.x += sinf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
 			}
 		}
 	}
@@ -570,7 +597,7 @@ void MovePlayer(int nPlayer)
 	{// 右
 		pPlayer->move.x += PLAYER_MOVE;
 
-		pPlayer->rotDest.y = -D3DX_PI * 0.5f + pCamera->rot.y;	// 目標の角度を設定
+		pPlayer->rotDest.y = -D3DX_PI * 0.5f + Camerarot.y;	// 目標の角度を設定
 		pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
 
 		// もし、差分がπを超えたら
@@ -587,11 +614,11 @@ void MovePlayer(int nPlayer)
 		pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
 
 		// もし、現在の角度がπを超えたら
-		if (pPlayer->rot.y > D3DX_PI + pCamera->rot.y)
+		if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
 		{
 			pPlayer->rot.y -= D3DX_PI * 2;
 		}
-		else if (pPlayer->rot.y < -D3DX_PI + pCamera->rot.y)
+		else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
 		{
 			pPlayer->rot.y += D3DX_PI * 2;
 		}
@@ -600,7 +627,7 @@ void MovePlayer(int nPlayer)
 	{// 左
 		pPlayer->move.x += PLAYER_MOVE;
 
-		pPlayer->rotDest.y = D3DX_PI * 0.5f + pCamera->rot.y;	// 目標の角度を設定
+		pPlayer->rotDest.y = D3DX_PI * 0.5f + Camerarot.y;	// 目標の角度を設定
 		pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
 
 		// もし、差分がπを超えたら
@@ -617,11 +644,11 @@ void MovePlayer(int nPlayer)
 		pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
 
 		// もし、現在の角度がπを超えたら
-		if (pPlayer->rot.y > D3DX_PI + pCamera->rot.y)
+		if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
 		{
 			pPlayer->rot.y -= D3DX_PI * 2;
 		}
-		else if (pPlayer->rot.y < -D3DX_PI + pCamera->rot.y)
+		else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
 		{
 			pPlayer->rot.y += D3DX_PI * 2;
 		}
@@ -630,7 +657,7 @@ void MovePlayer(int nPlayer)
 	{// 上
 		pPlayer->move.z += PLAYER_MOVE;
 
-		pPlayer->rotDest.y = D3DX_PI + pCamera->rot.y;	// 目標の角度を設定
+		pPlayer->rotDest.y = D3DX_PI + Camerarot.y;	// 目標の角度を設定
 		pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
 
 		// もし、差分がπを超えたら
@@ -647,11 +674,11 @@ void MovePlayer(int nPlayer)
 		pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
 
 		// もし、現在の角度がπを超えたら
-		if (pPlayer->rot.y > D3DX_PI + pCamera->rot.y)
+		if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
 		{
 			pPlayer->rot.y -= D3DX_PI * 2;
 		}
-		else if (pPlayer->rot.y < -D3DX_PI + pCamera->rot.y)
+		else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
 		{
 			pPlayer->rot.y += D3DX_PI * 2;
 		}
@@ -660,7 +687,7 @@ void MovePlayer(int nPlayer)
 	{// 下
 		pPlayer->move.z += PLAYER_MOVE;
 
-		pPlayer->rotDest.y = pCamera->rot.y;	// 目標の角度を設定
+		pPlayer->rotDest.y = Camerarot.y;	// 目標の角度を設定
 		pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
 
 		// もし、差分がπを超えたら
@@ -677,11 +704,11 @@ void MovePlayer(int nPlayer)
 		pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
 
 		// もし、現在の角度がπを超えたら
-		if (pPlayer->rot.y > D3DX_PI + pCamera->rot.y)
+		if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
 		{
 			pPlayer->rot.y -= D3DX_PI * 2;
 		}
-		else if (pPlayer->rot.y < -D3DX_PI + pCamera->rot.y)
+		else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
 		{
 			pPlayer->rot.y += D3DX_PI * 2;
 		}

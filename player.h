@@ -55,8 +55,7 @@ typedef struct
 	D3DXVECTOR3 VectoPos;		// 境界線ベクトル - 移動ベクトル
 	bool bDisp;					// プレイヤーの描画可否
 	bool bJump;					// ジャンプ中かどうか
-	Model aModel[MAX_PART];		// モデル(パーツ)
-	int nNumModel;				// モデルの総数(パーツ数)
+	PARTS_INFO PartsInfo;		// プレイヤーのパーツの情報
 	Playerstate state;			// プレイヤーの状態
 
 	// モーションの要素
