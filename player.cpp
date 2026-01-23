@@ -70,7 +70,7 @@ void InitPlayer(void)
 	LoadMotion("data\\Scripts\\mouse.txt", &aIdxMotion[PLAYERTYPE_GIRL]);			// モーションスクリプトを読み込む
 	LPPARTS_INFO pPartsInfoGirl = GetPartsInfo(aIdxMotion[PLAYERTYPE_GIRL]);	// パーツ情報のアドレスを取得
 	LPMOTIONSCRIPT_INFO pMotionInfoGirl = GetMotionScriptInfo(aIdxMotion[PLAYERTYPE_GIRL]);	// モーション情報のアドレスを取得
-	
+
 	if (pPartsInfoGirl != NULL)
 	{// NULLじゃなかったとき
 		g_Player[PLAYERTYPE_GIRL].PartsInfo = *pPartsInfoGirl;		// アドレスの中身のみをコピー
@@ -80,7 +80,7 @@ void InitPlayer(void)
 	LoadMotion("data\\Scripts\\mouse.txt", &aIdxMotion[PLAYERTYPE_MOUSE]);		// モーションスクリプトを読み込む
 	LPPARTS_INFO pPartsInfoMouse = GetPartsInfo(aIdxMotion[PLAYERTYPE_MOUSE]);	// パーツ情報のアドレスを取得
 	LPMOTIONSCRIPT_INFO pMotionInfoMouse = GetMotionScriptInfo(aIdxMotion[PLAYERTYPE_MOUSE]);	// モーション情報のアドレスを取得
-	
+
 	if (pPartsInfoMouse != NULL)
 	{// NULLじゃなかったとき
 		g_Player[PLAYERTYPE_MOUSE].PartsInfo = *pPartsInfoMouse;	// アドレスの中身のみをコピー
@@ -132,57 +132,23 @@ void UpdatePlayer(void)
 
 		//JumpPlayer();	// ジャンプに関する処理
 
-
-
-	//
-	//// 突進と同時にposを移動する
-	//	if (g_Player.motionType == MOTIONTYPEPLAYER_ATTACK && g_Player.nKey >= 3 && g_Player.dir == PLAYERDIRECTION_EAST)
-	//	{
-	//		g_Player.move.x += ATTACK_MOVE;
-	//	}
-	//	if (g_Player.motionType == MOTIONTYPEPLAYER_ATTACK && g_Player.nKey >= 3 && g_Player.dir == PLAYERDIRECTION_WEST)
-	//	{
-	//		g_Player.move.x -= ATTACK_MOVE;
-	//	}
-	//	if (g_Player.motionType == MOTIONTYPEPLAYER_ATTACK && g_Player.nKey >= 3 && g_Player.dir == PLAYERDIRECTION_NORTH)
-	//	{
-	//		g_Player.move.z += ATTACK_MOVE;
-	//	}
-	//	if (g_Player.motionType == MOTIONTYPEPLAYER_ATTACK && g_Player.nKey >= 3 && g_Player.dir == PLAYERDIRECTION_SOUTH)
-	//	{
-	//		g_Player.move.z -= ATTACK_MOVE;
-	//	}
-	//	if (g_Player.motionType == MOTIONTYPEPLAYER_ATTACK && g_Player.nKey >= 3 && g_Player.dir == PLAYERDIRECTION_NORTHEAST)
-	//	{
-	//		g_Player.move.x += ATTACK_MOVE;
-	//		g_Player.move.z += ATTACK_MOVE;
-	//	}
-	//	if (g_Player.motionType == MOTIONTYPEPLAYER_ATTACK && g_Player.nKey >= 3 && g_Player.dir == PLAYERDIRECTION_NORTHWEST)
-	//	{
-	//		g_Player.move.x -= ATTACK_MOVE;
-	//		g_Player.move.z += ATTACK_MOVE;
-	//	}
-	//	if (g_Player.motionType == MOTIONTYPEPLAYER_ATTACK && g_Player.nKey >= 3 && g_Player.dir == PLAYERDIRECTION_SOUTHEAST)
-	//	{
-	//		g_Player.move.x += ATTACK_MOVE;
-	//		g_Player.move.z -= ATTACK_MOVE;
-	//	}
-	//	if (g_Player.motionType == MOTIONTYPEPLAYER_ATTACK && g_Player.nKey >= 3 && g_Player.dir == PLAYERDIRECTION_SOUTHWEST)
-	//	{
-	//		g_Player.move.x -= ATTACK_MOVE;
-	//		g_Player.move.z -= ATTACK_MOVE;
-	//	}く
+		// 操作する対象を切り替える
+		if (GetJoypadPress(nCntPlayer, JOYKEY_LB) == true || GetJoypadPress(nCntPlayer, JOYKEY_RB) == true)
+		{
+			if (g_ActivePlayer == 1)
+			{// ネズミ→少女
+				g_ActivePlayer = 0;
+			}
+			else
+			{// 少女→ネズミ
+				g_ActivePlayer = 1;
+			}
+		}
 
 		pPlayer->move.y += GRAVITY;	// 重力をかけ続ける
 
 		// 移動量の更新
 		pPlayer->pos += pPlayer->move;
-
-		// 地面に沈んだ時
-		if (pPlayer->pos.y < 100.0f)
-		{
-			pPlayer->pos.y = 100.0f;
-		}
 
 		// 慣性を掛ける
 		pPlayer->move.x += (0.0f - pPlayer->move.x) * (PLAYER_INI * 1.5f);
@@ -197,40 +163,14 @@ void UpdatePlayer(void)
 		// モデルとの当たり判定
 		CollisionModel(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move);
 
-		//// 地面に埋まった時の処理
-		//if (CollisionMeshField(&pPlayer->pos, &pPlayer->posOld) == true)
-		//{
-		//	if ((pPlayer->state == PLAYERSTATE_WALK || pPlayer->state == PLAYERSTATE_JUMP) && pPlayer->bJump == true)
-		//	{
-		//		PlaySound(SOUND_LABEL_LAND);
-		//	}
-
-		//	pPlayer->bJump = false;
-		//}
-		//else
-		//{
-		//	pPlayer->bJump = true;
-		//}
-
-		//// モデルとの当たり判定
-		//if (CollisionGimicck(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move) == true)
-		//{
-		//	// 影の位置設定
-		//	SetPositionShadow(g_IdxShadowPlayer, D3DXVECTOR3(pPlayer->pos.x, pGimicck->vtxMax.y + 10, pPlayer->pos.z), 30, 30);
-		//}
-		//else if (CollisionGimicck(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move) == false)
-		//{
-		//	// 影の位置設定
-		//	SetPositionShadow(g_IdxShadowPlayer, D3DXVECTOR3(pPlayer->pos.x, 5.0f, pPlayer->pos.z), 30, 30);
-		//}
+		// 地面に沈んだ時
+		if (pPlayer->pos.y < 100.0f)
+		{
+			pPlayer->pos.y = 100.0f;
+		}
 
 		//UpdateMotion();
 	}
-
-
-	//PrintDebugProc("[POS] : [%f]\n", g_Player.pos.x);
-	//PrintDebugProc("        [%f]\n", g_Player.pos.y);
-	//PrintDebugProc("        [%f]\n\n", g_Player.pos.z);
 }
 
 // =================================================
@@ -1531,7 +1471,7 @@ int GetActivePlayer(void)
 // =================================================
 // プレイヤーの位置情報を渡す
 // =================================================
-void SetPlayer(D3DXVECTOR3 *pPosGirl, D3DXVECTOR3 *pPosMouse)
+void SetPlayer(D3DXVECTOR3* pPosGirl, D3DXVECTOR3* pPosMouse)
 {
 	*pPosGirl = g_Player[PLAYERTYPE_GIRL].pos;
 	*pPosMouse = g_Player[PLAYERTYPE_MOUSE].pos;
