@@ -1119,6 +1119,8 @@ int MyMathUtil::GenerateMessageBox(_In_ UINT nType, _In_ const char* pCaption, _
 	int nReturn = MessageBox(hWnd, &aStrOut[0], pCaption, nType);
 	return nReturn;
 #endif
+
+	return 0;
 }
 
 //==================================================================

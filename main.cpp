@@ -21,7 +21,7 @@
 //*** マクロ定義 ***
 //**********************************************************************************
 #define CLASS_NAME		"WindowClass"				// ウィンドウクラスの名前
-#define WINDOW_NAME		"ウィンドウ表示処理"		// キャプションに表示される名前
+#define WINDOW_NAME		"GearGirl"					// キャプションに表示される名前
 #define SCREEN_WIDTH		(1280)					// ウィンドウの幅
 #define SCREEN_HEIGHT		(720)					// ウィンドウの高さ
 #define MODE_ON										// モード切り替え
