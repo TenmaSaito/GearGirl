@@ -623,10 +623,10 @@ void MovePlayer(int nPlayer)
 	else
 	{// ネズミの操作
 		if (GetKeyboardPress(DIK_LEFT) == true || GetJoypadPress(nPlayer, JOYKEY_LEFT) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_LEFT))
-		{//Aキーが押される	
+		{// 左矢印が押される	
 
 			if (GetKeyboardPress(DIK_UP) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
-			{// WとA(左上)の入力
+			{// 左上の入力
 				pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.25f) * PLAYER_MOVE;
 				pPlayer->move.z += cosf(-Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
 
@@ -657,7 +657,7 @@ void MovePlayer(int nPlayer)
 				}
 			}
 			else if (GetKeyboardPress(DIK_DOWN) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
-			{// SとA(左下)の入力
+			{// 左下の入力
 				pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
 				pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
 
@@ -688,7 +688,7 @@ void MovePlayer(int nPlayer)
 				}
 			}
 			else
-			{// A単体の入力
+			{// 左矢印単体の入力
 				pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
 				pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
 
@@ -720,9 +720,9 @@ void MovePlayer(int nPlayer)
 			}
 		}
 		else if (GetKeyboardPress(DIK_RIGHT) == true || GetJoypadPress(nPlayer, JOYKEY_RIGHT) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_RIGHT))
-		{//Dキーが押される
+		{// 右矢印が押される
 			if (GetKeyboardPress(DIK_UP) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
-			{// WとD(右上)の入力
+			{// 右上の入力
 				pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
 				pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
 
@@ -753,7 +753,7 @@ void MovePlayer(int nPlayer)
 				}
 			}
 			else if (GetKeyboardPress(DIK_DOWN) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
-			{// SとD(右下)の入力
+			{// 右下の入力
 				pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.75f) * PLAYER_MOVE;
 				pPlayer->move.z += cosf(-Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
 
@@ -784,7 +784,7 @@ void MovePlayer(int nPlayer)
 				}
 			}
 			else
-			{// Dだけの入力
+			{// 右矢印だけの入力
 				pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
 				pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
 
@@ -816,7 +816,7 @@ void MovePlayer(int nPlayer)
 			}
 		}
 		else if (GetKeyboardPress(DIK_UP) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
-		{//Wキーが押される
+		{//上矢印が押される
 			pPlayer->move.z += cosf(Camerarot.y) * PLAYER_MOVE;
 			pPlayer->move.x += sinf(Camerarot.y) * PLAYER_MOVE;
 
@@ -882,7 +882,8 @@ void MovePlayer(int nPlayer)
 	// スティックでの操作
 	if (GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_RIGHT))
 	{// 右
-		pPlayer->move.x += PLAYER_MOVE;
+		pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
+		pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
 
 		pPlayer->rotDest.y = -D3DX_PI * 0.5f + Camerarot.y;	// 目標の角度を設定
 		pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
@@ -912,7 +913,8 @@ void MovePlayer(int nPlayer)
 	}
 	if (GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_LEFT))
 	{// 左
-		pPlayer->move.x += PLAYER_MOVE;
+		pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
+		pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
 
 		pPlayer->rotDest.y = D3DX_PI * 0.5f + Camerarot.y;	// 目標の角度を設定
 		pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
@@ -942,7 +944,8 @@ void MovePlayer(int nPlayer)
 	}
 	if (GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
 	{// 上
-		pPlayer->move.z += PLAYER_MOVE;
+		pPlayer->move.z += cosf(Camerarot.y) * PLAYER_MOVE;
+		pPlayer->move.x += sinf(Camerarot.y) * PLAYER_MOVE;
 
 		pPlayer->rotDest.y = D3DX_PI + Camerarot.y;	// 目標の角度を設定
 		pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
@@ -972,7 +975,8 @@ void MovePlayer(int nPlayer)
 	}
 	if (GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
 	{// 下
-		pPlayer->move.z += PLAYER_MOVE;
+		pPlayer->move.z += cosf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
+		pPlayer->move.x += sinf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
 
 		pPlayer->rotDest.y = Camerarot.y;	// 目標の角度を設定
 		pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
