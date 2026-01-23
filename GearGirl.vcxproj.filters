@@ -132,6 +132,9 @@
     <ClCompile Include="field.cpp">
       <Filter>ソース ファイル\object</Filter>
     </ClCompile>
+    <ClCompile Include="player.cpp">
+      <Filter>ソース ファイル\resouce</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h">
@@ -193,6 +196,9 @@
     </ClInclude>
     <ClInclude Include="field.h">
       <Filter>ヘッダー ファイル\object</Filter>
+    </ClInclude>
+    <ClInclude Include="player.h">
+      <Filter>ヘッダー ファイル\resouce</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
