@@ -34,7 +34,7 @@
 Player g_Player[PLAYERTYPE_MAX];	// プレイヤーの樹応報
 int g_IdxShadowPlayer = -1;			// 使用する影の番号
 float g_sinrot = 0;					// sinカーブを用いると起用の変数
-int g_nNumPlayer = 0;				// プレイヤーのアクティブ人数
+int g_nNumPlayer = 1;				// プレイヤーのアクティブ人数
 int g_ActivePlayer = 0;				// 操作しているプレイヤータイプ
 
 // =================================================
@@ -130,10 +130,10 @@ void UpdatePlayer(void)
 
 		MovePlayer(nCntPlayer);	// 移動に関する処理
 
-		//JumpPlayer();	// ジャンプに関する処理
+		JumpPlayer(nCntPlayer);	// ジャンプに関する処理
 
 		// 操作する対象を切り替える
-		if (g_nNumPlayer == 0)
+		if (g_nNumPlayer == 1)
 		{// シングルプレイ時
 			if (GetJoypadPress(nCntPlayer, JOYKEY_LB) == true || GetJoypadPress(nCntPlayer, JOYKEY_RB) == true)
 			{
@@ -161,6 +161,7 @@ void UpdatePlayer(void)
 		if (pPlayer->pos.y < 100.0f)
 		{
 			pPlayer->pos.y = 100.0f;
+			pPlayer->bJump = false;
 		}
 
 		// カメラに使用しているインデックスを渡して追従させる
@@ -172,13 +173,14 @@ void UpdatePlayer(void)
 		// モデルとの当たり判定
 		CollisionModel(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move);
 
-
-
 		//UpdateMotion();
 	}
 
 	// デバッグ用のプレイ人数切り替え処理
 	ChangeNumPlayer();
+
+	PrintDebugProc("\nPlayer0 : [SPACE] :  JUMP\n");
+	PrintDebugProc("\nPlayer1 : [RSHIFT] :  JUMP\n");
 }
 
 // =================================================
@@ -330,28 +332,8 @@ void MovePlayer(int nPlayer)
 				pPlayer->rotDest.y = D3DX_PI * 0.75f + Camerarot.y;	// 目標の角度を設定
 				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
 
-				// もし、差分がπを超えたら
-				if (pPlayer->rotDiff.y > D3DX_PI)
-				{
-					pPlayer->rotDiff.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rotDiff.y < -D3DX_PI)
-				{
-					pPlayer->rotDiff.y += D3DX_PI * 2;
-				}
-
-				// 回転に補正を掛ける
-				pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
-
-				// もし、現在の角度がπを超えたら
-				if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
-				{
-					pPlayer->rot.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
-				{
-					pPlayer->rot.y += D3DX_PI * 2;
-				}
+				// rotの補正
+				RotRepair(nPlayer);
 			}
 			else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
 			{// SとA(左下)の入力
@@ -361,28 +343,8 @@ void MovePlayer(int nPlayer)
 				pPlayer->rotDest.y = D3DX_PI * 0.25f + Camerarot.y;	// 目標の角度を設定
 				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
 
-				// もし、差分がπを超えたら
-				if (pPlayer->rotDiff.y > D3DX_PI)
-				{
-					pPlayer->rotDiff.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rotDiff.y < -D3DX_PI)
-				{
-					pPlayer->rotDiff.y += D3DX_PI * 2;
-				}
-
-				// 回転に補正を掛ける
-				pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
-
-				// もし、現在の角度がπを超えたら
-				if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
-				{
-					pPlayer->rot.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
-				{
-					pPlayer->rot.y += D3DX_PI * 2;
-				}
+				// rotの補正
+				RotRepair(nPlayer);
 			}
 			else
 			{// A単体の入力
@@ -392,28 +354,8 @@ void MovePlayer(int nPlayer)
 				pPlayer->rotDest.y = D3DX_PI * 0.5f + Camerarot.y;	// 目標の角度を設定
 				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
 
-				// もし、差分がπを超えたら
-				if (pPlayer->rotDiff.y > D3DX_PI)
-				{
-					pPlayer->rotDiff.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rotDiff.y < -D3DX_PI)
-				{
-					pPlayer->rotDiff.y += D3DX_PI * 2;
-				}
-
-				// 回転に補正を掛ける
-				pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
-
-				// もし、現在の角度がπを超えたら
-				if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
-				{
-					pPlayer->rot.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
-				{
-					pPlayer->rot.y += D3DX_PI * 2;
-				}
+				// rotの補正
+				RotRepair(nPlayer);
 			}
 		}
 		else if (GetKeyboardPress(DIK_D) == true || GetJoypadPress(nPlayer, JOYKEY_RIGHT) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_RIGHT))
@@ -427,28 +369,8 @@ void MovePlayer(int nPlayer)
 				pPlayer->rotDest.y = -D3DX_PI * 0.75f + Camerarot.y;	// 目標の角度を設定
 				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
 
-				// もし、差分がπを超えたら
-				if (pPlayer->rotDiff.y > D3DX_PI)
-				{
-					pPlayer->rotDiff.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rotDiff.y < -D3DX_PI)
-				{
-					pPlayer->rotDiff.y += D3DX_PI * 2;
-				}
-
-				// 回転に補正を掛ける
-				pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
-
-				// もし、現在の角度がπを超えたら
-				if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
-				{
-					pPlayer->rot.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
-				{
-					pPlayer->rot.y += D3DX_PI * 2;
-				}
+				// rotの補正
+				RotRepair(nPlayer);
 			}
 			else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
 			{// SとD(右下)の入力
@@ -458,28 +380,8 @@ void MovePlayer(int nPlayer)
 				pPlayer->rotDest.y = -D3DX_PI * 0.25f + Camerarot.y;	// 目標の角度を設定
 				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
 
-				// もし、差分がπを超えたら
-				if (pPlayer->rotDiff.y > D3DX_PI)
-				{
-					pPlayer->rotDiff.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rotDiff.y < -D3DX_PI)
-				{
-					pPlayer->rotDiff.y += D3DX_PI * 2;
-				}
-
-				// 回転に補正を掛ける
-				pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
-
-				// もし、現在の角度がπを超えたら
-				if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
-				{
-					pPlayer->rot.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
-				{
-					pPlayer->rot.y += D3DX_PI * 2;
-				}
+				// rotの補正
+				RotRepair(nPlayer);
 			}
 			else
 			{// Dだけの入力
@@ -489,28 +391,8 @@ void MovePlayer(int nPlayer)
 				pPlayer->rotDest.y = -D3DX_PI * 0.5f + Camerarot.y;	// 目標の角度を設定
 				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
 
-				// もし、差分がπを超えたら
-				if (pPlayer->rotDiff.y > D3DX_PI)
-				{
-					pPlayer->rotDiff.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rotDiff.y < -D3DX_PI)
-				{
-					pPlayer->rotDiff.y += D3DX_PI * 2;
-				}
-
-				// 回転に補正を掛ける
-				pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
-
-				// もし、現在の角度がπを超えたら
-				if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
-				{
-					pPlayer->rot.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
-				{
-					pPlayer->rot.y += D3DX_PI * 2;
-				}
+				// rotの補正
+				RotRepair(nPlayer);
 			}
 		}
 		else if (GetKeyboardPress(DIK_W) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
@@ -521,28 +403,8 @@ void MovePlayer(int nPlayer)
 			pPlayer->rotDest.y = D3DX_PI + Camerarot.y;	// 目標の角度を設定
 			pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
 
-			// もし、差分がπを超えたら
-			if (pPlayer->rotDiff.y > D3DX_PI)
-			{
-				pPlayer->rotDiff.y -= D3DX_PI * 2;
-			}
-			else if (pPlayer->rotDiff.y < -D3DX_PI)
-			{
-				pPlayer->rotDiff.y += D3DX_PI * 2;
-			}
-
-			// 回転に補正を掛ける
-			pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
-
-			// もし、現在の角度がπを超えたら
-			if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
-			{
-				pPlayer->rot.y -= D3DX_PI * 2;
-			}
-			else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
-			{
-				pPlayer->rot.y += D3DX_PI * 2;
-			}
+			// rotの補正
+			RotRepair(nPlayer);
 		}
 		else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
 		{//Sキーが押される
@@ -552,28 +414,8 @@ void MovePlayer(int nPlayer)
 			pPlayer->rotDest.y = Camerarot.y;	// 目標の角度を設定
 			pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
 
-			// もし、差分がπを超えたら
-			if (pPlayer->rotDiff.y > D3DX_PI)
-			{
-				pPlayer->rotDiff.y -= D3DX_PI * 2;
-			}
-			else if (pPlayer->rotDiff.y < -D3DX_PI)
-			{
-				pPlayer->rotDiff.y += D3DX_PI * 2;
-			}
-
-			// 回転に補正を掛ける
-			pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
-
-			// もし、現在の角度がπを超えたら
-			if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
-			{
-				pPlayer->rot.y -= D3DX_PI * 2;
-			}
-			else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
-			{
-				pPlayer->rot.y += D3DX_PI * 2;
-			}
+			// rotの補正
+			RotRepair(nPlayer);
 		}
 	}
 	else
@@ -589,28 +431,8 @@ void MovePlayer(int nPlayer)
 				pPlayer->rotDest.y = D3DX_PI * 0.75f + Camerarot.y;	// 目標の角度を設定
 				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
 
-				// もし、差分がπを超えたら
-				if (pPlayer->rotDiff.y > D3DX_PI)
-				{
-					pPlayer->rotDiff.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rotDiff.y < -D3DX_PI)
-				{
-					pPlayer->rotDiff.y += D3DX_PI * 2;
-				}
-
-				// 回転に補正を掛ける
-				pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
-
-				// もし、現在の角度がπを超えたら
-				if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
-				{
-					pPlayer->rot.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
-				{
-					pPlayer->rot.y += D3DX_PI * 2;
-				}
+				// rotの補正
+				RotRepair(nPlayer);
 			}
 			else if (GetKeyboardPress(DIK_DOWN) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
 			{// 左下の入力
@@ -620,28 +442,8 @@ void MovePlayer(int nPlayer)
 				pPlayer->rotDest.y = D3DX_PI * 0.25f + Camerarot.y;	// 目標の角度を設定
 				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
 
-				// もし、差分がπを超えたら
-				if (pPlayer->rotDiff.y > D3DX_PI)
-				{
-					pPlayer->rotDiff.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rotDiff.y < -D3DX_PI)
-				{
-					pPlayer->rotDiff.y += D3DX_PI * 2;
-				}
-
-				// 回転に補正を掛ける
-				pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
-
-				// もし、現在の角度がπを超えたら
-				if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
-				{
-					pPlayer->rot.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
-				{
-					pPlayer->rot.y += D3DX_PI * 2;
-				}
+				// rotの補正
+				RotRepair(nPlayer);
 			}
 			else
 			{// 左矢印単体の入力
@@ -651,28 +453,8 @@ void MovePlayer(int nPlayer)
 				pPlayer->rotDest.y = D3DX_PI * 0.5f + Camerarot.y;	// 目標の角度を設定
 				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
 
-				// もし、差分がπを超えたら
-				if (pPlayer->rotDiff.y > D3DX_PI)
-				{
-					pPlayer->rotDiff.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rotDiff.y < -D3DX_PI)
-				{
-					pPlayer->rotDiff.y += D3DX_PI * 2;
-				}
-
-				// 回転に補正を掛ける
-				pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
-
-				// もし、現在の角度がπを超えたら
-				if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
-				{
-					pPlayer->rot.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
-				{
-					pPlayer->rot.y += D3DX_PI * 2;
-				}
+				// rotの補正
+				RotRepair(nPlayer);
 			}
 		}
 		else if (GetKeyboardPress(DIK_RIGHT) == true || GetJoypadPress(nPlayer, JOYKEY_RIGHT) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_RIGHT))
@@ -685,28 +467,8 @@ void MovePlayer(int nPlayer)
 				pPlayer->rotDest.y = -D3DX_PI * 0.75f + Camerarot.y;	// 目標の角度を設定
 				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
 
-				// もし、差分がπを超えたら
-				if (pPlayer->rotDiff.y > D3DX_PI)
-				{
-					pPlayer->rotDiff.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rotDiff.y < -D3DX_PI)
-				{
-					pPlayer->rotDiff.y += D3DX_PI * 2;
-				}
-
-				// 回転に補正を掛ける
-				pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
-
-				// もし、現在の角度がπを超えたら
-				if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
-				{
-					pPlayer->rot.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
-				{
-					pPlayer->rot.y += D3DX_PI * 2;
-				}
+				// rotの補正
+				RotRepair(nPlayer);
 			}
 			else if (GetKeyboardPress(DIK_DOWN) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
 			{// 右下の入力
@@ -716,28 +478,8 @@ void MovePlayer(int nPlayer)
 				pPlayer->rotDest.y = -D3DX_PI * 0.25f + Camerarot.y;	// 目標の角度を設定
 				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
 
-				// もし、差分がπを超えたら
-				if (pPlayer->rotDiff.y > D3DX_PI)
-				{
-					pPlayer->rotDiff.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rotDiff.y < -D3DX_PI)
-				{
-					pPlayer->rotDiff.y += D3DX_PI * 2;
-				}
-
-				// 回転に補正を掛ける
-				pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
-
-				// もし、現在の角度がπを超えたら
-				if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
-				{
-					pPlayer->rot.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
-				{
-					pPlayer->rot.y += D3DX_PI * 2;
-				}
+				// rotの補正
+				RotRepair(nPlayer);
 			}
 			else
 			{// 右矢印だけの入力
@@ -747,28 +489,8 @@ void MovePlayer(int nPlayer)
 				pPlayer->rotDest.y = -D3DX_PI * 0.5f + Camerarot.y;	// 目標の角度を設定
 				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
 
-				// もし、差分がπを超えたら
-				if (pPlayer->rotDiff.y > D3DX_PI)
-				{
-					pPlayer->rotDiff.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rotDiff.y < -D3DX_PI)
-				{
-					pPlayer->rotDiff.y += D3DX_PI * 2;
-				}
-
-				// 回転に補正を掛ける
-				pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
-
-				// もし、現在の角度がπを超えたら
-				if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
-				{
-					pPlayer->rot.y -= D3DX_PI * 2;
-				}
-				else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
-				{
-					pPlayer->rot.y += D3DX_PI * 2;
-				}
+				// rotの補正
+				RotRepair(nPlayer);
 			}
 		}
 		else if (GetKeyboardPress(DIK_UP) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
@@ -779,28 +501,8 @@ void MovePlayer(int nPlayer)
 			pPlayer->rotDest.y = D3DX_PI + Camerarot.y;	// 目標の角度を設定
 			pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
 
-			// もし、差分がπを超えたら
-			if (pPlayer->rotDiff.y > D3DX_PI)
-			{
-				pPlayer->rotDiff.y -= D3DX_PI * 2;
-			}
-			else if (pPlayer->rotDiff.y < -D3DX_PI)
-			{
-				pPlayer->rotDiff.y += D3DX_PI * 2;
-			}
-
-			// 回転に補正を掛ける
-			pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
-
-			// もし、現在の角度がπを超えたら
-			if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
-			{
-				pPlayer->rot.y -= D3DX_PI * 2;
-			}
-			else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
-			{
-				pPlayer->rot.y += D3DX_PI * 2;
-			}
+			// rotの補正
+			RotRepair(nPlayer);
 		}
 		else if (GetKeyboardPress(DIK_DOWN) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
 		{//下矢印が押される
@@ -810,28 +512,8 @@ void MovePlayer(int nPlayer)
 			pPlayer->rotDest.y = Camerarot.y;	// 目標の角度を設定
 			pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
 
-			// もし、差分がπを超えたら
-			if (pPlayer->rotDiff.y > D3DX_PI)
-			{
-				pPlayer->rotDiff.y -= D3DX_PI * 2;
-			}
-			else if (pPlayer->rotDiff.y < -D3DX_PI)
-			{
-				pPlayer->rotDiff.y += D3DX_PI * 2;
-			}
-
-			// 回転に補正を掛ける
-			pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
-
-			// もし、現在の角度がπを超えたら
-			if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
-			{
-				pPlayer->rot.y -= D3DX_PI * 2;
-			}
-			else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
-			{
-				pPlayer->rot.y += D3DX_PI * 2;
-			}
+			// rotの補正
+			RotRepair(nPlayer);
 		}
 	}
 
@@ -844,28 +526,8 @@ void MovePlayer(int nPlayer)
 		pPlayer->rotDest.y = -D3DX_PI * 0.5f + Camerarot.y;	// 目標の角度を設定
 		pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
 
-		// もし、差分がπを超えたら
-		if (pPlayer->rotDiff.y > D3DX_PI)
-		{
-			pPlayer->rotDiff.y -= D3DX_PI * 2;
-		}
-		else if (pPlayer->rotDiff.y < -D3DX_PI)
-		{
-			pPlayer->rotDiff.y += D3DX_PI * 2;
-		}
-
-		// 回転に補正を掛ける
-		pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
-
-		// もし、現在の角度がπを超えたら
-		if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
-		{
-			pPlayer->rot.y -= D3DX_PI * 2;
-		}
-		else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
-		{
-			pPlayer->rot.y += D3DX_PI * 2;
-		}
+		// rotの補正
+		RotRepair(nPlayer);
 	}
 	if (GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_LEFT))
 	{// 左
@@ -875,28 +537,8 @@ void MovePlayer(int nPlayer)
 		pPlayer->rotDest.y = D3DX_PI * 0.5f + Camerarot.y;	// 目標の角度を設定
 		pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
 
-		// もし、差分がπを超えたら
-		if (pPlayer->rotDiff.y > D3DX_PI)
-		{
-			pPlayer->rotDiff.y -= D3DX_PI * 2;
-		}
-		else if (pPlayer->rotDiff.y < -D3DX_PI)
-		{
-			pPlayer->rotDiff.y += D3DX_PI * 2;
-		}
-
-		// 回転に補正を掛ける
-		pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
-
-		// もし、現在の角度がπを超えたら
-		if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
-		{
-			pPlayer->rot.y -= D3DX_PI * 2;
-		}
-		else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
-		{
-			pPlayer->rot.y += D3DX_PI * 2;
-		}
+		// rotの補正
+		RotRepair(nPlayer);
 	}
 	if (GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
 	{// 上
@@ -906,28 +548,8 @@ void MovePlayer(int nPlayer)
 		pPlayer->rotDest.y = D3DX_PI + Camerarot.y;	// 目標の角度を設定
 		pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
 
-		// もし、差分がπを超えたら
-		if (pPlayer->rotDiff.y > D3DX_PI)
-		{
-			pPlayer->rotDiff.y -= D3DX_PI * 2;
-		}
-		else if (pPlayer->rotDiff.y < -D3DX_PI)
-		{
-			pPlayer->rotDiff.y += D3DX_PI * 2;
-		}
-
-		// 回転に補正を掛ける
-		pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
-
-		// もし、現在の角度がπを超えたら
-		if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
-		{
-			pPlayer->rot.y -= D3DX_PI * 2;
-		}
-		else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
-		{
-			pPlayer->rot.y += D3DX_PI * 2;
-		}
+		// rotの補正
+		RotRepair(nPlayer);
 	}
 	if (GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
 	{// 下
@@ -937,53 +559,46 @@ void MovePlayer(int nPlayer)
 		pPlayer->rotDest.y = Camerarot.y;	// 目標の角度を設定
 		pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
 
-		// もし、差分がπを超えたら
-		if (pPlayer->rotDiff.y > D3DX_PI)
-		{
-			pPlayer->rotDiff.y -= D3DX_PI * 2;
-		}
-		else if (pPlayer->rotDiff.y < -D3DX_PI)
-		{
-			pPlayer->rotDiff.y += D3DX_PI * 2;
-		}
-
-		// 回転に補正を掛ける
-		pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
-
-		// もし、現在の角度がπを超えたら
-		if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
-		{
-			pPlayer->rot.y -= D3DX_PI * 2;
-		}
-		else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
-		{
-			pPlayer->rot.y += D3DX_PI * 2;
-		}
+		// rotの補正
+		RotRepair(nPlayer);
 	}
 }
-#if 0
+
 // =================================================
 // プレイヤーのジャンプ関数
 // =================================================
-void JumpPlayer(void)
+void JumpPlayer(int nPlayer)
 {
 	// プレイヤー構造体をポインタ化
-	Player* pPlayer = &g_Player[0];
+	Player* pPlayer = &g_Player[nPlayer];
 
-	for (int nCntPlayer = 0; nCntPlayer < PLAYERTYPE_MAX; nCntPlayer++, pPlayer++)
-	{
+	if (nPlayer == 0)
+	{// 少女
 		// ジャンプする
-		if ((GetKeyboardTrigger(DIK_RETURN) == true || GetJoypadTrigger(JOYKEY_A)) && pPlayer->bJump == false)
+		if ((GetKeyboardTrigger(DIK_SPACE) == true || GetJoypadTrigger(nPlayer, JOYKEY_A)) && pPlayer->bJump == false)
 		{
-			PlaySound(SOUND_LABEL_JUMP);
-			pPlayer->state = PLAYERSTATE_JUMP;
+			//PlaySound(SOUND_LABEL_JUMP);
+			//pPlayer->state = PLAYERSTATE_JUMP;
 
 			pPlayer->move.y = JUMP_FORCE;
 			pPlayer->bJump = true;
 		}
 	}
-}
+	else
+	{// ネズミ
+		// ジャンプする
+		if ((GetKeyboardTrigger(DIK_RSHIFT) == true || GetJoypadTrigger(nPlayer, JOYKEY_A)) && pPlayer->bJump == false)
+		{
+			//PlaySound(SOUND_LABEL_JUMP);
+			//pPlayer->state = PLAYERSTATE_JUMP;
 
+			pPlayer->move.y = JUMP_FORCE;
+			pPlayer->bJump = true;
+		}
+	}
+
+}
+#if 0
 // =================================================
 // モデル設置処理
 // =================================================
@@ -1458,7 +1073,7 @@ void SetMotion(MOTIONTYPE motionType, bool bUseBrend, int nBlendFrame, PlayerTyp
 		g_Player[PlayerType].bFinishMotion = false;		// モーションが終了したかどうか
 	}
 
-	}
+}
 #endif
 // =================================================
 // プレイ人数情報を渡す
@@ -1494,11 +1109,11 @@ void ChangeNumPlayer(void)
 	if (GetKeyboardTrigger(DIK_1) == true)
 	{
 		if (g_nNumPlayer == 1)
-		{
-			g_nNumPlayer = 0;
+		{// 1人→2人
+			g_nNumPlayer = 2;
 		}
 		else
-		{
+		{// 2人→1人
 			g_nNumPlayer = 1;
 		}
 	}

@@ -91,7 +91,7 @@ void UpdatePlayer(void);	// 更新処理
 void DrawPlayer(void);		// 描画処理
 Player *GetPlayer(void);	// プレイヤー情報を渡す
 void MovePlayer(int nPlayer);	// プレイヤーの移動関数
-void JumpPlayer(void);			// プレイヤーのジャンプ関数
+void JumpPlayer(int nPlayer);			// プレイヤーのジャンプ関数
 void SetModel(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int NumIdx, int Parent, int nParts);	// モデルの設置処理
 void UpdateMotion(void);	// モーションの更新
 void SetKey(D3DXVECTOR3 pos, D3DXVECTOR3 rot);	// キー毎の位置、向きの設定
