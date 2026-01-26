@@ -43,14 +43,18 @@
 #define CAM_ZOOM		DIK_SPACE				// ズームアウト
 #define CAM_ZOOM_IN		DIK_LSHIFT				// ズームイン (+スペース
 
-#define MAX_CAMERA		2						// カメラの数
-
 #define CAMERA_NULLCHECK(n)		if (-1 < n && n < MAX_CAMERA)
 
 
 //==============================================================
 // 列挙型
 //==============================================================
+typedef enum
+{
+	PLAYER_ONE = 0,						// 少女に追従カメラ
+	PLAYER_TWO,							// ネズミに追従カメラ
+	MAX_CAMERA
+}CameraType;
 
 //==============================================================
 // カメラの構造体定義
@@ -72,7 +76,7 @@ typedef struct Camera
 	float fPlayerFront;					// プレイヤーより少し前
 	float fPlayerMoveRot;				// プレイヤーの移動方向
 	bool bUse;							// 配列を使っているか
-	bool bEnable;						// 描画に使うか
+	bool bDraw;							// 描画したか
 }Camera;
 POINTER(Camera, P_CAMERA);
 
@@ -83,11 +87,8 @@ void InitCamera(void);
 void UninitCamera(void);
 void UpdateCamera(void);
 void SetCamera(void);										// カメラを設置（mainのDrawの最初にする）
-void SetPotisionCamera(int nIdx, vec3 pos);					// カメラの位置更新
-void CameraEnable(int nIdx);								// カメラを描画に使用すると宣言
-int GetCamera(void);										// まだ未使用のカメラ番号を取得
 void ReleaseCamera(int nIdx);								// カメラを開放
-P_CAMERA GetCameraArray(void);								// カメラ除法配列の先頭アドレスを取得
+P_CAMERA GetCamera(void);									// カメラ除法配列の先頭アドレスを取得
 void GetCameraPos(int nCamNum, vec3* pPosV, vec3* pPosR);	// カメラの位置情報を取得
 void GetCameraRot(int nCamNum, vec3* pRot);					// カメラの角度情報を取得
 int GetCameraNum(void);										// 使用中のカメラの数を取得
