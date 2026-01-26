@@ -5,6 +5,7 @@
 // 
 // =================================================
 #include<stdio.h>
+#include<d3dx9math.h>
 #include "main.h"
 #include "camera.h"
 #include "debugproc.h"
@@ -14,20 +15,6 @@
 #include "modeldata.h"
 #include "motion.h"
 #include "player.h"
-
-// =================================================
-// マクロ定義
-#define	MAX_PLAYER		(2)				// プレイヤーの最大数
-#define	MAX_TEX			(16)			// テクスチャの最大数
-#define	PLAYER_MOVE		(0.5)				// プレイヤーの移動速度
-#define	ATTACK_MOVE		(1.0f)			// 突進の移動速度
-#define	PLAYER_ROTMOVE	(0.3f)			// プレイヤーの回転速度
-#define	PLAYER_INI		(0.2f)			// プレイヤーの慣性
-#define	PLAYER_LIM		(50)			// プレイヤーの移動制限
-#define	GRAVITY			(-0.3f)			// 重力
-#define	JUMP_FORCE		(4.1f)			// ジャンプ力
-#define	STICK_DEADAREA	(10000)			// ジョイスティックのデッドエリア
-#define	MODEL_PLAYER	"data\\model.txt"	// モデルを読み込むファイル名
 
 // =================================================
 // グローバル変数
@@ -54,7 +41,7 @@ void InitPlayer(void)
 	for (int nCntPlayer = 0; nCntPlayer < PLAYERTYPE_MAX; nCntPlayer++)
 	{
 		g_Player[nCntPlayer].posOri = D3DXVECTOR3(0.0f, 100.0f, 0.0f);
-		g_Player[nCntPlayer].pos = D3DXVECTOR3(0.0f, 100.0f, 0.0f);
+		g_Player[nCntPlayer].pos = PLAYER_POSDEF;
 		g_Player[nCntPlayer].posOld = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_Player[nCntPlayer].rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_Player[nCntPlayer].bDisp = true;
