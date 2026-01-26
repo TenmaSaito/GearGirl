@@ -20,7 +20,7 @@ int		g_nEnableCamera;				// 起動させるカメラの数
 //**************************************************************
 // プロトタイプ宣言
 void SetCameraOption(void);					// カメラ設定
-void CameraFollow(P_CAMERA pCamera);		// プレイヤーに追従移動
+void CameraFollow(void);					// プレイヤーに追従移動
 void CameraRotation(P_CAMERA pCamera);		// プレイヤーと同じ向きに回転
 void CameraOrbit(P_CAMERA pCamera);			// オービット処理
 void CameraMove(P_CAMERA pCamera);			// カメラ移動（ポーズ中のみ
@@ -32,17 +32,17 @@ void InitCamera(void)
 {
 	//**************************************************************
 	// 変数宣言
-	P_CAMERA pCamera = GetCameraArray();
+	P_CAMERA pCamera = GetCamera();
 
 	//**************************************************************
 	// 各値の初期化
-	SetCameraOption();
+	g_nEnableCamera = GetNumPlayer();	// プレイヤー数
 
 	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCamera++)
 	{
 		// カメラ座標等
 		pCamera->posV = D3DXVECTOR3 CAMERA_V_DEFPOS;							// 視点
-		pCamera->posR = D3DXVECTOR3 CAMERA_R_DEFPOS;							// 注視点
+		pCamera->posR = D3DXVECTOR3 (0.0f,100.0f,0.0f);							// 注視点
 		pCamera->posRDest = D3DXVECTOR3 CAMERA_R_DEFPOS;						// 目的の注視点
 		pCamera->vecU = D3DXVECTOR3(0.0f, 1.0f, 0.0f);							// 上方向ベクトル
 		pCamera->rot = D3DXVECTOR3(D3DX_PI * 0.2f, 0.0f, 0.0f);					// カメラの角度
@@ -55,13 +55,15 @@ void InitCamera(void)
 		pCamera->viewport.Height = SCREEN_HEIGHT;								// 表示画面の高さ
 
 		pCamera->viewport.MinZ = 0.0f;											
-		pCamera->viewport.MaxZ = 1.0f;
-		pCamera->bAoutRot = false;												// 自動で回り込みOFF
-		pCamera->nCntAoutRot = 0;												//		〃		 ONにするまでのカウンタ
-		pCamera->bUse = false;
-		pCamera->bEnable = false;
-
+		pCamera->viewport.MaxZ = 1.0f;											
+		pCamera->nCntAoutRot = 0;												// 自動で回り込み ONにするまでのカウンタ
+		pCamera->bAoutRot = false;												//		〃		  OFF
+		pCamera->bUse = true;
+		pCamera->bDraw = false;
 	}
+
+	// 画面分割設定
+	SetCameraOption();
 }
 
 //=========================================================================================
@@ -70,9 +72,27 @@ void SetCameraOption(void)
 {
 	//**************************************************************
 	// 変数宣言
-	g_nEnableCamera = 2/* GetNumPlayer()*/;	// プレイヤー数
+	P_CAMERA pCamera = GetCamera();
 
+	g_nEnableCamera = GetNumPlayer();	// プレイヤー数
 
+	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCamera++)
+	{		
+		if (g_nEnableCamera < 2)
+		{// 1P
+			pCamera->viewport.X = 0.0f;								// 画面左上 X 座標
+			pCamera->viewport.Y = 0.0f;								// 画面左上 Y 座標
+			pCamera->viewport.Width = SCREEN_WIDTH;					// 表示画面の横幅
+			pCamera->viewport.Height = SCREEN_HEIGHT;				// 表示画面の高さ
+		}
+		else
+		{// 2P
+			pCamera->viewport.X = SCREEN_WIDTH * 0.5f * nCntCamera;	// 画面左上 X 座標
+			pCamera->viewport.Y = 0.0f;								// 画面左上 Y 座標
+			pCamera->viewport.Width = SCREEN_WIDTH * 0.5f;			// 表示画面の横幅
+			pCamera->viewport.Height = SCREEN_HEIGHT;				// 表示画面の高さ
+		}
+	}
 }
 
 //=========================================================================================
@@ -90,8 +110,12 @@ void UpdateCamera(void)
 {
 	//**************************************************************
 	// 変数宣言
-	P_CAMERA pCamera = GetCameraArray();
+	P_CAMERA pCamera = GetCamera();
 
+	if (g_nEnableCamera != GetNumPlayer())
+	{
+		SetCameraOption();
+	}
 
 #if 0
 	// プレイヤーが停止していたら回り込み/////////////////////////////////OFF
@@ -163,11 +187,14 @@ void UpdateCamera(void)
 	}
 
 #endif
+
 	CameraOrbit(pCamera);
+
+	CameraFollow();
 
 	//**************************************************************
 	// 注視点から視点を求める
-	pCamera = GetCameraArray();
+	pCamera = GetCamera();
 	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCamera++)
 	{
 		if (pCamera->bUse)
@@ -175,6 +202,8 @@ void UpdateCamera(void)
 			pCamera->posV.x = pCamera->posR.x - sinf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
 			pCamera->posV.y = pCamera->posR.y - cosf(D3DX_PI - pCamera->rot.x) * pCamera->fDist;
 			pCamera->posV.z = pCamera->posR.z + cosf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
+			pCamera->bDraw = false;
+
 			PrintDebugProc("CAMERA %d\nposV : %~3f\nposR : %~3f\n", nCntCamera, pCamera->posV.x, pCamera->posV.y, pCamera->posV.z, pCamera->posR.x, pCamera->posR.y, pCamera->posR.z);
 			PrintDebugProc("rot  : %~3f\n", pCamera->rot.x, pCamera->rot.y, pCamera->rot.z);
 		}
@@ -183,39 +212,46 @@ void UpdateCamera(void)
 
 //==============================================================
 //	プレイヤーに追従
-void CameraFollow(P_CAMERA pCamera)
+void CameraFollow(void)
 {
 	//if (GetPause() == false)
 	//{
 		//**************************************************************
 		// 変数宣言
+		P_CAMERA pCamera = GetCamera();				// カメラ情報
 		Player* pPlayer = GetPlayer();				// プレイヤー情報
 		float fPlayerFront = CAMERA_PLAYER_FRONT;	// プレイヤーより前
-		static float fPlayerMoveRot = atan2f(-pPlayer->move.x, -pPlayer->move.z);
-		//**************************************************************
-		// プレイヤーに追従
-		if (pPlayer->move.x != 0 || pPlayer->move.z != 0)
-		{// カメラを少し先へ
-			fPlayerMoveRot = atan2f(-pPlayer->move.x, -pPlayer->move.z);
-		}
-		pCamera->posRDest.x = pPlayer->pos.x - fPlayerFront * sinf(fPlayerMoveRot);
-		pCamera->posRDest.y = pPlayer->pos.y;
-		pCamera->posRDest.z = pPlayer->pos.z - fPlayerFront * cosf(fPlayerMoveRot);
+		static float fPlayerMoveRot;
+
+		for (int nPlayer = 0; nPlayer < MAX_PLAYER; nPlayer++, pCamera++, pPlayer++)
+		{
+			//**************************************************************
+			// プレイヤーに追従
+			
+			//if (CAMERA_PLFR_DEADZONE < pPlayer->move.x * pPlayer->move.x + pPlayer->move.z * pPlayer->move.z)
+			{// カメラを少し先へ
+				fPlayerMoveRot = atan2f(-pPlayer->move.x, -pPlayer->move.z);
+
+				pCamera->posRDest.x = pPlayer->pos.x - fPlayerFront * sinf(fPlayerMoveRot);
+				pCamera->posRDest.y = pPlayer->pos.y;
+				pCamera->posRDest.z = pPlayer->pos.z - fPlayerFront * cosf(fPlayerMoveRot);
+			}
 #if 0
-	}
-	else
-	{
-		//**************************************************************
-		// 変数宣言
-		vec3 pos = GetAnchor();
-		g_camera.posRDest = pos;
-	}
+			}
+			else
+			{
+				//**************************************************************
+				// 変数宣言
+				vec3 pos = GetAnchor();
+				g_camera.posRDest = pos;
+			}
 #endif
-	//**************************************************************
-	// カメラの位置を補正
-	pCamera->posR.x += (pCamera->posRDest.x - pCamera->posR.x) * CAMERA_FOLLOW_FACTOR;
-	pCamera->posR.y += (pCamera->posRDest.y - pCamera->posR.y) * CAMERA_FOLLOW_FACTOR;
-	pCamera->posR.z += (pCamera->posRDest.z - pCamera->posR.z) * CAMERA_FOLLOW_FACTOR;			
+			//**************************************************************
+			// カメラの位置を補正
+			pCamera->posR.x += (pCamera->posRDest.x - pCamera->posR.x) * CAMERA_FOLLOW_FACTOR;
+			pCamera->posR.y += (pCamera->posRDest.y - pCamera->posR.y) * CAMERA_FOLLOW_FACTOR;
+			pCamera->posR.z += (pCamera->posRDest.z - pCamera->posR.z) * CAMERA_FOLLOW_FACTOR;
+		}
 }
 
 //==============================================================
@@ -364,11 +400,19 @@ void SetCamera(void)
 	//**************************************************************
 	// 変数宣言
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();		// デバイスへのポインタ
-	P_CAMERA			pCam = GetCameraArray();
+	P_CAMERA			pCam = GetCamera();
 
 	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCam++)
 	{
-		if (pCam->bUse && pCam->bEnable)
+		if (g_nEnableCamera == 1)
+		{
+			if (GetActivePlayer() == PLAYERTYPE_MOUSE)
+			{
+				pCam++;
+			}
+		}
+
+		if (pCam->bUse && pCam->bDraw == false)
 		{
 			//**************************************************************
 			// ビューポートの設定
@@ -400,84 +444,16 @@ void SetCamera(void)
 
 			EndDevice();// デバイス取得終了
 
-			pCam->bEnable = false;	// 描画に使用したので更新されるまで更新されるまで描画に使用しない
+			pCam->bDraw = true;
 			return;
 		}
 	}
 }
 
 //=========================================================================================
-// カメラの位置を更新
-//=========================================================================================
-void SetPotisionCamera(int nIdx, vec3 pos)
-{
-	//**************************************************************
-	// 変数宣言
-	P_CAMERA pCam = GetCameraArray();
-
-	CAMERA_NULLCHECK(nIdx)
-	{
-		pCam += nIdx;
-		if (pCam->bUse)
-		{
-			pCam->posR = pos;
-		}
-	}
-}
-
-//=========================================================================================
-// カメラを描画に使用
-//=========================================================================================
-void CameraEnable(int nIdx)
-{
-	//**************************************************************
-	// 変数宣言
-	P_CAMERA pCam;
-
-	CAMERA_NULLCHECK(nIdx)
-	{
-		if (g_aCamera[nIdx].bUse)
-		{
-			g_aCamera[nIdx].bEnable = true;
-		}
-	}
-}
-
-//=========================================================================================
-// カメラ番号を取得7
-//=========================================================================================
-int GetCamera(void)
-{
-	//**************************************************************
-	// 変数宣言
-	P_CAMERA pCam = GetCameraArray();
-
-	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++,pCam++)
-	{
-		if (pCam->bUse == false)
-		{
-			pCam->bUse = true;
-			return nCntCamera;
-		}
-	}
-	return -1;
-}
-
-//=========================================================================================
-// カメラを解放
-//=========================================================================================
-void ReleaseCamera(int nIdx)
-{
-	CAMERA_NULLCHECK(nIdx)
-	{
-		g_aCamera[nIdx].bUse = false;
-	}
-}
-
-//=========================================================================================
 // カメラの情報を取得
 //=========================================================================================
-P_CAMERA GetCameraArray(void)
+P_CAMERA GetCamera(void)
 {
 	return &g_aCamera[0];
 }
