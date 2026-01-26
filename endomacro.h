@@ -17,6 +17,6 @@
 #define vec2		D3DXVECTOR2
 #define vec3		D3DXVECTOR3
 #define POINTER(mold,name)			typedef struct mold* name							// (mold) のポインタ型の (name) を定義する
-
+#define MIDCHECK(MIN,N,MAX)			(MIN < N && N < MAX)
 
 #endif // !_ENDOMACRO_H_

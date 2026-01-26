@@ -26,6 +26,7 @@
 #define CAMERA_FOLLOW_FACTOR	(0.15f)					// カメラが追従移動する時の補正
 #define CAMERA_ROTET_FACTOR		(0.01f)					// カメラが追従回転する時の補正
 #define CAMERA_PLAYER_FRONT		(50.0f)					// 注視点をプレイヤーより少し先にする
+#define CAMERA_PLFR_DEADZONE	(0.01f)					// これ以上速度があればカメラを動かす
 
 //**************************************************************
 // カメラ操作
@@ -42,9 +43,6 @@
 
 #define CAM_ZOOM		DIK_SPACE				// ズームアウト
 #define CAM_ZOOM_IN		DIK_LSHIFT				// ズームイン (+スペース
-
-#define CAMERA_NULLCHECK(n)		if (-1 < n && n < MAX_CAMERA)
-
 
 //==============================================================
 // 列挙型

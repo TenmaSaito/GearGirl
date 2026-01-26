@@ -42,7 +42,7 @@ void InitCamera(void)
 	{
 		// カメラ座標等
 		pCamera->posV = D3DXVECTOR3 CAMERA_V_DEFPOS;							// 視点
-		pCamera->posR = D3DXVECTOR3 CAMERA_R_DEFPOS;							// 注視点
+		pCamera->posR = D3DXVECTOR3 (0.0f,100.0f,0.0f);							// 注視点
 		pCamera->posRDest = D3DXVECTOR3 CAMERA_R_DEFPOS;						// 目的の注視点
 		pCamera->vecU = D3DXVECTOR3(0.0f, 1.0f, 0.0f);							// 上方向ベクトル
 		pCamera->rot = D3DXVECTOR3(D3DX_PI * 0.2f, 0.0f, 0.0f);					// カメラの角度
@@ -62,35 +62,37 @@ void InitCamera(void)
 		pCamera->bDraw = false;
 	}
 
-	//SetCameraOption();
+	// 画面分割設定
+	SetCameraOption();
 }
 
 //=========================================================================================
 // カメラ設定
 void SetCameraOption(void)
 {
-#if 0
 	//**************************************************************
 	// 変数宣言
+	P_CAMERA pCamera = GetCamera();
+
 	g_nEnableCamera = GetNumPlayer();	// プレイヤー数
 
-	if (g_nEnableCamera < 2)
-	{
-		// 画面設定等
-		pCamera->viewport.X = 0.0f;						// 画面左上 X 座標
-		pCamera->viewport.Y = 0.0f;						// 画面左上 Y 座標
-		pCamera->viewport.Width = SCREEN_WIDTH;			// 表示画面の横幅
-		pCamera->viewport.Height = SCREEN_HEIGHT;		// 表示画面の高さ
+	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCamera++)
+	{		
+		if (g_nEnableCamera < 2)
+		{// 1P
+			pCamera->viewport.X = 0.0f;								// 画面左上 X 座標
+			pCamera->viewport.Y = 0.0f;								// 画面左上 Y 座標
+			pCamera->viewport.Width = SCREEN_WIDTH;					// 表示画面の横幅
+			pCamera->viewport.Height = SCREEN_HEIGHT;				// 表示画面の高さ
+		}
+		else
+		{// 2P
+			pCamera->viewport.X = SCREEN_WIDTH * 0.5f * nCntCamera;	// 画面左上 X 座標
+			pCamera->viewport.Y = 0.0f;								// 画面左上 Y 座標
+			pCamera->viewport.Width = SCREEN_WIDTH * 0.5f;			// 表示画面の横幅
+			pCamera->viewport.Height = SCREEN_HEIGHT;				// 表示画面の高さ
+		}
 	}
-	else
-	{
-		// 画面設定等
-		pCamera->viewport.X = 0.0f;						// 画面左上 X 座標
-		pCamera->viewport.Y = SCREEN_WIDTH * 0.5f;		// 画面左上 Y 座標
-		pCamera->viewport.Width = SCREEN_WIDTH;			// 表示画面の横幅
-		pCamera->viewport.Height = SCREEN_HEIGHT;		// 表示画面の高さ
-	}
-#endif
 }
 
 //=========================================================================================
@@ -109,8 +111,11 @@ void UpdateCamera(void)
 	//**************************************************************
 	// 変数宣言
 	P_CAMERA pCamera = GetCamera();
-	g_nEnableCamera = GetNumPlayer();	// プレイヤー数
 
+	if (g_nEnableCamera != GetNumPlayer())
+	{
+		SetCameraOption();
+	}
 
 #if 0
 	// プレイヤーが停止していたら回り込み/////////////////////////////////OFF
@@ -182,7 +187,6 @@ void UpdateCamera(void)
 	}
 
 #endif
-	// SetCameraOption()
 
 	CameraOrbit(pCamera);
 
@@ -221,26 +225,26 @@ void CameraFollow(void)
 
 		for (int nPlayer = 0; nPlayer < MAX_PLAYER; nPlayer++, pCamera++, pPlayer++)
 		{
-			fPlayerMoveRot = atan2f(-pPlayer->move.x, -pPlayer->move.z);
-
 			//**************************************************************
 			// プレイヤーに追従
-			if (pPlayer->move.x != 0 || pPlayer->move.z != 0)
+			
+			//if (CAMERA_PLFR_DEADZONE < pPlayer->move.x * pPlayer->move.x + pPlayer->move.z * pPlayer->move.z)
 			{// カメラを少し先へ
 				fPlayerMoveRot = atan2f(-pPlayer->move.x, -pPlayer->move.z);
+
+				pCamera->posRDest.x = pPlayer->pos.x - fPlayerFront * sinf(fPlayerMoveRot);
+				pCamera->posRDest.y = pPlayer->pos.y;
+				pCamera->posRDest.z = pPlayer->pos.z - fPlayerFront * cosf(fPlayerMoveRot);
 			}
-			pCamera->posRDest.x = pPlayer->pos.x - fPlayerFront * sinf(fPlayerMoveRot);
-			pCamera->posRDest.y = pPlayer->pos.y;
-			pCamera->posRDest.z = pPlayer->pos.z - fPlayerFront * cosf(fPlayerMoveRot);
 #if 0
-		}
-	else
-	{
-	//**************************************************************
-	// 変数宣言
-	vec3 pos = GetAnchor();
-	g_camera.posRDest = pos;
-	}
+			}
+			else
+			{
+				//**************************************************************
+				// 変数宣言
+				vec3 pos = GetAnchor();
+				g_camera.posRDest = pos;
+			}
 #endif
 			//**************************************************************
 			// カメラの位置を補正
@@ -400,6 +404,14 @@ void SetCamera(void)
 
 	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCam++)
 	{
+		if (g_nEnableCamera == 1)
+		{
+			if (GetActivePlayer() == PLAYERTYPE_MOUSE)
+			{
+				pCam++;
+			}
+		}
+
 		if (pCam->bUse && pCam->bDraw == false)
 		{
 			//**************************************************************
