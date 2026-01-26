@@ -63,7 +63,6 @@ void InitPlayer(void)
 		g_Player[nCntPlayer].nKey = 0;
 		g_Player[nCntPlayer].state = PLAYERSTATE_NEUTRAL;
 		g_Player[nCntPlayer].bFinishMotion = true;
-		g_Player[nCntPlayer].nIdxCamera = GetCamera();
 	}
 
 	// 少女のパーツ、モーションを読み込む
@@ -164,11 +163,8 @@ void UpdatePlayer(void)
 			pPlayer->bJump = false;
 		}
 
-		// カメラに使用しているインデックスを渡して追従させる
-		SetPotisionCamera(pPlayer->nIdxCamera, pPlayer->pos);
-
 		// カメラを有効化させる
-		CameraEnable(pPlayer->nIdxCamera);
+		//CameraEnable(pPlayer->nIdxCamera);
 
 		// モデルとの当たり判定
 		CollisionModel(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move);
