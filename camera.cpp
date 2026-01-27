@@ -41,23 +41,23 @@ void InitCamera(void)
 	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCamera++)
 	{
 		// カメラ座標等
-		pCamera->posV = D3DXVECTOR3 CAMERA_V_DEFPOS;							// 視点
-		pCamera->posR = D3DXVECTOR3 (0.0f,100.0f,0.0f);							// 注視点
-		pCamera->posRDest = D3DXVECTOR3 CAMERA_R_DEFPOS;						// 目的の注視点
-		pCamera->vecU = D3DXVECTOR3(0.0f, 1.0f, 0.0f);							// 上方向ベクトル
-		pCamera->rot = D3DXVECTOR3(D3DX_PI * 0.2f, 0.0f, 0.0f);					// カメラの角度
-		pCamera->fDist = CAMERA_DISTANS;										// 視点と注視点の距離
+		pCamera->posV = D3DXVECTOR3 CAMERA_V_DEFPOS;					// 視点
+		pCamera->posR = PLAYER_POSDEF;									// 注視点
+		pCamera->posRDest = D3DXVECTOR3 CAMERA_R_DEFPOS;				// 目的の注視点
+		pCamera->vecU = D3DXVECTOR3(0.0f, 1.0f, 0.0f);					// 上方向ベクトル
+		pCamera->rot = D3DXVECTOR3(D3DX_PI * 0.2f, 0.0f, 0.0f);			// カメラの角度
+		pCamera->fDist = CAMERA_DISTANS;								// 視点と注視点の距離
 
 		// 画面設定等
-		pCamera->viewport.X = SCREEN_WIDTH * 0.5f * nCntCamera;					// 画面左上 X 座標
-		pCamera->viewport.Y = 0.0f;												// 画面左上 Y 座標
-		pCamera->viewport.Width = SCREEN_WIDTH * 0.5f;							// 表示画面の横幅
-		pCamera->viewport.Height = SCREEN_HEIGHT;								// 表示画面の高さ
+		pCamera->viewport.X = SCREEN_WIDTH * 0.5f * nCntCamera;			// 画面左上 X 座標
+		pCamera->viewport.Y = 0.0f;										// 画面左上 Y 座標
+		pCamera->viewport.Width = SCREEN_WIDTH * 0.5f;					// 表示画面の横幅
+		pCamera->viewport.Height = SCREEN_HEIGHT;						// 表示画面の高さ
 
-		pCamera->viewport.MinZ = 0.0f;											
-		pCamera->viewport.MaxZ = 1.0f;											
-		pCamera->nCntAoutRot = 0;												// 自動で回り込み ONにするまでのカウンタ
-		pCamera->bAoutRot = false;												//		〃		  OFF
+		pCamera->viewport.MinZ = 0.0f;									
+		pCamera->viewport.MaxZ = 1.0f;									
+		pCamera->nCntAoutRot = 0;										// 自動で回り込み ONにするまでのカウンタ
+		pCamera->bAoutRot = false;										//		〃		  OFF
 		pCamera->bUse = true;
 		pCamera->bDraw = false;
 	}
@@ -228,7 +228,7 @@ void CameraFollow(void)
 			//**************************************************************
 			// プレイヤーに追従
 			
-			//if (CAMERA_PLFR_DEADZONE < pPlayer->move.x * pPlayer->move.x + pPlayer->move.z * pPlayer->move.z)
+			if (CAMERA_PLFR_DEADZONE < pPlayer->move.x * pPlayer->move.x + pPlayer->move.z * pPlayer->move.z)
 			{// カメラを少し先へ
 				fPlayerMoveRot = atan2f(-pPlayer->move.x, -pPlayer->move.z);
 
