@@ -356,7 +356,7 @@ bool LoadFileFromMotionScript(const char* pMotionFileName)
 						if (strstr(aStr, READ_ENDCHARACTER) != NULL)
 						{
 							// Žæ“¾‚µ‚½î•ñ‚ð“n‚·
-
+							pPInfo->nNumParts = nNumParts;
 							break;
 						}
 						else if (strstr(aStr, READ_PARTS) != NULL)
