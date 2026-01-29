@@ -164,6 +164,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mathUtil.cpp" />
     <ClCompile Include="mesh.cpp" />
+    <ClCompile Include="meshcylinder.cpp" />
     <ClCompile Include="meshsphere.cpp" />
     <ClCompile Include="mode.cpp" />
     <ClCompile Include="model.cpp" />

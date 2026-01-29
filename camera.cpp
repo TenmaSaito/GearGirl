@@ -331,7 +331,7 @@ void CameraOrbit(P_CAMERA pCamera)
 	//**************************************************************
 	// 注視点のまわりを回転
 	// キーボード操作
-	if (GetKeyboardRepeat(CAM_ORBIT_R))
+	if (GetKeyboardRepeat(CAM_ORBIT_R) && GetKeyboardPress(DIK_M) != true)
 	{
 		pCamera->rot.y -= CAMERA_SPIN;
 		bUse = true;
@@ -445,6 +445,7 @@ void SetCamera(void)
 			EndDevice();// デバイス取得終了
 
 			pCam->bDraw = true;
+
 			return;
 		}
 	}

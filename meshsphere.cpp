@@ -128,7 +128,7 @@ void DrawMeshSphere(void)
 
 			//**************************************************************
 			// スフィアの描画
-			pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, 0, 0, g_aMeshSphere[nCntMeshSphere].nVerti, 0, g_aMeshSphere[nCntMeshSphere].nPrim);
+			pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, 0, 0, pMesh->nVerti, 0, pMesh->nPrim);
 		}
 	}
 
@@ -142,7 +142,7 @@ void SetMeshSphere(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int n
 {
 	//**************************************************************
 	// 変数宣言
-	LPDIRECT3DDEVICE9	pDevice = GetDevice();			//--------- デバイス取得 ---------//
+	LPDIRECT3DDEVICE9	pDevice = GetDevice();				//--------- デバイス取得 ---------//
 	P_MESH				pMesh = GetMeshSphere();			// メッシュスフィア先頭アドレス
 	VERTEX_3D*			pVtx;								// 頂点情報へのポインタ
 	WORD*				pIdx;								// インデックス情報へのポインタ
@@ -151,7 +151,6 @@ void SetMeshSphere(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int n
 	float				fHeightCal;							// 計算用高さ
 	int					nHeightVerti = nHeightDivision + 1,
 						nCircleVerti = nCircleDivision + 1;	// 縦頂点数と横頂点数
-	int					nBoth = 0;
 	vec3 angle = D3DXVECTOR3_NULL;
 
 	for (int nCntMeshSphere = 0; nCntMeshSphere < MAX_MESHSPHERE; nCntMeshSphere++, pMesh++)
@@ -173,11 +172,11 @@ void SetMeshSphere(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int n
 
 			//**************************************************************
 			// 頂点バッファの読み込み
-			pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * pMesh->nVerti,
+			pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * g_aMeshSphere[nCntMeshSphere].nVerti,
 				D3DUSAGE_WRITEONLY,
 				FVF_VERTEX_3D,
 				D3DPOOL_MANAGED,
-				&pMesh->pVtxBuff,
+				&g_aMeshSphere[nCntMeshSphere].pVtxBuff,
 				NULL);
 
 			//**************************************************************
@@ -186,12 +185,12 @@ void SetMeshSphere(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int n
 				D3DUSAGE_WRITEONLY,
 				D3DFMT_INDEX16,
 				D3DPOOL_MANAGED,
-				&pMesh->pIdxBuffer,
+				&g_aMeshSphere[nCntMeshSphere].pIdxBuffer,
 				NULL);
 
 			//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 			// 頂点バッファをロックし、頂点情報へのポインタを取得
-			pMesh->pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+			g_aMeshSphere[nCntMeshSphere].pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
 			for (int nCntHeight = 0, nCntVer = 0; nCntHeight <= nHeightDivision; nCntHeight++)
 			{
@@ -201,28 +200,30 @@ void SetMeshSphere(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int n
 				for (int nCntCircle = 0; nCntCircle <= nCircleDivision; nCntCircle++, nCntVer++)
 				{
 					// 頂点座標を設定
-					pVtx[nCntVer].pos = D3DXVECTOR3(fRadius * -sinf(angle.y * nCntCircle),
-						fRadius,
-						fRadius * cosf(angle.y * nCntCircle));
+					pVtx[nCntVer].pos = D3DXVECTOR3(fRadiusCal * sinf(angle.y * nCntCircle),
+						fHeightCal,
+						fRadiusCal * cosf(angle.y * nCntCircle));
 
-					// 法線ベクトルの設定
-					pVtx[nCntVer].nor = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+					// 法線ベクトルの設定(正規化)
+					vecDir = D3DXVECTOR3(pVtx[nCntVer].pos.x, 0.0f, pVtx[nCntVer].pos.z); // 頂点座標<=真横なのでYだけ消す
+					D3DXVec3Normalize(&vecDir, &vecDir);			//いい感じのベクトルに変換してくれる
+					pVtx[nCntVer].nor = vecDir;
 
 					// 頂点カラー設定
 					pVtx[nCntVer].col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 
 					// テクスチャ座標を設定
-					pVtx[nCntVer].tex = D3DXVECTOR2((float)nCntCircle, (float)nCntHeight);
+					pVtx[nCntVer].tex = D3DXVECTOR2((float)nCntCircle / nCircleDivision, (float)nCntHeight / nHeightDivision);
 				}
 			}
 
 			// 頂点バッファのロック解除
-			pMesh->pVtxBuff->Unlock();
+			g_aMeshSphere[nCntMeshSphere].pVtxBuff->Unlock();
 			//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 			//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 			// インデックスバッファをロックし、頂点番号データへのポインタを取得
-			pMesh->pIdxBuffer->Lock(0, 0, (void**)&pIdx, 0);
+			g_aMeshSphere[nCntMeshSphere].pIdxBuffer->Lock(0, 0, (void**)&pIdx, 0);
 
 			// 頂点番号データの設定
 			for (int nCntHeight = 0; nCntHeight < nHeightDivision; nCntHeight++)
@@ -242,10 +243,10 @@ void SetMeshSphere(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int n
 			}
 
 			// インデックスバッファのロック解除
-			pMesh->pIdxBuffer->Unlock();
+			g_aMeshSphere[nCntMeshSphere].pIdxBuffer->Unlock();
 			//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
-			pMesh->bUse = true;
+			g_aMeshSphere[nCntMeshSphere].bUse = true;
 			break;
 		}
 	}

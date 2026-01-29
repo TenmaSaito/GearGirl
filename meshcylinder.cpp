@@ -6,13 +6,13 @@
 //==================================================================================================================================
 //**************************************************************
 // インクルード
-#include "input.h"
 #include "mesh.h"
+#include "Texture.h"
+#include "debugproc.h"
 
 //**************************************************************
 // グローバル変数
-LPDIRECT3DTEXTURE9			g_pTextureMeshCylinder = NULL;			// テクスチャへのポインタ
-MeshCylinder				g_aMeshCylinder[MAX_MESHCYLINDER];		// メッシュ壁情報
+MeshInfo				g_aMeshCylinder[MAX_MESHCYLINDER];		// メッシュ壁情報
 
 //**************************************************************
 // プロトタイプ宣言
@@ -27,10 +27,6 @@ void InitMeshCylinder(void)
 	LPDIRECT3DDEVICE9	pDevice = GetDevice();		// デバイスへのポインタ
 
 	//**************************************************************
-	// テクスチャ読み込み
-	D3DXCreateTextureFromFile(pDevice,"data\\TEXTURE\\object\\block002.jpg",&g_pTextureMeshCylinder);
-
-	//**************************************************************
 	// 位置・サイズの初期化
 	for (int nCntMeshCylinder = 0; nCntMeshCylinder < MAX_MESHCYLINDER; nCntMeshCylinder++)
 	{
@@ -41,19 +37,12 @@ void InitMeshCylinder(void)
 		g_aMeshCylinder[nCntMeshCylinder].pIdxBuffer = NULL;
 		g_aMeshCylinder[nCntMeshCylinder].nHeightDivision = 0;
 		g_aMeshCylinder[nCntMeshCylinder].nCircleDivision = 0;
-		g_aMeshCylinder[nCntMeshCylinder].fAngle = 0.0f;
 		g_aMeshCylinder[nCntMeshCylinder].nVerti = 0;
 		g_aMeshCylinder[nCntMeshCylinder].nPrim = 0;
-		g_aMeshCylinder[nCntMeshCylinder].bInside = false;
-		g_aMeshCylinder[nCntMeshCylinder].bOutside = false;
+		g_aMeshCylinder[nCntMeshCylinder].bInner = false;
+		g_aMeshCylinder[nCntMeshCylinder].bOuter = false;
 		g_aMeshCylinder[nCntMeshCylinder].bUse = false;
 	}
-
-	// 壁の設置
-	SetMeshCylinder(D3DXVECTOR3(300.0f, 0.0, -300.0f),  D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(100.0f,100.0f, 100.0f),3, 32,true,true);
-	//SetMeshCylinder(D3DXVECTOR3(FIELD_SIZE, 0.0, 0.0f),  D3DXVECTOR3(0.0f, D3DX_PI * 0.5f, 0.0f), D3DXVECTOR3(1000.0f, 200.0f, 0.0f)	,2, 2);
-	//SetMeshCylinder(D3DXVECTOR3(0.0f, 0.0, -FIELD_SIZE), D3DXVECTOR3(0.0f, -D3DX_PI, 0.0f), D3DXVECTOR3(1000.0f, 200.0f, 0.0f)			,3, 3);
-	//SetMeshCylinder(D3DXVECTOR3(-FIELD_SIZE, 0.0, 0.0f), D3DXVECTOR3(0.0f, -D3DX_PI * 0.5f, 0.0f), D3DXVECTOR3(1000.0f, 200.0f, 0.0f)	,4, 4);
 }
 
 //=========================================================================================
@@ -61,14 +50,6 @@ void InitMeshCylinder(void)
 //=========================================================================================
 void UninitMeshCylinder(void)
 {
-	//**************************************************************
-	// テクスチャの破棄
-	if (g_pTextureMeshCylinder != NULL)
-	{
-		g_pTextureMeshCylinder->Release();
-		g_pTextureMeshCylinder = NULL;
-	}
-
 	for (int nCntMeshCylinder = 0; nCntMeshCylinder < MAX_MESHCYLINDER; nCntMeshCylinder++)
 	{
 		//**************************************************************
@@ -94,7 +75,17 @@ void UninitMeshCylinder(void)
 //=========================================================================================
 void UpdateMeshCylinder(void)
 {
+	P_MESH pMesh = &g_aMeshCylinder[0];
 
+	for (int nCntMeshCylinder = 0; nCntMeshCylinder < MAX_MESHCYLINDER; nCntMeshCylinder++,pMesh++)
+	{
+		if (pMesh->bUse)
+		{
+			PrintDebugProc("MESH CYLINDER %d\n pos : %~3f\n", nCntMeshCylinder,pMesh->pos.x, pMesh->pos.y, pMesh->pos.z);
+			PrintDebugProc(" radius %f\n height %f",pMesh->size.x, pMesh->size.y);
+
+		}
+	}
 }
 
 //=========================================================================================
@@ -145,7 +136,7 @@ void DrawMeshCylinder(void)
 
 			//**************************************************************
 			// テクスチャの設定
-			pDevice->SetTexture(0, g_pTextureMeshCylinder);
+			pDevice->SetTexture(0, GetTexture(g_aMeshCylinder[nCntMeshCylinder].nIdxTexture));
 
 			//**************************************************************
 			// フィールドの描画
@@ -157,7 +148,9 @@ void DrawMeshCylinder(void)
 //=========================================================================================
 // 壁を設置
 //=========================================================================================
-void SetMeshCylinder(D3DXVECTOR3 pos, D3DXVECTOR3 rot, D3DXVECTOR3 size, int nHeightDivision, int nCircleDivision,bool bInside, bool bOutside)
+//void SetMeshCylinder(D3DXVECTOR3 pos, D3DXVECTOR3 rot, D3DXVECTOR3 size, int nHeightDivision, int nCircleDivision,bool bInside, bool bOutside)
+void SetMeshCylinder(vec3 pos, vec3 rot, float fRadius, float fHeight, int nHeightDivision, int nCircleDivision, bool bInner, bool bOuter, int nTex)
+
 {
 	//**************************************************************
 	// 変数宣言
@@ -168,6 +161,7 @@ void SetMeshCylinder(D3DXVECTOR3 pos, D3DXVECTOR3 rot, D3DXVECTOR3 size, int nHe
 	int					nHeightVerti = nHeightDivision + 1,
 						nCircleVerti = nCircleDivision + 1;	// 縦頂点数と横頂点数
 	int					nBoth = 0;
+	float				fAngle = 0.0f;
 
 	for (int nCntMeshCylinder = 0; nCntMeshCylinder < MAX_MESHCYLINDER; nCntMeshCylinder++)
 	{
@@ -176,18 +170,20 @@ void SetMeshCylinder(D3DXVECTOR3 pos, D3DXVECTOR3 rot, D3DXVECTOR3 size, int nHe
 			// 値の保存
 			g_aMeshCylinder[nCntMeshCylinder].pos = pos;
 			g_aMeshCylinder[nCntMeshCylinder].rot = rot;
-			g_aMeshCylinder[nCntMeshCylinder].size = size;
+
+			g_aMeshCylinder[nCntMeshCylinder].size = vec3(fRadius, fHeight, fRadius);
 			g_aMeshCylinder[nCntMeshCylinder].nHeightDivision = nHeightDivision;
 			g_aMeshCylinder[nCntMeshCylinder].nCircleDivision = nCircleDivision;
-			g_aMeshCylinder[nCntMeshCylinder].fAngle = (float)(2 * D3DX_PI / nCircleDivision);
+			fAngle = (float)(2 * D3DX_PI / nCircleDivision);
 			g_aMeshCylinder[nCntMeshCylinder].nVerti = nHeightVerti * nCircleVerti;
 			g_aMeshCylinder[nCntMeshCylinder].nPrim = (nHeightDivision * (nCircleDivision + 2) - 2) * 2;
-			g_aMeshCylinder[nCntMeshCylinder].bInside = bInside;
-			if (bInside)
+			g_aMeshCylinder[nCntMeshCylinder].bInner = bInner;
+			if (bInner)
 				nBoth++;
-			g_aMeshCylinder[nCntMeshCylinder].bOutside = bOutside;
-			if (bOutside)
+			g_aMeshCylinder[nCntMeshCylinder].bOuter = bOuter;
+			if (bOuter)
 				nBoth++;
+			g_aMeshCylinder[nCntMeshCylinder].nIdxTexture = nTex;
 
 			//**************************************************************
 			// 頂点バッファの読み込み
@@ -216,9 +212,9 @@ void SetMeshCylinder(D3DXVECTOR3 pos, D3DXVECTOR3 rot, D3DXVECTOR3 size, int nHe
 				for (int nCntCircle = 0; nCntCircle <= nCircleDivision; nCntCircle++, nCntVer++)
 				{
 					// 頂点座標を設定
-					pVtx[nCntVer].pos = D3DXVECTOR3(g_aMeshCylinder[nCntMeshCylinder].size.x * sinf(g_aMeshCylinder[nCntMeshCylinder].fAngle * nCntCircle),
+					pVtx[nCntVer].pos = D3DXVECTOR3(g_aMeshCylinder[nCntMeshCylinder].size.x * sinf(fAngle * nCntCircle),
 						(g_aMeshCylinder[nCntMeshCylinder].size.y / nHeightDivision) * nCntDepth,
-						g_aMeshCylinder[nCntMeshCylinder].size.z * cosf(g_aMeshCylinder[nCntMeshCylinder].fAngle * nCntCircle));
+						g_aMeshCylinder[nCntMeshCylinder].size.z * cosf(fAngle * nCntCircle));
 
 					// 法線ベクトルの設定(正規化)
 					vecDir = D3DXVECTOR3(pVtx[nCntVer].pos.x, 0.0f, pVtx[nCntVer].pos.z); // 頂点座標<=真横なのでYだけ消す

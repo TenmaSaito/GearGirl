@@ -24,8 +24,10 @@ void InitMesh(void)
 	// Sphere
 	InitMeshSphere();
 
+	// Cylinder
+	InitMeshCylinder();
 
-	SetMeshSphere(vec3(300.0f,100.0f,300.0f), D3DXVECTOR3_NULL, 100.0f, 16, 16, true, true,0);
+	SetMeshSphere(vec3(0.0f, 120.0f, 0.0f), D3DXVECTOR3_NULL, 1000.0f, 16, 32, true, true, 0);
 }
 
 //=========================================================================================
@@ -35,6 +37,10 @@ void UninitMesh(void)
 {
 	// Sphere
 	UninitMeshSphere();
+
+	// Cylinder
+	UninitMeshCylinder();
+
 }
 
 //=========================================================================================
@@ -44,6 +50,10 @@ void UpdateMesh(void)
 {
 	// Sphere
 	UpdateMeshSphere();
+
+	// Cylinder
+	UpdateMeshCylinder();
+
 }
 
 //=========================================================================================
@@ -53,4 +63,8 @@ void DrawMesh(void)
 {
 	// Sphere
 	DrawMeshSphere();
+
+	// Cylinder
+	DrawMeshCylinder();
+
 }
