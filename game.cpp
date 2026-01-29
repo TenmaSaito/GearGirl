@@ -20,6 +20,7 @@
 #include "light.h"
 #include "thread.h"
 #include "motion.h"
+#include "mesh.h"
 
 //**********************************************************************************
 //*** マクロ定義 ***
@@ -60,6 +61,9 @@ void InitGame(void)
 	/*** 床の初期化 ***/
 	InitField();
 
+	/*** メッシュの初期化 ***/
+	InitMesh();
+
 	/*** モデルの初期化 ***/
 	InitModel();
 
@@ -98,6 +102,8 @@ void UninitGame(void)
 	/*** 床の終了 ***/
 	UninitField();
 
+	/*** メッシュの終了 ***/
+
 	/*** モデルの終了 ***/
 	UninitModel();
 
@@ -135,6 +141,9 @@ void UpdateGame(void)
 	/*** 床の更新 ***/
 	UpdateField();
 
+	/*** メッシュの更新 ***/
+	UpdateMesh();
+
 	/*** モデルの更新 ***/
 	UpdateModel();
 
@@ -170,6 +179,9 @@ void DrawGame(void)
 
 		/*** 床の描画  ***/
 		DrawField();
+
+		/*** メッシュの描画 ***/
+		DrawMesh();
 
 		// VERTEX_2D ============================================
 		/*** Aの描画 ***/
