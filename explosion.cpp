@@ -7,11 +7,8 @@
 //**********************************************************************************
 //*** インクルードファイル ***
 //**********************************************************************************
-#include "bullet.h"
-#include "effect.h"
-#include "shadow.h"
 #include "mathUtil.h"
-#include "loadxfile.h"
+#include "Texture.h"
 
 //*************************************************************************************************
 //*** マクロ定義 ***
@@ -37,7 +34,6 @@ typedef struct
 	int nCounterAnim;		// アニメーションカウンター
 	int nPatternAnim;		// アニメーションパターン
 	int nSpeeedAnim;		// アニメーションスピード
-	int nIdShadow;			// 影
 	bool bUse;				// 使っているか
 }Explosion;
 
@@ -70,17 +66,11 @@ void InitExplosion(void)
 		g_aExplosion[nCntExplosion].fHeight = 0.0f;
 		g_aExplosion[nCntExplosion].nCounterAnim = 0;
 		g_aExplosion[nCntExplosion].nPatternAnim = 0;
-		g_aExplosion[nCntExplosion].nIdShadow = -1;
 		g_aExplosion[nCntExplosion].bUse = false;
 	}
 
-	g_nIndexTextureExplosion = 0;
+	g_nIndexTextureExplosion = -1;
 	g_nTextureAnimCount = 1;
-
-	/*** テクスチャの読み込み ***/
-	D3DXCreateTextureFromFile(pDevice,
-							  "data\\TEXTURE\\explosion000.png",
-							  &g_pTextureExplosion);
 
 	/*** 頂点バッファの生成 ***/
 	pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * 4 * MAX_EXPLOSION,
@@ -191,17 +181,12 @@ void UpdateExplosion(void)
 			pVtx[3].pos.y = -g_aExplosion[nCntExplosion].fHeight;
 			pVtx[3].pos.z = 0.0f;
 
-			// 影を移動
-			SetPositionShadow(g_aExplosion[nCntExplosion].nIdShadow, g_aExplosion[nCntExplosion].pos, D3DXVECTOR3_NULL);
-
 			g_aExplosion[nCntExplosion].nCounterAnim++;
 			if (g_aExplosion[nCntExplosion].nCounterAnim % g_aExplosion[nCntExplosion].nSpeeedAnim == 0)
 			{ // アニメーションを増加
 				g_aExplosion[nCntExplosion].nPatternAnim++;
 				if (g_aExplosion[nCntExplosion].nPatternAnim >= g_nTextureAnimCount)
 				{ // 影を消去
-					DestroyShadow(g_aExplosion[nCntExplosion].nIdShadow);
-					g_aExplosion[nCntExplosion].nIdShadow = -1;
 					g_aExplosion[nCntExplosion].bUse = false;
 				}
 			}
@@ -312,8 +297,6 @@ void SetExplosion(D3DXVECTOR3 pos, float fWidth, float fHeight, int nSpeedAnim)
 			pVtx[3].pos.x = g_aExplosion[nCntExplosion].fWidth;
 			pVtx[3].pos.y = -g_aExplosion[nCntExplosion].fHeight;
 			pVtx[3].pos.z = 0.0f;
-
-			g_aExplosion[nCntExplosion].nIdShadow = SetShadow(EXPLOSION_SIZE_X, EXPLOSION_SIZE_Z);
 
 			break;
 		}
