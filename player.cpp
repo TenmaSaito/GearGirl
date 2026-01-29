@@ -32,6 +32,7 @@ float g_sinrot = 0;					// sinカーブを用いると起用の変数
 int g_nNumPlayer = 1;				// プレイヤーのアクティブ人数
 int g_ActivePlayer = 0;				// 操作しているプレイヤータイプ
 
+
 // =================================================
 // 初期化処理
 // =================================================
@@ -155,6 +156,11 @@ void UpdatePlayer(void)
 		if (pPlayer->pos.y < 100.0f)
 		{
 			pPlayer->pos.y = 100.0f;
+
+			if (pPlayer->bJump == true)
+			{// 着地モーション
+				SetMotionType(MOTIONTYPE_JUMP, true, 5, (PlayerType)nCntPlayer);
+			}
 			pPlayer->bJump = false;
 		}
 
@@ -172,6 +178,8 @@ void UpdatePlayer(void)
 
 	PrintDebugProc("\nPlayer0 : [SPACE] :  JUMP\n");
 	PrintDebugProc("\nPlayer1 : [RSHIFT] :  JUMP\n");
+
+	PrintDebugProc("\nPlayer1 : [%d]\n", g_aPlayer[1].nCounterMotion);
 }
 
 // =================================================
@@ -583,7 +591,7 @@ void JumpPlayer(PlayerType nPlayer)
 			//PlaySound(SOUND_LABEL_JUMP);
 			//pPlayer->state = PLAYERSTATE_JUMP;
 
-			SetMotionType(MOTIONTYPE_ACTION, false, 10, nPlayer);
+			SetMotionType(MOTIONTYPE_ACTION, true, 3, nPlayer);
 
 			pPlayer->move.y = JUMP_FORCE;
 			pPlayer->bJump = true;
@@ -708,7 +716,7 @@ void UpdateMotion(PlayerType Type)
 	KEY_INFO* pInfoBlend = &pPlayer->aMotionInfo[pPlayer->motionTypeBlend].aKeyInfo[pPlayer->nKeyBlend];
 	
 	/*** 全パーツの更新！ ***/
-	for (int nCntModel = 0; nCntModel < pPlayer->nNumModel; nCntModel++)
+	for (int nCntModel = 0; nCntModel < pPlayer->PartsInfo.nNumParts; nCntModel++)
 	{
 		int nNext = (pPlayer->nKey + 1) % pPlayer->aMotionInfo[pPlayer->motionType].nNumKey;
 		// 次のキーの値		
@@ -717,13 +725,10 @@ void UpdateMotion(PlayerType Type)
 		D3DXVECTOR3 UpdatePos = {};	// 更新する位置	
 		D3DXVECTOR3 diffRot = {};	// 角度の差分		
 		D3DXVECTOR3 UpdateRot = {};	// 更新する角度		
-		KEY* pKey = &pInfo->aKey[nCntModel];
-
-		// 現在のキー		
-		KEY* pKeyNext = &pPlayer->aMotionInfo[pPlayer->motionType].aKeyInfo[nNext].aKey[nCntModel];
-
-		// 次のキー		
+		KEY* pKey = &pInfo->aKey[nCntModel];	// 現在のキー		
+		KEY* pKeyNext = &pPlayer->aMotionInfo[pPlayer->motionType].aKeyInfo[nNext].aKey[nCntModel];		// 次のキー		
 		PARTS* pModel = &pPlayer->PartsInfo.aParts[nCntModel];
+
 		if (pPlayer->bBlendMotion == true)
 		{ // モーションブレンドあり	
 			D3DXVECTOR3 diffKeyPosCurrent = {};	// 現在のモーションの位置の差分			
@@ -746,9 +751,11 @@ void UpdateMotion(PlayerType Type)
 			/* ブレンドモーション */
 			diffPos.x = pKeyNextBlend->pos.x - pKeyBlend->pos.x;
 			diffKeyPosBlend.x = pKeyBlend->pos.x + diffPos.x * fRateKeyBlend;
+
 			/* 求める差分 */
 			diffPosBlend.x = diffKeyPosBlend.x - diffKeyPosCurrent.x;
 			UpdatePos.x = diffKeyPosCurrent.x + (diffPosBlend.x * fRateBlend);
+
 			// --- Y ---		
 			/* 現在のモーション */
 			diffPos.y = pKeyNext->pos.y - pKey->pos.y;
@@ -757,6 +764,7 @@ void UpdateMotion(PlayerType Type)
 			/* ブレンドモーション */
 			diffPos.y = pKeyNextBlend->pos.y - pKeyBlend->pos.y;
 			diffKeyPosBlend.y = pKeyBlend->pos.y + diffPos.y * fRateKeyBlend;
+
 			/* 求める差分 */
 			diffPosBlend.y = diffKeyPosBlend.y - diffKeyPosCurrent.y;
 			UpdatePos.y = diffKeyPosCurrent.y + (diffPosBlend.y * fRateBlend);
@@ -896,6 +904,7 @@ void UpdateMotion(PlayerType Type)
 			pPlayer->nKeyBlend = ((pPlayer->nKeyBlend + 1) % pPlayer->aMotionInfo[pPlayer->motionTypeBlend].nNumKey);
 			pPlayer->nCounterMotionBlend = 0;
 		}	
+
 		pPlayer->nCounterBlend++;
 
 		if (pPlayer->nCounterBlend >= pPlayer->nFrameBlend)
