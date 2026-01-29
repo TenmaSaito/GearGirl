@@ -23,6 +23,9 @@ void InitMesh(void)
 {
 	// Sphere
 	InitMeshSphere();
+
+
+	SetMeshSphere(vec3(300.0f,100.0f,300.0f), D3DXVECTOR3_NULL, 100.0f, 16, 16, true, true,0);
 }
 
 //=========================================================================================
