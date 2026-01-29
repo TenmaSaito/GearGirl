@@ -57,6 +57,7 @@ void InitPlayer(void)
 		g_aPlayer[nCntPlayer].nCounterMotion = 0;
 		g_aPlayer[nCntPlayer].nKey = 0;
 		g_aPlayer[nCntPlayer].state = PLAYERSTATE_NEUTRAL;
+		g_aPlayer[nCntPlayer].motionType = MOTIONTYPE_NEUTRAL;
 		g_aPlayer[nCntPlayer].bFinishMotion = true;
 	}
 
@@ -582,7 +583,7 @@ void JumpPlayer(PlayerType nPlayer)
 			//PlaySound(SOUND_LABEL_JUMP);
 			//pPlayer->state = PLAYERSTATE_JUMP;
 
-			SetMotionType(MOTIONTYPE_ACTION, true, 10, nPlayer);
+			SetMotionType(MOTIONTYPE_ACTION, false, 10, nPlayer);
 
 			pPlayer->move.y = JUMP_FORCE;
 			pPlayer->bJump = true;
@@ -596,19 +597,22 @@ void JumpPlayer(PlayerType nPlayer)
 //================================================================================================================
 void SetMotionType(MOTIONTYPE motionTypeNext, bool bBlend, int nFrameBlend, PlayerType PlayerType)
 {
-	Player* pPlayer = &g_aPlayer[PlayerType];
+	Player* pPlayer = &g_aPlayer[PlayerType];	// プレイヤー情報へのアドレス	
 
-	// プレイヤー情報へのアドレス	
 	if (motionTypeNext < 0 || motionTypeNext >= MOTIONTYPE_MAX)
 	{ // モーションインデックスの上下限確認
 		return;
 	}
+
 	if (motionTypeNext == MOTIONTYPE_LANDING && pPlayer->motionType != MOTIONTYPE_LANDING && pPlayer->motionTypeBlend != MOTIONTYPE_LANDING)
 	{
 		D3DXVECTOR3 pos = pPlayer->pos;
 		pos.y = pPlayer->pos.y + 0.5f;
 	}
+
+	// ブレンドモーションをするかどうか
 	pPlayer->bBlendMotion = bBlend;
+
 	if (bBlend == false)
 	{
 		/*** 各変数を初期化し、次のモーションを設定 ***/
@@ -623,7 +627,7 @@ void SetMotionType(MOTIONTYPE motionTypeNext, bool bBlend, int nFrameBlend, Play
 		KEY_INFO* pInfo = &pPlayer->aMotionInfo[pPlayer->motionType].aKeyInfo[pPlayer->nKey];
 
 		/*** 全パーツの初期設定！ ***/
-		for (int nCntModel = 0; nCntModel < pPlayer->nNumModel; nCntModel++)
+		for (int nCntModel = 0; nCntModel < pPlayer->PartsInfo.nNumParts; nCntModel++)
 		{
 			int nNext = (pPlayer->nKey + 1) % pPlayer->aMotionInfo[pPlayer->motionType].nNumKey;
 
@@ -859,9 +863,11 @@ void UpdateMotion(PlayerType Type)
 		pModel->pos = pModel->posLocal + UpdatePos;
 		pModel->rot = pModel->rotLocal + UpdateRot;
 	}
+
 	if (pPlayer->bBlendMotion == false)
 	{
 		pPlayer->nCounterMotion++;
+
 		if (pPlayer->nCounterMotion >= pInfo->nFrame)
 		{ // モーションカウンターが現在のキー情報のフレーム数を超えた場合
 			if (pPlayer->motionType < 0 || pPlayer->motionType >= MOTIONTYPE_MAX)
@@ -883,6 +889,7 @@ void UpdateMotion(PlayerType Type)
 	else
 	{
 		pPlayer->nCounterMotionBlend++;
+
 		if (pPlayer->nCounterMotionBlend >= pInfoBlend->nFrame)
 		{ // モーションカウンターがブレンドモーションの現在のキーのフレーム数を超えた場合	
 			/** ブレンドモーションのキーを一つ進める **/
