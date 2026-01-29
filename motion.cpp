@@ -39,10 +39,10 @@
 #define	READ_NUMKEY				"NUM_KEY"			// ƒL[î•ñ‚Ì”
 #define READ_FRAME				"FRAME"				// ƒtƒŒ[ƒ€”
 
-#define CMP_SUCCESS(cmp)			(cmp == 0)		// strcmp,strncmp‚Å‚Ì¬Œ÷”»’è
-#define CMP_FAILED(cmp)				(cmp != 0)		// strcmp,strncmp‚Å‚ÌŽ¸”s”»’è
-#define STR_SUCCESS(str)			(str != NULL)	// strstr‚Å‚Ì¬Œ÷”»’è
-#define STR_FAILED(str)				(str == NULL)	// strstr‚Å‚ÌŽ¸”s”»’è
+#define CMP_SUCCESS(cmp)		(cmp == 0)			// strcmp,strncmp‚Å‚Ì¬Œ÷”»’è
+#define CMP_FAILED(cmp)			(cmp != 0)			// strcmp,strncmp‚Å‚ÌŽ¸”s”»’è
+#define STR_SUCCESS(str)		(str != NULL)		// strstr‚Å‚Ì¬Œ÷”»’è
+#define STR_FAILED(str)			(str == NULL)		// strstr‚Å‚ÌŽ¸”s”»’è
 
 //**********************************************************************************
 //*** ƒvƒƒgƒ^ƒCƒvéŒ¾ ***
@@ -356,7 +356,7 @@ bool LoadFileFromMotionScript(const char* pMotionFileName)
 						if (strstr(aStr, READ_ENDCHARACTER) != NULL)
 						{
 							// Žæ“¾‚µ‚½î•ñ‚ð“n‚·
-
+							pPInfo->nNumParts = nNumParts;
 							break;
 						}
 						else if (strstr(aStr, READ_PARTS) != NULL)
