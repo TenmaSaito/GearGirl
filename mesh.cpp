@@ -35,8 +35,8 @@ void InitMesh(void)
 
 	//SetMeshCylinder(vec3(0.0f, 120.0f, 0.0f), vec3_ZERO, 100.0f, 100.0f, 1, 16);
 	//SetMeshSphere(vec3(200.0f, 120.0f, 0.0f), vec3_ZERO, 100.0f, 16, 32);
-	SetMeshRing(vec3(0.0f, 120.0f, 100.0f), vec3_ZERO, 100.0f, 120.0f, 3, 16);
-	SetMeshDome(vec3(200.0f, 120.0f, 100.0f), vec3_ZERO, 100.0f, 8, 16);
+	//SetMeshRing(vec3(0.0f, 120.0f, 100.0f), vec3_ZERO, 100.0f, 120.0f, 3, 16);
+	//SetMeshDome(vec3(200.0f, 120.0f, 100.0f), vec3_ZERO, 100.0f, 8, 16);
 }
 
 //=========================================================================================
