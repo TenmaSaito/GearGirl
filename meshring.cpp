@@ -6,13 +6,17 @@
 //==================================================================================================================================
 //**************************************************************
 // インクルード
-#include "input.h"
 #include "mesh.h"
+#include "Texture.h"
+
+//**************************************************************
+// マクロ定義
+#define RINGRADIUS_INNER	size.x
+#define RINGRADIUS_OUTER	size.z
 
 //**************************************************************
 // グローバル変数
-LPDIRECT3DTEXTURE9			g_pTextureMeshRing = NULL;			// テクスチャへのポインタ
-MeshRing				g_aMeshRing[MAX_MESHRING];		// メッシュリングの情報
+MeshInfo				g_aMeshRing[MAX_MESHRING];		// メッシュリングの情報
 
 //**************************************************************
 // プロトタイプ宣言
@@ -27,10 +31,6 @@ void InitMeshRing(void)
 	LPDIRECT3DDEVICE9	pDevice = GetDevice();		// デバイスへのポインタ
 
 	//**************************************************************
-	// テクスチャ読み込み
-	D3DXCreateTextureFromFile(pDevice,"data\\TEXTURE\\object\\block002.jpg",&g_pTextureMeshRing);
-
-	//**************************************************************
 	// 位置・サイズの初期化
 	for (int nCntMeshRing = 0; nCntMeshRing < MAX_MESHRING; nCntMeshRing++)
 	{
@@ -38,23 +38,16 @@ void InitMeshRing(void)
 		g_aMeshRing[nCntMeshRing].rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_aMeshRing[nCntMeshRing].pVtxBuff = NULL;
 		g_aMeshRing[nCntMeshRing].pIdxBuffer = NULL;
-		g_aMeshRing[nCntMeshRing].fInnerRadius = 0.0f;
-		g_aMeshRing[nCntMeshRing].fOuterRadius = 0.0f;
+		g_aMeshRing[nCntMeshRing].RINGRADIUS_INNER = 0.0f;
+		g_aMeshRing[nCntMeshRing].RINGRADIUS_OUTER = 0.0f;
 		g_aMeshRing[nCntMeshRing].nHeightDivision = 0;
 		g_aMeshRing[nCntMeshRing].nCircleDivision = 0;
-		g_aMeshRing[nCntMeshRing].fAngle = 0.0f;
 		g_aMeshRing[nCntMeshRing].nVerti = 0;
 		g_aMeshRing[nCntMeshRing].nPrim = 0;
-		g_aMeshRing[nCntMeshRing].bInside = false;
-		g_aMeshRing[nCntMeshRing].bOutside = false;
+		g_aMeshRing[nCntMeshRing].bInner = false;
+		g_aMeshRing[nCntMeshRing].bOuter = false;
 		g_aMeshRing[nCntMeshRing].bUse = false;
 	}
-
-	// メッシュリングの設置
-	SetMeshRing(D3DXVECTOR3(-300.0f, 10.0f, -300.0f),  D3DXVECTOR3(0.0f, 0.0f, 0.0f), 50.0f,100.0f,3, 32,true,true);
-	//SetMeshRing(D3DXVECTOR3(FIELD_SIZE, 0.0, 0.0f),  D3DXVECTOR3(0.0f, D3DX_PI * 0.5f, 0.0f), D3DXVECTOR3(1000.0f, 200.0f, 0.0f)	,2, 2);
-	//SetMeshRing(D3DXVECTOR3(0.0f, 0.0, -FIELD_SIZE), D3DXVECTOR3(0.0f, -D3DX_PI, 0.0f), D3DXVECTOR3(1000.0f, 200.0f, 0.0f)		,3, 3);
-	//SetMeshRing(D3DXVECTOR3(-FIELD_SIZE, 0.0, 0.0f), D3DXVECTOR3(0.0f, -D3DX_PI * 0.5f, 0.0f), D3DXVECTOR3(1000.0f, 200.0f, 0.0f)	,4, 4);
 }
 
 //=========================================================================================
@@ -62,14 +55,6 @@ void InitMeshRing(void)
 //=========================================================================================
 void UninitMeshRing(void)
 {
-	//**************************************************************
-	// テクスチャの破棄
-	if (g_pTextureMeshRing != NULL)
-	{
-		g_pTextureMeshRing->Release();
-		g_pTextureMeshRing = NULL;
-	}
-
 	for (int nCntMeshRing = 0; nCntMeshRing < MAX_MESHRING; nCntMeshRing++)
 	{
 		//**************************************************************
@@ -146,7 +131,7 @@ void DrawMeshRing(void)
 
 			//**************************************************************
 			// テクスチャの設定
-			pDevice->SetTexture(0, g_pTextureMeshRing);
+			pDevice->SetTexture(0, GetTexture(g_aMeshRing[nCntMeshRing].nIdxTexture));
 
 			//**************************************************************
 			// フィールドの描画
@@ -158,11 +143,12 @@ void DrawMeshRing(void)
 //=========================================================================================
 // メッシュリングを設置
 //=========================================================================================
-void SetMeshRing(D3DXVECTOR3 pos, D3DXVECTOR3 rot, float fInner, float fOuter, int nHeightDivision, int nCircleDivision,bool bInside, bool bOutside)
+void SetMeshRing(vec3 pos, vec3 rot, float fInner, float fOuter, int nHeightDivision, int nCircleDivision, bool bInner, bool bOuter, int nTex)
 {
 	//**************************************************************
 	// 変数宣言
 	LPDIRECT3DDEVICE9	pDevice = GetDevice();				// デバイスへのポインタ
+	P_MESH				pMesh = GetMeshRing();				// メッシュリングポインタ
 	VERTEX_3D*			pVtx;								// 頂点情報へのポインタ
 	WORD*				pIdx;								// インデックス情報へのポインタ
 	D3DXVECTOR3			vecDir;								// 法線ベクトル計算用
@@ -171,48 +157,49 @@ void SetMeshRing(D3DXVECTOR3 pos, D3DXVECTOR3 rot, float fInner, float fOuter, i
 						nCircleVerti = nCircleDivision + 1;	// 縦頂点数と横頂点数
 	int					nBoth = 0;
 
-	for (int nCntMeshRing = 0; nCntMeshRing < MAX_MESHRING; nCntMeshRing++)
+	for (int nCntMeshRing = 0; nCntMeshRing < MAX_MESHRING; nCntMeshRing++, pMesh++)
 	{
-		if (g_aMeshRing[nCntMeshRing].bUse == false)
+		if (pMesh->bUse == false)
 		{
 			// 値の保存
-			g_aMeshRing[nCntMeshRing].pos = pos;
-			g_aMeshRing[nCntMeshRing].rot = rot;
-			g_aMeshRing[nCntMeshRing].fInnerRadius = fInner;
-			g_aMeshRing[nCntMeshRing].fOuterRadius = fOuter;
-			g_aMeshRing[nCntMeshRing].nHeightDivision = nHeightDivision;
-			g_aMeshRing[nCntMeshRing].nCircleDivision = nCircleDivision;
-			g_aMeshRing[nCntMeshRing].fAngle = (float)(2 * D3DX_PI / nCircleDivision);
-			g_aMeshRing[nCntMeshRing].nVerti = nHeightVerti * nCircleVerti;
-			g_aMeshRing[nCntMeshRing].nPrim = (nHeightDivision * (nCircleDivision + 2) - 2) * 2;
-			g_aMeshRing[nCntMeshRing].bInside = bInside;
-			if (bInside)
+			pMesh->pos = pos;
+			pMesh->rot = rot;
+			pMesh->RINGRADIUS_INNER = fInner;
+			pMesh->RINGRADIUS_OUTER = fOuter;
+			pMesh->nHeightDivision = nHeightDivision;
+			pMesh->nCircleDivision = nCircleDivision;
+			float fAngle = (float)(2 * D3DX_PI / nCircleDivision);
+			pMesh->nVerti = nHeightVerti * nCircleVerti;
+			pMesh->nPrim = (nHeightDivision * (nCircleDivision + 2) - 2) * 2;
+			pMesh->bInner = bInner;
+			pMesh->bOuter = bOuter;
+			pMesh->nIdxTexture = nTex;
+			if (bInner)
 				nBoth++;
-			g_aMeshRing[nCntMeshRing].bOutside = bOutside;
-			if (bOutside)
+			if (bOuter)
 				nBoth++;
 
 			//**************************************************************
 			// 頂点バッファの読み込み
-			pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * g_aMeshRing[nCntMeshRing].nVerti,
+			pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * pMesh->nVerti,
 				D3DUSAGE_WRITEONLY,
 				FVF_VERTEX_3D,
 				D3DPOOL_MANAGED,
-				&g_aMeshRing[nCntMeshRing].pVtxBuff,
+				&pMesh->pVtxBuff,
 				NULL);
 
 			//**************************************************************
 			// インデックスバッファの生成
-			pDevice->CreateIndexBuffer(sizeof(WORD) * 2 * (nHeightDivision * (nCircleDivision + 2) - 1) * nBoth,
+			pDevice->CreateIndexBuffer(sizeof(WORD) * 2 * (nHeightDivision * (nCircleDivision + 2) - 1),
 				D3DUSAGE_WRITEONLY,
 				D3DFMT_INDEX16,
 				D3DPOOL_MANAGED,
-				&g_aMeshRing[nCntMeshRing].pIdxBuffer,
+				&pMesh->pIdxBuffer,
 				NULL);
 
 			//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 			// 頂点バッファをロックし、頂点情報へのポインタを取得
-			g_aMeshRing[nCntMeshRing].pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+			pMesh->pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
 			for (int nCntDepth = 0, nCntVer = 0; nCntDepth <= nHeightDivision; nCntDepth++)
 			{
@@ -221,9 +208,9 @@ void SetMeshRing(D3DXVECTOR3 pos, D3DXVECTOR3 rot, float fInner, float fOuter, i
 				for (int nCntCircle = 0; nCntCircle <= nCircleDivision; nCntCircle++, nCntVer++)
 				{
 					// 頂点座標を設定
-					pVtx[nCntVer].pos = D3DXVECTOR3(fThick * -sinf(g_aMeshRing[nCntMeshRing].fAngle * nCntCircle),
+					pVtx[nCntVer].pos = D3DXVECTOR3(fThick * -sinf(fAngle * nCntCircle),
 						0.0f,
-						fThick * cosf(g_aMeshRing[nCntMeshRing].fAngle * nCntCircle));
+						fThick * cosf(fAngle * nCntCircle));
 
 					// 法線ベクトルの設定
 					pVtx[nCntVer].nor = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
@@ -237,12 +224,12 @@ void SetMeshRing(D3DXVECTOR3 pos, D3DXVECTOR3 rot, float fInner, float fOuter, i
 			}
 
 			// 頂点バッファのロック解除
-			g_aMeshRing[nCntMeshRing].pVtxBuff->Unlock();
+			pMesh->pVtxBuff->Unlock();
 			//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 			//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 			// インデックスバッファをロックし、頂点番号データへのポインタを取得
-			g_aMeshRing[nCntMeshRing].pIdxBuffer->Lock(0, 0, (void**)&pIdx, 0);
+			pMesh->pIdxBuffer->Lock(0, 0, (void**)&pIdx, 0);
 			// 頂点番号データの設定
 			for (int nCntDepth = 0; nCntDepth < nHeightDivision; nCntDepth++)
 			{
@@ -261,17 +248,17 @@ void SetMeshRing(D3DXVECTOR3 pos, D3DXVECTOR3 rot, float fInner, float fOuter, i
 			}
 
 			// インデックスバッファのロック解除
-			g_aMeshRing[nCntMeshRing].pIdxBuffer->Unlock();
+			pMesh->pIdxBuffer->Unlock();
 			//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
-			g_aMeshRing[nCntMeshRing].bUse = true;
+			pMesh->bUse = true;
 			break;
 		}
 	}
 }
 
 //=========================================================================================
-// フィールド情報を取得
+// メッシュリング情報を取得
 //=========================================================================================
 P_MESH GetMeshRing(void)
 {

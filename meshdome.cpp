@@ -6,12 +6,11 @@
 //==================================================================================================================================
 //**************************************************************
 // インクルード
-#include "input.h"
 #include "mesh.h"
+#include "Texture.h"
 
 //**************************************************************
 // グローバル変数
-LPDIRECT3DTEXTURE9			g_pTextureMeshDome = NULL;			// テクスチャへのポインタ
 MeshInfo				g_aMeshDome[MAX_MESHDOME];		// メッシュ壁情報
 
 //**************************************************************
@@ -25,10 +24,6 @@ void InitMeshDome(void)
 	//**************************************************************
 	// 変数宣言
 	LPDIRECT3DDEVICE9	pDevice = GetDevice();		// デバイスへのポインタ
-
-	//**************************************************************
-	// テクスチャ読み込み
-	D3DXCreateTextureFromFile(pDevice,"data\\TEXTURE\\object\\block002.jpg",&g_pTextureMeshDome);
 
 	//**************************************************************
 	// 位置・サイズの初期化
@@ -47,13 +42,6 @@ void InitMeshDome(void)
 		g_aMeshDome[nCntMeshDome].bOuter = false;
 		g_aMeshDome[nCntMeshDome].bUse = false;
 	}
-
-	// 壁の設置
-
-	//SetMeshDome(D3DXVECTOR3(300.0f, 0.0f, 300.0f),  D3DXVECTOR3(0.0f, 0.0f, 0.0f), 100.0f,8, 32,true,true);
-	//SetMeshDome(D3DXVECTOR3(FIELD_SIZE, 0.0, 0.0f),  D3DXVECTOR3(0.0f, D3DX_PI * 0.5f, 0.0f), D3DXVECTOR3(1000.0f, 200.0f, 0.0f)	,2, 2);
-	//SetMeshDome(D3DXVECTOR3(0.0f, 0.0, -FIELD_SIZE), D3DXVECTOR3(0.0f, -D3DX_PI, 0.0f), D3DXVECTOR3(1000.0f, 200.0f, 0.0f)			,3, 3);
-	//SetMeshDome(D3DXVECTOR3(-FIELD_SIZE, 0.0, 0.0f), D3DXVECTOR3(0.0f, -D3DX_PI * 0.5f, 0.0f), D3DXVECTOR3(1000.0f, 200.0f, 0.0f)	,4, 4);
 }
 
 //=========================================================================================
@@ -61,13 +49,6 @@ void InitMeshDome(void)
 //=========================================================================================
 void UninitMeshDome(void)
 {
-	//**************************************************************
-	// テクスチャの破棄
-	if (g_pTextureMeshDome != NULL)
-	{
-		g_pTextureMeshDome->Release();
-		g_pTextureMeshDome = NULL;
-	}
 
 	for (int nCntMeshDome = 0; nCntMeshDome < MAX_MESHDOME; nCntMeshDome++)
 	{
@@ -145,7 +126,7 @@ void DrawMeshDome(void)
 
 			//**************************************************************
 			// テクスチャの設定
-			pDevice->SetTexture(0, g_pTextureMeshDome);
+			pDevice->SetTexture(0, GetTexture(g_aMeshDome[nCntMeshDome].nIdxTexture));
 
 			//**************************************************************
 			// フィールドの描画
@@ -157,47 +138,44 @@ void DrawMeshDome(void)
 //=========================================================================================
 // 壁を設置
 //=========================================================================================
-void SetMeshDome(D3DXVECTOR3 pos, D3DXVECTOR3 rot, float fSize, int nHeightDivision, int nCircleDivision,bool bInside, bool bOutside)
+void SetMeshDome(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int nCircleDivision, bool bInner, bool bOuter, int nTex)
 {
 	//**************************************************************
 	// 変数宣言
 	LPDIRECT3DDEVICE9	pDevice = GetDevice();				// デバイスへのポインタ
+	P_MESH				pMesh = GetMeshDome();				// メッシュドームポインタ
 	VERTEX_3D*			pVtx;								// 頂点情報へのポインタ
 	WORD*				pIdx;								// インデックス情報へのポインタ
-	D3DXVECTOR3			vecDir;								// 法線ベクトル（計算用
-	float				fRadius;							// 計算用半径
-	float				fHeight;							// 計算用高さ
+	vec3				vecDir;								// 法線ベクトル（計算用
+	vec3				angle;								// 計算用角度
+	float				fRadiusCal;							// 計算用半径
+	float				fHeightCal;							// 計算用高さ
 	int					nHeightVerti = nHeightDivision + 1,
 						nCircleVerti = nCircleDivision + 1;	// 縦頂点数と横頂点数
-	int					nBoth = 0;
 
-	for (int nCntMeshDome = 0; nCntMeshDome < MAX_MESHDOME; nCntMeshDome++)
+	for (int nCntMeshDome = 0; nCntMeshDome < MAX_MESHDOME; nCntMeshDome++,pMesh++)
 	{
-		if (g_aMeshDome[nCntMeshDome].bUse == false)
+		if (pMesh->bUse == false)
 		{
 			// 値の保存
-			g_aMeshDome[nCntMeshDome].pos = D3DXVECTOR3(pos.x, pos.y, pos.z);
-			g_aMeshDome[nCntMeshDome].rot = rot;
-			//g_aMeshDome[nCntMeshDome].fSize = fSize;
-			g_aMeshDome[nCntMeshDome].nHeightDivision = nHeightDivision;
-			g_aMeshDome[nCntMeshDome].nCircleDivision = nCircleDivision;
-			//g_aMeshDome[nCntMeshDome].angle = D3DXVECTOR3((float)D3DX_PI / nHeightDivision * 0.5f,(float)(2 * D3DX_PI / nCircleDivision),(float)D3DX_PI / nHeightDivision);
-			g_aMeshDome[nCntMeshDome].nVerti = nHeightVerti * nCircleVerti;
-			g_aMeshDome[nCntMeshDome].nPrim = (nHeightDivision * (nCircleDivision + 2) - 2) * 2;
-			g_aMeshDome[nCntMeshDome].bInner = bInside;
-			if (bInside)
-				nBoth++;
-			g_aMeshDome[nCntMeshDome].bOuter = bOutside;
-			if (bOutside)
-				nBoth++;
+			pMesh->pos = pos;
+			pMesh->rot = rot;
+			pMesh->size = vec3(fRadius, fRadius * 0.5f, fRadius);
+			pMesh->nHeightDivision = nHeightDivision;
+			pMesh->nCircleDivision = nCircleDivision;
+			pMesh->nVerti = nHeightVerti * nCircleVerti;
+			pMesh->nPrim = (nHeightDivision * (nCircleDivision + 2) - 2) * 2;
+			pMesh->bInner = bInner;
+			pMesh->bOuter = bOuter;
+			angle = vec3((float)D3DX_PI / nHeightDivision * 0.5f, (float)(2 * D3DX_PI / nCircleDivision), (float)D3DX_PI / nHeightDivision);
 
 			//**************************************************************
 			// 頂点バッファの読み込み
-			pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * g_aMeshDome[nCntMeshDome].nVerti,
+			pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * pMesh->nVerti,
 				D3DUSAGE_WRITEONLY,
 				FVF_VERTEX_3D,
 				D3DPOOL_MANAGED,
-				&g_aMeshDome[nCntMeshDome].pVtxBuff,
+				&pMesh->pVtxBuff,
 				NULL);
 
 			//**************************************************************
@@ -206,24 +184,24 @@ void SetMeshDome(D3DXVECTOR3 pos, D3DXVECTOR3 rot, float fSize, int nHeightDivis
 				D3DUSAGE_WRITEONLY,
 				D3DFMT_INDEX16,
 				D3DPOOL_MANAGED,
-				&g_aMeshDome[nCntMeshDome].pIdxBuffer,
+				&pMesh->pIdxBuffer,
 				NULL);
 
 			//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 			// 頂点バッファをロックし、頂点情報へのポインタを取得
-			g_aMeshDome[nCntMeshDome].pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+			pMesh->pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
 			for (int nCntHeight = 0, nCntVer = 0; nCntHeight <= nHeightDivision; nCntHeight++)
 			{
-				fRadius = fSize * sinf(g_aMeshDome[nCntMeshDome].angle.x * nCntHeight);
-				fHeight = fSize * cosf(g_aMeshDome[nCntMeshDome].angle.x * nCntHeight);
+				fRadiusCal = fRadius * sinf(angle.x * nCntHeight);
+				fHeightCal = fRadius * cosf(angle.x * nCntHeight);
 
 				for (int nCntCircle = 0; nCntCircle <= nCircleDivision; nCntCircle++, nCntVer++)
 				{
 					// 頂点座標を設定
-					pVtx[nCntVer].pos = D3DXVECTOR3(fRadius * -sinf(g_aMeshDome[nCntMeshDome].angle.y * nCntCircle),
-						fHeight,
-						fRadius * cosf(g_aMeshDome[nCntMeshDome].angle.y * nCntCircle));
+					pVtx[nCntVer].pos = vec3(fRadiusCal * sinf(angle.y * nCntCircle),
+						fHeightCal,
+						fRadiusCal * cosf(angle.y * nCntCircle));
 
 					// 法線ベクトルの設定(正規化)
 					vecDir = D3DXVECTOR3(pVtx[nCntVer].pos.x, 0.0f, pVtx[nCntVer].pos.z); // 頂点座標<=真横なのでYだけ消す
@@ -239,12 +217,12 @@ void SetMeshDome(D3DXVECTOR3 pos, D3DXVECTOR3 rot, float fSize, int nHeightDivis
 			}
 
 			// 頂点バッファのロック解除
-			g_aMeshDome[nCntMeshDome].pVtxBuff->Unlock();
+			pMesh->pVtxBuff->Unlock();
 			//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 			//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 			// インデックスバッファをロックし、頂点番号データへのポインタを取得
-			g_aMeshDome[nCntMeshDome].pIdxBuffer->Lock(0, 0, (void**)&pIdx, 0);
+			pMesh->pIdxBuffer->Lock(0, 0, (void**)&pIdx, 0);
 			// 頂点番号データの設定
 			for (int nCntHeight = 0; nCntHeight < nHeightDivision; nCntHeight++)
 			{
@@ -263,10 +241,10 @@ void SetMeshDome(D3DXVECTOR3 pos, D3DXVECTOR3 rot, float fSize, int nHeightDivis
 			}
 
 			// インデックスバッファのロック解除
-			g_aMeshDome[nCntMeshDome].pIdxBuffer->Unlock();
+			pMesh->pIdxBuffer->Unlock();
 			//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
-			g_aMeshDome[nCntMeshDome].bUse = true;
+			pMesh->bUse = true;
 			break;
 		}
 	}

@@ -141,6 +141,12 @@
     <ClCompile Include="meshcylinder.cpp">
       <Filter>ソース ファイル\object\Mesh</Filter>
     </ClCompile>
+    <ClCompile Include="meshdome.cpp">
+      <Filter>ソース ファイル\object\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="meshring.cpp">
+      <Filter>ソース ファイル\object\Mesh</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h">

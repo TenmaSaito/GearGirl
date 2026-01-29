@@ -65,7 +65,7 @@ void UpdateMesh(void);
 void UpdateMeshSphere(void);
 void UpdateMeshDome(void);
 void UpdateMeshCylinder(void);
-void UpdateMeshRingg(void);
+void UpdateMeshRing(void);
 
 void DrawMesh(void);
 void DrawMeshSphere(void);
@@ -73,8 +73,8 @@ void DrawMeshDome(void);
 void DrawMeshCylinder(void);
 void DrawMeshRing(void);
 
-void SetMeshSphere	(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int nCircleDivision, bool bInner, bool bOuter, int nTex = -1);
-void SetMeshDome	(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int nCircleDivision, bool bInner, bool bOuter, int nTex = -1);
+void SetMeshSphere	(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int nCircleDivision, bool bInner = false, bool bOuter = true, int nTex = -1);
+void SetMeshDome	(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int nCircleDivision, bool bInner = false, bool bOuter = true, int nTex = -1);
 void SetMeshCylinder(vec3 pos, vec3 rot, float fRadius,float fHeight, int nHeightDivision, int nCircleDivision, bool bInner = false, bool bOuter = true, int nTex = -1);
 void SetMeshRing	(vec3 pos, vec3 rot, float fInner, float fOuter, int nHeightDivision, int nCircleDivision, bool bInner = false, bool bOuter = true, int nTex = -1);
 

@@ -165,6 +165,8 @@
     <ClCompile Include="mathUtil.cpp" />
     <ClCompile Include="mesh.cpp" />
     <ClCompile Include="meshcylinder.cpp" />
+    <ClCompile Include="meshdome.cpp" />
+    <ClCompile Include="meshring.cpp" />
     <ClCompile Include="meshsphere.cpp" />
     <ClCompile Include="mode.cpp" />
     <ClCompile Include="model.cpp" />

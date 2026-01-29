@@ -17,54 +17,78 @@
 // プロトタイプ宣言
 
 //=========================================================================================
-// 空の初期化処理
+// メッシュの初期化処理
 //=========================================================================================
 void InitMesh(void)
 {
 	// Sphere
 	InitMeshSphere();
 
+	// Dome
+	InitMeshDome();
+
 	// Cylinder
 	InitMeshCylinder();
 
-	SetMeshSphere(vec3(0.0f, 120.0f, 0.0f), D3DXVECTOR3_NULL, 1000.0f, 16, 32, true, true, 0);
+	// Ring
+	InitMeshRing();
+
+	//SetMeshCylinder(vec3(0.0f, 120.0f, 0.0f), vec3_ZERO, 100.0f, 100.0f, 1, 16);
+	//SetMeshSphere(vec3(200.0f, 120.0f, 0.0f), vec3_ZERO, 100.0f, 16, 32);
+	SetMeshRing(vec3(0.0f, 120.0f, 100.0f), vec3_ZERO, 100.0f, 120.0f, 3, 16);
+	SetMeshDome(vec3(200.0f, 120.0f, 100.0f), vec3_ZERO, 100.0f, 8, 16);
 }
 
 //=========================================================================================
-// 空の終了処理
+// メッシュの終了処理
 //=========================================================================================
 void UninitMesh(void)
 {
 	// Sphere
 	UninitMeshSphere();
 
+	// Dome
+	UninitMeshDome();
+
 	// Cylinder
 	UninitMeshCylinder();
 
+	// Ring
+	UninitMeshRing();
 }
 
 //=========================================================================================
-// 空の更新処理
+// メッシュの更新処理
 //=========================================================================================
 void UpdateMesh(void)
 {
 	// Sphere
 	UpdateMeshSphere();
 
+	// Dome
+	UpdateMeshDome();
+
 	// Cylinder
 	UpdateMeshCylinder();
 
+	// Ring
+	UpdateMeshRing();
 }
 
 //=========================================================================================
-// 空の描画処理
+// メッシュの描画処理
 //=========================================================================================
 void DrawMesh(void)
 {
 	// Sphere
 	DrawMeshSphere();
 
+	// Dome
+	DrawMeshDome();
+
 	// Cylinder
 	DrawMeshCylinder();
 
+	// Ring
+	DrawMeshRing();
 }
