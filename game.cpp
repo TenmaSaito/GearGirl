@@ -103,6 +103,7 @@ void UninitGame(void)
 	UninitField();
 
 	/*** メッシュの終了 ***/
+	UninitMesh();
 
 	/*** モデルの終了 ***/
 	UninitModel();

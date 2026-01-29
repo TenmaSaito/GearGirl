@@ -161,17 +161,15 @@ void SetMeshSphere(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int n
 			// 値の保存
 			pMesh->pos = pos;
 			pMesh->rot = rot;
+			pMesh->size = vec3(fRadius, fRadius, fRadius);
 			pMesh->nHeightDivision = nHeightDivision;
 			pMesh->nCircleDivision = nCircleDivision;
 			angle = vec3((float)D3DX_PI / nHeightDivision,(float)(2 * D3DX_PI / nCircleDivision),(float)D3DX_PI / nHeightDivision);
 			pMesh->nVerti = nHeightVerti * nCircleVerti;
 			pMesh->nPrim = (nHeightDivision * (nCircleDivision + 2) - 2) * 2;
 			pMesh->bInner = bInner;
-			if (bInner)
-				nBoth++;
 			pMesh->bOuter = bOuter;
-			if (bOuter)
-				nBoth++;
+			pMesh->nIdxTexture = nTex;
 
 			//**************************************************************
 			// 頂点バッファの読み込み
@@ -207,10 +205,8 @@ void SetMeshSphere(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int n
 						fRadius,
 						fRadius * cosf(angle.y * nCntCircle));
 
-					// 法線ベクトルの設定(正規化)
-					vecDir = D3DXVECTOR3(pVtx[nCntVer].pos.x, 0.0f, pVtx[nCntVer].pos.z); // 頂点座標<=真横なのでYだけ消す
-					D3DXVec3Normalize(&vecDir, &vecDir);			//いい感じのベクトルに変換してくれる
-					pVtx[nCntVer].nor = vecDir;
+					// 法線ベクトルの設定
+					pVtx[nCntVer].nor = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 
 					// 頂点カラー設定
 					pVtx[nCntVer].col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
