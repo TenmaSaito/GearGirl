@@ -39,10 +39,10 @@
 #define	READ_NUMKEY				"NUM_KEY"			// キー情報の数
 #define READ_FRAME				"FRAME"				// フレーム数
 
-#define CMP_SUCCESS(cmp)			(cmp == 0)		// strcmp,strncmpでの成功判定
-#define CMP_FAILED(cmp)				(cmp != 0)		// strcmp,strncmpでの失敗判定
-#define STR_SUCCESS(str)			(str != NULL)	// strstrでの成功判定
-#define STR_FAILED(str)				(str == NULL)	// strstrでの失敗判定
+#define CMP_SUCCESS(cmp)		(cmp == 0)			// strcmp,strncmpでの成功判定
+#define CMP_FAILED(cmp)			(cmp != 0)			// strcmp,strncmpでの失敗判定
+#define STR_SUCCESS(str)		(str != NULL)		// strstrでの成功判定
+#define STR_FAILED(str)			(str == NULL)		// strstrでの失敗判定
 
 //**********************************************************************************
 //*** プロトタイプ宣言 ***
