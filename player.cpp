@@ -15,10 +15,18 @@
 #include "modeldata.h"
 #include "motion.h"
 #include "player.h"
+#include "MathUtil.h"
+
+using namespace MyMathUtil;
+
+// =================================================
+// プロトタイプ宣言
+void UpdateMotion(PlayerType Type);	// モーションのアップデート
+void SetMotionType(MOTIONTYPE motionTypeNext, bool bBlend, int nFrameBlend, PlayerType PlayerType);	// モーションの変更
 
 // =================================================
 // グローバル変数
-Player g_Player[PLAYERTYPE_MAX];	// プレイヤーの樹応報
+Player g_aPlayer[PLAYERTYPE_MAX];	// プレイヤーの樹応報
 int g_IdxShadowPlayer = -1;			// 使用する影の番号
 float g_sinrot = 0;					// sinカーブを用いると起用の変数
 int g_nNumPlayer = 1;				// プレイヤーのアクティブ人数
@@ -40,16 +48,16 @@ void InitPlayer(void)
 	// 各種変数を初期化(0固定)
 	for (int nCntPlayer = 0; nCntPlayer < PLAYERTYPE_MAX; nCntPlayer++)
 	{
-		g_Player[nCntPlayer].posOri = D3DXVECTOR3(0.0f, 100.0f, 0.0f);
-		g_Player[nCntPlayer].pos = PLAYER_POSDEF;
-		g_Player[nCntPlayer].posOld = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		g_Player[nCntPlayer].rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		g_Player[nCntPlayer].bDisp = true;
-		g_Player[nCntPlayer].bJump = false;
-		g_Player[nCntPlayer].nCounterMotion = 0;
-		g_Player[nCntPlayer].nKey = 0;
-		g_Player[nCntPlayer].state = PLAYERSTATE_NEUTRAL;
-		g_Player[nCntPlayer].bFinishMotion = true;
+		g_aPlayer[nCntPlayer].posOri = D3DXVECTOR3(0.0f, 100.0f, 0.0f);
+		g_aPlayer[nCntPlayer].pos = PLAYER_POSDEF;
+		g_aPlayer[nCntPlayer].posOld = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		g_aPlayer[nCntPlayer].rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		g_aPlayer[nCntPlayer].bDisp = true;
+		g_aPlayer[nCntPlayer].bJump = false;
+		g_aPlayer[nCntPlayer].nCounterMotion = 0;
+		g_aPlayer[nCntPlayer].nKey = 0;
+		g_aPlayer[nCntPlayer].state = PLAYERSTATE_NEUTRAL;
+		g_aPlayer[nCntPlayer].bFinishMotion = true;
 	}
 
 	// 少女のパーツ、モーションを読み込む
@@ -59,7 +67,7 @@ void InitPlayer(void)
 
 	if (pPartsInfoGirl != NULL)
 	{// NULLじゃなかったとき
-		g_Player[PLAYERTYPE_GIRL].PartsInfo = *pPartsInfoGirl;		// アドレスの中身のみをコピー
+		g_aPlayer[PLAYERTYPE_GIRL].PartsInfo = *pPartsInfoGirl;		// アドレスの中身のみをコピー
 	}
 
 	// ネズミのパーツ、モーションを読み込む
@@ -69,18 +77,18 @@ void InitPlayer(void)
 
 	if (pPartsInfoMouse != NULL)
 	{// NULLじゃなかったとき
-		g_Player[PLAYERTYPE_MOUSE].PartsInfo = *pPartsInfoMouse;	// アドレスの中身のみをコピー
+		g_aPlayer[PLAYERTYPE_MOUSE].PartsInfo = *pPartsInfoMouse;	// アドレスの中身のみをコピー
 	}
 	// モーションのキー、フレーム情報を代入する
 	for (int nCntMotion = 0; nCntMotion < MOTIONTYPE_MAX; nCntMotion++)
 	{
 		if (pMotionInfoGirl != NULL)
 		{// NULLじゃなかったとき
-			g_Player[PLAYERTYPE_GIRL].aMotionInfo[nCntMotion] = pMotionInfoGirl->aMotionInfo[nCntMotion];
+			g_aPlayer[PLAYERTYPE_GIRL].aMotionInfo[nCntMotion] = pMotionInfoGirl->aMotionInfo[nCntMotion];
 		}
 		if (pMotionInfoMouse != NULL)
 		{// NULLじゃなかったとき
-			g_Player[PLAYERTYPE_MOUSE].aMotionInfo[nCntMotion] = pMotionInfoMouse->aMotionInfo[nCntMotion];
+			g_aPlayer[PLAYERTYPE_MOUSE].aMotionInfo[nCntMotion] = pMotionInfoMouse->aMotionInfo[nCntMotion];
 		}
 	}
 
@@ -102,22 +110,20 @@ void UninitPlayer(void)
 void UpdatePlayer(void)
 {
 	// プレイヤー構造体をポインタ化
-	Player* pPlayer = &g_Player[0];
+	Player* pPlayer = &g_aPlayer[0];
 
 	for (int nCntPlayer = 0; nCntPlayer < PLAYERTYPE_MAX; nCntPlayer++, pPlayer++)
 	{
 		// 現在位置の保存
 		pPlayer->posOld = pPlayer->pos;
 
-		if (g_Player->bFinishMotion == true)
-		{// 待機モーションを再生
+		MovePlayer((PlayerType)nCntPlayer);	// 移動に関する処理
 
-		}
+		JumpPlayer((PlayerType)nCntPlayer);	// ジャンプに関する処理
 
-		MovePlayer(nCntPlayer);	// 移動に関する処理
+		UpdateMotion((PlayerType)nCntPlayer);
 
-		JumpPlayer(nCntPlayer);	// ジャンプに関する処理
-
+		// === デバッグ処理 === // 
 		// 操作する対象を切り替える
 		if (g_nNumPlayer == 1)
 		{// シングルプレイ時
@@ -134,7 +140,8 @@ void UpdatePlayer(void)
 			}
 		}
 
-		pPlayer->move.y += GRAVITY;	// 重力をかけ続ける
+		// 重力をかけ続ける
+		pPlayer->move.y += GRAVITY;
 
 		// 移動量の更新
 		pPlayer->pos += pPlayer->move;
@@ -172,7 +179,7 @@ void UpdatePlayer(void)
 void DrawPlayer(void)
 {
 	// プレイヤー構造体をポインタ化
-	Player* pPlayer = &g_Player[0];
+	Player* pPlayer = &g_aPlayer[0];
 
 	LPDIRECT3DDEVICE9 pDevice;		// デバイスへのポインタ
 
@@ -285,16 +292,16 @@ void DrawPlayer(void)
 // =================================================
 Player* GetPlayer(void)
 {
-	return &g_Player[0];
+	return &g_aPlayer[0];
 }
 
 // =================================================
 // プレイヤーの行動関数
 // =================================================
-void MovePlayer(int nPlayer)
+void MovePlayer(PlayerType nPlayer)
 {
 	// プレイヤー構造体をポインタ化
-	Player* pPlayer = &g_Player[nPlayer];
+	Player* pPlayer = &g_aPlayer[nPlayer];
 
 	// カメラの向きを保存する
 	vec3 Camerarot;
@@ -550,10 +557,10 @@ void MovePlayer(int nPlayer)
 // =================================================
 // プレイヤーのジャンプ関数
 // =================================================
-void JumpPlayer(int nPlayer)
+void JumpPlayer(PlayerType nPlayer)
 {
 	// プレイヤー構造体をポインタ化
-	Player* pPlayer = &g_Player[nPlayer];
+	Player* pPlayer = &g_aPlayer[nPlayer];
 
 	if (nPlayer == 0)
 	{// 少女
@@ -575,489 +582,322 @@ void JumpPlayer(int nPlayer)
 			//PlaySound(SOUND_LABEL_JUMP);
 			//pPlayer->state = PLAYERSTATE_JUMP;
 
+			SetMotionType(MOTIONTYPE_ACTION, true, 10, nPlayer);
+
 			pPlayer->move.y = JUMP_FORCE;
 			pPlayer->bJump = true;
 		}
 	}
 
 }
-#if 0
-// =================================================
-// モデル設置処理
-// =================================================
-void SetModel(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int NumIdx, int Parent, int nParts)
+
+//================================================================================================================
+// --- モーションの変更！ ---
+//================================================================================================================
+void SetMotionType(MOTIONTYPE motionTypeNext, bool bBlend, int nFrameBlend, PlayerType PlayerType)
 {
-	g_Player[PLAYERTYPE_GIRL].nNumModel = nParts;	// パーツ数を設定
-	g_Player[PLAYERTYPE_MOUSE].nNumModel = nParts;	// パーツ数を設定
+	Player* pPlayer = &g_aPlayer[PlayerType];
 
-	// === パーツの階層構造の設定 === //
-	// 少女のパーツ設定
-	g_Player[PLAYERTYPE_GIRL].aModel[NumIdx].nIdxModelParent = Parent;
-	g_Player[PLAYERTYPE_GIRL].aModel[NumIdx].pos = pos;
-	g_Player[PLAYERTYPE_GIRL].aModel[NumIdx].rot = rot;
-
-	// ネズミのパーツ設定
-	g_Player[PLAYERTYPE_MOUSE].aModel[NumIdx].nIdxModelParent = Parent;
-	g_Player[PLAYERTYPE_MOUSE].aModel[NumIdx].pos = pos;
-	g_Player[PLAYERTYPE_MOUSE].aModel[NumIdx].rot = rot;
-}
-
-// =================================================
-// キー毎の位置、向きの設定
-// =================================================
-void SetKey(D3DXVECTOR3 pos, D3DXVECTOR3 rot)
-{
-	if (g_nCntMotion == 2)
+	// プレイヤー情報へのアドレス	
+	if (motionTypeNext < 0 || motionTypeNext >= MOTIONTYPE_MAX)
+	{ // モーションインデックスの上下限確認
+		return;
+	}
+	if (motionTypeNext == MOTIONTYPE_LANDING && pPlayer->motionType != MOTIONTYPE_LANDING && pPlayer->motionTypeBlend != MOTIONTYPE_LANDING)
 	{
-		int n = 0;
+		D3DXVECTOR3 pos = pPlayer->pos;
+		pos.y = pPlayer->pos.y + 0.5f;
 	}
-
-	// === キー毎のpos、rotを代入 === //
-	// 少女のpos、rotを代入
-	g_Player[PLAYERTYPE_GIRL].aMotionInfo[g_nCntMotion].aKeyInfo[g_nCntKeyFrame].aKey[g_nCntKey].fPosX = pos.x;	// 各posを代入
-	g_Player[PLAYERTYPE_GIRL].aMotionInfo[g_nCntMotion].aKeyInfo[g_nCntKeyFrame].aKey[g_nCntKey].fPosY = pos.y;	// 各posを代入
-	g_Player[PLAYERTYPE_GIRL].aMotionInfo[g_nCntMotion].aKeyInfo[g_nCntKeyFrame].aKey[g_nCntKey].fPosZ = pos.z;	// 各posを代入	
-	g_Player[PLAYERTYPE_GIRL].aMotionInfo[g_nCntMotion].aKeyInfo[g_nCntKeyFrame].aKey[g_nCntKey].fRotX = rot.x;	// 各rotを代入
-	g_Player[PLAYERTYPE_GIRL].aMotionInfo[g_nCntMotion].aKeyInfo[g_nCntKeyFrame].aKey[g_nCntKey].fRotY = rot.y;	// 各rotを代入
-	g_Player[PLAYERTYPE_GIRL].aMotionInfo[g_nCntMotion].aKeyInfo[g_nCntKeyFrame].aKey[g_nCntKey].fRotZ = rot.z;	// 各rotを代入
-
-	// ネズミのpos、rotを代入
-	g_Player[PLAYERTYPE_MOUSE].aMotionInfo[g_nCntMotion].aKeyInfo[g_nCntKeyFrame].aKey[g_nCntKey].fPosX = pos.x;	// 各posを代入
-	g_Player[PLAYERTYPE_MOUSE].aMotionInfo[g_nCntMotion].aKeyInfo[g_nCntKeyFrame].aKey[g_nCntKey].fPosY = pos.y;	// 各posを代入
-	g_Player[PLAYERTYPE_MOUSE].aMotionInfo[g_nCntMotion].aKeyInfo[g_nCntKeyFrame].aKey[g_nCntKey].fPosZ = pos.z;	// 各posを代入
-	g_Player[PLAYERTYPE_MOUSE].aMotionInfo[g_nCntMotion].aKeyInfo[g_nCntKeyFrame].aKey[g_nCntKey].fRotX = rot.x;	// 各rotを代入
-	g_Player[PLAYERTYPE_MOUSE].aMotionInfo[g_nCntMotion].aKeyInfo[g_nCntKeyFrame].aKey[g_nCntKey].fRotY = rot.y;	// 各rotを代入
-	g_Player[PLAYERTYPE_MOUSE].aMotionInfo[g_nCntMotion].aKeyInfo[g_nCntKeyFrame].aKey[g_nCntKey].fRotZ = rot.z;	// 各rotを代入
-}
-
-// =================================================
-// 一つ一つキーのフレーム設定
-// =================================================
-void SetKeyInfo(int nFrame)
-{
-	g_Player[PLAYERTYPE_GIRL].aMotionInfo[g_nCntMotion].aKeyInfo[g_nCntKeyFrame].nFrame = nFrame;	// 1キーごとのフレーム数
-	g_Player[PLAYERTYPE_MOUSE].aMotionInfo[g_nCntMotion].aKeyInfo[g_nCntKeyFrame].nFrame = nFrame;	// 1キーごとのフレーム数
-}
-
-// =================================================
-// モーション情報の設定
-// =================================================
-void SetMotionInfo(int nLoop, int NumKey)
-{
-	int Loop = nLoop;
-
-	if (Loop == 0)
-	{// ループしない
-		g_Player[PLAYERTYPE_GIRL].aMotionInfo[g_nCntMotion].bLoop = false;
-	}
-	else if (Loop == 1)
-	{// ループする
-		g_Player[PLAYERTYPE_GIRL].aMotionInfo[g_nCntMotion].bLoop = true;
-	}
-
-	//g_Player.aMotionInfo[g_nCntMotion].nNumKey = NumKey;	// キーの総数
-}
-
-// =================================================
-// モーションの更新処理
-// =================================================
-void UpdateMotion(void)
-{
-	float fDiffKey;
-	float fPosX;
-	float fPosY;
-	float fPosZ;
-	float fRotX;
-	float fRotY;
-	float fRotZ;
-
-	KEY* pKey;		// 現在のモーションの現在のキーのポインタ
-	KEY* pKeyNext;	// 現在のモーションの1つ次のキーのポインタ
-
-	KEY* pKeyBlend;		// ブレンドモーションの現在のキーのポインタ
-	KEY* pKeyNextBlend;	// ブレンドモーションの1つ次のキーのポインタ
-
-	// プレイヤー構造体をポインタ化
-	Player* pPlayer = &g_Player[0];
-
-	for (int nCntPlayer = 0; nCntPlayer < PLAYERTYPE_MAX; nCntPlayer++, pPlayer++)
+	pPlayer->bBlendMotion = bBlend;
+	if (bBlend == false)
 	{
-		// 現在のモーションのフレーム数のポインタ
-		KEY_INFO* pKeyFrame = &pPlayer->aMotionInfo[pPlayer->motionType].aKeyInfo[pPlayer->nKey];
+		/*** 各変数を初期化し、次のモーションを設定 ***/
+		pPlayer->nCounterMotion = pPlayer->nCounterMotionBlend;
+		pPlayer->nKey = pPlayer->nKeyBlend;
+		pPlayer->motionType = motionTypeNext;
+		pPlayer->bLoop = pPlayer->aMotionInfo[motionTypeNext].bLoop;
+		pPlayer->nNumKey = pPlayer->aMotionInfo[motionTypeNext].nNumKey;
+		pPlayer->bFinishMotion = false;
 
-		// ブレンドモーションのフレーム数のポインタ
-		KEY_INFO* pKeyFrameBlend = &pPlayer->aMotionInfo[pPlayer->motionTypeBlend].aKeyInfo[pPlayer->nKeyBlend];
+		/*** 現在のモーションのキー情報へのポインタ ***/
+		KEY_INFO* pInfo = &pPlayer->aMotionInfo[pPlayer->motionType].aKeyInfo[pPlayer->nKey];
 
-		// 全モデル(パーツ)の更新
+		/*** 全パーツの初期設定！ ***/
 		for (int nCntModel = 0; nCntModel < pPlayer->nNumModel; nCntModel++)
 		{
-			pPlayer->bFinishMotion = false;
+			int nNext = (pPlayer->nKey + 1) % pPlayer->aMotionInfo[pPlayer->motionType].nNumKey;
 
-			// 現在のモーションのフレームの分割数
-			float fRateKey = (float)pPlayer->nCounterMotion / (float)pKeyFrame->nFrame;
+			// 次のキーの値			
+			float fRateKey = (float)pPlayer->nCounterMotion / (float)pInfo->nFrame;			// モーションカウンター / 再生フレーム数	
 
-			// 現在のモーションのポインタ
-			pKey = &pPlayer->aMotionInfo[pPlayer->motionType].aKeyInfo[pPlayer->nKey].aKey[nCntModel];
-			pKeyNext = &pPlayer->aMotionInfo[pPlayer->motionType].aKeyInfo[(pPlayer->nKey + 1) % pPlayer->nNumKey].aKey[nCntModel];
+			D3DXVECTOR3 diffPos = {};	// 位置の差分
+			D3DXVECTOR3 UpdatePos = {};	// 更新する位置		
+			D3DXVECTOR3 diffRot = {};	// 角度の差分			
+			D3DXVECTOR3 UpdateRot = {};	// 更新する角度		
+			KEY* pKey = &pInfo->aKey[nCntModel];		// 現在のキー	
+			PARTS* pModel = &pPlayer->PartsInfo.aParts[nCntModel];
+			KEY* pKeyNext = &pPlayer->aMotionInfo[pPlayer->motionType].aKeyInfo[nNext].aKey[nCntModel];
+			// 次のキー			
+			/** キー情報から位置と向きを算出！ **/
+			// === POS ===			
+			// --- X ---		
+			diffPos.x = pKeyNext->pos.x - pKey->pos.x;
+			UpdatePos.x = pKey->pos.x + diffPos.x * fRateKey;
 
-			if (pPlayer->bBlendMotion == true)
-			{// ブレンドアリ
-				// ブレンドモーションのポインタ
-				pKeyBlend = &pPlayer->aMotionInfo[pPlayer->motionTypeBlend].aKeyInfo[pPlayer->nKeyBlend].aKey[nCntModel];
-				pKeyNextBlend = &pPlayer->aMotionInfo[g_Player->motionTypeBlend].aKeyInfo[(pPlayer->nKeyBlend + 1) % pPlayer->nNumKeyBlend].aKey[nCntModel];
+			// --- Y ---		
+			diffPos.y = pKeyNext->pos.y - pKey->pos.y;
+			UpdatePos.y = pKey->pos.y + diffPos.y * fRateKey;
 
-				// ブレンドモーションのフレームの分割数
-				float fRateKeyBlend = (float)pPlayer->nCounterMotionBlend / (float)pKeyFrameBlend->nFrame;
+			// --- Z ---			
+			diffPos.z = pKeyNext->pos.z - pKey->pos.z;
+			UpdatePos.z = pKey->pos.z + diffPos.z * fRateKey;
 
-				// ブレンド自体の相対値
-				float fRateBlend = (float)pPlayer->nCounterBlend / (float)pPlayer->nFrameBlend;
+			// === ROT ===			
+			// --- X ---			
+			diffRot.x = pKeyNext->rot.x - pKey->rot.x;
+			RepairRot(&diffRot.x, &diffRot.x);
 
-				// キー情報から位置、向きを算出
+			UpdateRot.x = pKey->rot.x + diffRot.x * fRateKey;
+			RepairRot(&UpdateRot.x, &UpdateRot.x);
 
-				// Xの位置を算出
-				// 現在のモーション
-				fDiffKey = pKeyNext->fPosX - pKey->fPosX;
-				float fPosXCurrent = pKey->fPosX + (fDiffKey * fRateKey);
+			// --- Y ---			
+			diffRot.y = pKeyNext->rot.y - pKey->rot.y;
+			RepairRot(&diffRot.y, &diffRot.y);
 
-				// ブレンドモーション
-				float fDiffKeyBlend = pKeyNextBlend->fPosX - pKeyBlend->fPosX;
-				float fPosXBlend = pKeyBlend->fPosX + (fDiffKeyBlend * fRateKeyBlend);
+			UpdateRot.y = pKey->rot.y + diffRot.y * fRateKey;
+			RepairRot(&UpdateRot.y, &UpdateRot.y);
 
-				float fDiffBlend = fPosXBlend - fPosXCurrent;	// 現在モーションとブレンドモーションの差分
-				fPosX = fPosXCurrent + (fDiffBlend * fRateBlend);	// fPosXの向きを求める
+			// --- Z ---			
+			diffRot.z = pKeyNext->rot.z - pKey->rot.z;
+			RepairRot(&diffRot.z, &diffRot.z);
 
-				// Yの位置を算出
-				// 現在のモーション
-				fDiffKey = pKeyNext->fPosY - pKey->fPosY;	// 次のモーションとの差分を求める(現在のモーション)
-				float fPosYCurrent = pKey->fPosY + (fDiffKey * fRateKey);	// 次のキーに徐々に近づける
+			UpdateRot.z = pKey->rot.z + diffRot.z * fRateKey;
+			RepairRot(&UpdateRot.z, &UpdateRot.z);
 
-				// ブレンドモーション
-				fDiffKeyBlend = pKeyNextBlend->fPosY - pKeyBlend->fPosY;	// 次のモーションとの差分を求める(ブレンドモーション)
-				float fPosYBlend = pKeyBlend->fPosY + (fDiffKeyBlend * fRateKeyBlend);	// 現在のキーから次のキーに徐々に近づける
-
-				fDiffBlend = fPosYBlend - fPosYCurrent;		// 現在モーションとブレンドモーションの差分
-				fPosY = fPosYCurrent + (fDiffBlend * fRateBlend);	// fPosYの位置を求める
-
-				// Zの位置を算出
-				// 現在のモーション
-				fDiffKey = pKeyNext->fPosZ - pKey->fPosZ;	// 次のモーションとの差分を求める(現在のモーション)
-				float fPosZCurrent = pKey->fPosZ + (fDiffKey * fRateKey);	// 次のキーに徐々に近づける
-
-				// ブレンドモーション
-				fDiffKeyBlend = pKeyNextBlend->fPosZ - pKeyBlend->fPosZ;	// 次のモーションとの差分を求める(ブレンドモーション)
-				float fPosZBlend = pKeyBlend->fPosZ + (fDiffKeyBlend * fRateKeyBlend);	// 現在のキーから次のキーに徐々に近づける
-
-				fDiffBlend = fPosZBlend - fPosZCurrent;		// 現在モーションとブレンドモーションの差分
-				fPosZ = fPosZCurrent + (fDiffBlend * fRateBlend);	// fPosZの位置を求める
-
-				// Xの向きを算出
-				// 現在のモーション
-				fDiffKey = pKeyNext->fRotX - pKey->fRotX;	// 次のモーションとの差分を求める(現在のモーション)
-
-				// もし、差分がπ・-πを超えたら
-				if (fDiffKey > D3DX_PI)
-				{
-					fDiffKey -= D3DX_PI * 2;
-				}
-				else if (fDiffKey < -D3DX_PI)
-				{
-					fDiffKey += D3DX_PI * 2;
-				}
-
-				float fRotXCurrent = pKey->fRotX + (fDiffKey * fRateKey);	// 次のキーに徐々に近づける
-
-				// ブレンドモーション
-				fDiffKeyBlend = pKeyNextBlend->fRotX - pKeyBlend->fRotX;	// 次のモーションとの差分を求める(ブレンドモーション)
-
-				// もし、差分がπ・-πを超えたら
-				if (fDiffKeyBlend > D3DX_PI)
-				{
-					fDiffKeyBlend -= D3DX_PI * 2;
-				}
-				else if (fDiffKeyBlend < -D3DX_PI)
-				{
-					fDiffKeyBlend += D3DX_PI * 2;
-				}
-
-				float fRotXBlend = pKeyBlend->fRotX + (fDiffKeyBlend * fRateKeyBlend);	// 現在のキーから次のキーに徐々に近づける
-
-				fDiffBlend = fRotXBlend - fRotXCurrent;		// 現在モーションとブレンドモーションの差分
-				fRotX = fRotXCurrent + (fDiffBlend * fRateBlend);	// RotXの向きを求める
-
-				// Yの向きを算出
-				// 現在のモーション
-				fDiffKey = pKeyNext->fRotY - pKey->fRotY;	// 次のモーションとの差分を求める(現在のモーション)
-
-				// もし、差分がπ・-πを超えたら
-				if (fDiffKey > D3DX_PI)
-				{
-					fDiffKey -= D3DX_PI * 2;
-				}
-				else if (fDiffKey < -D3DX_PI)
-				{
-					fDiffKey += D3DX_PI * 2;
-				}
-
-				float fRotYCurrent = pKey->fRotY + (fDiffKey * fRateKey);	// 次のキーに徐々に近づける
-
-				// ブレンドモーション
-				fDiffKeyBlend = pKeyNextBlend->fRotY - pKeyBlend->fRotY;	// 次のモーションとの差分を求める(ブレンドモーション)
-
-				// もし、差分がπ・-πを超えたら
-				if (fDiffKeyBlend > D3DX_PI)
-				{
-					fDiffKeyBlend -= D3DX_PI * 2;
-				}
-				else if (fDiffKeyBlend < -D3DX_PI)
-				{
-					fDiffKeyBlend += D3DX_PI * 2;
-				}
-
-				float fRotYBlend = pKeyBlend->fRotY + (fDiffKeyBlend * fRateKeyBlend);	// 現在のキーから次のキーに徐々に近づける
-
-				fDiffBlend = fRotXBlend - fRotYCurrent;		// 現在モーションとブレンドモーションの差分
-				fRotY = fRotYCurrent + (fDiffBlend * fRateBlend);	// RotYの向きを求める
-
-				// Zの向きを算出
-				// 現在のモーション
-				fDiffKey = pKeyNext->fRotZ - pKey->fRotZ;	// 次のモーションとの差分を求める(現在のモーション)
-
-				// もし、差分がπ・-πを超えたら
-				if (fDiffKey > D3DX_PI)
-				{
-					fDiffKey -= D3DX_PI * 2;
-				}
-				else if (fDiffKey < -D3DX_PI)
-				{
-					fDiffKey += D3DX_PI * 2;
-				}
-
-				float fRotZCurrent = pKey->fRotZ + (fDiffKey * fRateKey);	// 次のキーに徐々に近づける
-
-				// ブレンドモーション
-				fDiffKeyBlend = pKeyNextBlend->fRotZ - pKeyBlend->fRotZ;	// 次のモーションとの差分を求める(ブレンドモーション)
-
-				// もし、差分がπ・-πを超えたら
-				if (fDiffKeyBlend > D3DX_PI)
-				{
-					fDiffKeyBlend -= D3DX_PI * 2;
-				}
-				else if (fDiffKeyBlend < -D3DX_PI)
-				{
-					fDiffKeyBlend += D3DX_PI * 2;
-				}
-
-				float fRotZBlend = pKeyBlend->fRotZ + (fDiffKeyBlend * fRateKeyBlend);	// 現在のキーから次のキーに徐々に近づける
-
-				fDiffBlend = fRotXBlend - fRotZCurrent;		// 現在モーションとブレンドモーションの差分
-				fRotZ = fRotZCurrent + (fDiffBlend * fRateBlend);	// RotZの向きを求める
-			}
-
-			// キー情報から位置、向きを算出
-			// Xの位置を算出
-			fDiffKey = pKeyNext->fPosX - pKey->fPosX;
-			fPosX = pKey->fPosX + (fDiffKey * fRateKey);
-
-			// Yの位置を算出
-			fDiffKey = pKeyNext->fPosY - pKey->fPosY;
-			fPosY = pKey->fPosY + (fDiffKey * fRateKey);
-
-			// Zの位置を算出
-			fDiffKey = pKeyNext->fPosZ - pKey->fPosZ;
-			fPosZ = pKey->fPosZ + (fDiffKey * fRateKey);
-
-			// Xの向きを算出
-			fDiffKey = pKeyNext->fRotX - pKey->fRotX;
-
-			// もし、差分がπ・-πを超えたら
-			if (fDiffKey > D3DX_PI)
-			{
-				fDiffKey -= D3DX_PI * 2;
-			}
-			else if (fDiffKey < -D3DX_PI)
-			{
-				fDiffKey += D3DX_PI * 2;
-			}
-
-			fRotX = pKey->fRotX + (fDiffKey * fRateKey);
-
-			// Yの向きを算出
-			fDiffKey = pKeyNext->fRotY - pKey->fRotY;
-
-			// もし、差分がπ・-πを超えたら
-			if (fDiffKey > D3DX_PI)
-			{
-				fDiffKey -= D3DX_PI * 2;
-			}
-			else if (fDiffKey < -D3DX_PI)
-			{
-				fDiffKey += D3DX_PI * 2;
-			}
-
-			fRotY = pKey->fRotY + (fDiffKey * fRateKey);
-
-			// Zの向きを算出
-			fDiffKey = pKeyNext->fRotZ - pKey->fRotZ;
-
-			// もし、差分がπ・-πを超えたら
-			if (fDiffKey > D3DX_PI)
-			{
-				fDiffKey -= D3DX_PI * 2;
-			}
-			else if (fDiffKey < -D3DX_PI)
-			{
-				fDiffKey += D3DX_PI * 2;
-			}
-
-			fRotZ = pKey->fRotZ + (fDiffKey * fRateKey);
-
-			// パーツの位置・向きを設定
-			pPlayer->aModel[nCntModel].pos = D3DXVECTOR3(pPlayer->Offset[nCntModel].x + fPosX, pPlayer->Offset[nCntModel].y + fPosY, pPlayer->Offset[nCntModel].z + fPosZ);
-			pPlayer->aModel[nCntModel].rot = D3DXVECTOR3(fRotX, fRotY, fRotZ);
+			/** 位置、向きを更新！ **/
+			pModel->pos = pModel->posLocal + UpdatePos;
+			pModel->rot = pModel->rotLocal + UpdateRot;
 		}
-
-		pPlayer->nCounterMotion++;
-
-		// キーを1つ進める
-		if (pPlayer->nCounterMotion >= pPlayer->aMotionInfo[pPlayer->motionType].aKeyInfo[pPlayer->nKey].nFrame && pPlayer->bFinishMotion == false)
-		{// ループするモーション
-			pPlayer->nKey = (pPlayer->nKey + 1) % pPlayer->nNumKey;
-			pPlayer->nCounterMotion = 0;
-			pPlayer->nCntAllround++;
-		}
-		else if (pPlayer->nCntAllround >= pPlayer->aMotionInfo[pPlayer->motionType].nNumKey)
-		{// 1周したらtrueにする(連発防止)
-			pPlayer->bFinishMotion = true;
-		}
-		else if (pPlayer->nCntAllround >= pPlayer->aMotionInfo[pPlayer->motionType].nNumKey && pPlayer->aMotionInfo[pPlayer->motionType].bLoop == false)
-		{// ループしないモーションの全キーを回した場合
-			pPlayer->bFinishMotion = true;
-			pPlayer->state = PLAYERSTATE_NEUTRAL;
-			pPlayer->nCounterMotion = 0;
-		}
-	}
-
-}
-
-// =================================================
-// モーションの設定処理
-// =================================================
-void SetMotion(MOTIONTYPE motionType, bool bUseBrend, int nBlendFrame, PlayerType PlayerType)
-{
-	g_Player[PlayerType].bBlendMotion = bUseBrend;	// モーションブレンドするかどうか
-
-	if (bUseBrend == false)
-	{
-		// モーションの設定
-		g_Player[PlayerType].nCntAllround = 0;
-		g_Player[PlayerType].motionType = motionType;	// 使用するモーション
-		g_Player[PlayerType].nKey = g_Player[PlayerType].nKeyBlend;					// 現在のキー
-		g_Player[PlayerType].nCounterMotion = g_Player[PlayerType].nCounterMotionBlend;		// 次のキーに行くためのカウンター
-		g_Player[PlayerType].nNumKey = g_Player[PlayerType].aMotionInfo[motionType].nNumKey;	// モーションごとの総キー数	
-		g_Player[PlayerType].bFinishMotion = false;		// モーションが終了したかどうか
-		g_Player[PlayerType].bLoopMotion = g_Player[PlayerType].aMotionInfo[motionType].bLoop;		// モーションがループするかどうか
-
-		// キー情報のポインタ
-		KEY_INFO* pKeyInfo = &g_Player[PlayerType].aMotionInfo[motionType].aKeyInfo[g_Player[PlayerType].nKey];
-
-		// 現在のモーションのフレーム数のポインタ
-		KEY_INFO* pKeyFrame = &g_Player[PlayerType].aMotionInfo[g_Player[PlayerType].motionType].aKeyInfo[g_Player[PlayerType].nKey];
-
-		KEY* pKey;		// 現在のモーションの現在のキーのポインタ
-		KEY* pKeyNext;	// 現在のモーションの1つ次のキーのポインタ
-
-		// パーツの初期設定
-		for (int nCntModel = 0; nCntModel < g_Player[PlayerType].nNumModel; nCntModel++)
-		{
-			// 現在のモーションのポインタ
-			pKey = &g_Player[PlayerType].aMotionInfo[g_Player[PlayerType].motionType].aKeyInfo[g_Player[PlayerType].nKey].aKey[nCntModel];
-			pKeyNext = &g_Player[PlayerType].aMotionInfo[g_Player[PlayerType].motionType].aKeyInfo[(g_Player[PlayerType].nKey + 1) % g_Player[PlayerType].nNumKey].aKey[nCntModel];
-
-			// キー情報から位置、向きを算出
-			float fDiffKey;
-			D3DXVECTOR3 Pos;
-			D3DXVECTOR3 Rot;
-
-			float fRateKey = (float)g_Player[PlayerType].nCounterMotion / (float)pKeyFrame->nFrame;
-
-			// Xの位置を算出
-			fDiffKey = pKeyNext->fPosX - pKey->fPosX;
-			Pos.x = pKey->fPosX + (fDiffKey * fRateKey);
-
-			// Yの位置を算出
-			fDiffKey = pKeyNext->fPosY - pKey->fPosY;
-			Pos.y = pKey->fPosY + (fDiffKey * fRateKey);
-
-			// Zの位置を算出
-			fDiffKey = pKeyNext->fPosZ - pKey->fPosZ;
-			Pos.z = pKey->fPosZ + (fDiffKey * fRateKey);
-
-			// Xの向きを算出
-			fDiffKey = pKeyNext->fRotX - pKey->fRotX;
-
-			// もし、差分がπ・-πを超えたら
-			if (fDiffKey > D3DX_PI)
-			{
-				fDiffKey -= D3DX_PI * 2;
-			}
-			else if (fDiffKey < -D3DX_PI)
-			{
-				fDiffKey += D3DX_PI * 2;
-			}
-
-			Rot.x = pKey->fRotX + (fDiffKey * fRateKey);
-
-			// Yの向きを算出
-			fDiffKey = pKeyNext->fRotY - pKey->fRotY;
-
-			// もし、差分がπ・-πを超えたら
-			if (fDiffKey > D3DX_PI)
-			{
-				fDiffKey -= D3DX_PI * 2;
-			}
-			else if (fDiffKey < -D3DX_PI)
-			{
-				fDiffKey += D3DX_PI * 2;
-			}
-
-			Rot.y = pKey->fRotY + (fDiffKey * fRateKey);
-
-			// Zの向きを算出
-			fDiffKey = pKeyNext->fRotZ - pKey->fRotZ;
-
-			// もし、差分がπ・-πを超えたら
-			if (fDiffKey > D3DX_PI)
-			{
-				fDiffKey -= D3DX_PI * 2;
-			}
-			else if (fDiffKey < -D3DX_PI)
-			{
-				fDiffKey += D3DX_PI * 2;
-			}
-
-			Rot.z = pKey->fRotZ + (fDiffKey * fRateKey);
-
-			// パーツの位置・向きを設定
-			g_Player[PlayerType].aModel[nCntModel].pos = D3DXVECTOR3(g_Player[PlayerType].Offset[nCntModel].x + Pos.x, g_Player[PlayerType].Offset[nCntModel].y + Pos.y, g_Player[PlayerType].Offset[nCntModel].z + Pos.z);
-			g_Player[PlayerType].aModel[nCntModel].rot = Rot;
-		}
-
 	}
 	else
 	{
-		// ブレンドモーションの設定
-		g_Player[PlayerType].nCntAllround = 0;
-		g_Player[PlayerType].motionTypeBlend = motionType;
-		g_Player[PlayerType].nFrameBlend = nBlendFrame;		// ブレンドにかけるフレーム数
-		g_Player[PlayerType].nNumKeyBlend = g_Player[PlayerType].aMotionInfo[motionType].nNumKey;
-		g_Player[PlayerType].nKeyBlend = 0;
-		g_Player[PlayerType].nCounterBlend = 0;
-		g_Player[PlayerType].nCounterMotionBlend = 0;
-		g_Player[PlayerType].bFinishMotion = false;		// モーションが終了したかどうか
+		/*** 各変数を初期化し、ブレンドモーションを設定 ***/
+		pPlayer->bFinishMotion = false;
+		pPlayer->motionTypeBlend = motionTypeNext;
+		pPlayer->nCounterBlend = 0;
+		pPlayer->nCounterMotionBlend = 0;
+		pPlayer->nFrameBlend = nFrameBlend;
+		pPlayer->nNumKeyBlend = pPlayer->aMotionInfo[motionTypeNext].nNumKey;
+		pPlayer->nKeyBlend = 0;
 	}
-
 }
-#endif
+
+//================================================================================================================
+// --- モーションアップデート！ ---
+//================================================================================================================
+void UpdateMotion(PlayerType Type)
+{
+	Player* pPlayer = &g_aPlayer[Type];	// プレイヤー情報へのアドレス	
+
+	/*** 現在のモーションのキー情報へのポインタ ***/
+	KEY_INFO* pInfo = &pPlayer->aMotionInfo[pPlayer->motionType].aKeyInfo[pPlayer->nKey];
+	KEY_INFO* pInfoBlend = &pPlayer->aMotionInfo[pPlayer->motionTypeBlend].aKeyInfo[pPlayer->nKeyBlend];
+	
+	/*** 全パーツの更新！ ***/
+	for (int nCntModel = 0; nCntModel < pPlayer->nNumModel; nCntModel++)
+	{
+		int nNext = (pPlayer->nKey + 1) % pPlayer->aMotionInfo[pPlayer->motionType].nNumKey;
+		// 次のキーの値		
+		float fRateKey = (float)pPlayer->nCounterMotion / (float)pInfo->nFrame;		// モーションカウンター / 再生フレーム数
+		D3DXVECTOR3 diffPos = {};	// 位置の差分
+		D3DXVECTOR3 UpdatePos = {};	// 更新する位置	
+		D3DXVECTOR3 diffRot = {};	// 角度の差分		
+		D3DXVECTOR3 UpdateRot = {};	// 更新する角度		
+		KEY* pKey = &pInfo->aKey[nCntModel];
+
+		// 現在のキー		
+		KEY* pKeyNext = &pPlayer->aMotionInfo[pPlayer->motionType].aKeyInfo[nNext].aKey[nCntModel];
+
+		// 次のキー		
+		PARTS* pModel = &pPlayer->PartsInfo.aParts[nCntModel];
+		if (pPlayer->bBlendMotion == true)
+		{ // モーションブレンドあり	
+			D3DXVECTOR3 diffKeyPosCurrent = {};	// 現在のモーションの位置の差分			
+			D3DXVECTOR3 diffKeyRotCurrent = {};	// 現在のモーションの角度の差分		
+			D3DXVECTOR3 diffKeyPosBlend = {};	// ブレンドモーションの位置の差分			
+			D3DXVECTOR3 diffKeyRotBlend = {};	// ブレンドモーションの角度の差分	
+			D3DXVECTOR3 diffPosBlend = {};		// 最終差分		
+			D3DXVECTOR3 diffRotBlend = {};		// 最終差分			
+			int nNextBlend = (pPlayer->nKeyBlend + 1) % pPlayer->aMotionInfo[pPlayer->motionTypeBlend].nNumKey;			// 次のキーの値		
+			KEY* pKeyBlend = &pInfoBlend->aKey[nCntModel];																// 現在のキー	
+			KEY* pKeyNextBlend = &pPlayer->aMotionInfo[pPlayer->motionTypeBlend].aKeyInfo[nNextBlend].aKey[nCntModel];	// 次のキー
+			float fRateKeyBlend = (float)pPlayer->nCounterMotionBlend / (float)pInfoBlend->nFrame;						// モーションカウンター / 再生フレーム数
+			float fRateBlend = (float)pPlayer->nCounterBlend / (float)pPlayer->nFrameBlend;							// ブレンドの相対量		
+
+			// --- X ---			
+			/* 現在のモーション */
+			diffPos.x = pKeyNext->pos.x - pKey->pos.x;
+			diffKeyPosCurrent.x = pKey->pos.x + diffPos.x * fRateKey;
+
+			/* ブレンドモーション */
+			diffPos.x = pKeyNextBlend->pos.x - pKeyBlend->pos.x;
+			diffKeyPosBlend.x = pKeyBlend->pos.x + diffPos.x * fRateKeyBlend;
+			/* 求める差分 */
+			diffPosBlend.x = diffKeyPosBlend.x - diffKeyPosCurrent.x;
+			UpdatePos.x = diffKeyPosCurrent.x + (diffPosBlend.x * fRateBlend);
+			// --- Y ---		
+			/* 現在のモーション */
+			diffPos.y = pKeyNext->pos.y - pKey->pos.y;
+			diffKeyPosCurrent.y = pKey->pos.y + diffPos.y * fRateKey;
+
+			/* ブレンドモーション */
+			diffPos.y = pKeyNextBlend->pos.y - pKeyBlend->pos.y;
+			diffKeyPosBlend.y = pKeyBlend->pos.y + diffPos.y * fRateKeyBlend;
+			/* 求める差分 */
+			diffPosBlend.y = diffKeyPosBlend.y - diffKeyPosCurrent.y;
+			UpdatePos.y = diffKeyPosCurrent.y + (diffPosBlend.y * fRateBlend);
+
+			// --- Z ---			
+			/* 現在のモーション */
+			diffPos.z = pKeyNext->pos.z - pKey->pos.z;
+			diffKeyPosCurrent.z = pKey->pos.z + diffPos.z * fRateKey;
+
+			/* ブレンドモーション */
+			diffPos.z = pKeyNextBlend->pos.z - pKeyBlend->pos.z;
+			diffKeyPosBlend.z = pKeyBlend->pos.z + diffPos.z * fRateKeyBlend;
+
+			/* 求める差分 */
+			diffPosBlend.z = diffKeyPosBlend.z - diffKeyPosCurrent.z;
+			UpdatePos.z = diffKeyPosCurrent.z + (diffPosBlend.z * fRateBlend);
+
+			// === ROT ===			
+			// --- X ---			
+			/* 現在のモーション */
+			diffRot.x = pKeyNext->rot.x - pKey->rot.x;
+			RepairRot(&diffRot.x, &diffRot.x);
+			diffKeyRotCurrent.x = pKey->rot.x + diffRot.x * fRateKey;
+			RepairRot(&diffKeyRotCurrent.x, &diffKeyRotCurrent.x);
+
+			/* ブレンドモーション */
+			diffRot.x = pKeyNextBlend->rot.x - pKeyBlend->rot.x;
+			RepairRot(&diffRot.x, &diffRot.x);
+			diffKeyRotBlend.x = pKeyBlend->rot.x + diffRot.x * fRateKeyBlend;
+			RepairRot(&diffKeyRotBlend.x, &diffKeyRotBlend.x);
+
+			/* 求める差分 */
+			diffRotBlend.x = diffKeyRotBlend.x - diffKeyRotCurrent.x;
+			UpdateRot.x = diffKeyRotCurrent.x + (diffRotBlend.x * fRateBlend);
+
+			// --- Y ---			
+			diffRot.y = pKeyNext->rot.y - pKey->rot.y;
+			RepairRot(&diffRot.y, &diffRot.y);
+			diffKeyRotCurrent.y = pKey->rot.y + diffRot.y * fRateKey;
+			RepairRot(&diffKeyRotCurrent.y, &diffKeyRotCurrent.y);
+
+			/* ブレンドモーション */
+			diffRot.y = pKeyNextBlend->rot.y - pKeyBlend->rot.y;
+			RepairRot(&diffRot.y, &diffRot.y);
+			diffKeyRotBlend.y = pKeyBlend->rot.y + diffRot.y * fRateKeyBlend;
+			RepairRot(&diffKeyRotBlend.y, &diffKeyRotBlend.y);
+
+			/* 求める差分 */
+			diffRotBlend.y = diffKeyRotBlend.y - diffKeyRotCurrent.y;
+			UpdateRot.y = diffKeyRotCurrent.y + (diffRotBlend.y * fRateBlend);
+
+			// --- Z ---			
+			diffRot.z = pKeyNext->rot.z - pKey->rot.z;
+			RepairRot(&diffRot.z, &diffRot.z);
+			diffKeyRotCurrent.z = pKey->rot.z + diffRot.z * fRateKey;
+			RepairRot(&diffKeyRotCurrent.z, &diffKeyRotCurrent.z);
+
+			/* ブレンドモーション */
+			diffRot.z = pKeyNextBlend->rot.z - pKeyBlend->rot.z;
+			RepairRot(&diffRot.z, &diffRot.z);
+			diffKeyRotBlend.z = pKeyBlend->rot.z + diffRot.z * fRateKeyBlend;
+			RepairRot(&diffKeyRotBlend.z, &diffKeyRotBlend.z);
+
+			/* 求める差分 */
+			diffRotBlend.z = diffKeyRotBlend.z - diffKeyRotCurrent.z;
+			UpdateRot.z = diffKeyRotCurrent.z + (diffRotBlend.z * fRateBlend);
+		}
+		else
+		{ // ブレンド無し	
+		  /** キー情報から位置と向きを算出！ **/
+		  // === POS ===			
+		  // --- X ---			
+			diffPos.x = pKeyNext->pos.x - pKey->pos.x;
+			UpdatePos.x = pKey->pos.x + diffPos.x * fRateKey;
+
+			// --- Y ---		
+			diffPos.y = pKeyNext->pos.y - pKey->pos.y;
+			UpdatePos.y = pKey->pos.y + diffPos.y * fRateKey;
+
+			// --- Z ---			
+			diffPos.z = pKeyNext->pos.z - pKey->pos.z;
+			UpdatePos.z = pKey->pos.z + diffPos.z * fRateKey;
+
+			// === ROT ===			
+			// --- X ---		
+			diffRot.x = pKeyNext->rot.x - pKey->rot.x;
+			RepairRot(&diffRot.x, &diffRot.x);
+			UpdateRot.x = pKey->rot.x + diffRot.x * fRateKey;
+			RepairRot(&UpdateRot.x, &UpdateRot.x);
+
+			// --- Y ---		
+			diffRot.y = pKeyNext->rot.y - pKey->rot.y;
+			RepairRot(&diffRot.y, &diffRot.y);
+			UpdateRot.y = pKey->rot.y + diffRot.y * fRateKey;
+			RepairRot(&UpdateRot.y, &UpdateRot.y);
+
+			// --- Z ---			
+			diffRot.z = pKeyNext->rot.z - pKey->rot.z;
+			RepairRot(&diffRot.z, &diffRot.z);
+			UpdateRot.z = pKey->rot.z + diffRot.z * fRateKey;
+			RepairRot(&UpdateRot.z, &UpdateRot.z);
+		}
+		/** 位置、向きを更新！ **/
+		pModel->pos = pModel->posLocal + UpdatePos;
+		pModel->rot = pModel->rotLocal + UpdateRot;
+	}
+	if (pPlayer->bBlendMotion == false)
+	{
+		pPlayer->nCounterMotion++;
+		if (pPlayer->nCounterMotion >= pInfo->nFrame)
+		{ // モーションカウンターが現在のキー情報のフレーム数を超えた場合
+			if (pPlayer->motionType < 0 || pPlayer->motionType >= MOTIONTYPE_MAX)
+			{ // モーションインデックスの上下限確認		
+				return;
+			}
+			
+			/** キーを一つ進める **/
+			pPlayer->nKey = ((pPlayer->nKey + 1) % pPlayer->aMotionInfo[pPlayer->motionType].nNumKey);
+			
+			if (pPlayer->nKey == 0 && pPlayer->bLoop == false)
+			{
+				SetMotionType(MOTIONTYPE_NEUTRAL, true, 120, Type);
+			}			
+			
+			pPlayer->nCounterMotion = 0;
+		}
+	}
+	else
+	{
+		pPlayer->nCounterMotionBlend++;
+		if (pPlayer->nCounterMotionBlend >= pInfoBlend->nFrame)
+		{ // モーションカウンターがブレンドモーションの現在のキーのフレーム数を超えた場合	
+			/** ブレンドモーションのキーを一つ進める **/
+			pPlayer->nKeyBlend = ((pPlayer->nKeyBlend + 1) % pPlayer->aMotionInfo[pPlayer->motionTypeBlend].nNumKey);
+			pPlayer->nCounterMotionBlend = 0;
+		}	
+		pPlayer->nCounterBlend++;
+
+		if (pPlayer->nCounterBlend >= pPlayer->nFrameBlend)
+		{ // ブレンドカウンターがブレンドフレーム数を超えた場合	
+			SetMotionType(pPlayer->motionTypeBlend, false, 0, Type);
+		}
+	}
+}
+
 // =================================================
 // プレイ人数情報を渡す
 // =================================================
@@ -1079,8 +919,8 @@ int GetActivePlayer(void)
 // =================================================
 void SetPlayer(D3DXVECTOR3* pPosGirl, D3DXVECTOR3* pPosMouse)
 {
-	*pPosGirl = g_Player[PLAYERTYPE_GIRL].pos;
-	*pPosMouse = g_Player[PLAYERTYPE_MOUSE].pos;
+	*pPosGirl = g_aPlayer[PLAYERTYPE_GIRL].pos;
+	*pPosMouse = g_aPlayer[PLAYERTYPE_MOUSE].pos;
 }
 
 // =================================================
@@ -1105,10 +945,10 @@ void ChangeNumPlayer(void)
 // =================================================
 // rotにおける逆回りを防ぐ補正
 // =================================================
-void RotRepair(int nPlayer)
+void RotRepair(PlayerType nPlayer)
 {
 	// プレイヤー構造体をポインタ化
-	Player* pPlayer = &g_Player[nPlayer];
+	Player* pPlayer = &g_aPlayer[nPlayer];
 
 	// カメラの向きを保存する
 	vec3 Camerarot;

@@ -17,10 +17,10 @@
 #define	MAX_PLAYER		(2)				// プレイヤーの最大数
 #define PLAYER_POSDEF	D3DXVECTOR3(0.0f, 100.0f, 0.0f) // プレイヤーの初期位置
 #define	MAX_TEX			(16)			// テクスチャの最大数
-#define	PLAYER_MOVE		(0.5)			// プレイヤーの移動速度
+#define	PLAYER_MOVE		(0.5f)			// プレイヤーの移動速度
 #define	PLAYER_ROTMOVE	(0.3f)			// プレイヤーの回転速度
 #define	PLAYER_INI		(0.2f)			// プレイヤーの慣性
-#define	PLAYER_LIM		(50)			// プレイヤーの移動制限
+#define	PLAYER_LIM		(50.0f)			// プレイヤーの移動制限
 #define	ATTACK_MOVE		(1.0f)			// 突進の移動速度
 #define	JUMP_FORCE		(4.1f)			// ジャンプ力
 
@@ -72,12 +72,13 @@ typedef struct
 	PARTS_INFO PartsInfo;		// プレイヤーのパーツの情報
 	Playerstate state;			// プレイヤーの状態
 	int nIdxCamera;				// 使用するカメラのインデックス
+	int nNumModel;				// プレイヤーを構成するパーツ数
 
 	// モーションの要素
 	MOTION_INFO aMotionInfo[MOTIONTYPE_MAX];	// モーション情報
 	int nNumMotion;			// 現在のモーションの総数
 	MOTIONTYPE motionType;	// 現在のモーションの種類
-	bool bLoopMotion;		// ループするかどうか
+	bool bLoop;				// ループするかどうか
 	int nNumKey;			// 現在のモーションのキーの総数
 	int nKey;				// 現在のモーションの現在のキーNo.
 	int nCounterMotion;		// 現在のモーションのカウンター
@@ -104,18 +105,12 @@ void UninitPlayer(void);	// 終了処理
 void UpdatePlayer(void);	// 更新処理
 void DrawPlayer(void);		// 描画処理
 Player *GetPlayer(void);	// プレイヤー情報を渡す
-void MovePlayer(int nPlayer);	// プレイヤーの移動関数
-void JumpPlayer(int nPlayer);			// プレイヤーのジャンプ関数
-void SetModel(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int NumIdx, int Parent, int nParts);	// モデルの設置処理
-void UpdateMotion(void);	// モーションの更新
-void SetKey(D3DXVECTOR3 pos, D3DXVECTOR3 rot);	// キー毎の位置、向きの設定
-void SetKeyInfo(int nFrame);					// 一つ一つキーの設定
-void SetMotionInfo(int nLoop, int NumKey);		// モーション情報の設定
-void SetMotion(MOTIONTYPE motionType, bool bUseBrend, int nBlendFrame, PlayerType Playertype);	// モーションの呼び出し処理
+void MovePlayer(PlayerType nPlayer);	// プレイヤーの移動関数
+void JumpPlayer(PlayerType nPlayer);	// プレイヤーのジャンプ関数
 int GetNumPlayer(void);			// プレイ人数情報を渡す
 int GetActivePlayer(void);		// 操作しているプレイヤー情報を渡す
 void SetPlayer(D3DXVECTOR3* pPosGirl, D3DXVECTOR3* pPosMouse);	// プレイヤーの位置情報を渡す
 void ChangeNumPlayer(void);		// プレイ人数を切り替える(デバッグ用)
-void RotRepair(int nPlayer);	// rotにおける逆回りを防ぐ補正
+void RotRepair(PlayerType nPlayer);	// rotにおける逆回りを防ぐ補正
 
 #endif
