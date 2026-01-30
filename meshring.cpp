@@ -17,6 +17,7 @@
 //**************************************************************
 // グローバル変数
 MeshInfo				g_aMeshRing[MAX_MESHRING];		// メッシュリングの情報
+int						g_nSetMeshRing;					// セット済みのリング数
 
 //**************************************************************
 // プロトタイプ宣言
@@ -29,6 +30,7 @@ void InitMeshRing(void)
 	//**************************************************************
 	// 変数宣言
 	LPDIRECT3DDEVICE9	pDevice = GetDevice();		// デバイスへのポインタ
+	g_nSetMeshRing = 0;
 
 	//**************************************************************
 	// 位置・サイズの初期化
@@ -252,6 +254,7 @@ void SetMeshRing(vec3 pos, vec3 rot, float fInner, float fOuter, int nHeightDivi
 			//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 			pMesh->bUse = true;
+			g_nSetMeshRing++;
 			break;
 		}
 	}
@@ -263,4 +266,12 @@ void SetMeshRing(vec3 pos, vec3 rot, float fInner, float fOuter, int nHeightDivi
 P_MESH GetMeshRing(void)
 {
 	return &g_aMeshRing[0];
+}
+
+//=========================================================================================
+// リング数を取得
+//=========================================================================================
+int GetNumMeshRing(void)
+{
+	return g_nSetMeshRing;
 }

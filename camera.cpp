@@ -43,7 +43,7 @@ void InitCamera(void)
 		// カメラ座標等
 		pCamera->posV = D3DXVECTOR3 CAMERA_V_DEFPOS;					// 視点
 		pCamera->posR = PLAYER_POSDEF;									// 注視点
-		pCamera->posRDest = D3DXVECTOR3 CAMERA_R_DEFPOS;				// 目的の注視点
+		pCamera->posRDest = PLAYER_POSDEF;				// 目的の注視点
 		pCamera->vecU = D3DXVECTOR3(0.0f, 1.0f, 0.0f);					// 上方向ベクトル
 		pCamera->rot = D3DXVECTOR3(D3DX_PI * 0.2f, 0.0f, 0.0f);			// カメラの角度
 		pCamera->fDist = CAMERA_DISTANS;								// 視点と注視点の距離
@@ -331,17 +331,17 @@ void CameraOrbit(P_CAMERA pCamera)
 	//**************************************************************
 	// 注視点のまわりを回転
 	// キーボード操作
-	if (GetKeyboardRepeat(CAM_ORBIT_R) && GetKeyboardPress(DIK_M) != true)
+	if (GetKeyboardPress(CAM_ORBIT_R) && GetKeyboardPress(DIK_M) != true)
 	{
 		pCamera->rot.y -= CAMERA_SPIN;
 		bUse = true;
 	}
-	if (GetKeyboardRepeat(CAM_ORBIT_L))
+	if (GetKeyboardPress(CAM_ORBIT_L))
 	{
 		pCamera->rot.y += CAMERA_SPIN;
 		bUse = true;
 	}
-	if (GetKeyboardRepeat(CAM_ORBIT_UP))
+	if (GetKeyboardPress(CAM_ORBIT_UP))
 	{
 		pCamera->rot.x -= CAMERA_SPIN;
 		pCamera->posV.x = pCamera->posR.x - cosf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
@@ -349,7 +349,7 @@ void CameraOrbit(P_CAMERA pCamera)
 		pCamera->posV.z = pCamera->posR.z + sinf(D3DX_PI - pCamera->rot.x) * pCamera->fDist;
 
 	}
-	if (GetKeyboardRepeat(CAM_ORBIT_DW))
+	if (GetKeyboardPress(CAM_ORBIT_DW))
 	{
 		pCamera->rot.x += CAMERA_SPIN;
 		pCamera->posV.x = pCamera->posR.x - cosf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;

@@ -12,9 +12,11 @@
 
 //**************************************************************
 // グローバル変数
+bool		g_bMeshDebug[MESHTYPE];			// メッシュのデバッグ表示　ON OFF
 
 //**************************************************************
 // プロトタイプ宣言
+void MeshDebug(void);						// メッシュのデバッグ表示処理
 
 //=========================================================================================
 // メッシュの初期化処理
@@ -73,6 +75,73 @@ void UpdateMesh(void)
 
 	// Ring
 	UpdateMeshRing();
+
+#ifdef _DEBUG
+	MeshDebug();
+#endif
+}
+
+//=========================================================================================
+// メッシュのデバッグ表示処理
+void MeshDebug(void)
+{
+	//**************************************************************
+	// 変数宣言
+	P_MESH	pMesh[MESHTYPE];
+
+	//**************************************************************
+	// ガイド表示
+	if (GetKeyboardPress(DEBUG_MESH_KEY))
+	{
+		PrintDebugProc("\nM + S => MESH_SPHERE   [ %d / %d ]\n", GetNumMeshSphere(), MAX_MESHSPHERE);
+		PrintDebugProc("\nM + D => MESH_DOME     [ %d / %d ]\n", GetNumMeshDome(), MAX_MESHDOME);
+		PrintDebugProc("\nM + C => MESH_CYLINDER [ %d / %d ]\n", GetNumMeshCylinder(), MAX_MESHCYLINDER);
+		PrintDebugProc("\nM + R => MESH_RING     [ %d / %d ]\n", GetNumMeshRing(), MAX_MESHRING);
+
+		//**************************************************************
+		// 各メッシュタイプごとの表示切り替え
+		if (GetKeyboardTrigger(DEBUG_SPHERE_KEY))
+		{
+			g_bMeshDebug[0] = g_bMeshDebug[0] ^ 1;
+		}
+		if (GetKeyboardTrigger(DEBUG_DOME_KEY))
+		{
+			g_bMeshDebug[1] = g_bMeshDebug[1] ^ 1;
+		}
+		if (GetKeyboardTrigger(DEBUG_CYLINDER_KEY))
+		{
+			g_bMeshDebug[2] = g_bMeshDebug[2] ^ 1;
+		}
+		if (GetKeyboardTrigger(DEBUG_RING_KEY))
+		{
+			g_bMeshDebug[3] = g_bMeshDebug[3] ^ 1;
+		}
+	}
+
+	//**************************************************************
+	// 各メッシュタイプごとに情報取得
+	if (g_bMeshDebug[0])
+	{
+		pMesh[0] = GetMeshSphere();
+	}
+
+	if (g_bMeshDebug[1])
+	{
+		pMesh[1] = GetMeshDome();
+	}
+
+	if (g_bMeshDebug[2])
+	{
+		pMesh[2] = GetMeshCylinder();
+	}
+
+	if (g_bMeshDebug[3])
+	{
+		pMesh[3] = GetMeshRing();
+	}
+
+
+
 }
 
 //=========================================================================================

@@ -13,6 +13,7 @@
 //**************************************************************
 // グローバル変数
 MeshInfo				g_aMeshCylinder[MAX_MESHCYLINDER];		// メッシュ壁情報
+int						g_nSetMeshCylinder;						// セット済みのメッシュシリンダー数
 
 //**************************************************************
 // プロトタイプ宣言
@@ -25,6 +26,7 @@ void InitMeshCylinder(void)
 	//**************************************************************
 	// 変数宣言
 	LPDIRECT3DDEVICE9	pDevice = GetDevice();		// デバイスへのポインタ
+	g_nSetMeshCylinder = 0;
 
 	//**************************************************************
 	// 位置・サイズの初期化
@@ -258,6 +260,7 @@ void SetMeshCylinder(vec3 pos, vec3 rot, float fRadius, float fHeight, int nHeig
 			//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 			g_aMeshCylinder[nCntMeshCylinder].bUse = true;
+			g_nSetMeshCylinder++;
 			break;
 		}
 	}
@@ -269,4 +272,12 @@ void SetMeshCylinder(vec3 pos, vec3 rot, float fRadius, float fHeight, int nHeig
 P_MESH GetMeshCylinder(void)
 {
 	return &g_aMeshCylinder[0];
+}
+
+//=========================================================================================
+// フィールド数を取得
+//=========================================================================================
+int GetNumMeshCylinder(void)
+{
+	return g_nSetMeshCylinder;
 }

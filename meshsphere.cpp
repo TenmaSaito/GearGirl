@@ -13,6 +13,7 @@
 //**************************************************************
 // グローバル変数
 MeshInfo				g_aMeshSphere[MAX_MESHSPHERE];		// メッシュスフィア情報
+int						g_nSetMeshSphere;					// セット済みのメッシュスフィア数
 
 //**************************************************************
 // プロトタイプ宣言
@@ -25,7 +26,7 @@ void InitMeshSphere(void)
 	//**************************************************************
 	// 変数宣言
 	P_MESH pMesh = GetMeshSphere();
-	LPDIRECT3DDEVICE9	pDevice = GetDevice();			// デバイス取得
+	g_nSetMeshSphere = 0;
 
 	//**************************************************************
 	// 構造体初期化
@@ -34,8 +35,6 @@ void InitMeshSphere(void)
 		memset(pMesh, 0, sizeof(MeshInfo));
 		pMesh->bUse = false;
 	}
-
-	EndDevice();										// デバイス取得終了
 }
 
 //=========================================================================================
@@ -247,6 +246,7 @@ void SetMeshSphere(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int n
 			//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 			g_aMeshSphere[nCntMeshSphere].bUse = true;
+			g_nSetMeshSphere++;
 			break;
 		}
 	}
@@ -260,4 +260,12 @@ void SetMeshSphere(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int n
 P_MESH GetMeshSphere(void)
 {
 	return &g_aMeshSphere[0];
+}
+
+//=========================================================================================
+// スフィア数を取得
+//=========================================================================================
+int GetNumMeshSphere(void)
+{
+	return g_nSetMeshSphere;
 }

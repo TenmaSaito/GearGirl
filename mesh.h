@@ -16,11 +16,20 @@
 // マクロ定義
 //=========================================================================================
 #define MAX_TEX_MESH			(2)						// テクスチャ数
+#define MESHTYPE				(4)						// 種類
 #define MAX_MESHSPHERE			(16)					// スフィア
 #define MAX_MESHDOME			(16)					// ドーム
 #define MAX_MESHCYLINDER		(16)					// シリンダー
 #define MAX_MESHRING			(64)					// リング
 #define MAX_MESH				(MAX_MESHSPHERE + MAX_MESHDOME + MAX_MESHCYLINDER + MAX_MESHRING)
+
+//**************************************************************
+// デバッグ表示用キー
+#define DEBUG_MESH_KEY			DIK_M					// メッシュのデバッグ情報を表示
+#define DEBUG_SPHERE_KEY		DIK_S					// スフィアの詳細情報
+#define DEBUG_DOME_KEY			DIK_D					// ドームの詳細情報
+#define DEBUG_CYLINDER_KEY		DIK_C					// シリンダーの詳細情報
+#define DEBUG_RING_KEY			DIK_R					// リングの詳細情報
 
 //==============================================================
 // メッシュ基本情報の構造体
@@ -82,4 +91,10 @@ P_MESH GetMeshSphere(void);
 P_MESH GetMeshDome(void);
 P_MESH GetMeshCylinder(void);
 P_MESH GetMeshRing(void);
+
+int GetNumMeshSphere(void);
+int GetNumMeshDome(void);
+int GetNumMeshCylinder(void);
+int GetNumMeshRing(void);
+
 #endif // !_MESH_H_
