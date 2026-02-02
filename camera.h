@@ -20,7 +20,8 @@
 #define VIEW_MAXDEPTH			(10000.0f)				// 最大描画距離
 #define CAMERA_V_DEFPOS			(0.0f, 350.0f, 500.0f)	// 視点のデフォ位置
 #define CAMERA_R_DEFPOS			(0.0f, 0.0f, 0.0f)		// 注視点のデフォ位置
-#define CAMERA_DISTANS			(200.0f)				// カメラと注視点の距離
+#define CAMERA_1P_DISTANS		(200.0f)				// 少女のカメラと注視点の距離
+#define CAMERA_2P_DISTANS		(100.0f)				// ネズミのカメラと注視点の距離
 #define CAMERA_MOVE				(10.0f)					// カメラの移動速度
 #define CAMERA_SPIN				(0.01f)					// カメラの回転速度
 #define CAMERA_FOLLOW_FACTOR	(0.15f)					// カメラが追従移動する時の補正
@@ -30,6 +31,8 @@
 
 //**************************************************************
 // カメラ操作
+#define CAM_2POPRAT		DIK_LCONTROL			// ２Pのカメラを操作
+
 #define CAM_RESET		DIK_TAB					// カメラ位置角度リセット
 #define CAM_MOVE_UP		DIK_W					// カメラ移動　前
 #define CAM_MOVE_DW		DIK_S					// カメラ移動　後

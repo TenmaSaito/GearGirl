@@ -10,6 +10,7 @@
 #include "mode.h"
 #include "Title.h"
 #include "game.h"
+#include "Result.h"
 
 //*************************************************************************************************
 //*** マクロ定義 ***
@@ -41,6 +42,11 @@ void InitMode(void)
 	case MODE_GAME:
 		InitGame();
 		break;
+
+		// エンディング画面
+	case MODE_RESULT:
+		InitResult();
+		break;
 	}
 }
 
@@ -54,6 +60,9 @@ void UninitMode(void)
 
 	// ゲーム画面の終了処理
 	UninitGame();
+
+	// エンディング画面の終了処理
+	UninitResult();
 }
 
 //==================================================================================
@@ -71,6 +80,11 @@ void UpdateMode(void)
 		// ゲーム画面
 	case MODE_GAME:
 		UpdateGame();
+		break;
+
+		// エンディング画面
+	case MODE_RESULT:
+		UpdateResult();
 		break;
 	}
 }
@@ -99,6 +113,11 @@ void DrawMode(void)
 	case MODE_GAME:
 		DrawGame();
 		break;
+
+		// エンディング画面
+	case MODE_RESULT:
+		DrawResult();
+		break;
 	}
 
 	// ビューポートの設定
@@ -124,6 +143,11 @@ void SetMode(MODE mode)
 	case MODE_GAME:
 		UninitGame();
 		break;
+
+		// エンディング画面
+	case MODE_RESULT:
+		UninitResult();
+		break;
 	}
 
 	// 指定の画面(モード)の初期化処理
@@ -137,6 +161,11 @@ void SetMode(MODE mode)
 		// ゲーム画面
 	case MODE_GAME:
 		InitGame();
+		break;
+
+		// エンディング画面
+	case MODE_RESULT:
+		InitResult();
 		break;
 	}
 

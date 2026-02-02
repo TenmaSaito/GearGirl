@@ -43,10 +43,20 @@ void InitCamera(void)
 		// カメラ座標等
 		pCamera->posV = D3DXVECTOR3 CAMERA_V_DEFPOS;					// 視点
 		pCamera->posR = PLAYER_POSDEF;									// 注視点
-		pCamera->posRDest = PLAYER_POSDEF;				// 目的の注視点
+		pCamera->posRDest = PLAYER_POSDEF;								// 目的の注視点
 		pCamera->vecU = D3DXVECTOR3(0.0f, 1.0f, 0.0f);					// 上方向ベクトル
-		pCamera->rot = D3DXVECTOR3(D3DX_PI * 0.2f, 0.0f, 0.0f);			// カメラの角度
-		pCamera->fDist = CAMERA_DISTANS;								// 視点と注視点の距離
+
+		switch (nCntCamera)
+		{
+		case PLAYER_TWO:
+			pCamera->rot = D3DXVECTOR3(D3DX_PI * 0.35f, 0.0f, 0.0f);	// カメラの角度
+			pCamera->fDist = CAMERA_2P_DISTANS;
+			break;
+		default:
+			pCamera->rot = D3DXVECTOR3(D3DX_PI * 0.2f, 0.0f, 0.0f);		// カメラの角度
+			pCamera->fDist = CAMERA_1P_DISTANS;							// 視点と注視点の距離
+			break;
+		}
 
 		// 画面設定等
 		pCamera->viewport.X = SCREEN_WIDTH * 0.5f * nCntCamera;			// 画面左上 X 座標
@@ -187,8 +197,11 @@ void UpdateCamera(void)
 	}
 
 #endif
+		if (GetKeyboardPress(CAM_2POPRAT))
+			CameraOrbit(pCamera + 1);
+		else
+			CameraOrbit(pCamera);
 
-	CameraOrbit(pCamera);
 
 	CameraFollow();
 
@@ -220,7 +233,7 @@ void CameraFollow(void)
 		// 変数宣言
 		P_CAMERA pCamera = GetCamera();				// カメラ情報
 		Player* pPlayer = GetPlayer();				// プレイヤー情報
-		float fPlayerFront = CAMERA_PLAYER_FRONT;	// プレイヤーより前
+		float fPlayerFront/* = CAMERA_PLAYER_FRONT*/;	// プレイヤーより前
 		static float fPlayerMoveRot;
 
 		for (int nPlayer = 0; nPlayer < MAX_PLAYER; nPlayer++, pCamera++, pPlayer++)
@@ -230,6 +243,7 @@ void CameraFollow(void)
 			
 			if (CAMERA_PLFR_DEADZONE < pPlayer->move.x * pPlayer->move.x + pPlayer->move.z * pPlayer->move.z)
 			{// カメラを少し先へ
+				fPlayerFront = pCamera->fDist * 0.25f;
 				fPlayerMoveRot = atan2f(-pPlayer->move.x, -pPlayer->move.z);
 
 				pCamera->posRDest.x = pPlayer->pos.x - fPlayerFront * sinf(fPlayerMoveRot);
@@ -528,7 +542,7 @@ void CameraReset(P_CAMERA pCamera)
 
 	//**************************************************************
 	// 注視点から視点を求める
-	pCamera->fDist = CAMERA_DISTANS;										// 視点と注視点の距離
+	pCamera->fDist = CAMERA_1P_DISTANS;										// 視点と注視点の距離
 	pCamera->rot = vec3(D3DX_PI * 0.2f, D3DX_PI * 0.5f, 0.0f);				// カメラの角度
 	pCamera->posV.x = pCamera->posR.x - cosf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
 	pCamera->posV.y = pCamera->posR.y - cosf(D3DX_PI - pCamera->rot.x) * pCamera->fDist;

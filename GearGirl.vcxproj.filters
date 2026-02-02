@@ -70,6 +70,12 @@
     <Filter Include="ソース ファイル\object\Mesh">
       <UniqueIdentifier>{2d8c68d9-1a7c-451d-bc9c-fce9026e4907}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\mode\Result">
+      <UniqueIdentifier>{1e6b2f78-e200-48e6-8402-b0835d8e187b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\mode\Result">
+      <UniqueIdentifier>{3026b0c2-5f38-45d6-8eb9-e4702993757e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Texture.cpp">
@@ -147,6 +153,9 @@
     <ClCompile Include="meshring.cpp">
       <Filter>ソース ファイル\object\Mesh</Filter>
     </ClCompile>
+    <ClCompile Include="Result.cpp">
+      <Filter>ソース ファイル\mode\Result</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h">
@@ -214,6 +223,9 @@
     </ClInclude>
     <ClInclude Include="explosion.h">
       <Filter>ヘッダー ファイル\object</Filter>
+    </ClInclude>
+    <ClInclude Include="Result.h">
+      <Filter>ヘッダー ファイル\mode\Result</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
