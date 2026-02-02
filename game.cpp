@@ -21,6 +21,7 @@
 #include "thread.h"
 #include "motion.h"
 #include "mesh.h"
+#include "item.h"
 
 //**********************************************************************************
 //*** マクロ定義 ***
@@ -70,6 +71,9 @@ void InitGame(void)
 	/*** プレイヤーの初期化 ***/
 	InitPlayer();
 
+	/*** アイテムの初期化 ***/
+	InitItem();
+
 	/*** ライトの初期化 ***/
 	InitLight();
 
@@ -111,6 +115,9 @@ void UninitGame(void)
 	/*** プレイヤーの終了 ***/
 	UninitPlayer();
 
+	/*** アイテムの終了 ***/
+	UninitItem();
+
 	/*** ライトの終了 ***/
 	UninitLight();
 }
@@ -151,6 +158,9 @@ void UpdateGame(void)
 	/*** プレイヤーの更新 ***/
 	UpdatePlayer();
 
+	/*** アイテムの更新 ***/
+	UpdateItem();
+
 	/*** ライトの更新 ***/
 	UpdateLight();
 }
@@ -177,6 +187,9 @@ void DrawGame(void)
 
 		/*** プレイヤーの描画 ***/
 		DrawPlayer();
+
+		/*** アイテムの描画 ***/
+		DrawItem();
 
 		/*** 床の描画  ***/
 		DrawField();
