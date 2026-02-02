@@ -17,11 +17,13 @@
 #include "3Dmodel.h"
 #include "field.h"
 #include "player.h"
+#include "pause.h"
 #include "light.h"
 #include "thread.h"
 #include "motion.h"
 #include "mesh.h"
 #include "item.h"
+#include "debugproc.h"
 
 //**********************************************************************************
 //*** マクロ定義 ***
@@ -36,6 +38,7 @@
 //**********************************************************************************
 int g_nIdx3DModel;		// 設置した3Dモデルのインデックス
 int g_nIdxCamera;		// 設置したカメラのインデックス
+bool g_bPause = false;	//ポーズ状態のON/OFF
 
 //==================================================================================
 // --- 初期化 ---
@@ -79,6 +82,9 @@ void InitGame(void)
 
 	/*** モデルのスクリプト読み込み ***/
 	LoadModel();
+
+	/*** ポーズの初期化 ***/
+	InitPause();
 }
 
 //==================================================================================
@@ -120,6 +126,9 @@ void UninitGame(void)
 
 	/*** ライトの終了 ***/
 	UninitLight();
+
+	/*** ポーズの終了 ***/
+	UninitPause();
 }
 
 //==================================================================================
@@ -127,6 +136,51 @@ void UninitGame(void)
 //==================================================================================
 void UpdateGame(void)
 {
+	//ポーズ状態のON/OFFを切り替え
+	if (GetKeyboardTrigger(DIK_P) == true
+		|| GetJoypadTrigger(0, JOYKEY_BACK) == true
+		|| GetJoypadTrigger(1, JOYKEY_BACK) == true)
+	{
+		g_bPause = g_bPause ? false : true;
+	}
+	//ポーズ状態がONの時
+	if (g_bPause == true)
+	{
+		//ポーズの更新処理
+		UpdatePause();
+	}
+	//ポーズ状態がOFFの時
+	else
+	{
+		/*** Aの更新 ***/
+
+		/*** カメラの更新 ***/
+		UpdateCamera();
+
+		/*** 3Dモデルの更新 ***/
+		Update3DModel();
+
+		/*** 床の更新 ***/
+		UpdateField();
+
+		/*** メッシュの更新 ***/
+		UpdateMesh();
+
+		/*** モデルの更新 ***/
+		UpdateModel();
+
+		/*** プレイヤーの更新 ***/
+		UpdatePlayer();
+
+		/*** アイテムの更新 ***/
+		UpdateItem();
+
+		/*** ライトの更新 ***/
+		UpdateLight();
+	}
+
+	PrintDebugProc("NumPlayer %d  ActivePlayer %d  CameraNum %d", GetNumPlayer(), GetActivePlayer(), GetCameraNum());
+
 	// モード変更
 	if (GetKeyboardTrigger(DIK_RETURN)
 		|| GetJoypadTrigger(0, JOYKEY_A)
@@ -137,32 +191,6 @@ void UpdateGame(void)
 			SetFade(MODE_RESULT);
 		}
 	}
-
-	/*** Aの更新 ***/
-
-	/*** カメラの更新 ***/
-	UpdateCamera();
-
-	/*** 3Dモデルの更新 ***/
-	Update3DModel();
-
-	/*** 床の更新 ***/
-	UpdateField();
-
-	/*** メッシュの更新 ***/
-	UpdateMesh();
-
-	/*** モデルの更新 ***/
-	UpdateModel();
-
-	/*** プレイヤーの更新 ***/
-	UpdatePlayer();
-
-	/*** アイテムの更新 ***/
-	UpdateItem();
-
-	/*** ライトの更新 ***/
-	UpdateLight();
 }
 
 //==================================================================================
@@ -170,6 +198,13 @@ void UpdateGame(void)
 //==================================================================================
 void DrawGame(void)
 {
+	//ポーズ状態がONの時
+	if (g_bPause == true)
+	{
+		/*** ポーズの描画 ***/
+		DrawPause();
+	}
+
 	// カメラの数分だけ描画
 	for (int nCntDraw = 0; nCntDraw < GetCameraNum(); nCntDraw++)
 	{		
@@ -200,4 +235,12 @@ void DrawGame(void)
 		// VERTEX_2D ============================================
 		/*** Aの描画 ***/
 	}
+}
+
+//==================================================================================
+// ポーズの設定
+//==================================================================================
+void SetEnablePause(bool bPouse)
+{
+	g_bPause = bPouse;
 }
