@@ -156,6 +156,9 @@
     <ClCompile Include="Result.cpp">
       <Filter>ソース ファイル\mode\Result</Filter>
     </ClCompile>
+    <ClCompile Include="item.cpp">
+      <Filter>ソース ファイル\mode\game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h">
@@ -226,6 +229,9 @@
     </ClInclude>
     <ClInclude Include="Result.h">
       <Filter>ヘッダー ファイル\mode\Result</Filter>
+    </ClInclude>
+    <ClInclude Include="item.h">
+      <Filter>ヘッダー ファイル\mode\game</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
