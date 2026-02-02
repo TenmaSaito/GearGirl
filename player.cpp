@@ -31,7 +31,7 @@ int g_IdxShadowPlayer = -1;			// 使用する影の番号
 float g_sinrot = 0;					// sinカーブを用いると起用の変数
 int g_nNumPlayer = 1;				// プレイヤーのアクティブ人数
 int g_ActivePlayer = 0;				// 操作しているプレイヤータイプ
-
+int g_Functionkey = 0;
 
 // =================================================
 // 初期化処理
@@ -139,9 +139,8 @@ void UpdatePlayer(void)
 
 		UpdateMotion((PlayerType)nCntPlayer);
 
-		if (pPlayer->bFinishMotion == true
-			&& pPlayer->motionType != MOTIONTYPE_NEUTRAL
-			&& pPlayer->motionTypeBlend != MOTIONTYPE_NEUTRAL)
+		if (pPlayer->bFinishMotion == true && (pPlayer->motionType != MOTIONTYPE_NEUTRAL
+			&& pPlayer->motionTypeBlend != MOTIONTYPE_NEUTRAL) || pPlayer->motionType == MOTIONTYPE_MOVE || pPlayer->motionTypeBlend == MOTIONTYPE_MOVE)
 		{
 			SetMotionType(MOTIONTYPE_NEUTRAL, true, 10, (PlayerType)nCntPlayer);
 		}
@@ -175,11 +174,9 @@ void UpdatePlayer(void)
 
 		// モデルとの当たり判定
 		CollisionModel(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move);
-
-		//UpdateMotion();
 	}
 
-	// === デバッグ処理 === // 
+
 	// 操作する対象を切り替える
 	if (g_nNumPlayer == 1)
 	{// シングルプレイ時
@@ -196,21 +193,41 @@ void UpdatePlayer(void)
 		}
 	}
 
+	// === デバッグ処理 === // 
 	// デバッグ用のプレイ人数切り替え処理
 	ChangeNumPlayer();
 
-	PrintDebugProc("\nPlayer切り替え : [Q or E] : [%d]\n", g_ActivePlayer);
-	PrintDebugProc("操作対象 : 0 → 少女\n                1 → ネズミ\n");
+	// F1キーを押して、デバッグ表示のON/OFFを切り替える
+	if (GetKeyboardTrigger(DIK_F1) == true)
+	{
+		if (g_Functionkey == 1)
+		{
+			g_Functionkey = 0;
+		}
+		else
+		{
+			g_Functionkey = 1;
+		}
+	}
 
-	PrintDebugProc("\nPlayer0 : [SPACE] :  JUMP\n");
-	PrintDebugProc("\nPlayer1 : [RSHIFT] :  JUMP\n");
+	PrintDebugProc("\nPlayerデバッグ表示切り替え : [F1]\n");
 
-	PrintDebugProc("\nPlayer1 : nCounterMotion [%d]\n", g_aPlayer[1].nCounterMotion);
-	PrintDebugProc("\nPlayer1 : nCounterMotionBlend [%d]\n", g_aPlayer[1].nCounterMotionBlend);
-	PrintDebugProc("\nPlayer1 : [%d]\n", g_aPlayer[0].bLoop);
-	PrintDebugProc("\nPlayer1 : BlendMotion [%d]\n", g_aPlayer[1].bBlendMotion);
-	PrintDebugProc("\nPlayer1 : Motiontype [%d]\n", g_aPlayer[1].motionType);
-	PrintDebugProc("\nPlayer1 : MotiontypeBlend [%d]\n", g_aPlayer[1].motionTypeBlend);
+	// デバッグ表示
+	if (g_Functionkey == 0)
+	{
+		PrintDebugProc("\nPlayer切り替え : [Q] : [%d]\n", g_ActivePlayer);
+		PrintDebugProc("操作対象 : 0 → 少女\n                1 → ネズミ\n");
+
+		PrintDebugProc("\nPlayer0 : [SPACE] :  JUMP\n");
+		PrintDebugProc("\nPlayer1 : [RSHIFT] :  JUMP\n");
+
+		PrintDebugProc("\nPlayer1 : nCounterMotion [%d]\n", g_aPlayer[1].nCounterMotion);
+		PrintDebugProc("\nPlayer1 : nCounterMotionBlend [%d]\n", g_aPlayer[1].nCounterMotionBlend);
+		PrintDebugProc("\nPlayer1 : [%d]\n", g_aPlayer[0].bLoop);
+		PrintDebugProc("\nPlayer1 : BlendMotion [%d]\n", g_aPlayer[1].bBlendMotion);
+		PrintDebugProc("\nPlayer1 : Motiontype [%d]\n", g_aPlayer[1].motionType);
+		PrintDebugProc("\nPlayer1 : MotiontypeBlend [%d]\n", g_aPlayer[1].motionTypeBlend);
+	}
 }
 
 // =================================================
@@ -453,6 +470,13 @@ void MovePlayer(PlayerType nPlayer)
 	{// ネズミの操作
 		if (GetKeyboardPress(DIK_LEFT) == true || GetJoypadPress(nPlayer, JOYKEY_LEFT) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_LEFT))
 		{// 左矢印が押される	
+
+			if ((pPlayer->bFinishMotion == true || pPlayer->motionType == MOTIONTYPE_LANDING || pPlayer->motionType == MOTIONTYPE_NEUTRAL)
+				&& pPlayer->motionType != MOTIONTYPE_MOVE && pPlayer->motionTypeBlend != MOTIONTYPE_MOVE)
+			{
+				SetMotionType(MOTIONTYPE_MOVE, false, 10, nPlayer);
+				pPlayer->state = PLAYERSTATE_WALK;
+			}
 
 			if (GetKeyboardPress(DIK_UP) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
 			{// 左上の入力
@@ -745,7 +769,7 @@ void UpdateMotion(PlayerType Type)
 	for (int nCntModel = 0; nCntModel < pPlayer->PartsInfo.nNumParts; nCntModel++)
 	{
 		int nNext = (pPlayer->nKey + 1) % pPlayer->aMotionInfo[pPlayer->motionType].nNumKey;
-		
+
 		// 次のキーの値		
 		float fRateKey = (float)pPlayer->nCounterMotion / (float)pInfo->nFrame;		// モーションカウンター / 再生フレーム数
 		D3DXVECTOR3 diffPos = {};	// 位置の差分
@@ -918,6 +942,7 @@ void UpdateMotion(PlayerType Type)
 			{
 				pPlayer->bFinishMotion = true;
 				SetMotionType(MOTIONTYPE_NEUTRAL, false, 120, Type);
+				pPlayer->state = PLAYERSTATE_NEUTRAL;
 			}
 
 			pPlayer->nCounterMotion = 0;
@@ -932,13 +957,22 @@ void UpdateMotion(PlayerType Type)
 			/** ブレンドモーションのキーを一つ進める **/
 			pPlayer->nKeyBlend = ((pPlayer->nKeyBlend + 1) % pPlayer->aMotionInfo[pPlayer->motionTypeBlend].nNumKey);
 			pPlayer->nCounterMotionBlend = 0;
+
+			// モーションごとの総キー数を超えるまでカウント増加
+			pPlayer->nCntAllround++;
+
+			if (pPlayer->nCntAllround > pPlayer->aMotionInfo[pPlayer->motionTypeBlend].nNumKey)
+			{
+				pPlayer->bFinishMotion = true;
+				pPlayer->nCntAllround = 0;
+			}
 		}
 
 		pPlayer->nCounterBlend++;
 
 		if (pPlayer->nCounterBlend >= pPlayer->nFrameBlend)
 		{ // ブレンドカウンターがブレンドフレーム数を超えた場合	
-			SetMotionType(pPlayer->motionTypeBlend, false, 0, Type);
+			SetMotionType(pPlayer->motionTypeBlend, false, 10, Type);
 		}
 	}
 }
