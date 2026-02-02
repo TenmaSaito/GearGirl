@@ -32,19 +32,19 @@
 // プレイヤータイプ
 typedef enum
 {
-	PLAYERTYPE_GIRL = 0,
-	PLAYERTYPE_MOUSE,
-	PLAYERTYPE_MAX
+	PLAYERTYPE_GIRL = 0,	// 少女
+	PLAYERTYPE_MOUSE,		// ネズミ
+	PLAYERTYPE_MAX		
 }PlayerType;
 
 // =================================================
 // アームの種類
 typedef enum
 {
-	ARMTYPE_NORMAL = 0,
-	ARMTYPE_CATAPULT,
-	ARMTYPE_HUNMER,
-	ARMTYPE_PICCKING,
+	ARMTYPE_NORMAL = 0,	// 通常の腕
+	ARMTYPE_CATAPULT,	// カタパルトの腕
+	ARMTYPE_HUMMER,		// ハンマーの腕
+	ARMTYPE_PICCKING,	// ピッキング時の腕
 	ARMTYPE_MAX
 }ArmType;
 
@@ -64,6 +64,7 @@ typedef enum
 // プレイヤーの構造体を定義
 typedef struct
 {
+	// プレイヤー自身の要素
 	D3DXVECTOR3 posOri;			// 何かの動作を行った位置
 	D3DXVECTOR3 pos;			// 現在の位置
 	D3DXVECTOR3 Offset[MAX_PART];	// プレイヤーモデルのオフセット
@@ -79,10 +80,11 @@ typedef struct
 	D3DXVECTOR3 VectoPos;		// 境界線ベクトル - 移動ベクトル
 	bool bDisp;					// プレイヤーの描画可否
 	bool bJump;					// ジャンプ中かどうか
-	PARTS_INFO PartsInfo;		// プレイヤーのパーツの情報
-	Playerstate state;			// プレイヤーの状態
 	int nIdxCamera;				// 使用するカメラのインデックス
 	int nNumModel;				// プレイヤーを構成するパーツ数
+	PARTS_INFO PartsInfo;		// プレイヤーのパーツの情報
+	Playerstate state;			// プレイヤーの状態
+	ArmType Armtype;			// 腕の種類
 
 	// モーションの要素
 	MOTION_INFO aMotionInfo[MOTIONTYPE_MAX];	// モーション情報
