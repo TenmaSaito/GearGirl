@@ -49,11 +49,11 @@ void InitCamera(void)
 		switch (nCntCamera)
 		{
 		case PLAYER_TWO:
-			pCamera->rot = D3DXVECTOR3(D3DX_PI * 0.35f, 0.0f, 0.0f);		// カメラの角度
+			pCamera->rot = D3DXVECTOR3(D3DX_PI * 0.35f, 0.0f, 0.0f);	// カメラの角度
 			pCamera->fDist = CAMERA_2P_DISTANS;
 			break;
 		default:
-			pCamera->rot = D3DXVECTOR3(D3DX_PI * 0.2f, 0.0f, 0.0f);			// カメラの角度
+			pCamera->rot = D3DXVECTOR3(D3DX_PI * 0.2f, 0.0f, 0.0f);		// カメラの角度
 			pCamera->fDist = CAMERA_1P_DISTANS;							// 視点と注視点の距離
 			break;
 		}
