@@ -139,8 +139,6 @@ void UninitExplosion(void)
 		g_pTextureExplosion = NULL;
 	}
 
-	RELEASE(g_pVtxBuffExplosion);
-
 	/*** 頂点バッファの破棄 ***/
 	if (g_pVtxBuffExplosion != NULL)
 	{
