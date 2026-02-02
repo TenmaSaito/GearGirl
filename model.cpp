@@ -52,9 +52,6 @@ void InitModel(void)
 		g_ModelInfo[nCntModel].nShadow = -1;		// 種類
 		g_ModelInfo[nCntModel].bUse = false;		// 未使用
 		g_ModelInfo[nCntModel].bDisp = false;	// 非描画
-		g_ModelInfo[nCntModel].bShake = false;	// 非振動
-		g_ModelInfo[nCntModel].nCntFall = 0;		// 果物が落ちてくる回数をリセット
-		g_ModelInfo[nCntModel].ShakeCounter = 0;		// 果物が落ちてくる回数をリセット
 	}
 }
 

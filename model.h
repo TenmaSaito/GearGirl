@@ -44,9 +44,6 @@ typedef struct
 	bool bUse;				// モデル自体を使用中かどうか
 	bool bUseShadow;		// 影を使用中かどうか
 	bool bDisp;				// 表示するかどうか
-	bool bShake;			// 振動中かどうか
-	int nCntFall;			// 何回木を揺らしてフルーツを落としたか
-	int ShakeCounter;		// 振動させるカウンター
 }ModelInfo;
 
 // =================================================
@@ -64,8 +61,8 @@ void UninitModel(void);	// 終了処理
 void UpdateModel(void);	// 更新処理
 void DrawModel(void);	// 描画処理
 void SetModel(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nType, int nUseShadow);		// モデルの設定処理
-Model* GetModel(void);			// モデル情報の譲渡
-ModelInfo* GetModelInfo(void);	// ゴールモデル情報の譲渡
+Model* GetModel(void);			// モデル情報の譲渡(種類毎)
+ModelInfo* GetModelInfo(void);	// モデル情報の譲渡(個別)
 bool LoadModel(void);			// モデルの読み込み処理
 bool JudgeComent(char* pStr);	// スクリプト読み込みでのコメントアウトの処理
 bool CollisionModel(D3DXVECTOR3* pPos, D3DXVECTOR3* pPosOld, D3DXVECTOR3* pMove);	// モデルとの当たり判定
