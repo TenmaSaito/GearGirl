@@ -87,7 +87,7 @@ void InitPlayer(void)
 	if (pPartsInfoMouse != NULL)
 	{// NULLじゃなかったとき
 		g_aPlayer[PLAYERTYPE_MOUSE].PartsInfo = *pPartsInfoMouse;	// アドレスの中身のみをコピー
-		
+
 		for (int nCntParts = 0; nCntParts < g_aPlayer[PLAYERTYPE_MOUSE].PartsInfo.nNumParts; nCntParts++)
 		{
 			PARTS* pParts = &g_aPlayer[PLAYERTYPE_MOUSE].PartsInfo.aParts[nCntParts];
@@ -146,23 +146,6 @@ void UpdatePlayer(void)
 			SetMotionType(MOTIONTYPE_NEUTRAL, true, 10, (PlayerType)nCntPlayer);
 		}
 
-		// === デバッグ処理 === // 
-		// 操作する対象を切り替える
-		if (g_nNumPlayer == 1)
-		{// シングルプレイ時
-			if (GetJoypadPress(nCntPlayer, JOYKEY_LB) == true || GetJoypadPress(nCntPlayer, JOYKEY_RB) == true)
-			{
-				if (g_ActivePlayer == 1)
-				{// ネズミ→少女
-					g_ActivePlayer = 0;
-				}
-				else
-				{// 少女→ネズミ
-					g_ActivePlayer = 1;
-				}
-			}
-		}
-
 		// 重力をかけ続ける
 		pPlayer->move.y += GRAVITY;
 
@@ -178,12 +161,13 @@ void UpdatePlayer(void)
 		{
 			pPlayer->pos.y = 100.0f;
 
-			if (pPlayer->bJump == true)
+			if (pPlayer->bJump == true && pPlayer->state == PLAYERSTATE_JUMP)
 			{// 着地モーション
 				SetMotionType(MOTIONTYPE_LANDING, true, 1, (PlayerType)nCntPlayer);
 			}
 
 			pPlayer->bJump = false;
+			pPlayer->state = PLAYERSTATE_NEUTRAL;
 		}
 
 		// カメラを有効化させる
@@ -195,8 +179,28 @@ void UpdatePlayer(void)
 		//UpdateMotion();
 	}
 
+	// === デバッグ処理 === // 
+	// 操作する対象を切り替える
+	if (g_nNumPlayer == 1)
+	{// シングルプレイ時
+		if (GetJoypadPress(0, JOYKEY_LB) == true || GetJoypadPress(0, JOYKEY_RB) == true || GetKeyboardTrigger(DIK_Q) == true || GetKeyboardTrigger(DIK_E) == true)
+		{
+			if (g_ActivePlayer == 1)
+			{// ネズミ→少女
+				g_ActivePlayer = 0;
+			}
+			else
+			{// 少女→ネズミ
+				g_ActivePlayer = 1;
+			}
+		}
+	}
+
 	// デバッグ用のプレイ人数切り替え処理
 	ChangeNumPlayer();
+
+	PrintDebugProc("\nPlayer切り替え : [Q or E] : [%d]\n", g_ActivePlayer);
+	PrintDebugProc("操作対象 : 0 → 少女\n                1 → ネズミ\n");
 
 	PrintDebugProc("\nPlayer0 : [SPACE] :  JUMP\n");
 	PrintDebugProc("\nPlayer1 : [RSHIFT] :  JUMP\n");
@@ -617,7 +621,7 @@ void JumpPlayer(PlayerType nPlayer)
 		if ((GetKeyboardTrigger(DIK_RSHIFT) == true || GetJoypadTrigger(nPlayer, JOYKEY_A)) && pPlayer->bJump == false)
 		{
 			//PlaySound(SOUND_LABEL_JUMP);
-			//pPlayer->state = PLAYERSTATE_JUMP;
+			pPlayer->state = PLAYERSTATE_JUMP;
 
 			SetMotionType(MOTIONTYPE_JUMP, true, 3, nPlayer);
 
@@ -736,7 +740,7 @@ void UpdateMotion(PlayerType Type)
 	/*** 現在のモーションのキー情報へのポインタ ***/
 	KEY_INFO* pInfo = &pPlayer->aMotionInfo[pPlayer->motionType].aKeyInfo[pPlayer->nKey];
 	KEY_INFO* pInfoBlend = &pPlayer->aMotionInfo[pPlayer->motionTypeBlend].aKeyInfo[pPlayer->nKeyBlend];
-	
+
 	/*** 全パーツの更新！ ***/
 	for (int nCntModel = 0; nCntModel < pPlayer->PartsInfo.nNumParts; nCntModel++)
 	{
@@ -889,6 +893,7 @@ void UpdateMotion(PlayerType Type)
 			UpdateRot.z = pKey->rot.z + diffRot.z * fRateKey;
 			RepairRot(&UpdateRot.z, &UpdateRot.z);
 		}
+
 		/** 位置、向きを更新！ **/
 		pModel->pos = pModel->posLocal + UpdatePos;
 		pModel->rot = pModel->rotLocal + UpdateRot;
@@ -904,16 +909,16 @@ void UpdateMotion(PlayerType Type)
 			{ // モーションインデックスの上下限確認		
 				return;
 			}
-			
+
 			/** キーを一つ進める **/
 			pPlayer->nKey = ((pPlayer->nKey + 1) % pPlayer->aMotionInfo[pPlayer->motionType].nNumKey);
-			
+
 			if (pPlayer->nKey == 0 && pPlayer->bLoop == false)
 			{
 				pPlayer->bFinishMotion = true;
-				//SetMotionType(MOTIONTYPE_NEUTRAL, true, 120, Type);
-			}			
-			
+				SetMotionType(MOTIONTYPE_NEUTRAL, true, 120, Type);
+			}
+
 			pPlayer->nCounterMotion = 0;
 		}
 	}
@@ -926,7 +931,7 @@ void UpdateMotion(PlayerType Type)
 			/** ブレンドモーションのキーを一つ進める **/
 			pPlayer->nKeyBlend = ((pPlayer->nKeyBlend + 1) % pPlayer->aMotionInfo[pPlayer->motionTypeBlend].nNumKey);
 			pPlayer->nCounterMotionBlend = 0;
-		}	
+		}
 
 		pPlayer->nCounterBlend++;
 

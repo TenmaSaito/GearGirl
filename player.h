@@ -32,11 +32,21 @@
 // プレイヤータイプ
 typedef enum
 {
-	PLAYERTYPE_GIRL,
+	PLAYERTYPE_GIRL = 0,
 	PLAYERTYPE_MOUSE,
 	PLAYERTYPE_MAX
 }PlayerType;
 
+// =================================================
+// アームの種類
+typedef enum
+{
+	ARMTYPE_NORMAL = 0,
+	ARMTYPE_CATAPULT,
+	ARMTYPE_HUNMER,
+	ARMTYPE_PICCKING,
+	ARMTYPE_MAX
+}ArmType;
 
 // =================================================
 // プレイヤーの状態
