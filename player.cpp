@@ -163,7 +163,7 @@ void UpdatePlayer(void)
 
 			if (pPlayer->bJump == true && pPlayer->state == PLAYERSTATE_JUMP)
 			{// 着地モーション
-				SetMotionType(MOTIONTYPE_LANDING, true, 1, (PlayerType)nCntPlayer);
+				SetMotionType(MOTIONTYPE_LANDING, true, 30, (PlayerType)nCntPlayer);
 			}
 
 			pPlayer->bJump = false;
@@ -745,6 +745,7 @@ void UpdateMotion(PlayerType Type)
 	for (int nCntModel = 0; nCntModel < pPlayer->PartsInfo.nNumParts; nCntModel++)
 	{
 		int nNext = (pPlayer->nKey + 1) % pPlayer->aMotionInfo[pPlayer->motionType].nNumKey;
+		
 		// 次のキーの値		
 		float fRateKey = (float)pPlayer->nCounterMotion / (float)pInfo->nFrame;		// モーションカウンター / 再生フレーム数
 		D3DXVECTOR3 diffPos = {};	// 位置の差分
@@ -900,7 +901,7 @@ void UpdateMotion(PlayerType Type)
 	}
 
 	if (pPlayer->bBlendMotion == false)
-	{
+	{// ブレンドなし
 		pPlayer->nCounterMotion++;
 
 		if (pPlayer->nCounterMotion >= pInfo->nFrame)
@@ -923,7 +924,7 @@ void UpdateMotion(PlayerType Type)
 		}
 	}
 	else
-	{
+	{// ブレンドあり
 		pPlayer->nCounterMotionBlend++;
 
 		if (pPlayer->nCounterMotionBlend >= pInfoBlend->nFrame)
