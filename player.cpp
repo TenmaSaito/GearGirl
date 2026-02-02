@@ -183,7 +183,7 @@ void UpdatePlayer(void)
 	// 操作する対象を切り替える
 	if (g_nNumPlayer == 1)
 	{// シングルプレイ時
-		if (GetJoypadPress(0, JOYKEY_LB) == true || GetJoypadPress(0, JOYKEY_RB) == true || GetKeyboardTrigger(DIK_Q) == true || GetKeyboardTrigger(DIK_E) == true)
+		if (GetJoypadPress(0, JOYKEY_LB) == true || GetKeyboardTrigger(DIK_Q) == true)
 		{
 			if (g_ActivePlayer == 1)
 			{// ネズミ→少女
