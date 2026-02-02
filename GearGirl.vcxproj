@@ -172,6 +172,7 @@
     <ClCompile Include="model.cpp" />
     <ClCompile Include="motion.cpp" />
     <ClCompile Include="player.cpp" />
+    <ClCompile Include="Result.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="thread.cpp" />
     <ClCompile Include="title.cpp" />
@@ -196,6 +197,7 @@
     <ClInclude Include="model.h" />
     <ClInclude Include="motion.h" />
     <ClInclude Include="player.h" />
+    <ClInclude Include="Result.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="thread.h" />
     <ClInclude Include="title.h" />

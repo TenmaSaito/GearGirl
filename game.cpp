@@ -127,7 +127,7 @@ void UpdateGame(void)
 	{
 		if (GetFade() == FADE_NONE)
 		{
-			SetFade(MODE_TITLE);
+			SetFade(MODE_RESULT);
 		}
 	}
 
