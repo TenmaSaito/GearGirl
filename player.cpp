@@ -163,7 +163,7 @@ void UpdatePlayer(void)
 
 			if (pPlayer->bJump == true && pPlayer->state == PLAYERSTATE_JUMP)
 			{// ’…’nƒ‚[ƒVƒ‡ƒ“
-				SetMotionType(MOTIONTYPE_LANDING, true, 30, (PlayerType)nCntPlayer);
+				SetMotionType(MOTIONTYPE_LANDING, false, 10, (PlayerType)nCntPlayer);
 			}
 
 			pPlayer->bJump = false;
@@ -205,12 +205,12 @@ void UpdatePlayer(void)
 	PrintDebugProc("\nPlayer0 : [SPACE] :  JUMP\n");
 	PrintDebugProc("\nPlayer1 : [RSHIFT] :  JUMP\n");
 
-	PrintDebugProc("\nPlayer1 : nCounterMotion [%d]\n", g_aPlayer[0].nCounterMotion);
-	PrintDebugProc("\nPlayer1 : nCounterMotionBlend [%d]\n", g_aPlayer[0].nCounterMotionBlend);
+	PrintDebugProc("\nPlayer1 : nCounterMotion [%d]\n", g_aPlayer[1].nCounterMotion);
+	PrintDebugProc("\nPlayer1 : nCounterMotionBlend [%d]\n", g_aPlayer[1].nCounterMotionBlend);
 	PrintDebugProc("\nPlayer1 : [%d]\n", g_aPlayer[0].bLoop);
-	PrintDebugProc("\nPlayer1 : BlendMotion [%d]\n", g_aPlayer[0].bBlendMotion);
-	PrintDebugProc("\nPlayer1 : Motiontype [%d]\n", g_aPlayer[0].motionType);
-	PrintDebugProc("\nPlayer1 : MotiontypeBlend [%d]\n", g_aPlayer[0].motionTypeBlend);
+	PrintDebugProc("\nPlayer1 : BlendMotion [%d]\n", g_aPlayer[1].bBlendMotion);
+	PrintDebugProc("\nPlayer1 : Motiontype [%d]\n", g_aPlayer[1].motionType);
+	PrintDebugProc("\nPlayer1 : MotiontypeBlend [%d]\n", g_aPlayer[1].motionTypeBlend);
 }
 
 // =================================================
@@ -623,7 +623,7 @@ void JumpPlayer(PlayerType nPlayer)
 			//PlaySound(SOUND_LABEL_JUMP);
 			pPlayer->state = PLAYERSTATE_JUMP;
 
-			SetMotionType(MOTIONTYPE_JUMP, true, 3, nPlayer);
+			SetMotionType(MOTIONTYPE_JUMP, false, 5, nPlayer);
 
 			pPlayer->move.y = JUMP_FORCE;
 			pPlayer->bJump = true;
@@ -917,7 +917,7 @@ void UpdateMotion(PlayerType Type)
 			if (pPlayer->nKey == 0 && pPlayer->bLoop == false)
 			{
 				pPlayer->bFinishMotion = true;
-				SetMotionType(MOTIONTYPE_NEUTRAL, true, 120, Type);
+				SetMotionType(MOTIONTYPE_NEUTRAL, false, 120, Type);
 			}
 
 			pPlayer->nCounterMotion = 0;
