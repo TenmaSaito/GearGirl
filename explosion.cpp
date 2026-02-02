@@ -18,7 +18,7 @@
 #define EXPLOSION_SPD			(2.0f)		// 爆発の移動スピード
 #define EXPLOSION_WDSPD			(0.1f)		// 爆発の拡縮スピード
 #define MAX_EXPLOSION			(300)		// 爆発の最大出現数
-#define MAX_TEXTURE				(8)			// アニメーション数
+#define MAX_TEXANIM				(8)			// アニメーション数
 #define EXPLOSION_COUNT			(3)			// 爆発のアニメーションカウント
 
 //*************************************************************************************************

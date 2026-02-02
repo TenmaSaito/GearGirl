@@ -70,6 +70,13 @@ void InitPlayer(void)
 	if (pPartsInfoGirl != NULL)
 	{// NULLじゃなかったとき
 		g_aPlayer[PLAYERTYPE_GIRL].PartsInfo = *pPartsInfoGirl;		// アドレスの中身のみをコピー
+
+		for (int nCntParts = 0; nCntParts < g_aPlayer[PLAYERTYPE_GIRL].PartsInfo.nNumParts; nCntParts++)
+		{
+			PARTS* pParts = &g_aPlayer[PLAYERTYPE_GIRL].PartsInfo.aParts[nCntParts];
+			pParts->posLocal = pParts->pos;
+			pParts->rotLocal = pParts->rot;
+		}
 	}
 
 	// ネズミのパーツ、モーションを読み込む
@@ -80,6 +87,13 @@ void InitPlayer(void)
 	if (pPartsInfoMouse != NULL)
 	{// NULLじゃなかったとき
 		g_aPlayer[PLAYERTYPE_MOUSE].PartsInfo = *pPartsInfoMouse;	// アドレスの中身のみをコピー
+		
+		for (int nCntParts = 0; nCntParts < g_aPlayer[PLAYERTYPE_MOUSE].PartsInfo.nNumParts; nCntParts++)
+		{
+			PARTS* pParts = &g_aPlayer[PLAYERTYPE_MOUSE].PartsInfo.aParts[nCntParts];
+			pParts->posLocal = pParts->pos;
+			pParts->rotLocal = pParts->rot;
+		}
 	}
 	// モーションのキー、フレーム情報を代入する
 	for (int nCntMotion = 0; nCntMotion < MOTIONTYPE_MAX; nCntMotion++)
@@ -125,6 +139,13 @@ void UpdatePlayer(void)
 
 		UpdateMotion((PlayerType)nCntPlayer);
 
+		if (pPlayer->bFinishMotion == true
+			&& pPlayer->motionType != MOTIONTYPE_NEUTRAL
+			&& pPlayer->motionTypeBlend != MOTIONTYPE_NEUTRAL)
+		{
+			SetMotionType(MOTIONTYPE_NEUTRAL, true, 10, (PlayerType)nCntPlayer);
+		}
+
 		// === デバッグ処理 === // 
 		// 操作する対象を切り替える
 		if (g_nNumPlayer == 1)
@@ -159,8 +180,9 @@ void UpdatePlayer(void)
 
 			if (pPlayer->bJump == true)
 			{// 着地モーション
-				SetMotionType(MOTIONTYPE_JUMP, true, 5, (PlayerType)nCntPlayer);
+				SetMotionType(MOTIONTYPE_LANDING, true, 1, (PlayerType)nCntPlayer);
 			}
+
 			pPlayer->bJump = false;
 		}
 
@@ -179,7 +201,12 @@ void UpdatePlayer(void)
 	PrintDebugProc("\nPlayer0 : [SPACE] :  JUMP\n");
 	PrintDebugProc("\nPlayer1 : [RSHIFT] :  JUMP\n");
 
-	PrintDebugProc("\nPlayer1 : [%d]\n", g_aPlayer[1].nCounterMotion);
+	PrintDebugProc("\nPlayer1 : nCounterMotion [%d]\n", g_aPlayer[0].nCounterMotion);
+	PrintDebugProc("\nPlayer1 : nCounterMotionBlend [%d]\n", g_aPlayer[0].nCounterMotionBlend);
+	PrintDebugProc("\nPlayer1 : [%d]\n", g_aPlayer[0].bLoop);
+	PrintDebugProc("\nPlayer1 : BlendMotion [%d]\n", g_aPlayer[0].bBlendMotion);
+	PrintDebugProc("\nPlayer1 : Motiontype [%d]\n", g_aPlayer[0].motionType);
+	PrintDebugProc("\nPlayer1 : MotiontypeBlend [%d]\n", g_aPlayer[0].motionTypeBlend);
 }
 
 // =================================================
@@ -241,9 +268,10 @@ void DrawPlayer(void)
 
 			// パーツの位置(オフセット)を反映
 			D3DXMatrixTranslation(&mtxTransModel,
-				pPlayer->PartsInfo.aParts[nCntModel].posLocal.x,
-				pPlayer->PartsInfo.aParts[nCntModel].posLocal.y,
-				pPlayer->PartsInfo.aParts[nCntModel].posLocal.z);
+				pPlayer->PartsInfo.aParts[nCntModel].pos.x,
+				pPlayer->PartsInfo.aParts[nCntModel].pos.y,
+				pPlayer->PartsInfo.aParts[nCntModel].pos.z);
+
 			// かけ合わせる
 			D3DXMatrixMultiply(&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
 				&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
@@ -591,7 +619,7 @@ void JumpPlayer(PlayerType nPlayer)
 			//PlaySound(SOUND_LABEL_JUMP);
 			//pPlayer->state = PLAYERSTATE_JUMP;
 
-			SetMotionType(MOTIONTYPE_ACTION, true, 3, nPlayer);
+			SetMotionType(MOTIONTYPE_JUMP, true, 3, nPlayer);
 
 			pPlayer->move.y = JUMP_FORCE;
 			pPlayer->bJump = true;
@@ -610,12 +638,6 @@ void SetMotionType(MOTIONTYPE motionTypeNext, bool bBlend, int nFrameBlend, Play
 	if (motionTypeNext < 0 || motionTypeNext >= MOTIONTYPE_MAX)
 	{ // モーションインデックスの上下限確認
 		return;
-	}
-
-	if (motionTypeNext == MOTIONTYPE_LANDING && pPlayer->motionType != MOTIONTYPE_LANDING && pPlayer->motionTypeBlend != MOTIONTYPE_LANDING)
-	{
-		D3DXVECTOR3 pos = pPlayer->pos;
-		pos.y = pPlayer->pos.y + 0.5f;
 	}
 
 	// ブレンドモーションをするかどうか
@@ -888,7 +910,8 @@ void UpdateMotion(PlayerType Type)
 			
 			if (pPlayer->nKey == 0 && pPlayer->bLoop == false)
 			{
-				SetMotionType(MOTIONTYPE_NEUTRAL, true, 120, Type);
+				pPlayer->bFinishMotion = true;
+				//SetMotionType(MOTIONTYPE_NEUTRAL, true, 120, Type);
 			}			
 			
 			pPlayer->nCounterMotion = 0;

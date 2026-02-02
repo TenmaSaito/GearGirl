@@ -122,13 +122,15 @@ bool LoadMotion(_In_ const char* pMotionFileName, int* pOutIdx)
 			MyMathUtil::CheckPath(pMotionFileName);
 
 			// モーションパスを保存
-			ZeroMemory(&pMotionInfo->aFileName[0], sizeof(char) * MAX_PATH);
-			strcpy(&pMotionInfo->aFileName[0], pMotionFileName);
+			ZeroMemory(&pMotionInfo->aFileName[nCntMotion], sizeof(char) * MAX_PATH);
+			strcpy(&pMotionInfo->aFileName[nCntMotion], pMotionFileName);
 
 			if (pOutIdx)
 			{ // テクスチャ番号を格納
 				*pOutIdx = nCntMotion;
 			}
+
+			g_nNumScriptInfo++;
 
 			/*** 成功 ***/
 			return true;
