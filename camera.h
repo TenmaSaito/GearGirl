@@ -77,7 +77,6 @@ typedef struct Camera
 	float fPlayerFront;					// プレイヤーより少し前
 	float fPlayerMoveRot;				// プレイヤーの移動方向
 	bool bUse;							// 配列を使っているか
-	bool bDraw;							// 描画したか
 }Camera;
 POINTER(Camera, P_CAMERA);
 

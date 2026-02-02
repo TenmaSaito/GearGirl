@@ -69,7 +69,6 @@ void InitCamera(void)
 		pCamera->nCntAoutRot = 0;										// 自動で回り込み ONにするまでのカウンタ
 		pCamera->bAoutRot = false;										//		〃		  OFF
 		pCamera->bUse = true;
-		pCamera->bDraw = false;
 	}
 
 	// 画面分割設定
@@ -127,76 +126,6 @@ void UpdateCamera(void)
 		SetCameraOption();
 	}
 
-#if 0
-	// プレイヤーが停止していたら回り込み/////////////////////////////////OFF
-	if (GetPlayer()->state == PLAYERSTATE_WAIT && 0)
-	{
-		g_camera.nCntAoutRot++;
-		if (60 < g_camera.nCntAoutRot)
-			g_camera.bAoutRot = true;
-	}
-	else
-	{
-		g_camera.nCntAoutRot = 0;
-		g_camera.bAoutRot = false;
-	}
-
-	//**************************************************************
-	// カメラの位置をリセット
-	if (GetKeyboardTrigger(CAM_RESET) && 0)/////////////////////////////////OFF
-	{
-		g_camera.posV = D3DXVECTOR3 CAMERA_V_DEFPOS;				// 視点
-		g_camera.posR = D3DXVECTOR3 CAMERA_R_DEFPOS;				// 注視点
-		g_camera.posRDest = D3DXVECTOR3 CAMERA_R_DEFPOS;			// 目的の注視点
-		g_camera.rot = D3DXVECTOR3(0.0f, D3DX_PI * 0.5f, 0.0f);		// カメラの角度
-		g_camera.fDist = CAMERA_DISTANS;							// カメラと注視点の距離
-	}
-
-	//**************************************************************
-	// 移動
-	if (GetPause() == false)
-	{
-		CameraFollow();		// 追従
-	}
-	else if (GetView() || GetEdit(EDIT_MAX))
-	{
-		if (GetView())
-			CameraMove();		// 操作
-		else if (GetEdit(EDIT_MAX))
-			CameraFollow();		// 追従
-
-		//**************************************************************
-		// 視点,注視点間の距離を変える
-		if (GetKeyboardRepeat(CAM_ZOOM))
-		{
-			if (GetKeyboardPress(CAM_ZOOM_IN))
-			{
-				g_camera.fDist -= CAMERA_MOVE;
-			}
-			else
-			{
-				g_camera.fDist += CAMERA_MOVE;
-			}
-		}
-
-		//**************************************************************
-		// 回転
-		CameraOrbit();		// 注視点で回転
-	}
-
-	if (g_camera.bAoutRot)
-		CameraRotation();	// 自動で回り込み////////////////////////////////////////// OFF
-
-
-		for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCamera++)
-	{
-		if (pCamera->bUse)
-		{
-			CameraFollow(pCamera);		// 追従
-		}
-	}
-
-#endif
 		if (GetKeyboardPress(CAM_2POPRAT))
 			CameraOrbit(pCamera + 1);
 		else
@@ -215,7 +144,6 @@ void UpdateCamera(void)
 			pCamera->posV.x = pCamera->posR.x - sinf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
 			pCamera->posV.y = pCamera->posR.y - cosf(D3DX_PI - pCamera->rot.x) * pCamera->fDist;
 			pCamera->posV.z = pCamera->posR.z + cosf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
-			pCamera->bDraw = false;
 
 			PrintDebugProc("CAMERA %d\nposV : %~3f\nposR : %~3f\n", nCntCamera, pCamera->posV.x, pCamera->posV.y, pCamera->posV.z, pCamera->posR.x, pCamera->posR.y, pCamera->posR.z);
 			PrintDebugProc("rot  : %~3f\n", pCamera->rot.x, pCamera->rot.y, pCamera->rot.z);
@@ -233,7 +161,7 @@ void CameraFollow(void)
 		// 変数宣言
 		P_CAMERA pCamera = GetCamera();				// カメラ情報
 		Player* pPlayer = GetPlayer();				// プレイヤー情報
-		float fPlayerFront/* = CAMERA_PLAYER_FRONT*/;	// プレイヤーより前
+		float fPlayerFront;							// プレイヤーより前
 		static float fPlayerMoveRot;
 
 		for (int nPlayer = 0; nPlayer < MAX_PLAYER; nPlayer++, pCamera++, pPlayer++)
@@ -415,6 +343,7 @@ void SetCamera(void)
 	// 変数宣言
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();		// デバイスへのポインタ
 	P_CAMERA			pCam = GetCamera();
+	static bool bCameraSwitch = false;				// 複数画面描画時カメラの切り替え
 
 	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCam++)
 	{
@@ -425,8 +354,17 @@ void SetCamera(void)
 				pCam++;
 			}
 		}
+		else if (bCameraSwitch == false)
+		{
+			pCam++;
+			bCameraSwitch = true;
+		}
+		else
+		{
+			bCameraSwitch = false;
+		}
 
-		if (pCam->bUse && pCam->bDraw == false)
+		if (pCam->bUse)
 		{
 			//**************************************************************
 			// ビューポートの設定
@@ -457,8 +395,6 @@ void SetCamera(void)
 			pDevice->SetTransform(D3DTS_VIEW, &pCam->mtxView);
 
 			EndDevice();// デバイス取得終了
-
-			pCam->bDraw = true;
 
 			return;
 		}
