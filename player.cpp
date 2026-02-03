@@ -234,6 +234,7 @@ void UpdatePlayer(void)
 		PrintDebugProc("Player1 : BlendMotion [%d]\n", g_aPlayer[1].bBlendMotion);
 		PrintDebugProc("Player1 : Motiontype [%d]\n", g_aPlayer[1].motionType);
 		PrintDebugProc("Player1 : MotiontypeBlend [%d]\n", g_aPlayer[1].motionTypeBlend);
+		PrintDebugProc("Player0 : PlayerState [%d]\n", g_aPlayer[0].state);
 	}
 }
 
@@ -379,7 +380,7 @@ void MovePlayer(PlayerType nPlayer)
 		if (GetKeyboardPress(DIK_A) == true || GetJoypadPress(nPlayer, JOYKEY_LEFT) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_LEFT))
 		{//AƒL[‚ª‰Ÿ‚³‚ê‚é	
 
-			if (pPlayer->bFinishMotion == true && pPlayer->state != PLAYERSTATE_MOVE)
+			if (pPlayer->bFinishMotion == true && pPlayer->state == PLAYERSTATE_NEUTRAL)
 			{
 				SetMotionType(MOTIONTYPE_MOVE, false, 10, nPlayer);
 				pPlayer->state = PLAYERSTATE_MOVE;
