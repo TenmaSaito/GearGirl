@@ -957,15 +957,6 @@ void UpdateMotion(PlayerType Type)
 			/** ブレンドモーションのキーを一つ進める **/
 			pPlayer->nKeyBlend = ((pPlayer->nKeyBlend + 1) % pPlayer->aMotionInfo[pPlayer->motionTypeBlend].nNumKey);
 			pPlayer->nCounterMotionBlend = 0;
-
-			// モーションごとの総キー数を超えるまでカウント増加
-			pPlayer->nCntAllround++;
-
-			if (pPlayer->nCntAllround > pPlayer->aMotionInfo[pPlayer->motionTypeBlend].nNumKey)
-			{
-				pPlayer->bFinishMotion = true;
-				pPlayer->nCntAllround = 0;
-			}
 		}
 
 		pPlayer->nCounterBlend++;
