@@ -48,7 +48,7 @@ typedef struct Item
 	ITEMTYPE		type;
 	bool			bUse;				// 構造体を使用しているかどうか
 	bool			bGet;				// プレイヤーが取得したかどうか
-
+	bool			bCollision;			// 衝突するか(true)、取得するか(false)
 	D3DXMATRIX		mtxWorld;			// ワールドマトリックス
 	int				nIdxTex;			// テクスチャインデックス
 }Item;
