@@ -174,7 +174,7 @@ void DrawPrompt(void)
 //==================================================================================
 // --- 設置 ---
 //==================================================================================
-int SetPrompt(D3DXVECTOR3 pos, D3DXVECTOR2 size, int nIdxTexture)
+int SetPrompt(D3DXVECTOR3 pos, D3DXVECTOR2 size, int nIdxTexture, bool bAuto)
 {
 	LPPROMPT pPrompt = &g_aPrompt[0];		// プロンプトポインタ
 	VERTEX_3D* pVtx = nullptr;				// 頂点バッファへのポインタ
@@ -194,6 +194,7 @@ int SetPrompt(D3DXVECTOR3 pos, D3DXVECTOR2 size, int nIdxTexture)
 		{ // 使われていなかった場合
 			pPrompt->bUse = true;
 			pPrompt->bDisp = false;
+			pPrompt->bAuto = bAuto;
 			pPrompt->pos = pos;
 			pPrompt->size = size;
 			pPrompt->nIdxTexture = nIdxTexture;
@@ -213,6 +214,44 @@ int SetPrompt(D3DXVECTOR3 pos, D3DXVECTOR2 size, int nIdxTexture)
 	g_pVtxBuffPrompt->Unlock();
 
 	return nReturnId;
+}
+
+//==================================================================================
+// --- 検知判定 ---
+// return : 最も近距離で検知したプロンプト
+//==================================================================================
+int DetectionPrompt(D3DXVECTOR3 pos, float fLength)
+{
+	LPPROMPT pPrompt = &g_aPrompt[0];		// プロンプトポインタ
+	int nNearDetection = -1;				// 検知したプロンプト
+	float fDetectionLength = 1000000.0f;	// プロンプトとの距離
+
+	for (int nCntPrompt = 0; nCntPrompt < MAX_PROMPT; nCntPrompt++, pPrompt++)
+	{
+		if (pPrompt->bUse == true && pPrompt->bAuto == true)
+		{ // 使用されていて、検知判定オンなら
+			// 二点間の差分を求める
+			D3DXVECTOR3 length = pos - pPrompt->pos;
+
+			// ベクトルの長さを取得
+			float fLengthPrompt = D3DXVec3Length(&length);
+			if (fLengthPrompt <= fLength)
+			{ // 検知範囲内なら描画開始
+				pPrompt->bDisp = true;
+				if (fDetectionLength <= fLengthPrompt)
+				{ // もし今までで一番近いプロンプトなら更新
+					nNearDetection = nCntPrompt;
+					fDetectionLength = fLengthPrompt;
+				}
+			}
+			else
+			{ // 検知範囲外なら描画停止
+				pPrompt->bDisp = false;
+			}
+		}
+	}
+
+	return nNearDetection;
 }
 
 //==================================================================================

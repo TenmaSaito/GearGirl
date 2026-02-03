@@ -92,7 +92,7 @@ void InitGame(void)
 
 	int nIdxPrompt, Tex;
 	LoadTexture("data/TEXTURE/TestPrompt.png", &Tex);
-	nIdxPrompt = SetPrompt(D3DXVECTOR3(100, 100, 200), D3DXVECTOR2(50.0f, 20.0f), Tex);
+	nIdxPrompt = SetPrompt(D3DXVECTOR3(100, 100, 200), D3DXVECTOR2(50.0f, 20.0f), Tex, true);
 	SetEnablePrompt(true, nIdxPrompt);
 }
 
