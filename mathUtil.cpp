@@ -424,6 +424,109 @@ void MyMathUtil::SetFullScreenPolygon(VERTEX_2D* pVtx)
 }
 
 //==================================================================
+// --- ポリゴンのテクスチャを設定する処理 ---
+//==================================================================
+//template<typename VERTEX>
+//void MyMathUtil::SetDefaultTexture(VERTEX* pVtx);
+
+//==================================================================
+// --- ポリゴンの法線を設定する処理 ---
+//==================================================================
+void MyMathUtil::SetPolygonNormal(VERTEX_3D* pVtx, D3DXVECTOR3 nor)
+{
+	if (pVtx == nullptr) return;
+
+	pVtx[0].nor = nor;
+	pVtx[1].nor = nor;
+	pVtx[2].nor = nor;
+	pVtx[3].nor = nor;
+}
+
+//==================================================================
+// --- ポリゴンのRHWを設定する処理 ---
+//==================================================================
+void MyMathUtil::SetPolygonRHW(VERTEX_2D* pVtx)
+{
+	if (pVtx == nullptr) return;
+
+	pVtx[0].rhw = 1.0f;
+	pVtx[1].rhw = 1.0f;
+	pVtx[2].rhw = 1.0f;
+	pVtx[3].rhw = 1.0f;
+}
+
+//==================================================================
+// --- ポリゴンの位置を設定する処理 ---
+//==================================================================
+void MyMathUtil::SetPolygonSize(VERTEX_3D* pVtx, D3DXVECTOR2 size, bool bY)
+{
+	if (pVtx == nullptr) return;
+
+	if (bY)
+	{
+		/*** 頂点座標の設定の設定 ***/
+		pVtx[0].pos.x = -size.x * 0.5f;
+		pVtx[0].pos.y = size.y * 0.5f;
+		pVtx[0].pos.z = 0.0f;
+
+		pVtx[1].pos.x = size.x * 0.5f;
+		pVtx[1].pos.y = size.y * 0.5f;
+		pVtx[1].pos.z = 0.0f;
+
+		pVtx[2].pos.x = -size.x * 0.5f;
+		pVtx[2].pos.y = -size.y * 0.5f;
+		pVtx[2].pos.z = 0.0f;
+
+		pVtx[3].pos.x = size.y * 0.5f;
+		pVtx[3].pos.y = -size.y * 0.5f;
+		pVtx[3].pos.z = 0.0f;
+	}
+	else
+	{
+		/*** 頂点座標の設定の設定 ***/
+		pVtx[0].pos.x = -size.x * 0.5f;
+		pVtx[0].pos.y = 0.0f;
+		pVtx[0].pos.z = size.y * 0.5f;
+
+		pVtx[1].pos.x = size.x * 0.5f;
+		pVtx[1].pos.y = 0.0f;
+		pVtx[1].pos.z = size.y * 0.5f;
+
+		pVtx[2].pos.x = -size.x * 0.5f;
+		pVtx[2].pos.y = 0.0f;
+		pVtx[2].pos.z = -size.y * 0.5f;
+
+		pVtx[3].pos.x = size.y * 0.5f;
+		pVtx[3].pos.y = 0.0f;
+		pVtx[3].pos.z = -size.y * 0.5f;
+	}
+}
+
+//==================================================================
+// --- ポリゴンの位置を設定する処理 ---
+//==================================================================
+void MyMathUtil::SetPolygonPos(VERTEX_2D* pVtx, D3DXVECTOR3 pos, D3DXVECTOR2 size)
+{
+	if (pVtx == nullptr) return;
+
+	pVtx[0].pos.x = pos.x - (size.x * 0.5f);
+	pVtx[0].pos.y = pos.y - (size.y * 0.5f);
+	pVtx[0].pos.z = 0.0f;
+
+	pVtx[1].pos.x = pos.x + (size.x * 0.5f);
+	pVtx[1].pos.y = pos.y - (size.y * 0.5f);
+	pVtx[1].pos.z = 0.0f;
+
+	pVtx[2].pos.x = pos.x - (size.x * 0.5f);
+	pVtx[2].pos.y = pos.y + (size.y * 0.5f);
+	pVtx[2].pos.z = 0.0f;
+
+	pVtx[3].pos.x = pos.x + (size.x * 0.5f);
+	pVtx[3].pos.y = pos.y + (size.y * 0.5f);
+	pVtx[3].pos.z = 0.0f;
+}
+
+//==================================================================
 // --- 360°をD3DXVECTOR3のRadianに変換する処理 ---
 //==================================================================
 D3DXVECTOR3 MyMathUtil::DegreeToRadian(D3DXVECTOR3 degree)

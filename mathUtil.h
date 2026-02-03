@@ -86,6 +86,35 @@ namespace MyMathUtil
 	void SetVtxTexture(VERTEX_2D* pVtx, float x, float y);
 	void SetVtxTexture(VERTEX_3D* pVtx, float x, float y);
 	void SetFullScreenPolygon(VERTEX_2D* pVtx);
+	void SetPolygonSize(VERTEX_3D* pVtx, D3DXVECTOR2 size, bool bY);
+	void SetPolygonPos(VERTEX_2D* pVtx, D3DXVECTOR3 pos, D3DXVECTOR2 size);
+
+	// テクスチャ設定
+	template<typename VERTEX>
+	void SetDefaultTexture(VERTEX* pVtx)
+	{
+		if (pVtx == nullptr) return;
+
+		pVtx[0].tex = D3DXVECTOR2(0.0f, 0.0f);
+		pVtx[1].tex = D3DXVECTOR2(1.0f, 0.0f);
+		pVtx[2].tex = D3DXVECTOR2(0.0f, 1.0f);
+		pVtx[3].tex = D3DXVECTOR2(1.0f, 1.0f);
+	}
+
+	// 色設定
+	template<typename VERTEX>
+	void SetDefaultColor(VERTEX* pVtx, D3DXCOLOR col = D3DXCOLOR_NULL)
+	{
+		if (pVtx == nullptr) return;
+
+		pVtx[0].col = col;
+		pVtx[1].col = col;
+		pVtx[2].col = col;
+		pVtx[3].col = col;
+	}
+	
+	void SetPolygonNormal(VERTEX_3D *pVtx, D3DXVECTOR3 nor);
+	void SetPolygonRHW(VERTEX_2D *pVtx);
 	D3DXVECTOR3 DegreeToRadian(D3DXVECTOR3 degree);
 	D3DXVECTOR3 RadianToDegree(D3DXVECTOR3 radian);
 	D3DXVECTOR3 INTToFloat(INT_VECTOR3 nVector3);
