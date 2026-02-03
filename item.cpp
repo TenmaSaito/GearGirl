@@ -19,10 +19,11 @@ Item g_aItem[MAX_ITEM];								// アイテム情報
 
 //**************************************************************
 // プロトタイプ宣言
-void LoadItemSet(void);										// アイテムの配置情報を読み込み
-void SetItem(vec3 pos, vec3 rot, ITEMTYPE type, int nTex);	// アイテム設置
-void SaveItemSet(void);										// アイテムの配置情報を書き出し
-P_ITEM GetItem(void);										// 先頭アドレス取得
+void LoadItemSet(void);															// アイテムの配置情報を読み込み
+void SetItem(vec3 pos, vec3 rot, ITEMTYPE type, int nTex,bool bColi = false);	// アイテム設置
+void SaveItemSet(void);															// アイテムの配置情報を書き出し
+P_ITEM GetItem(void);															// 先頭アドレス取得
+
 
 //=========================================================================================
 // アイテム初期化
@@ -131,7 +132,7 @@ void DrawItem(void)
 
 	for (int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++, pItem++)
 	{
-		if (pItem->bUse)
+		if (pItem->bUse &&( pItem->bGet == false || pItem->bCollision))
 		{
 			//**************************************************************
 			// ワールドマトリックスの初期化
@@ -183,11 +184,9 @@ void DrawItem(void)
 				sizeof(VERTEX_3D));
 
 			////$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-			//// Zテストを無効にする
+			//Zテストを無効にする
 			//pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
 			//pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
-
-			// Alphaテストを無効
 
 			//**************************************************************
 			// 頂点フォーマットの設定
@@ -199,11 +198,9 @@ void DrawItem(void)
 
 			//**************************************************************
 			// ポリゴンの描画
-			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);
-
-			// Aplphaテストを有効
-
-			//// Zテストを有効にする
+			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, nCntItem * 4, 2);
+			
+			//Zテストを有効にする
 			//pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
 			//pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 			////$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -226,19 +223,26 @@ void LoadItemSet(void)
 //=========================================================================================
 void CollisionItem(vec3 pos, float fRange)
 {
+	//**************************************************************
+	// 変数宣言
 	P_ITEM pItem = GetItem();		// 先頭アドレス
-
 
 	for (int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++, pItem++)
 	{
 		if (pItem->bUse && pItem->bGet == false)
 		{
 			// 距離の計算
-			float fDist = sqrtf(SQUARE(pItem->pos.x - pos.x) + SQUARE(pItem->pos.y - pos.y) + SQUARE(pItem->pos.z - pos.z));
+			float fDistX = SQUARE(pItem->pos.x - pos.x);
+			float fDistY = SQUARE(pItem->pos.y - pos.y);
+			float fDistZ = SQUARE(pItem->pos.z - pos.z);
+			float fDist = sqrtf(__ABSOLUTE(SQUARE(pItem->pos.x - pos.x) + SQUARE(pItem->pos.y - pos.y) + SQUARE(pItem->pos.z - pos.z)));
 			
+			PrintDebugProc("Player<=>Item %f\nPlayerRnge = %f\n ItemRange = %f\n", fDist, fRange, pItem->fRange);
+
 			if (fDist <= pItem->fRange + fRange)
 			{
-				pItem->bGet = false;
+				PrintDebugProc("!!! 衝突中 !!!\n\n");
+				pItem->bGet = true;
 				break;
 			}
 		}
@@ -248,7 +252,7 @@ void CollisionItem(vec3 pos, float fRange)
 
 //=========================================================================================
 // 単体アイテム設置
-void SetItem(vec3 pos, vec3 rot, ITEMTYPE type, int nTex)
+void SetItem(vec3 pos, vec3 rot, ITEMTYPE type, int nTex, bool bColi)
 {
 	//**************************************************************
 	// 変数宣言
@@ -265,6 +269,7 @@ void SetItem(vec3 pos, vec3 rot, ITEMTYPE type, int nTex)
 				pItem->fRange = ITEM_RANGE;
 				pItem->type = type;
 				pItem->nIdxTex = nTex;
+				pItem->bCollision = bColi;
 				pItem->bGet = false;
 				pItem->bUse = true;
 				break;
