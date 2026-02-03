@@ -30,6 +30,7 @@
 #define DEF_COL					D3DXCOLOR_NULL					// デフォルトカラー
 #define COL_R(r)				D3DXCOLOR(r, 1.0f, 1.0f, 1.0f)	// R値変更
 #define COL_A(a)				D3DXCOLOR(1.0f, 1.0f, 1.0f, a)	// A値変更
+#define IS_SAME(a, b)			_Generic((a), (b) : 1, default 0)
 
 namespace MyMathUtil
 {

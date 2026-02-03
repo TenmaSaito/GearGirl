@@ -38,7 +38,7 @@ void UninitPrompt(void);
 void UpdatePrompt(void);
 void DrawPrompt(void);
 
-int SetPrompt(void);
+int SetPrompt(D3DXVECTOR3 pos, D3DXVECTOR2 size, int nIdxTexture);
 void SetEnablePrompt(bool bDisp, int nIdxPrompt);
 D3DXVECTOR3 GetPromptPos(int nIdxPrompt);
 LPPROMPT GetPrompt(void);

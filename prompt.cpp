@@ -54,7 +54,7 @@ void InitPrompt(void)
 	for (int nCntPrompt = 0; nCntPrompt < MAX_PROMPT; nCntPrompt++)
 	{
 		// 頂点設定
-		MyMathUtil::SetPolygonSize(pVtx, D3DXVECTOR2(), true);
+		MyMathUtil::SetPolygonSize(pVtx, D3DXVECTOR2(0, 0), true);
 
 		// 色指定
 		MyMathUtil::SetDefaultColor<VERTEX_3D>(pVtx);
@@ -109,52 +109,63 @@ void DrawPrompt(void)
 	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
 	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 
+	/*** ライティングをオフ ***/
+	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
+
 	// NULLCHECK
-	if (g_pVtxBuffPrompt == nullptr) return;
-
-	/*** 頂点バッファをデータストリームに設定 ***/
-	pDevice->SetStreamSource(0, g_pVtxBuffPrompt, 0, sizeof(VERTEX_3D));
-
-	/*** 頂点フォーマットの設定 ***/
-	pDevice->SetFVF(FVF_VERTEX_3D);
-
-	for (int nCntPrompt = 0; nCntPrompt < MAX_PROMPT; nCntPrompt++, pPrompt++)
+	if (g_pVtxBuffPrompt != nullptr)
 	{
-		if (pPrompt->bUse == true && pPrompt->bDisp == true)
+		/*** 頂点バッファをデータストリームに設定 ***/
+		pDevice->SetStreamSource(0, g_pVtxBuffPrompt, 0, sizeof(VERTEX_3D));
+
+		/*** 頂点フォーマットの設定 ***/
+		pDevice->SetFVF(FVF_VERTEX_3D);
+
+		for (int nCntPrompt = 0; nCntPrompt < MAX_PROMPT; nCntPrompt++, pPrompt++)
 		{
-			/*** ワールドマトリックスの初期化 ***/
-			D3DXMatrixIdentity(&pPrompt->mtxWorld);
+			if (pPrompt->bUse == true && pPrompt->bDisp == true)
+			{
+				/*** ワールドマトリックスの初期化 ***/
+				D3DXMatrixIdentity(&pPrompt->mtxWorld);
 
-			/*** カメラのビューマトリックスを取得 ***/
-			pDevice->GetTransform(D3DTS_VIEW, &mtxView);
+				/*** カメラのビューマトリックスを取得 ***/
+				pDevice->GetTransform(D3DTS_VIEW, &mtxView);
 
-			/*** マトリックスの逆行列を求める (※ 位置を反映する前に必ず行うこと！) ***/
-			D3DXMatrixInverse(&pPrompt->mtxWorld, NULL, &mtxView);
-			/** 逆行列によって入ってしまった位置情報を初期化 **/
-			pPrompt->mtxWorld._41 = 0.0f;
-			pPrompt->mtxWorld._42 = 0.0f;
-			pPrompt->mtxWorld._43 = 0.0f;
+				/*** マトリックスの逆行列を求める (※ 位置を反映する前に必ず行うこと！) ***/
+				D3DXMatrixInverse(&pPrompt->mtxWorld, NULL, &mtxView);
+				/** 逆行列によって入ってしまった位置情報を初期化 **/
+				pPrompt->mtxWorld._41 = 0.0f;
+				pPrompt->mtxWorld._42 = 0.0f;
+				pPrompt->mtxWorld._43 = 0.0f;
 
-			/*** 位置を反映 (※ 向きを反映したのちに行うこと！) ***/
-			D3DXMatrixTranslation(&mtxTrans,
-				pPrompt->pos.x,
-				pPrompt->pos.y,
-				pPrompt->pos.z);
+				/*** 位置を反映 (※ 向きを反映したのちに行うこと！) ***/
+				D3DXMatrixTranslation(&mtxTrans,
+					pPrompt->pos.x,
+					pPrompt->pos.y,
+					pPrompt->pos.z);
 
-			D3DXMatrixMultiply(&pPrompt->mtxWorld, &pPrompt->mtxWorld, &mtxTrans);
+				D3DXMatrixMultiply(&pPrompt->mtxWorld, &pPrompt->mtxWorld, &mtxTrans);
 
-			/*** ワールドマトリックスの設定 ***/
-			pDevice->SetTransform(D3DTS_WORLD, &pPrompt->mtxWorld);
+				/*** ワールドマトリックスの設定 ***/
+				pDevice->SetTransform(D3DTS_WORLD, &pPrompt->mtxWorld);
 
-			/*** テクスチャの設定 ***/
-			pDevice->SetTexture(0, GetTexture(pPrompt->nIdxTexture));
+				/*** テクスチャの設定 ***/
+				pDevice->SetTexture(0, GetTexture(pPrompt->nIdxTexture));
 
-			/*** ポリゴンの描画 ***/
-			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP,		// プリミティブの種類
-				4 * nCntPrompt,								// 描画する最初の頂点インデックス
-				2);											// 描画するプリミティブの数
+				/*** ポリゴンの描画 ***/
+				pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP,		// プリミティブの種類
+					4 * nCntPrompt,								// 描画する最初の頂点インデックス
+					2);											// 描画するプリミティブの数
+			}
 		}
 	}
+
+	/*** Zテストを無効にする ***/
+	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
+	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+
+	/*** ライティングをオン ***/
+	pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
 
 	// デバイスの取得終了
 	EndDevice();
@@ -188,7 +199,8 @@ int SetPrompt(D3DXVECTOR3 pos, D3DXVECTOR2 size, int nIdxTexture)
 			pPrompt->nIdxTexture = nIdxTexture;
 
 			// 頂点設定
-			MyMathUtil::SetPolygonSize(pVtx, D3DXVECTOR2(), true);
+			MyMathUtil::SetPolygonSize(pVtx, size, true);
+
 			nReturnId = nCntPrompt;
 
 			break;

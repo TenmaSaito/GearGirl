@@ -24,6 +24,7 @@
 #include "mesh.h"
 #include "item.h"
 #include "debugproc.h"
+#include "prompt.h"
 
 //**********************************************************************************
 //*** マクロ定義 ***
@@ -85,6 +86,14 @@ void InitGame(void)
 
 	/*** ポーズの初期化 ***/
 	InitPause();
+
+	/*** プロンプト初期化 ***/
+	InitPrompt();
+
+	int nIdxPrompt, Tex;
+	LoadTexture("data/TEXTURE/TestPrompt.png", &Tex);
+	nIdxPrompt = SetPrompt(D3DXVECTOR3(100, 100, 200), D3DXVECTOR2(50.0f, 20.0f), Tex);
+	SetEnablePrompt(true, nIdxPrompt);
 }
 
 //==================================================================================
@@ -129,6 +138,9 @@ void UninitGame(void)
 
 	/*** ポーズの終了 ***/
 	UninitPause();
+
+	/*** プロンプトの終了 ***/
+	UninitPrompt();
 }
 
 //==================================================================================
@@ -177,6 +189,9 @@ void UpdateGame(void)
 
 		/*** ライトの更新 ***/
 		UpdateLight();
+
+		/*** プロンプトの更新 ***/
+		UpdatePrompt();
 	}
 
 	PrintDebugProc("NumPlayer %d  ActivePlayer %d  CameraNum %d", GetNumPlayer(), GetActivePlayer(), GetCameraNum());
@@ -231,6 +246,9 @@ void DrawGame(void)
 
 		/*** メッシュの描画 ***/
 		DrawMesh();
+
+		/*** プロンプトの描画 ***/
+		DrawPrompt();
 
 		// VERTEX_2D ============================================
 		/*** Aの描画 ***/
