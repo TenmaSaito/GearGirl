@@ -26,5 +26,5 @@ void UpdateExplosion(void);
 void DrawExplosion(void);
 
 void SetExplosion(D3DXVECTOR3 pos, float fWidth, float fHeight, int nSpeedAnim);
-void SetIndexTextureExplosion(int nIndexTexture, int nAnimationCount);
+void SetExplosionEx(D3DXVECTOR3 pos, D3DXVECTOR3 move, float fSpd, float fWidth, float fHeight, int nSpeedAnim);
 #endif

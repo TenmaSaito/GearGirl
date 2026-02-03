@@ -477,7 +477,7 @@ void MyMathUtil::SetPolygonSize(VERTEX_3D* pVtx, D3DXVECTOR2 size, bool bY)
 		pVtx[2].pos.y = -size.y * 0.5f;
 		pVtx[2].pos.z = 0.0f;
 
-		pVtx[3].pos.x = size.y * 0.5f;
+		pVtx[3].pos.x = size.x * 0.5f;
 		pVtx[3].pos.y = -size.y * 0.5f;
 		pVtx[3].pos.z = 0.0f;
 	}

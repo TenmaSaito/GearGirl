@@ -86,33 +86,14 @@ void InitExplosion(void)
 	/*** 頂点座標の設定の設定 ***/
 	for (int nCntExplosion = 0; nCntExplosion < MAX_EXPLOSION; nCntExplosion++)
 	{
-		pVtx[0].pos.x = -EXPLOSION_SIZE_X;
-		pVtx[0].pos.y = EXPLOSION_SIZE_Z;
-		pVtx[0].pos.z = 0.0f;
-
-		pVtx[1].pos.x = EXPLOSION_SIZE_X;
-		pVtx[1].pos.y = EXPLOSION_SIZE_Z;
-		pVtx[1].pos.z = 0.0f;
-
-		pVtx[2].pos.x = -EXPLOSION_SIZE_X;
-		pVtx[2].pos.y = -EXPLOSION_SIZE_Z;
-		pVtx[2].pos.z = 0.0f;
-
-		pVtx[3].pos.x = EXPLOSION_SIZE_X;
-		pVtx[3].pos.y = -EXPLOSION_SIZE_Z;
-		pVtx[3].pos.z = 0.0f;
+		/*** ポリゴンのサイズ設定 ***/
+		MyMathUtil::SetPolygonSize(pVtx, D3DXVECTOR2(EXPLOSION_SIZE_X * 2, EXPLOSION_SIZE_Z * 2), true);
 
 		/*** 法線ベクトルの設定 ***/
-		pVtx[0].nor = D3DXVECTOR3(0.0f, 0.0f, -1.0f);
-		pVtx[1].nor = D3DXVECTOR3(0.0f, 0.0f, -1.0f);
-		pVtx[2].nor = D3DXVECTOR3(0.0f, 0.0f, -1.0f);
-		pVtx[3].nor = D3DXVECTOR3(0.0f, 0.0f, -1.0f);
+		MyMathUtil::SetPolygonNormal(pVtx, D3DXVECTOR3(0, 0, -1));
 
 		/*** 頂点カラー設定 ***/
-		pVtx[0].col = D3DXCOLOR_NULL;
-		pVtx[1].col = D3DXCOLOR_NULL;
-		pVtx[2].col = D3DXCOLOR_NULL;
-		pVtx[3].col = D3DXCOLOR_NULL;
+		MyMathUtil::SetDefaultColor<VERTEX_3D>(pVtx);
 
 		/*** テクスチャ座標の設定 ***/
 		pVtx[0].tex = D3DXVECTOR2(1.0f / g_nTextureAnimCount, 0.0f);
@@ -162,22 +143,10 @@ void UpdateExplosion(void)
 		// もし使われていれば
 		if (g_aExplosion[nCntExplosion].bUse == true)
 		{
+			g_aExplosion[nCntExplosion].pos += g_aExplosion[nCntExplosion].move;
+
 			// 頂点座標を調整
-			pVtx[0].pos.x = -g_aExplosion[nCntExplosion].fWidth;
-			pVtx[0].pos.y = g_aExplosion[nCntExplosion].fHeight;
-			pVtx[0].pos.z = 0.0f;
-
-			pVtx[1].pos.x = g_aExplosion[nCntExplosion].fWidth;
-			pVtx[1].pos.y = g_aExplosion[nCntExplosion].fHeight;
-			pVtx[1].pos.z = 0.0f;
-
-			pVtx[2].pos.x = -g_aExplosion[nCntExplosion].fWidth;
-			pVtx[2].pos.y = -g_aExplosion[nCntExplosion].fHeight;
-			pVtx[2].pos.z = 0.0f;
-
-			pVtx[3].pos.x = g_aExplosion[nCntExplosion].fWidth;
-			pVtx[3].pos.y = -g_aExplosion[nCntExplosion].fHeight;
-			pVtx[3].pos.z = 0.0f;
+			MyMathUtil::SetPolygonSize(pVtx, D3DXVECTOR2(g_aExplosion[nCntExplosion].fWidth * 2, g_aExplosion[nCntExplosion].fHeight * 2), true);
 
 			g_aExplosion[nCntExplosion].nCounterAnim++;
 			if (g_aExplosion[nCntExplosion].nCounterAnim % g_aExplosion[nCntExplosion].nSpeeedAnim == 0)
@@ -273,6 +242,7 @@ void SetExplosion(D3DXVECTOR3 pos, float fWidth, float fHeight, int nSpeedAnim)
 		if (g_aExplosion[nCntExplosion].bUse != true)
 		{
 			g_aExplosion[nCntExplosion].pos = pos;
+			g_aExplosion[nCntExplosion].move = VECNULL;
 			g_aExplosion[nCntExplosion].fWidth = fWidth;
 			g_aExplosion[nCntExplosion].fHeight = fHeight;
 			g_aExplosion[nCntExplosion].nCounterAnim = 0;
@@ -280,21 +250,8 @@ void SetExplosion(D3DXVECTOR3 pos, float fWidth, float fHeight, int nSpeedAnim)
 			g_aExplosion[nCntExplosion].nSpeeedAnim = nSpeedAnim;
 			g_aExplosion[nCntExplosion].bUse = true;
 
-			pVtx[0].pos.x = -g_aExplosion[nCntExplosion].fWidth;
-			pVtx[0].pos.y = g_aExplosion[nCntExplosion].fHeight;
-			pVtx[0].pos.z = 0.0f;
-
-			pVtx[1].pos.x = g_aExplosion[nCntExplosion].fWidth;
-			pVtx[1].pos.y = g_aExplosion[nCntExplosion].fHeight;
-			pVtx[1].pos.z = 0.0f;
-
-			pVtx[2].pos.x = -g_aExplosion[nCntExplosion].fWidth;
-			pVtx[2].pos.y = -g_aExplosion[nCntExplosion].fHeight;
-			pVtx[2].pos.z = 0.0f;
-
-			pVtx[3].pos.x = g_aExplosion[nCntExplosion].fWidth;
-			pVtx[3].pos.y = -g_aExplosion[nCntExplosion].fHeight;
-			pVtx[3].pos.z = 0.0f;
+			// 頂点座標を調整
+			MyMathUtil::SetPolygonSize(pVtx, D3DXVECTOR2(g_aExplosion[nCntExplosion].fWidth * 2, g_aExplosion[nCntExplosion].fHeight * 2), true);
 
 			break;
 		}
@@ -307,10 +264,37 @@ void SetExplosion(D3DXVECTOR3 pos, float fWidth, float fHeight, int nSpeedAnim)
 }
 
 //================================================================================================================
-// --- 爆発のテクスチャインデックス及びアニメーション数設定処理 ---
+// --- 爆発発生処理 ---
 //================================================================================================================
-void SetIndexTextureExplosion(int nIndexTexture, int nAnimationCount)
+void SetExplosionEx(D3DXVECTOR3 pos, D3DXVECTOR3 move, float fSpd, float fWidth, float fHeight, int nSpeedAnim)
 {
-	g_nIndexTextureExplosion = nIndexTexture;
-	g_nTextureAnimCount = nAnimationCount;
+	VERTEX_3D* pVtx;					// 頂点情報へのポインタ
+
+	/*** 頂点バッファの設定 ***/
+	g_pVtxBuffExplosion->Lock(0, 0, (void**)&pVtx, 0);
+
+	for (int nCntExplosion = 0; nCntExplosion < MAX_EXPLOSION; nCntExplosion++)
+	{
+		if (g_aExplosion[nCntExplosion].bUse != true)
+		{
+			g_aExplosion[nCntExplosion].pos = pos;
+			g_aExplosion[nCntExplosion].move = move * fSpd;
+			g_aExplosion[nCntExplosion].fWidth = fWidth;
+			g_aExplosion[nCntExplosion].fHeight = fHeight;
+			g_aExplosion[nCntExplosion].nCounterAnim = 0;
+			g_aExplosion[nCntExplosion].nPatternAnim = 0;
+			g_aExplosion[nCntExplosion].nSpeeedAnim = nSpeedAnim;
+			g_aExplosion[nCntExplosion].bUse = true;
+
+			// 頂点座標を調整
+			MyMathUtil::SetPolygonSize(pVtx, D3DXVECTOR2(g_aExplosion[nCntExplosion].fWidth * 2, g_aExplosion[nCntExplosion].fHeight * 2), true);
+
+			break;
+		}
+
+		pVtx += 4;
+	}
+
+	/*** 頂点バッファの設定を終了 ***/
+	g_pVtxBuffExplosion->Unlock();
 }
