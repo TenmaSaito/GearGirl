@@ -11,6 +11,7 @@
 #include "debugproc.h"
 #include "game.h"
 #include "input.h"
+#include "item.h"
 #include "model.h"
 #include "modeldata.h"
 #include "motion.h"
@@ -18,6 +19,10 @@
 #include "MathUtil.h"
 
 using namespace MyMathUtil;
+
+// =================================================
+// マクロ定義
+#define PLAYER_RANGE	(50.0f)		// プレイヤーとアイテムとの当たり判定の距離
 
 // =================================================
 // プロトタイプ宣言
@@ -173,6 +178,9 @@ void UpdatePlayer(void)
 
 		// モデルとの当たり判定
 		CollisionModel(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move);
+
+		// アイテムとの当たり判定
+		CollisionItem(pPlayer->pos, PLAYER_RANGE);
 	}
 
 
