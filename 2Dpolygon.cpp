@@ -8,6 +8,7 @@
 //*** インクルードファイル ***
 //**********************************************************************************
 #include "2Dpolygon.h"
+#include "mathUtil.h"
 #include "Texture.h"
 
 //*************************************************************************************************
@@ -131,39 +132,16 @@ int Set2DPolygon(D3DXVECTOR3 pos, D3DXVECTOR3 rot, D3DXVECTOR2 size, int nIdText
 			p2DPoly->pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
 			/*** 頂点座標の設定 ***/
-			pVtx[0].pos.x = pos.x - (size.x * 0.5f);
-			pVtx[0].pos.y = pos.y - (size.y * 0.5f);
-			pVtx[0].pos.z = 0.0f;
-
-			pVtx[1].pos.x = pos.x + (size.x * 0.5f);
-			pVtx[1].pos.y = pos.y - (size.y * 0.5f);
-			pVtx[1].pos.z = 0.0f;
-
-			pVtx[2].pos.x = pos.x - (size.x * 0.5f);
-			pVtx[2].pos.y = pos.y + (size.y * 0.5f);
-			pVtx[2].pos.z = 0.0f;
-
-			pVtx[3].pos.x = pos.x + (size.x * 0.5f);
-			pVtx[3].pos.y = pos.y + (size.y * 0.5f);
-			pVtx[3].pos.z = 0.0f;
+			MyMathUtil::SetPolygonPos(pVtx, pos, size);
 
 			/*** 座標変換用係数の設定 ***/
-			pVtx[0].rhw = 1.0f;
-			pVtx[1].rhw = 1.0f;
-			pVtx[2].rhw = 1.0f;
-			pVtx[3].rhw = 1.0f;
+			MyMathUtil::SetPolygonRHW(pVtx);
 
 			/*** 頂点カラー設定 ***/
-			pVtx[0].col = D3DXCOLOR_NULL;
-			pVtx[1].col = D3DXCOLOR_NULL;
-			pVtx[2].col = D3DXCOLOR_NULL;
-			pVtx[3].col = D3DXCOLOR_NULL;
+			MyMathUtil::SetDefaultColor<VERTEX_2D>(pVtx);
 
-			/*** テクスチャ座標の設定 ***/
-			pVtx[0].tex = D3DXVECTOR2(0.0f, 0.0f);
-			pVtx[1].tex = D3DXVECTOR2(1.0f, 0.0f);
-			pVtx[2].tex = D3DXVECTOR2(0.0f, 1.0f);
-			pVtx[3].tex = D3DXVECTOR2(1.0f, 1.0f);
+			/*** テクスチャ設定 ***/
+			MyMathUtil::SetDefaultTexture<VERTEX_2D>(pVtx);
 
 			/*** 頂点バッファの設定を終了 ***/
 			p2DPoly->pVtxBuff->Unlock();
