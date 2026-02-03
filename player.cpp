@@ -63,7 +63,7 @@ void InitPlayer(void)
 	}
 
 	// 少女のパーツ、モーションを読み込む
-	LoadMotion("data\\Scripts\\mouse.txt", &aIdxMotion[PLAYERTYPE_GIRL]);			// モーションスクリプトを読み込む
+	LoadMotion("data\\Motion\\geargirl.txt", &aIdxMotion[PLAYERTYPE_GIRL]);			// モーションスクリプトを読み込む
 	LPPARTS_INFO pPartsInfoGirl = GetPartsInfo(aIdxMotion[PLAYERTYPE_GIRL]);	// パーツ情報のアドレスを取得
 	LPMOTIONSCRIPT_INFO pMotionInfoGirl = GetMotionScriptInfo(aIdxMotion[PLAYERTYPE_GIRL]);	// モーション情報のアドレスを取得
 
@@ -471,7 +471,7 @@ void MovePlayer(PlayerType nPlayer)
 		if (GetKeyboardPress(DIK_LEFT) == true || GetJoypadPress(nPlayer, JOYKEY_LEFT) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_LEFT))
 		{// 左矢印が押される	
 
-			if ((pPlayer->bFinishMotion == true || pPlayer->motionType == MOTIONTYPE_LANDING || pPlayer->motionType == MOTIONTYPE_NEUTRAL)
+			if ((pPlayer->bFinishMotion == true && pPlayer->motionType == MOTIONTYPE_LANDING || pPlayer->motionType == MOTIONTYPE_NEUTRAL)
 				&& pPlayer->motionType != MOTIONTYPE_MOVE && pPlayer->motionTypeBlend != MOTIONTYPE_MOVE)
 			{
 				SetMotionType(MOTIONTYPE_MOVE, false, 10, nPlayer);

@@ -60,7 +60,7 @@ void InitModel(void)
 // =================================================
 void UninitModel(void)
 {
-	for (int nCntModel = 0; nCntModel < MODELTYPE_MAX; nCntModel++)
+	for (int nCntModel = 0; nCntModel < MAX_MODEL; nCntModel++)
 	{// ƒ‚ƒfƒ‹‚Ì”•ª”jŠü
 		if (g_ModelInfo[nCntModel].bUse == true)
 		{// Žg—p’†‚È‚ç
