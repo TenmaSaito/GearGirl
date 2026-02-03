@@ -155,6 +155,7 @@
     <ClCompile Include="3Dmodel.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="debugproc.cpp" />
+    <ClCompile Include="effect.cpp" />
     <ClCompile Include="explosion.cpp" />
     <ClCompile Include="fade.cpp" />
     <ClCompile Include="field.cpp" />
@@ -178,6 +179,7 @@
     <ClCompile Include="Result.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="thread.cpp" />
+    <ClCompile Include="timer.cpp" />
     <ClCompile Include="title.cpp" />
     <ClCompile Include="modeldata.cpp" />
   </ItemGroup>
@@ -186,6 +188,7 @@
     <ClInclude Include="3Dmodel.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="debugproc.h" />
+    <ClInclude Include="effect.h" />
     <ClInclude Include="endomacro.h" />
     <ClInclude Include="explosion.h" />
     <ClInclude Include="fade.h" />
@@ -206,6 +209,7 @@
     <ClInclude Include="Result.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="thread.h" />
+    <ClInclude Include="timer.h" />
     <ClInclude Include="title.h" />
     <ClInclude Include="modeldata.h" />
   </ItemGroup>
