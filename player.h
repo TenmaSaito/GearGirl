@@ -53,7 +53,7 @@ typedef enum
 typedef enum
 {
 	PLAYERSTATE_NEUTRAL = 0,	// 待機状態
-	PLAYERSTATE_WALK,			// 歩き状態
+	PLAYERSTATE_MOVE,			// 歩き状態
 	PLAYERSTATE_ATTACK,			// 攻撃状態
 	PLAYERSTATE_JUMP,			// ジャンプ状態
 	PLAYERSTATE_LAND,			// 着地状態

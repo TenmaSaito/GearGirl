@@ -63,7 +63,7 @@ void InitPlayer(void)
 	}
 
 	// 少女のパーツ、モーションを読み込む
-	LoadMotion("data\\Motion\\geargirl.txt", &aIdxMotion[PLAYERTYPE_GIRL]);			// モーションスクリプトを読み込む
+	LoadMotion("data\\Scripts\\geargirl.txt", &aIdxMotion[PLAYERTYPE_GIRL]);			// モーションスクリプトを読み込む
 	LPPARTS_INFO pPartsInfoGirl = GetPartsInfo(aIdxMotion[PLAYERTYPE_GIRL]);	// パーツ情報のアドレスを取得
 	LPMOTIONSCRIPT_INFO pMotionInfoGirl = GetMotionScriptInfo(aIdxMotion[PLAYERTYPE_GIRL]);	// モーション情報のアドレスを取得
 
@@ -139,11 +139,10 @@ void UpdatePlayer(void)
 
 		UpdateMotion((PlayerType)nCntPlayer);
 
-		if (pPlayer->bFinishMotion == true && (pPlayer->motionType != MOTIONTYPE_NEUTRAL
-			&& pPlayer->motionTypeBlend != MOTIONTYPE_NEUTRAL) || pPlayer->motionType == MOTIONTYPE_MOVE || pPlayer->motionTypeBlend == MOTIONTYPE_MOVE)
-		{
-			SetMotionType(MOTIONTYPE_NEUTRAL, true, 10, (PlayerType)nCntPlayer);
-		}
+		//if (pPlayer->bFinishMotion == true && pPlayer->motionType != MOTIONTYPE_NEUTRAL)
+		//{
+		//	SetMotionType(MOTIONTYPE_NEUTRAL, true, 10, (PlayerType)nCntPlayer);
+		//}
 
 		// 重力をかけ続ける
 		pPlayer->move.y += GRAVITY;
@@ -219,14 +218,14 @@ void UpdatePlayer(void)
 		PrintDebugProc("操作対象 : 0 → 少女\n                1 → ネズミ\n");
 
 		PrintDebugProc("\nPlayer0 : [SPACE] :  JUMP\n");
-		PrintDebugProc("\nPlayer1 : [RSHIFT] :  JUMP\n");
+		PrintDebugProc("Player1 : [RSHIFT] :  JUMP\n");
 
-		PrintDebugProc("\nPlayer1 : nCounterMotion [%d]\n", g_aPlayer[1].nCounterMotion);
-		PrintDebugProc("\nPlayer1 : nCounterMotionBlend [%d]\n", g_aPlayer[1].nCounterMotionBlend);
-		PrintDebugProc("\nPlayer1 : [%d]\n", g_aPlayer[0].bLoop);
-		PrintDebugProc("\nPlayer1 : BlendMotion [%d]\n", g_aPlayer[1].bBlendMotion);
-		PrintDebugProc("\nPlayer1 : Motiontype [%d]\n", g_aPlayer[1].motionType);
-		PrintDebugProc("\nPlayer1 : MotiontypeBlend [%d]\n", g_aPlayer[1].motionTypeBlend);
+		PrintDebugProc("Player1 : nCounterMotion [%d]\n", g_aPlayer[1].nCounterMotion);
+		PrintDebugProc("Player1 : nCounterMotionBlend [%d]\n", g_aPlayer[1].nCounterMotionBlend);
+		PrintDebugProc("Player1 : [%d]\n", g_aPlayer[0].bLoop);
+		PrintDebugProc("Player1 : BlendMotion [%d]\n", g_aPlayer[1].bBlendMotion);
+		PrintDebugProc("Player1 : Motiontype [%d]\n", g_aPlayer[1].motionType);
+		PrintDebugProc("Player1 : MotiontypeBlend [%d]\n", g_aPlayer[1].motionTypeBlend);
 	}
 }
 
@@ -470,12 +469,11 @@ void MovePlayer(PlayerType nPlayer)
 	{// ネズミの操作
 		if (GetKeyboardPress(DIK_LEFT) == true || GetJoypadPress(nPlayer, JOYKEY_LEFT) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_LEFT))
 		{// 左矢印が押される	
-
-			if ((pPlayer->bFinishMotion == true && pPlayer->motionType == MOTIONTYPE_LANDING || pPlayer->motionType == MOTIONTYPE_NEUTRAL)
-				&& pPlayer->motionType != MOTIONTYPE_MOVE && pPlayer->motionTypeBlend != MOTIONTYPE_MOVE)
+			if (pPlayer->bFinishMotion == true && (pPlayer->motionType == MOTIONTYPE_NEUTRAL || pPlayer->motionTypeBlend == MOTIONTYPE_NEUTRAL)
+				&& pPlayer->motionType != MOTIONTYPE_MOVE && pPlayer->motionTypeBlend != MOTIONTYPE_MOVE && pPlayer->state == PLAYERSTATE_NEUTRAL)
 			{
 				SetMotionType(MOTIONTYPE_MOVE, false, 10, nPlayer);
-				pPlayer->state = PLAYERSTATE_WALK;
+				pPlayer->state = PLAYERSTATE_MOVE;
 			}
 
 			if (GetKeyboardPress(DIK_UP) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
@@ -927,6 +925,7 @@ void UpdateMotion(PlayerType Type)
 	if (pPlayer->bBlendMotion == false)
 	{// ブレンドなし
 		pPlayer->nCounterMotion++;
+		pPlayer->nCntAllround++;
 
 		if (pPlayer->nCounterMotion >= pInfo->nFrame)
 		{ // モーションカウンターが現在のキー情報のフレーム数を超えた場合
@@ -938,11 +937,12 @@ void UpdateMotion(PlayerType Type)
 			/** キーを一つ進める **/
 			pPlayer->nKey = ((pPlayer->nKey + 1) % pPlayer->aMotionInfo[pPlayer->motionType].nNumKey);
 
-			if (pPlayer->nKey == 0 && pPlayer->bLoop == false)
+			if (pPlayer->nCntAllround >= pPlayer->aMotionInfo[pPlayer->motionType].nNumKey && pPlayer->motionType == MOTIONTYPE_MOVE || pPlayer->motionType == MOTIONTYPE_NEUTRAL)
 			{
 				pPlayer->bFinishMotion = true;
 				SetMotionType(MOTIONTYPE_NEUTRAL, false, 120, Type);
 				pPlayer->state = PLAYERSTATE_NEUTRAL;
+				pPlayer->nCntAllround = 0;
 			}
 
 			pPlayer->nCounterMotion = 0;
