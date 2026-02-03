@@ -379,6 +379,12 @@ void MovePlayer(PlayerType nPlayer)
 		if (GetKeyboardPress(DIK_A) == true || GetJoypadPress(nPlayer, JOYKEY_LEFT) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_LEFT))
 		{//Aキーが押される	
 
+			if (pPlayer->bFinishMotion == true && pPlayer->state != PLAYERSTATE_MOVE)
+			{
+				SetMotionType(MOTIONTYPE_MOVE, false, 10, nPlayer);
+				pPlayer->state = PLAYERSTATE_MOVE;
+			}
+
 			if (GetKeyboardPress(DIK_W) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
 			{// WとA(左上)の入力
 				pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.25f) * PLAYER_MOVE;
@@ -945,7 +951,7 @@ void UpdateMotion(PlayerType Type)
 			/** キーを一つ進める **/
 			pPlayer->nKey = ((pPlayer->nKey + 1) % pPlayer->aMotionInfo[pPlayer->motionType].nNumKey);
 
-			if (pPlayer->nCntAllround >= pPlayer->aMotionInfo[pPlayer->motionType].nNumKey && pPlayer->motionType == MOTIONTYPE_MOVE || pPlayer->motionType == MOTIONTYPE_NEUTRAL)
+			if (pPlayer->nKey == 0 && pPlayer->bLoop == false)
 			{
 				pPlayer->bFinishMotion = true;
 				SetMotionType(MOTIONTYPE_NEUTRAL, false, 120, Type);
