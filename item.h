@@ -15,14 +15,44 @@
 //=========================================================================================
 // マクロ定義
 //=========================================================================================
+#define MAX_ITEM		(16)		// アイテム最大数
+#define ITEM_RANK		(2)			// アイテムの等級段数
+#define ITEM_RANGE		(25.0f)		// アイテム当たり判定範囲
 
 //==============================================================
 // 列挙型
 //==============================================================
+typedef enum
+{
+	ITEMTYPE_SCREW_TRUE = 0,		// 新品ののねじ
+	ITEMTYPE_GEARS_TRUE,			// 磨かれた小さな歯車
+	ITEMTYPE_GEARL_TRUE,			// 綺麗な大きい歯車
+	ITEMTYPE_SHAFT_TRUE,			// まっすぐな軸
+	ITEMTYPE_SPRING_TRUE,			// 丁寧に直されたぜんまい
+	ITEMTYPE_SCREW_FALSE,			// 古いねじ
+	ITEMTYPE_GEARS_FALSE,			// 錆びた小さい歯車
+	ITEMTYPE_GEARL_FALSE,			// 欠けた大きい歯車
+	ITEMTYPE_SHAFT_FALSE,			// 少しい曲がった軸
+	ITEMTYPE_SPRING_FALSE,			// ゆがんだぜんまい
+	ITEMTYPE_MAX
+}ITEMTYPE;
 
 //==============================================================
 // 構造体定義
 //==============================================================
+typedef struct Item
+{
+	vec3			pos;
+	vec3			rot;
+	float			fRange;				// 当たり判定範囲（球）
+	ITEMTYPE		type;
+	bool			bUse;				// 構造体を使用しているかどうか
+	bool			bGet;				// プレイヤーが取得したかどうか
+
+	D3DXMATRIX		mtxWorld;			// ワールドマトリックス
+	int				nIdxTex;			// テクスチャインデックス
+}Item;
+POINTER(Item, P_ITEM);
 
 //=========================================================================================
 //プロトタイプ宣言
@@ -31,5 +61,7 @@ void InitItem(void);
 void UninitItem(void);
 void UpdateItem(void);
 void DrawItem(void);
+void CollisionItem(vec3 pos,float fRange);			// 当たり判定
+
 
 #endif // !_ITEM_H_
