@@ -218,14 +218,17 @@ int SetPrompt(D3DXVECTOR3 pos, D3DXVECTOR2 size, int nIdxTexture, bool bAuto)
 
 //==================================================================================
 // --- 検知判定 ---
+// return : 最も近距離で検知したプロンプト
 //==================================================================================
-bool DetectionPrompt(D3DXVECTOR3 pos, float fLength)
+int DetectionPrompt(D3DXVECTOR3 pos, float fLength)
 {
 	LPPROMPT pPrompt = &g_aPrompt[0];		// プロンプトポインタ
+	int nNearDetection = -1;				// 検知したプロンプト
+	float fDetectionLength = 1000000.0f;	// プロンプトとの距離
 
 	for (int nCntPrompt = 0; nCntPrompt < MAX_PROMPT; nCntPrompt++, pPrompt++)
 	{
-		if (pPrompt->bUse = true && pPrompt->bAuto == true)
+		if (pPrompt->bUse == true && pPrompt->bAuto == true)
 		{ // 使用されていて、検知判定オンなら
 			// 二点間の差分を求める
 			D3DXVECTOR3 length = pos - pPrompt->pos;
@@ -235,6 +238,11 @@ bool DetectionPrompt(D3DXVECTOR3 pos, float fLength)
 			if (fLengthPrompt <= fLength)
 			{ // 検知範囲内なら描画開始
 				pPrompt->bDisp = true;
+				if (fDetectionLength <= fLengthPrompt)
+				{ // もし今までで一番近いプロンプトなら更新
+					nNearDetection = nCntPrompt;
+					fDetectionLength = fLengthPrompt;
+				}
 			}
 			else
 			{ // 検知範囲外なら描画停止
@@ -242,6 +250,8 @@ bool DetectionPrompt(D3DXVECTOR3 pos, float fLength)
 			}
 		}
 	}
+
+	return nNearDetection;
 }
 
 //==================================================================================

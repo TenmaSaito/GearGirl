@@ -40,7 +40,7 @@ void UpdatePrompt(void);
 void DrawPrompt(void);
 
 int SetPrompt(D3DXVECTOR3 pos, D3DXVECTOR2 size, int nIdxTexture, bool bAuto);
-bool DetectionPrompt(D3DXVECTOR3 pos, float fLength);
+int DetectionPrompt(D3DXVECTOR3 pos, float fLength);
 void SetEnablePrompt(bool bDisp, int nIdxPrompt);
 D3DXVECTOR3 GetPromptPos(int nIdxPrompt);
 LPPROMPT GetPrompt(void);
