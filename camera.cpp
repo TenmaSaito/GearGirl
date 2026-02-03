@@ -354,14 +354,14 @@ void SetCamera(void)
 				pCam++;
 			}
 		}
-		else if (bCameraSwitch == false)
-		{
+		else if (bCameraSwitch == true)
+		{// 2P用カメラ設置
 			pCam++;
-			bCameraSwitch = true;
+			bCameraSwitch = false;
 		}
 		else
-		{
-			bCameraSwitch = false;
+		{// 1P用カメラ設置
+			bCameraSwitch = true;
 		}
 
 		if (pCam->bUse)
