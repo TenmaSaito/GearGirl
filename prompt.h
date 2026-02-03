@@ -28,6 +28,7 @@ typedef struct
 	int nIdxTexture;		// テクスチャインデックス
 	bool bUse;				// 使用状況
 	bool bDisp;				// 描画するか
+	bool bAuto;				// 検知判定を使用するか
 } Prompt, * LPPROMPT;
 
 //**********************************************************************************
@@ -38,7 +39,8 @@ void UninitPrompt(void);
 void UpdatePrompt(void);
 void DrawPrompt(void);
 
-int SetPrompt(D3DXVECTOR3 pos, D3DXVECTOR2 size, int nIdxTexture);
+int SetPrompt(D3DXVECTOR3 pos, D3DXVECTOR2 size, int nIdxTexture, bool bAuto);
+bool DetectionPrompt(D3DXVECTOR3 pos, float fLength);
 void SetEnablePrompt(bool bDisp, int nIdxPrompt);
 D3DXVECTOR3 GetPromptPos(int nIdxPrompt);
 LPPROMPT GetPrompt(void);
