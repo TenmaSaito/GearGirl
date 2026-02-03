@@ -10,6 +10,7 @@
 //==============================================================
 // ヘッダーインクルード
 #include "main.h"
+#include "modeldata.h"
 #include "endomacro.h"
 
 //=========================================================================================
@@ -24,21 +25,31 @@
 //==============================================================
 typedef enum
 {
-	ITEMTYPE_SCREW_TRUE = 0,		// 新品ののねじ
-	ITEMTYPE_GEARS_TRUE,			// 磨かれた小さな歯車
-	ITEMTYPE_GEARL_TRUE,			// 綺麗な大きい歯車
-	ITEMTYPE_SHAFT_TRUE,			// まっすぐな軸
-	ITEMTYPE_SPRING_TRUE,			// 丁寧に直されたぜんまい
-	ITEMTYPE_SCREW_FALSE,			// 古いねじ
-	ITEMTYPE_GEARS_FALSE,			// 錆びた小さい歯車
-	ITEMTYPE_GEARL_FALSE,			// 欠けた大きい歯車
-	ITEMTYPE_SHAFT_FALSE,			// 少しい曲がった軸
-	ITEMTYPE_SPRING_FALSE,			// ゆがんだぜんまい
+	ITEMTYPE_SCREW_TRUE = 0,		// [0] 新品ののねじ
+	ITEMTYPE_GEARS_TRUE,			// [1] 磨かれた小さな歯車
+	ITEMTYPE_GEARL_TRUE,			// [2] 綺麗な大きい歯車
+	ITEMTYPE_SHAFT_TRUE,			// [3] まっすぐな軸
+	ITEMTYPE_SPRING_TRUE,			// [4] 丁寧に直されたぜんまい
+	ITEMTYPE_SCREW_FALSE,			// [5] 古いねじ
+	ITEMTYPE_GEARS_FALSE,			// [6] 錆びた小さい歯車
+	ITEMTYPE_GEARL_FALSE,			// [7] 欠けた大きい歯車
+	ITEMTYPE_SHAFT_FALSE,			// [8] 少しい曲がった軸
+	ITEMTYPE_SPRING_FALSE,			// [9] ゆがんだぜんまい
 	ITEMTYPE_MAX
 }ITEMTYPE;
+//==============================================================
+// アイテム情報構造体定義
+//==============================================================
+typedef struct ItemInfo
+{
+	const char* pModelFile;
+	int			nNumGet;
+
+}ItemInfo;
+POINTER(ItemInfo, P_ITEMINFO);
 
 //==============================================================
-// 構造体定義
+// アイテム配置構造体定義
 //==============================================================
 typedef struct Item
 {
@@ -49,10 +60,12 @@ typedef struct Item
 	bool			bUse;				// 構造体を使用しているかどうか
 	bool			bGet;				// プレイヤーが取得したかどうか
 	bool			bCollision;			// 衝突するか(true)、取得するか(false)
+	int				nIdxModel;			// モデルデータのインデックス
 	D3DXMATRIX		mtxWorld;			// ワールドマトリックス
-	int				nIdxTex;			// テクスチャインデックス
 }Item;
 POINTER(Item, P_ITEM);
+
+
 
 //=========================================================================================
 //プロトタイプ宣言

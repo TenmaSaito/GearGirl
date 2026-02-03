@@ -13,17 +13,27 @@
 
 //**************************************************************
 // グローバル変数宣言
-LPDIRECT3DVERTEXBUFFER9 g_pVtxBuffItem = NULL;		// 頂点バッファへのポインタ
 int g_nSetItemNum;									// 設置済みのアイテム数
 Item g_aItem[MAX_ITEM];								// アイテム情報
-
+ItemInfo g_aItemInfo[ITEMTYPE_MAX] =
+{
+	{"data\\MODEL\\Item\\GearLarge.x",-1},	 // [0] 新品ののねじ
+	{"data\\MODEL\\Item\\GearLarge.x",-1},	 // [1] 磨かれた小さな歯車
+	{"data\\MODEL\\Item\\GearLarge.x",-1},	 // [2] 綺麗な大きい歯車
+	{"data\\MODEL\\Item\\GearLarge.x",-1},	 // [3] まっすぐな軸
+	{"data\\MODEL\\Item\\GearLarge.x",-1},	 // [4] 丁寧に直されたぜんまい
+	{"data\\MODEL\\Item\\GearLarge.x",-1},	 // [5] 古いねじ
+	{"data\\MODEL\\Item\\GearLarge.x",-1},	 // [6] 錆びた小さい歯車
+	{"data\\MODEL\\Item\\GearLargeDificit.x",-1},	 // [7] 欠けた大きい歯車
+	{"data\\MODEL\\Item\\GearLarge.x",-1},	 // [8] 少しい曲がった軸
+	{"data\\MODEL\\Item\\GearLarge.x",-1},	 // [9] ゆがんだぜんまい
+};
 //**************************************************************
 // プロトタイプ宣言
 void LoadItemSet(void);															// アイテムの配置情報を読み込み
-void SetItem(vec3 pos, vec3 rot, ITEMTYPE type, int nTex,bool bColi = false);	// アイテム設置
+void SetItem(vec3 pos, vec3 rot, ITEMTYPE type, bool bColi = false);			// アイテム設置
 void SaveItemSet(void);															// アイテムの配置情報を書き出し
 P_ITEM GetItem(void);															// 先頭アドレス取得
-
 
 //=========================================================================================
 // アイテム初期化
@@ -32,64 +42,31 @@ void InitItem(void)
 {
 	//**************************************************************
 	// 変数宣言
-	P_ITEM pItem = GetItem();
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();		// デバイスへのポインタ
-	VERTEX_3D* pVtx;								// 頂点情報へのポインタ
+	P_ITEM		pItem = GetItem();
+	P_ITEMINFO	pItemInfo = &g_aItemInfo[0];
+	HRESULT		hr;
 
-	g_nSetItemNum = 0;
+	// アイテム情報読込
+	for (int nCntItem = 0; nCntItem < ITEMTYPE_MAX; nCntItem++, pItemInfo++)
+	{
+		hr = LoadModelData(pItemInfo->pModelFile, &pItemInfo->nNumGet);
+		if (FAILED(hr))
+		{
+			
+		}
+	}
 
+	// アイテム配置初期化
 	for (int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++, pItem++)
 	{
 		pItem->bGet = false;
 		pItem->bUse = false;
 	}
 
-	// 頂点バッファの読み込み
-	pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * 4 * MAX_ITEM,
-		D3DUSAGE_WRITEONLY,
-		FVF_VERTEX_3D,
-		D3DPOOL_MANAGED,
-		&g_pVtxBuffItem,
-		NULL);
-
-	//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-	// 頂点バッファをロックし、頂点情報へのポインタを取得
-	g_pVtxBuffItem->Lock(0, 0, (void**)&pVtx, 0);
-
-	for (int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++, pVtx += 4)
-	{
-		// 頂点座標を設定
-		pVtx[0].pos = vec3(-ITEM_RANGE,  ITEM_RANGE, 0.0f);
-		pVtx[1].pos = vec3( ITEM_RANGE,  ITEM_RANGE, 0.0f);
-		pVtx[2].pos = vec3(-ITEM_RANGE, -ITEM_RANGE, 0.0f);
-		pVtx[3].pos = vec3( ITEM_RANGE, -ITEM_RANGE, 0.0f);
-
-		// 法線ベクトルの設定
-		pVtx[0].nor = vec3(0.0f, 0.0f, -1.0f);
-		pVtx[1].nor = vec3(0.0f, 0.0f, -1.0f);
-		pVtx[2].nor = vec3(0.0f, 0.0f, -1.0f);
-		pVtx[3].nor = vec3(0.0f, 0.0f, -1.0f);
-
-		// 頂点カラー設定
-		pVtx[0].col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-		pVtx[1].col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-		pVtx[2].col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-		pVtx[3].col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-
-		// テクスチャの座標設定
-		pVtx[0].tex = vec2(0.0f, 0.0f);
-		pVtx[1].tex = vec2(1.0f, 0.0f);
-		pVtx[2].tex = vec2(0.0f, 1.0f);
-		pVtx[3].tex = vec2(1.0f, 1.0f);
-	}
-	// 頂点バッファのロック解除
-	g_pVtxBuffItem->Unlock();
-	//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-
-	EndDevice();
-
-	SetItem(vec3(0.0f, 140.0f, 100.0f), vec3_ZERO, ITEMTYPE_GEARL_FALSE,3);
-
+	// 設置
+	g_nSetItemNum = 0;
+	SetItem(vec3(0.0f, 140.0f, 100.0f), vec3_ZERO, ITEMTYPE_GEARL_TRUE);
+	SetItem(vec3(0.0f, 140.0f, -100.0f), vec3_ZERO, ITEMTYPE_GEARL_FALSE);
 }
 
 //=========================================================================================
@@ -97,13 +74,7 @@ void InitItem(void)
 //=========================================================================================
 void UninitItem(void)
 {
-	//**************************************************************
-	// 頂点バッファの破棄
-	if (g_pVtxBuffItem != NULL)
-	{
-		g_pVtxBuffItem->Release();
-		g_pVtxBuffItem = NULL;
-	}
+
 }
 
 //=========================================================================================
@@ -126,87 +97,60 @@ void DrawItem(void)
 {
 	//**************************************************************
 	// 変数宣言
-	P_ITEM pItem = GetItem();
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();		// デバイスへのポインタ
-	D3DXMATRIX mtxView, mtxTrans;					// マトリックス計算用
+	P_ITEM			pItem = GetItem();				// 配置情報へのポインタ
+	D3DXMATRIX		mtxView, mtxRot, mtxTrans;		// マトリックス計算用
+	PMODELDATA		pModel;							// モデルデータへのポインタ
+	D3DMATERIAL9	matDef;							// 現在のマテリアル保存用
+	D3DXMATERIAL*	pMat;							// マテリアルデータへのポインタ
+
 
 	for (int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++, pItem++)
 	{
 		if (pItem->bUse &&( pItem->bGet == false || pItem->bCollision))
 		{
+			// インデックスからモデルデータを取得
+			pModel = GetModelData(pItem->nIdxModel);
+			
 			//**************************************************************
 			// ワールドマトリックスの初期化
 			D3DXMatrixIdentity(&pItem->mtxWorld);
 
-			// ビューマトリックスを取得
-			pDevice->GetTransform(D3DTS_VIEW, &mtxView);
-
-			//**************************************************************
 			// 向きを反映
-			// ポリゴンをカメラに対して正面に向ける
+			D3DXMatrixRotationYawPitchRoll(&mtxRot, pItem->rot.y, pItem->rot.x, pItem->rot.z);
+			D3DXMatrixMultiply(&pItem->mtxWorld, &pItem->mtxWorld, &mtxRot);
 
-			// D3DXMatrixInverse(&g_aBullet[nCntBullet].mtxWorld, NULL, &mtxView);　// 全部反対に向ける
-			// 下の９行はInVerseの内容
-			// Y軸
-			pItem->mtxWorld._11 = mtxView._11;
-			pItem->mtxWorld._12 = mtxView._21;
-			pItem->mtxWorld._13 = mtxView._31;
-
-			//// X軸　->　そのまま
-			//pItem->mtxWorld._21 = mtxView._12;
-			//pItem->mtxWorld._22 = mtxView._22;
-			//pItem->mtxWorld._23 = mtxView._32;
-
-			// Z軸
-			pItem->mtxWorld._31 = mtxView._13;
-			pItem->mtxWorld._32 = mtxView._23;
-			pItem->mtxWorld._33 = mtxView._33;
-
-			//// pos追従
-			//pItem->mtxWorld._41 = 0.0f;
-			//pItem->mtxWorld._42 = 0.0f;
-			//pItem->mtxWorld._43 = 0.0f;
-
-			//**************************************************************
 			// 位置を反映
 			D3DXMatrixTranslation(&mtxTrans, pItem->pos.x, pItem->pos.y, pItem->pos.z);
 			D3DXMatrixMultiply(&pItem->mtxWorld, &pItem->mtxWorld, &mtxTrans);
 
-			//**************************************************************
 			// ワールドマトリックスの設定
 			pDevice->SetTransform(D3DTS_WORLD, &pItem->mtxWorld);
 
-			//**************************************************************
-			// 頂点バッファをデータストリームに設定
-			pDevice->SetStreamSource(0,
-				g_pVtxBuffItem,
-				0,
-				sizeof(VERTEX_3D));
+			//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+			// 現在のマテリアルを取得
+			pDevice->GetMaterial(&matDef);
 
-			////$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-			//Zテストを無効にする
-			//pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
-			//pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+			// マテリアルデータへのポインタを取得
+			pMat = (D3DXMATERIAL*)pModel->pBuffMat->GetBufferPointer();
 
-			//**************************************************************
-			// 頂点フォーマットの設定
-			pDevice->SetFVF(FVF_VERTEX_3D);
+			for (int nCntMat = 0; nCntMat < (int)pModel->dwNumMat; nCntMat++)
+			{
+				// マテリアルの設定
+				pDevice->SetMaterial(&pMat[nCntMat].MatD3D);
 
-			//**************************************************************
-			// テクスチャの設定
-			pDevice->SetTexture(0, GetTexture(pItem->nIdxTex));
+				// テクスチャの設定
+				pDevice->SetTexture(0, pModel->apTexture[nCntMat]);
 
-			//**************************************************************
-			// ポリゴンの描画
-			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, nCntItem * 4, 2);
-			
-			//Zテストを有効にする
-			//pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
-			//pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
-			////$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+				// モデル(パーツ)の描画
+				pModel->pMesh->DrawSubset(nCntMat);
+			}
+
+			// 保存していたマテリアルに戻す
+			pDevice->SetMaterial(&matDef);
+			//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 		}
 	}
-
 	EndDevice();
 }
 
@@ -237,11 +181,11 @@ void CollisionItem(vec3 pos, float fRange)
 			float fDistZ = SQUARE(pItem->pos.z - pos.z);
 			float fDist = sqrtf(__ABSOLUTE(SQUARE(pItem->pos.x - pos.x) + SQUARE(pItem->pos.y - pos.y) + SQUARE(pItem->pos.z - pos.z)));
 			
-			PrintDebugProc("Player<=>Item %f\nPlayerRnge = %f\n ItemRange = %f\n", fDist, fRange, pItem->fRange);
+			// PrintDebugProc("Player<=>Item %f\nPlayerRnge = %f\n ItemRange = %f\n", fDist, fRange, pItem->fRange);
 
 			if (fDist <= pItem->fRange + fRange)
 			{
-				PrintDebugProc("!!! 衝突中 !!!\n\n");
+				// PrintDebugProc("!!! 衝突中 !!!\n\n");
 				pItem->bGet = true;
 				break;
 			}
@@ -252,7 +196,7 @@ void CollisionItem(vec3 pos, float fRange)
 
 //=========================================================================================
 // 単体アイテム設置
-void SetItem(vec3 pos, vec3 rot, ITEMTYPE type, int nTex, bool bColi)
+void SetItem(vec3 pos, vec3 rot, ITEMTYPE type, bool bColi)
 {
 	//**************************************************************
 	// 変数宣言
@@ -267,8 +211,8 @@ void SetItem(vec3 pos, vec3 rot, ITEMTYPE type, int nTex, bool bColi)
 				pItem->pos = pos;
 				pItem->rot = rot;
 				pItem->fRange = ITEM_RANGE;
-				pItem->type = type;
-				pItem->nIdxTex = nTex;
+				pItem->type = type;								// アイテムタイプ
+				pItem->nIdxModel = g_aItemInfo[type].nNumGet;	// モデルデータインデックス
 				pItem->bCollision = bColi;
 				pItem->bGet = false;
 				pItem->bUse = true;
