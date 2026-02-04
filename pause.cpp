@@ -14,6 +14,8 @@
 //==========================================================================================
 // ****** ポーズの選択肢を変更するとき ******
 // "ヘッダー"、"テクスチャファイル名"、"UpdatePauseのENTERキーが押された場合"の3つを変更
+// それに応じてマクロ定義の LINE_SPACE も変更可だが、
+// HEIGHT_SIZE , WIDTH_SIZE はなるべく変更しない方が良し
 //==========================================================================================
 
 //=========================================================
@@ -220,23 +222,23 @@ void UpdatePause(void)
 		nPauseData = 0;
 	}
 
-	////-------------------------------------
-	////ENTERキーが押された
-	//if (GetJoypadPress(0, JOYKEY_A) == true || GetJoypadPress(1, JOYKEY_A) == true || GetKeyboardPress(DIK_RETURN) == true)
-	//{
-	//	switch (nPauseData)
-	//	{
-	//	case PAUSE_MENU_RESTART:
-	//		SetFade(MODE_GAME);
-	//		break;
-	//	case PAUSE_MENU_RETITLE:
-	//		SetFade(MODE_TITLE);
-	//		break;
-	//	case PAUSE_MENU_CLOSE:
-	//		SetEnablePause(false);
-	//		break;
-	//	}
-	//}
+	//-------------------------------------
+	//ENTERキーが押された
+	if (GetJoypadPress(0, JOYKEY_A) == true || GetJoypadPress(1, JOYKEY_A) == true || GetKeyboardPress(DIK_RETURN) == true)
+	{
+		switch (nPauseData)
+		{
+		case PAUSE_MENU_RESTART:
+			SetFade(MODE_GAME);
+			break;
+		case PAUSE_MENU_RETITLE:
+			SetFade(MODE_TITLE);
+			break;
+		case PAUSE_MENU_CLOSE:
+			SetEnablePause(false);			// game.cppのUpdateの下部にあるモード変更を消したら起動します
+			break;
+		}
+	}
 
 	// 頂点バッファをアンロック
 	g_pVtxBuffPause->Unlock();
