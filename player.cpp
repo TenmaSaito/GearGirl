@@ -160,7 +160,8 @@ void UpdatePlayer(void)
 
 		UpdateMotion((PlayerType)nCntPlayer);
 
-		if (pPlayer->bFinishMotion == true)
+		if (pPlayer->bFinishMotion == true || (pPlayer->motionType != MOTIONTYPE_ACTION && pPlayer->motionType != MOTIONTYPE_JUMP && pPlayer->motionType != MOTIONTYPE_LANDING && pPlayer->motionType != MOTIONTYPE_MOVE
+			&& pPlayer->motionTypeBlend != MOTIONTYPE_ACTION && pPlayer->motionTypeBlend != MOTIONTYPE_JUMP && pPlayer->motionTypeBlend != MOTIONTYPE_LANDING && pPlayer->motionTypeBlend != MOTIONTYPE_MOVE))
 		{
 			SetMotionType(MOTIONTYPE_NEUTRAL, true, 10, (PlayerType)nCntPlayer);
 		}
@@ -414,9 +415,9 @@ void MovePlayer(PlayerType nPlayer)
 		if (GetKeyboardPress(DIK_A) == true || GetJoypadPress(nPlayer, JOYKEY_LEFT) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_LEFT))
 		{//Aキーが押される	
 
-			if (pPlayer->bFinishMotion == true && pPlayer->state == PLAYERSTATE_NEUTRAL)
+			if (pPlayer->motionType != MOTIONTYPE_MOVE && pPlayer->motionTypeBlend != MOTIONTYPE_MOVE && pPlayer->motionType != MOTIONTYPE_JUMP)
 			{
-				SetMotionType(MOTIONTYPE_MOVE, false, 10, nPlayer);
+				SetMotionType(MOTIONTYPE_MOVE, true, 10, nPlayer);
 				pPlayer->state = PLAYERSTATE_MOVE;
 			}
 
@@ -726,6 +727,7 @@ void SetMotionType(MOTIONTYPE motionTypeNext, bool bBlend, int nFrameBlend, Play
 		pPlayer->bLoop = pPlayer->aMotionInfo[motionTypeNext].bLoop;
 		pPlayer->nNumKey = pPlayer->aMotionInfo[motionTypeNext].nNumKey;
 		pPlayer->bFinishMotion = false;
+		pPlayer->nCntAllround = 0;
 
 		/*** 現在のモーションのキー情報へのポインタ ***/
 		KEY_INFO* pInfo = &pPlayer->aMotionInfo[pPlayer->motionType].aKeyInfo[pPlayer->nKey];
@@ -797,6 +799,7 @@ void SetMotionType(MOTIONTYPE motionTypeNext, bool bBlend, int nFrameBlend, Play
 		pPlayer->nFrameBlend = nFrameBlend;
 		pPlayer->nNumKeyBlend = pPlayer->aMotionInfo[motionTypeNext].nNumKey;
 		pPlayer->nKeyBlend = 0;
+		pPlayer->nCntAllround = 0;
 	}
 }
 
@@ -987,9 +990,10 @@ void UpdateMotion(PlayerType Type)
 			if (pPlayer->nKey == 0 && pPlayer->bLoop == false)
 			{
 				pPlayer->bFinishMotion = true;
-				SetMotionType(MOTIONTYPE_NEUTRAL, true, 0, Type);
+				SetMotionType(MOTIONTYPE_NEUTRAL, true, 1, Type);
 				pPlayer->state = PLAYERSTATE_NEUTRAL;
 			}
+
 
 			pPlayer->nCounterMotion = 0;
 		}
@@ -1003,7 +1007,6 @@ void UpdateMotion(PlayerType Type)
 			/** ブレンドモーションのキーを一つ進める **/
 			pPlayer->nKeyBlend = ((pPlayer->nKeyBlend + 1) % pPlayer->aMotionInfo[pPlayer->motionTypeBlend].nNumKey);
 			pPlayer->nCounterMotionBlend = 0;
-			g_Land++;
 		}
 
 		pPlayer->nCounterBlend++;
@@ -1011,7 +1014,7 @@ void UpdateMotion(PlayerType Type)
 		if (pPlayer->nCounterBlend >= pPlayer->nFrameBlend)
 		{ // ブレンドカウンターがブレンドフレーム数を超えた場合	
 			pPlayer->bFinishMotion = true;
-			SetMotionType(pPlayer->motionTypeBlend, false, 10, Type);
+			SetMotionType(pPlayer->motionTypeBlend, false, 20, Type);
 			//g_Land++;
 		}
 	}
