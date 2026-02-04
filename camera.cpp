@@ -15,7 +15,8 @@
 //**************************************************************
 // グローバル変数宣言
 Camera g_aCamera[MAX_CAMERA];
-int		g_nEnableCamera;				// 起動させるカメラの数
+int		g_nNumEnableCamera;				// 起動させるカメラの数
+int		g_nActivePlayer;				// １P時の画面のキャラクター
 
 //**************************************************************
 // プロトタイプ宣言
@@ -36,7 +37,8 @@ void InitCamera(void)
 
 	//**************************************************************
 	// 各値の初期化
-	g_nEnableCamera = GetNumPlayer();	// プレイヤー数
+	g_nNumEnableCamera = GetNumPlayer();	// プレイヤー数
+	g_nActivePlayer = 0;	// 画面のプレイヤー
 
 	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCamera++)
 	{
@@ -48,12 +50,12 @@ void InitCamera(void)
 
 		switch (nCntCamera)
 		{
-		case PLAYER_TWO:
-			pCamera->rot = D3DXVECTOR3(D3DX_PI * 0.35f, 0.0f, 0.0f);	// カメラの角度
+		case PLAYER_TWO:	// 2P用のカメラ設定
+			pCamera->rot = CAMERA_2P_ROT;	// カメラの角度
 			pCamera->fDist = CAMERA_2P_DISTANS;
 			break;
-		default:
-			pCamera->rot = D3DXVECTOR3(D3DX_PI * 0.2f, 0.0f, 0.0f);		// カメラの角度
+		default:			// その他のカメラ設定
+			pCamera->rot = CAMERA_1P_ROT;		// カメラの角度
 			pCamera->fDist = CAMERA_1P_DISTANS;							// 視点と注視点の距離
 			break;
 		}
@@ -83,11 +85,11 @@ void SetCameraOption(void)
 	// 変数宣言
 	P_CAMERA pCamera = GetCamera();
 
-	g_nEnableCamera = GetNumPlayer();	// プレイヤー数
+	g_nNumEnableCamera = GetNumPlayer();	// プレイヤー数
 
 	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCamera++)
 	{		
-		if (g_nEnableCamera < 2)
+		if (g_nNumEnableCamera < 2)
 		{// 1P
 			pCamera->viewport.X = 0.0f;								// 画面左上 X 座標
 			pCamera->viewport.Y = 0.0f;								// 画面左上 Y 座標
@@ -120,10 +122,23 @@ void UpdateCamera(void)
 	//**************************************************************
 	// 変数宣言
 	P_CAMERA pCamera = GetCamera();
+	int			nActivePlayer = GetActivePlayer();
 
-	if (g_nEnableCamera != GetNumPlayer())
+	// プレイヤー数が変わったら
+	if (g_nNumEnableCamera != GetNumPlayer())
 	{
 		SetCameraOption();
+	}
+
+	// 操作キャラが変わったら
+	if (g_nActivePlayer != nActivePlayer)
+	{
+		g_aCamera[nActivePlayer].posR = g_aCamera[g_nActivePlayer].posR;
+		g_aCamera[nActivePlayer].posV = g_aCamera[g_nActivePlayer].posV;
+		g_aCamera[nActivePlayer].rot = g_aCamera[g_nActivePlayer].rot;
+		g_aCamera[nActivePlayer].fDist = g_aCamera[g_nActivePlayer].fDist;
+
+		g_nActivePlayer = nActivePlayer;
 	}
 
 		if (GetKeyboardPress(CAM_2POPRAT))
@@ -188,6 +203,25 @@ void CameraFollow(void)
 				g_camera.posRDest = pos;
 			}
 #endif
+			//**************************************************************
+			// キャラクターに応じて角度を変更
+			switch (nPlayer)
+			{
+			case PLAYER_ONE:
+				pCamera->rot += (CAMERA_1P_ROT - pCamera->rot) * 0.25f;
+				pCamera->fDist += (CAMERA_1P_DISTANS - pCamera->fDist) * 0.25f;
+				break;
+
+			case PLAYER_TWO:
+				pCamera->rot += (CAMERA_2P_ROT - pCamera->rot) * 0.25f;
+				pCamera->fDist += (CAMERA_2P_DISTANS - pCamera->fDist) * 0.25f;
+				break;
+
+			default:
+				break;
+			}
+
+
 			//**************************************************************
 			// カメラの位置を補正
 			pCamera->posR.x += (pCamera->posRDest.x - pCamera->posR.x) * CAMERA_FOLLOW_FACTOR;
@@ -341,15 +375,15 @@ void SetCamera(void)
 {
 	//**************************************************************
 	// 変数宣言
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();		// デバイスへのポインタ
+	LPDIRECT3DDEVICE9	pDevice = GetDevice();		// デバイスへのポインタ
 	P_CAMERA			pCam = GetCamera();
 	static bool bCameraSwitch = false;				// 複数画面描画時カメラの切り替え
 
 	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCam++)
 	{
-		if (g_nEnableCamera == 1)
+		if (g_nNumEnableCamera == 1)
 		{
-			if (GetActivePlayer() == PLAYERTYPE_MOUSE)
+			if (g_nActivePlayer == PLAYERTYPE_MOUSE)
 			{
 				pCam++;
 			}
@@ -399,6 +433,7 @@ void SetCamera(void)
 			return;
 		}
 	}
+	EndDevice();// デバイス取得終了
 }
 
 //=========================================================================================
@@ -464,7 +499,7 @@ void GetCameraRot(int nCamNum, vec3* pRot)
 //=========================================================================================
 int GetCameraNum(void)
 {
-	return g_nEnableCamera;
+	return g_nNumEnableCamera;
 }
 
 //=========================================================================================
