@@ -19,17 +19,17 @@
 //=========================================================
 //マクロ定義
 //=========================================================
-#define MAX_POUSE		PAUSE_MENU_MAX		//ポーズの種類
-#define HEIGHT_SIZE		100.0f 				//縦サイズ
-#define WIDTH_SIZE		600.0f				//横サイズ
-#define LINE_SPACE		50.0f				//行間隔
+#define MAX_POUSE		PAUSE_MENU_MAX		// ポーズの種類
+#define HEIGHT_SIZE		100.0f 				// 縦サイズ
+#define WIDTH_SIZE		600.0f				// 横サイズ
+#define LINE_SPACE		50.0f				// 行間隔
 
 //=========================================================
 //グローバル変数
 //=========================================================
-LPDIRECT3DTEXTURE9		g_apTexturePause[MAX_POUSE]	 = {};		//テクスチャへのポインタ
-LPDIRECT3DVERTEXBUFFER9	g_pVtxBuffPause				 = NULL;	//頂点バッファへのポインタ
-D3DXVECTOR3 g_posPause[MAX_POUSE];								//位置
+LPDIRECT3DTEXTURE9		g_apTexturePause[MAX_POUSE]	 = {};		// テクスチャへのポインタ
+LPDIRECT3DVERTEXBUFFER9	g_pVtxBuffPause				 = NULL;	// 頂点バッファへのポインタ
+D3DXVECTOR3 g_posPause[MAX_POUSE];								// 位置
 bool nUpDisp = false;
 int nUpCounter = 0;
 int nPauseData;
@@ -49,23 +49,23 @@ const char* c_apFilenamePause[PAUSE_MENU_MAX] =
 //=========================================================
 void InitPause(void)
 {
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();		//デバイスへのポインタの取得
-	VERTEX_2D* pVtx;								//頂点情報へのポインタ
+	LPDIRECT3DDEVICE9 pDevice = GetDevice();		// デバイスへのポインタの取得
+	VERTEX_2D* pVtx;								// 頂点情報へのポインタ
 	float fDrawStart = 0.0f;
 
 	//-------------------------------------
-	//テクスチャの読み込み
+	// テクスチャの読み込み
 	for (int nCnrTex = 0; nCnrTex < PAUSE_MENU_MAX; nCnrTex++)
 	{
 		D3DXCreateTextureFromFile(pDevice, c_apFilenamePause[nCnrTex], &g_apTexturePause[nCnrTex]);
 	}
 
 	//-------------------------------------
-	//計算
+	// 計算
 	fDrawStart = SCREEN_HEIGHT / 2 - (PAUSE_MENU_MAX * HEIGHT_SIZE + (PAUSE_MENU_MAX - 1) * LINE_SPACE) / 2;
 
 	//-------------------------------------
-	//初期化
+	// 初期化
 	nPauseData = 0;
 	for (int nCntPouse = 0; nCntPouse < MAX_POUSE; nCntPouse++)
 	{
@@ -73,7 +73,7 @@ void InitPause(void)
 	}
 
 	//-------------------------------------
-	//頂点バッファの作成
+	// 頂点バッファの作成
 	pDevice->CreateVertexBuffer(sizeof(VERTEX_2D) * 4 * MAX_POUSE,
 		D3DUSAGE_WRITEONLY,
 		FVF_VERTEX_2D,
@@ -82,30 +82,30 @@ void InitPause(void)
 		NULL);
 
 	//-------------------------------------
-	//頂点バッファをロックし、頂点情報へのポインタを獲得
+	// 頂点バッファをロックし、頂点情報へのポインタを獲得
 	g_pVtxBuffPause->Lock(0, 0, (void**)&pVtx, 0);
 
 	for (int nCntPause = 0; nCntPause < MAX_POUSE; nCntPause++)
 	{
-		//位置の設定
+		// 位置の設定
 		pVtx[0].pos = D3DXVECTOR3(g_posPause[nCntPause].x - WIDTH_SIZE * 0.5f, nCntPause * (LINE_SPACE + HEIGHT_SIZE) + fDrawStart, 0.0f);
 		pVtx[1].pos = D3DXVECTOR3(g_posPause[nCntPause].x + WIDTH_SIZE * 0.5f, nCntPause * (LINE_SPACE + HEIGHT_SIZE) + fDrawStart, 0.0f);
-		pVtx[2].pos = D3DXVECTOR3(g_posPause[nCntPause].x - WIDTH_SIZE * 0.5f, nCntPause * (LINE_SPACE + HEIGHT_SIZE) + fDrawStart + HEIGHT_SIZE, 0.0f);		//間隔, 描画始め, サイズ
+		pVtx[2].pos = D3DXVECTOR3(g_posPause[nCntPause].x - WIDTH_SIZE * 0.5f, nCntPause * (LINE_SPACE + HEIGHT_SIZE) + fDrawStart + HEIGHT_SIZE, 0.0f);		// 間隔, 描画始め, サイズ
 		pVtx[3].pos = D3DXVECTOR3(g_posPause[nCntPause].x + WIDTH_SIZE * 0.5f, nCntPause * (LINE_SPACE + HEIGHT_SIZE) + fDrawStart + HEIGHT_SIZE, 0.0f);
 		
-		//rhwの設定
+		// rhwの設定
 		pVtx[0].rhw = 1.0f;
 		pVtx[1].rhw = 1.0f;
 		pVtx[2].rhw = 1.0f;
 		pVtx[3].rhw = 1.0f;
 
-		//頂点カラーの設定
+		// 頂点カラーの設定
 		pVtx[0].col = D3DCOLOR_RGBA(255, 255, 255, 155);
 		pVtx[1].col = D3DCOLOR_RGBA(255, 255, 255, 155);
 		pVtx[2].col = D3DCOLOR_RGBA(255, 255, 255, 155);
 		pVtx[3].col = D3DCOLOR_RGBA(255, 255, 255, 155);
 
-		//テクスチャ座標の設定
+		// テクスチャ座標の設定
 		pVtx[0].tex = D3DXVECTOR2(0.0f, 0.0f);
 		pVtx[1].tex = D3DXVECTOR2(1.0f, 0.0f);
 		pVtx[2].tex = D3DXVECTOR2(0.0f, 1.0f);
@@ -114,7 +114,7 @@ void InitPause(void)
 	}
 
 	//-------------------------------------
-	//頂点バッファをアンロック
+	// 頂点バッファをアンロック
 	g_pVtxBuffPause->Unlock();
 }
 
@@ -124,7 +124,7 @@ void InitPause(void)
 void UninitPause(void)
 {
 	//-------------------------------------
-	//テクスチャの破棄
+	// テクスチャの破棄
 	//-------------------------------------
 	for (int nCount = 0; nCount < MAX_POUSE; nCount++)
 	{
@@ -136,7 +136,7 @@ void UninitPause(void)
 	}
 
 	//-------------------------------------
-	//頂点バッファの破棄
+	// 頂点バッファの破棄
 	//-------------------------------------
 	if (g_pVtxBuffPause != NULL)
 	{
@@ -150,14 +150,14 @@ void UninitPause(void)
 //=========================================================
 void UpdatePause(void)
 {
-	VERTEX_2D* pVtx;										//頂点情報へのポインタ
-	FADE pFade = GetFade();									//フェード情報の取得
+	VERTEX_2D* pVtx;										// 頂点情報へのポインタ
+	FADE pFade = GetFade();									// フェード情報の取得
 
 	//-------------------------------------
-	//頂点バッファをロックし、頂点情報へのポインタを獲得
+	// 頂点バッファをロックし、頂点情報へのポインタを獲得
 	g_pVtxBuffPause->Lock(0, 0, (void**)&pVtx, 0);
 
-	//頂点座標を進める
+	// 頂点座標を進める
 	pVtx += nPauseData * 4;
 	pVtx[0].col = D3DCOLOR_RGBA(255, 255, 255, 155);
 	pVtx[1].col = D3DCOLOR_RGBA(255, 255, 255, 155);
@@ -165,39 +165,39 @@ void UpdatePause(void)
 	pVtx[3].col = D3DCOLOR_RGBA(255, 255, 255, 155);
 
 	//-------------------------------------
-	//頂点バッファをアンロック
+	// 頂点バッファをアンロック
 	g_pVtxBuffPause->Unlock();
 
-	//頂点バッファをロックし、頂点情報へのポインタを獲得
+	// 頂点バッファをロックし、頂点情報へのポインタを獲得
 	g_pVtxBuffPause->Lock(0, 0, (void**)&pVtx, 0);
 
 	//-------------------------------------
-	//下に向かうキーが押された
+	// 下に向かうキーが押された
 	if (GetJoypadRepeat(0, JOYKEY_UP) == true || GetJoypadRepeat(1, JOYKEY_UP) == true
 		|| GetKeyboardRepeat(DIK_W) == true || GetKeyboardRepeat(DIK_UP) == true)
 	{
 		nPauseData--;
 
-		if (nPauseData < PAUSE_MENU_RESTART)	//0より小さくしない
+		if (nPauseData < PAUSE_MENU_RESTART)	// 0より小さくしない
 		{
 			nPauseData = PAUSE_MENU_MAX - 1;
 		}
 	}
 
 	//-------------------------------------
-	//上に向かうキーが押された
+	// 上に向かうキーが押された
 	if (GetJoypadRepeat(0, JOYKEY_DOWN) == true || GetJoypadRepeat(1, JOYKEY_DOWN) == true
 		|| GetKeyboardRepeat(DIK_S) == true || GetKeyboardRepeat(DIK_DOWN) == true)
 	{
 		nPauseData++;
 
-		if (nPauseData >= PAUSE_MENU_MAX)	//総数より大きくしない
+		if (nPauseData >= PAUSE_MENU_MAX)	// 総数より大きくしない
 		{
 			nPauseData = PAUSE_MENU_RESTART;
 		}
 	}
 
-	//頂点座標を進める
+	// 頂点座標を進める
 	pVtx += nPauseData * 4;
 	pVtx[0].col = D3DCOLOR_RGBA(255, 255, 255, 255);
 	pVtx[1].col = D3DCOLOR_RGBA(255, 255, 255, 255);
@@ -205,7 +205,7 @@ void UpdatePause(void)
 	pVtx[3].col = D3DCOLOR_RGBA(255, 255, 255, 255);
 
 	//-------------------------------------
-	//Pキーが押された
+	// Pキーが押された
 	if (GetJoypadTrigger(0, JOYKEY_BACK) == true
 		|| GetJoypadTrigger(1, JOYKEY_BACK) == true
 		|| GetKeyboardTrigger(DIK_P) == true)
@@ -238,7 +238,7 @@ void UpdatePause(void)
 	//	}
 	//}
 
-	//頂点バッファをアンロック
+	// 頂点バッファをアンロック
 	g_pVtxBuffPause->Unlock();
 }
 
@@ -250,24 +250,27 @@ void DrawPause(void)
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();			//デバイスへのポインタ・取得
 
 	//-------------------------------------
-	//頂点バッファをデータストリームに設定
+	// 頂点バッファをデータストリームに設定
 	pDevice->SetStreamSource(0,
 							g_pVtxBuffPause,			//頂点バッファへのポインタ
 							0,
 							sizeof(VERTEX_2D));			//頂点情報構造体のサイズ
 
 	//-------------------------------------
-	//頂点フォーマットの設定
+	// 頂点フォーマットの設定
 	pDevice->SetFVF(FVF_VERTEX_2D);
 
 	for (int nCntPouse = 0; nCntPouse < MAX_POUSE; nCntPouse++)
 	{
-		//テクスチャの設定
+		// テクスチャの設定
 		pDevice->SetTexture(0, g_apTexturePause[nCntPouse]);
 
-		//ポリゴンの描画
+		// ポリゴンの描画
 		pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP,		//プリミティブの種類
 								nCntPouse * 4,			//描画する最初の頂点インデックス
 								2);						//プリミティブ(ポリゴン)数
 	}
+
+	// デバイスの破棄
+	EndDevice();
 }

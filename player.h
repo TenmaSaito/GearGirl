@@ -108,6 +108,7 @@ typedef struct
 	int nCounterBlend;			// ブレンドカウンター
 
 	int nCntAllround;			// あらゆるカウントに使用
+	bool bUseLandMotion;		// 着地モーションを再生したかどうか
 }Player;
 
 // =================================================
@@ -124,7 +125,5 @@ int GetActivePlayer(void);		// 操作しているプレイヤー情報を渡す
 void SetPlayer(D3DXVECTOR3* pPosGirl, D3DXVECTOR3* pPosMouse);	// プレイヤーの位置情報を渡す
 void ChangeNumPlayer(void);		// プレイ人数を切り替える(デバッグ用)
 void RotRepair(PlayerType nPlayer);	// rotにおける逆回りを防ぐ補正
-void UpdateMotionBear(PlayerType Type);
-void SetMotion(MOTIONTYPE motionType, PlayerType Type);
 
 #endif

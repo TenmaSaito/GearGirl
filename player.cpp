@@ -37,6 +37,7 @@ float g_sinrot = 0;					// sinカーブを用いると起用の変数
 int g_nNumPlayer = 1;				// プレイヤーのアクティブ人数
 int g_ActivePlayer = 0;				// 操作しているプレイヤータイプ
 int g_Functionkey = 0;
+int g_Land = 0;
 
 // =================================================
 // 初期化処理
@@ -133,6 +134,8 @@ void UpdatePlayer(void)
 	// プレイヤー構造体をポインタ化
 	Player* pPlayer = &g_aPlayer[0];
 
+	pPlayer->bUseLandMotion = false;
+
 	for (int nCntPlayer = 0; nCntPlayer < PLAYERTYPE_MAX; nCntPlayer++, pPlayer++)
 	{
 		// 現在位置の保存
@@ -142,13 +145,11 @@ void UpdatePlayer(void)
 
 		JumpPlayer((PlayerType)nCntPlayer);	// ジャンプに関する処理
 
-		//UpdateMotion((PlayerType)nCntPlayer);
-
-		UpdateMotionBear((PlayerType)nCntPlayer);
+		UpdateMotion((PlayerType)nCntPlayer);
 
 		if (pPlayer->bFinishMotion == true && pPlayer->motionType != MOTIONTYPE_NEUTRAL)
 		{
-			SetMotion(MOTIONTYPE_NEUTRAL, (PlayerType)nCntPlayer);
+			SetMotionType(MOTIONTYPE_NEUTRAL, false, 10, (PlayerType)nCntPlayer);
 		}
 
 		// 重力をかけ続ける
@@ -166,9 +167,11 @@ void UpdatePlayer(void)
 		{
 			pPlayer->pos.y = 100.0f;
 
-			if (pPlayer->bJump == true && pPlayer->state == PLAYERSTATE_JUMP && pPlayer->motionType != MOTIONTYPE_LANDING && pPlayer->motionTypeBlend != MOTIONTYPE_LANDING)
+			if (pPlayer->bJump == true && pPlayer->motionType != MOTIONTYPE_LANDING && pPlayer->motionTypeBlend != MOTIONTYPE_LANDING)
 			{// 着地モーション
-				SetMotion(MOTIONTYPE_LANDING, (PlayerType)nCntPlayer);
+				SetMotionType(MOTIONTYPE_LANDING, true , 10, (PlayerType)nCntPlayer);
+				pPlayer->bUseLandMotion = true;
+				//g_Land++;
 			}
 
 			pPlayer->bJump = false;
@@ -184,7 +187,6 @@ void UpdatePlayer(void)
 		// アイテムとの当たり判定
 		CollisionItem(pPlayer->pos, PLAYER_RANGE);
 	}
-
 
 	// 操作する対象を切り替える
 	if (g_nNumPlayer == 1)
@@ -237,6 +239,7 @@ void UpdatePlayer(void)
 		PrintDebugProc("Player1 : Motiontype [%d]\n", g_aPlayer[1].motionType);
 		PrintDebugProc("Player1 : MotiontypeBlend [%d]\n", g_aPlayer[1].motionTypeBlend);
 		PrintDebugProc("Player0 : PlayerState [%d]\n", g_aPlayer[0].state);
+		PrintDebugProc("Player0 : Land [%d]\n", g_Land);
 	}
 }
 
@@ -486,8 +489,7 @@ void MovePlayer(PlayerType nPlayer)
 	{// ネズミの操作
 		if (GetKeyboardPress(DIK_LEFT) == true || GetJoypadPress(nPlayer, JOYKEY_LEFT) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_LEFT))
 		{// 左矢印が押される	
-			if (pPlayer->bFinishMotion == true && (pPlayer->motionType == MOTIONTYPE_NEUTRAL || pPlayer->motionTypeBlend == MOTIONTYPE_NEUTRAL)
-				&& pPlayer->motionType != MOTIONTYPE_MOVE && pPlayer->motionTypeBlend != MOTIONTYPE_MOVE && pPlayer->state == PLAYERSTATE_NEUTRAL)
+			if (pPlayer->motionType != MOTIONTYPE_MOVE && pPlayer->motionTypeBlend != MOTIONTYPE_MOVE)
 			{
 				SetMotionType(MOTIONTYPE_MOVE, false, 10, nPlayer);
 				pPlayer->state = PLAYERSTATE_MOVE;
@@ -661,13 +663,13 @@ void JumpPlayer(PlayerType nPlayer)
 		{
 			//PlaySound(SOUND_LABEL_JUMP);
 			pPlayer->state = PLAYERSTATE_JUMP;
-			SetMotion(MOTIONTYPE_JUMP, nPlayer);
+			SetMotionType(MOTIONTYPE_JUMP, true, 5, nPlayer);
+			//g_Land++;
 
 			pPlayer->move.y = JUMP_FORCE;
 			pPlayer->bJump = true;
 		}
 	}
-
 }
 
 //================================================================================================================
@@ -941,7 +943,6 @@ void UpdateMotion(PlayerType Type)
 	if (pPlayer->bBlendMotion == false)
 	{// ブレンドなし
 		pPlayer->nCounterMotion++;
-		pPlayer->nCntAllround++;
 
 		if (pPlayer->nCounterMotion >= pInfo->nFrame)
 		{ // モーションカウンターが現在のキー情報のフレーム数を超えた場合
@@ -956,9 +957,8 @@ void UpdateMotion(PlayerType Type)
 			if (pPlayer->nKey == 0 && pPlayer->bLoop == false)
 			{
 				pPlayer->bFinishMotion = true;
-				SetMotionType(MOTIONTYPE_NEUTRAL, false, 120, Type);
+				SetMotionType(MOTIONTYPE_NEUTRAL, false, 20, Type);
 				pPlayer->state = PLAYERSTATE_NEUTRAL;
-				pPlayer->nCntAllround = 0;
 			}
 
 			pPlayer->nCounterMotion = 0;
@@ -973,13 +973,17 @@ void UpdateMotion(PlayerType Type)
 			/** ブレンドモーションのキーを一つ進める **/
 			pPlayer->nKeyBlend = ((pPlayer->nKeyBlend + 1) % pPlayer->aMotionInfo[pPlayer->motionTypeBlend].nNumKey);
 			pPlayer->nCounterMotionBlend = 0;
+			g_Land++;
 		}
 
 		pPlayer->nCounterBlend++;
 
 		if (pPlayer->nCounterBlend >= pPlayer->nFrameBlend)
 		{ // ブレンドカウンターがブレンドフレーム数を超えた場合	
-			SetMotionType(pPlayer->motionTypeBlend, false, 10, Type);
+			pPlayer->bFinishMotion = true;
+		  SetMotionType(pPlayer->motionTypeBlend, false, 10, Type);
+		  //g_Land++;
+
 		}
 	}
 }
@@ -1065,146 +1069,3 @@ void RotRepair(PlayerType nPlayer)
 		pPlayer->rot.y += D3DX_PI * 2;
 	}
 }
-
-// =================================================
-// モーションの更新処理
-// =================================================
-void UpdateMotionBear(PlayerType Type)
-{
-	Player* pPlayer = &g_aPlayer[Type];
-
-	float fDiffKey;
-	float fPosX;
-	float fPosY;
-	float fPosZ;
-	float fRotX;
-	float fRotY;
-	float fRotZ;
-
-	KEY* pKey;		// 現在のモーションの現在のキーのポインタ
-	KEY* pKeyNext;	// 現在のモーションの1つ次のキーのポインタ
-
-	//KEY* pKeyBlend;		// ブレンドモーションの現在のキーのポインタ
-	//KEY* pKeyNextBlend;	// ブレンドモーションの1つ次のキーのポインタ
-
-	// 現在のモーションのフレーム数のポインタ
-	KEY_INFO* pKeyFrame = &pPlayer->aMotionInfo[pPlayer->motionType].aKeyInfo[pPlayer->nKey];
-
-	// ブレンドモーションのフレーム数のポインタ
-	KEY_INFO* pKeyFrameBlend = &pPlayer->aMotionInfo[pPlayer->motionTypeBlend].aKeyInfo[pPlayer->nKeyBlend];
-
-	// 全モデル(パーツ)の更新
-	for (int nCntModel = 0; nCntModel < pPlayer->nNumModel; nCntModel++)
-	{
-		pPlayer->bFinishMotion = false;
-
-		// 現在のモーションのフレームの分割数
-		float fRateKey = (float)pPlayer->nCounterMotion / (float)pKeyFrame->nFrame;
-
-		// 現在のモーションのポインタ
-		pKey = &pPlayer->aMotionInfo[pPlayer->motionType].aKeyInfo[pPlayer->nKey].aKey[nCntModel];
-		pKeyNext = &pPlayer->aMotionInfo[pPlayer->motionType].aKeyInfo[(pPlayer->nKey + 1) % pPlayer->nNumKey].aKey[nCntModel];
-
-		// キー情報から位置、向きを算出
-		// Xの位置を算出
-		fDiffKey = pKeyNext->pos.x - pKey->pos.x;
-		fPosX = pKey->pos.x + (fDiffKey * fRateKey);
-
-		// Yの位置を算出
-		fDiffKey = pKeyNext->pos.y - pKey->pos.y;
-		fPosY = pKey->pos.y + (fDiffKey * fRateKey);
-
-		// Zの位置を算出
-		fDiffKey = pKeyNext->pos.z - pKey->pos.z;
-		fPosZ = pKey->pos.z + (fDiffKey * fRateKey);
-
-		// Xの向きを算出
-		fDiffKey = pKeyNext->rot.x - pKey->rot.x;
-
-		// もし、差分がπ・-πを超えたら
-		if (fDiffKey > D3DX_PI)
-		{
-			fDiffKey -= D3DX_PI * 2;
-		}
-		else if (fDiffKey < -D3DX_PI)
-		{
-			fDiffKey += D3DX_PI * 2;
-		}
-
-		fRotX = pKey->rot.x + (fDiffKey * fRateKey);
-
-		// Yの向きを算出
-		fDiffKey = pKeyNext->rot.y - pKey->rot.y;
-
-		// もし、差分がπ・-πを超えたら
-		if (fDiffKey > D3DX_PI)
-		{
-			fDiffKey -= D3DX_PI * 2;
-		}
-		else if (fDiffKey < -D3DX_PI)
-		{
-			fDiffKey += D3DX_PI * 2;
-		}
-
-		fRotY = pKey->rot.y + (fDiffKey * fRateKey);
-
-		// Zの向きを算出
-		fDiffKey = pKeyNext->rot.z - pKey->rot.z;
-
-		// もし、差分がπ・-πを超えたら
-		if (fDiffKey > D3DX_PI)
-		{
-			fDiffKey -= D3DX_PI * 2;
-		}
-		else if (fDiffKey < -D3DX_PI)
-		{
-			fDiffKey += D3DX_PI * 2;
-		}
-
-		fRotZ = pKey->rot.z + (fDiffKey * fRateKey);
-
-		// パーツの位置・向きを設定
-		pPlayer->aMotionInfo[nCntModel].aKeyInfo->aKey->pos = D3DXVECTOR3(pPlayer->Offset[nCntModel].x + fPosX, pPlayer->Offset[nCntModel].y + fPosY, pPlayer->Offset[nCntModel].z + fPosZ);
-		pPlayer->aMotionInfo[nCntModel].aKeyInfo->aKey->rot = D3DXVECTOR3(fRotX, fRotY, fRotZ);
-	}
-
-	pPlayer->nCounterMotion++;
-
-	// キーを1つ進める
-	if (pPlayer->nCounterMotion >= pPlayer->aMotionInfo[pPlayer->motionType].aKeyInfo[pPlayer->nKey].nFrame && pPlayer->bFinishMotion == false)
-	{// ループするモーション
-		pPlayer->nKey = (pPlayer->nKey + 1) % pPlayer->nNumKey;
-		pPlayer->nCounterMotion = 0;
-		pPlayer->nCntAllround++;
-	}
-	else if (pPlayer->nCntAllround >= pPlayer->aMotionInfo[pPlayer->motionType].nNumKey)
-	{// 1周したらtrueにする(連発防止)
-		pPlayer->bFinishMotion = true;
-	}
-	else if (pPlayer->nCntAllround >= pPlayer->aMotionInfo[pPlayer->motionType].nNumKey && pPlayer->aMotionInfo[pPlayer->motionType].bLoop == false)
-	{// ループしないモーションの全キーを回した場合
-		pPlayer->bFinishMotion = true;
-		SetMotion(MOTIONTYPE_NEUTRAL, Type);
-		pPlayer->state = PLAYERSTATE_NEUTRAL;
-		pPlayer->nCounterMotion = 0;
-	}
-}
-
-// =================================================
-// モーションの設定処理
-// =================================================
-void SetMotion(MOTIONTYPE motionType, PlayerType Type)
-{
-	Player* pPlayer = &g_aPlayer[Type];
-
-	pPlayer->nCntAllround = 0;
-
-	pPlayer->nCounterMotion = 0;
-	pPlayer->nKey = 0;
-	pPlayer->motionType = motionType;
-	pPlayer->bLoop = pPlayer->aMotionInfo[motionType].bLoop;
-	pPlayer->nNumKey = pPlayer->aMotionInfo[motionType].nNumKey;
-	pPlayer->bFinishMotion = false;
-
-}
-
