@@ -25,7 +25,6 @@ void InitMeshCylinder(void)
 {
 	//**************************************************************
 	// 変数宣言
-	LPDIRECT3DDEVICE9	pDevice = GetDevice();		// デバイスへのポインタ
 	g_nSetMeshCylinder = 0;
 
 	//**************************************************************
@@ -145,6 +144,8 @@ void DrawMeshCylinder(void)
 			pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, 0, 0, g_aMeshCylinder[nCntMeshCylinder].nVerti, 0, g_aMeshCylinder[nCntMeshCylinder].nPrim);
 		}
 	}
+
+	EndDevice();// デバイス取得終了
 }
 
 //=========================================================================================
@@ -264,6 +265,8 @@ void SetMeshCylinder(vec3 pos, vec3 rot, float fRadius, float fHeight, int nHeig
 			break;
 		}
 	}
+
+	EndDevice();// デバイス取得終了
 }
 
 //=========================================================================================

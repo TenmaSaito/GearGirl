@@ -24,7 +24,6 @@ void InitMeshDome(void)
 {
 	//**************************************************************
 	// 変数宣言
-	LPDIRECT3DDEVICE9	pDevice = GetDevice();		// デバイスへのポインタ
 	g_nSetMeshDome = 0;
 
 	//**************************************************************
@@ -135,6 +134,7 @@ void DrawMeshDome(void)
 			pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, 0, 0, g_aMeshDome[nCntMeshDome].nVerti, 0, g_aMeshDome[nCntMeshDome].nPrim);
 		}
 	}
+	EndDevice();// デバイス取得終了
 }
 
 //=========================================================================================
@@ -251,6 +251,7 @@ void SetMeshDome(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int nCi
 			break;
 		}
 	}
+	EndDevice();// デバイス取得終了
 }
 
 //=========================================================================================
