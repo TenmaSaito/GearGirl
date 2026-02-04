@@ -10,6 +10,10 @@
 #include "Texture.h"
 #include "debugproc.h"
 #include "input.h"
+#include "mathUtil.h"
+
+using  namespace MyMathUtil;
+
 
 //**************************************************************
 // グローバル変数宣言
@@ -49,11 +53,7 @@ void InitItem(void)
 	// アイテム情報読込
 	for (int nCntItem = 0; nCntItem < ITEMTYPE_MAX; nCntItem++, pItemInfo++)
 	{
-		hr = LoadModelData(pItemInfo->pModelFile, &pItemInfo->nNumGet);
-		if (FAILED(hr))
-		{
-			
-		}
+		LoadModelData(pItemInfo->pModelFile, &pItemInfo->nNumGet);
 	}
 
 	// アイテム配置初期化
@@ -86,8 +86,23 @@ void UpdateItem(void)
 	// 変数宣言
 	P_ITEM pItem = GetItem();
 
+	for (int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++, pItem++)
+	{
+		if (pItem->bUse)
+		{
+			switch (pItem->type)
+			{
+			default:
+				pItem->rot.x += SPIN_ITEM;
+				pItem->rot.y += SPIN_ITEM;
 
+				MyMathUtil::RepairRot(pItem->rot.x);
+				MyMathUtil::RepairRot(pItem->rot.y);
 
+				break;
+			}
+		}
+	}
 }
 
 //=========================================================================================
@@ -103,7 +118,6 @@ void DrawItem(void)
 	PMODELDATA		pModel;							// モデルデータへのポインタ
 	D3DMATERIAL9	matDef;							// 現在のマテリアル保存用
 	D3DXMATERIAL*	pMat;							// マテリアルデータへのポインタ
-
 
 	for (int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++, pItem++)
 	{
@@ -226,7 +240,11 @@ void SetItem(vec3 pos, vec3 rot, ITEMTYPE type, bool bColi)
 // アイテム設置位置保存
 void SaveItemSet(void)
 {
+	//**************************************************************
+	// 変数宣言
+	FILE* pFile;
 
+	// fopen(, pFile);
 }
 
 //=========================================================================================
