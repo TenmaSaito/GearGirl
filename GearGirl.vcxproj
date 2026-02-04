@@ -153,6 +153,7 @@
   <ItemGroup>
     <ClCompile Include="2Dpolygon.cpp" />
     <ClCompile Include="3Dmodel.cpp" />
+    <ClCompile Include="billboard.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="debugproc.cpp" />
     <ClCompile Include="effect.cpp" />
@@ -187,6 +188,7 @@
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h" />
     <ClInclude Include="3Dmodel.h" />
+    <ClInclude Include="billboard.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="debugproc.h" />
     <ClInclude Include="effect.h" />
