@@ -15,7 +15,10 @@
 //**************************************************************
 // グローバル変数宣言
 Camera g_aCamera[MAX_CAMERA];
-int		g_nEnableCamera;				// 起動させるカメラの数
+int		g_nNumEnableCamera;				// 起動させるカメラの数
+int		g_nActivePlayer;				// １P時の画面のキャラクター
+
+bool	g_bCameraDebug;					// カメラの情報
 
 //**************************************************************
 // プロトタイプ宣言
@@ -36,7 +39,9 @@ void InitCamera(void)
 
 	//**************************************************************
 	// 各値の初期化
-	g_nEnableCamera = GetNumPlayer();	// プレイヤー数
+	g_nNumEnableCamera = GetNumPlayer();	// プレイヤー数
+	g_nActivePlayer = 0;	// 画面のプレイヤー
+	g_bCameraDebug = false;
 
 	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCamera++)
 	{
@@ -48,12 +53,12 @@ void InitCamera(void)
 
 		switch (nCntCamera)
 		{
-		case PLAYER_TWO:
-			pCamera->rot = D3DXVECTOR3(D3DX_PI * 0.35f, 0.0f, 0.0f);	// カメラの角度
+		case PLAYER_TWO:	// 2P用のカメラ設定
+			pCamera->rot = CAMERA_2P_ROT;	// カメラの角度
 			pCamera->fDist = CAMERA_2P_DISTANS;
 			break;
-		default:
-			pCamera->rot = D3DXVECTOR3(D3DX_PI * 0.2f, 0.0f, 0.0f);		// カメラの角度
+		default:			// その他のカメラ設定
+			pCamera->rot = CAMERA_1P_ROT;		// カメラの角度
 			pCamera->fDist = CAMERA_1P_DISTANS;							// 視点と注視点の距離
 			break;
 		}
@@ -83,11 +88,11 @@ void SetCameraOption(void)
 	// 変数宣言
 	P_CAMERA pCamera = GetCamera();
 
-	g_nEnableCamera = GetNumPlayer();	// プレイヤー数
+	g_nNumEnableCamera = GetNumPlayer();	// プレイヤー数
 
 	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCamera++)
 	{		
-		if (g_nEnableCamera < 2)
+		if (g_nNumEnableCamera < 2)
 		{// 1P
 			pCamera->viewport.X = 0.0f;								// 画面左上 X 座標
 			pCamera->viewport.Y = 0.0f;								// 画面左上 Y 座標
@@ -117,13 +122,28 @@ void UninitCamera(void)
 //=========================================================================================
 void UpdateCamera(void)
 {
+	PrintDebugProc("\nCAMERAデバッグ表示切り替え：[F2]");
+
 	//**************************************************************
 	// 変数宣言
 	P_CAMERA pCamera = GetCamera();
+	int			nActivePlayer = GetActivePlayer();
 
-	if (g_nEnableCamera != GetNumPlayer())
+	// プレイヤー数が変わったら
+	if (g_nNumEnableCamera != GetNumPlayer())
 	{
 		SetCameraOption();
+	}
+
+	// 操作キャラが変わったら
+	if (g_nActivePlayer != nActivePlayer)
+	{
+		g_aCamera[nActivePlayer].posR = g_aCamera[g_nActivePlayer].posR;
+		g_aCamera[nActivePlayer].posV = g_aCamera[g_nActivePlayer].posV;
+		g_aCamera[nActivePlayer].rot = g_aCamera[g_nActivePlayer].rot;
+		g_aCamera[nActivePlayer].fDist = g_aCamera[g_nActivePlayer].fDist;
+
+		g_nActivePlayer = nActivePlayer;
 	}
 
 		if (GetKeyboardPress(CAM_2POPRAT))
@@ -145,10 +165,19 @@ void UpdateCamera(void)
 			pCamera->posV.y = pCamera->posR.y - cosf(D3DX_PI - pCamera->rot.x) * pCamera->fDist;
 			pCamera->posV.z = pCamera->posR.z + cosf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
 
-			PrintDebugProc("CAMERA %d\nposV : %~3f\nposR : %~3f\n", nCntCamera, pCamera->posV.x, pCamera->posV.y, pCamera->posV.z, pCamera->posR.x, pCamera->posR.y, pCamera->posR.z);
-			PrintDebugProc("rot  : %~3f\n", pCamera->rot.x, pCamera->rot.y, pCamera->rot.z);
+			if (g_bCameraDebug)
+			{
+				PrintDebugProc("CAMERA %d\nposV : %~3f\nposR : %~3f\n", nCntCamera, pCamera->posV.x, pCamera->posV.y, pCamera->posV.z, pCamera->posR.x, pCamera->posR.y, pCamera->posR.z);
+				PrintDebugProc("rot  : %~3f\n", pCamera->rot.x, pCamera->rot.y, pCamera->rot.z);
+			}
 		}
 	}
+
+	if (GetKeyboardTrigger(DIK_F2))
+	{
+		g_bCameraDebug = g_bCameraDebug ^ 1;
+	}
+		
 }
 
 //==============================================================
@@ -169,16 +198,19 @@ void CameraFollow(void)
 			//**************************************************************
 			// プレイヤーに追従
 			
-			if (CAMERA_PLFR_DEADZONE < pPlayer->move.x * pPlayer->move.x + pPlayer->move.z * pPlayer->move.z)
+			if (CAMERA_PLFR_DEADZONE < SQUARE(pPlayer->move.x) + SQUARE(pPlayer->move.z))
 			{// カメラを少し先へ
 				fPlayerFront = pCamera->fDist * 0.25f;
 				fPlayerMoveRot = atan2f(-pPlayer->move.x, -pPlayer->move.z);
 
 				pCamera->posRDest.x = pPlayer->pos.x - fPlayerFront * sinf(fPlayerMoveRot);
-				pCamera->posRDest.y = pPlayer->pos.y;
 				pCamera->posRDest.z = pPlayer->pos.z - fPlayerFront * cosf(fPlayerMoveRot);
 			}
-#if 0
+
+			// 高さは常に追従
+			pCamera->posRDest.y = pPlayer->pos.y;
+#if 0				
+
 			}
 			else
 			{
@@ -188,6 +220,25 @@ void CameraFollow(void)
 				g_camera.posRDest = pos;
 			}
 #endif
+			//**************************************************************
+			// キャラクターに応じて角度を変更
+			switch (nPlayer)
+			{
+			case PLAYER_ONE:
+				pCamera->rot += (CAMERA_1P_ROT - pCamera->rot) * 0.25f;
+				pCamera->fDist += (CAMERA_1P_DISTANS - pCamera->fDist) * 0.25f;
+				break;
+
+			case PLAYER_TWO:
+				pCamera->rot += (CAMERA_2P_ROT - pCamera->rot) * 0.25f;
+				pCamera->fDist += (CAMERA_2P_DISTANS - pCamera->fDist) * 0.25f;
+				break;
+
+			default:
+				break;
+			}
+
+
 			//**************************************************************
 			// カメラの位置を補正
 			pCamera->posR.x += (pCamera->posRDest.x - pCamera->posR.x) * CAMERA_FOLLOW_FACTOR;
@@ -341,15 +392,15 @@ void SetCamera(void)
 {
 	//**************************************************************
 	// 変数宣言
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();		// デバイスへのポインタ
+	LPDIRECT3DDEVICE9	pDevice = GetDevice();		// デバイスへのポインタ
 	P_CAMERA			pCam = GetCamera();
 	static bool bCameraSwitch = false;				// 複数画面描画時カメラの切り替え
 
 	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCam++)
 	{
-		if (g_nEnableCamera == 1)
+		if (g_nNumEnableCamera == 1)
 		{
-			if (GetActivePlayer() == PLAYERTYPE_MOUSE)
+			if (g_nActivePlayer == PLAYERTYPE_MOUSE)
 			{
 				pCam++;
 			}
@@ -399,6 +450,7 @@ void SetCamera(void)
 			return;
 		}
 	}
+	EndDevice();// デバイス取得終了
 }
 
 //=========================================================================================
@@ -464,7 +516,7 @@ void GetCameraRot(int nCamNum, vec3* pRot)
 //=========================================================================================
 int GetCameraNum(void)
 {
-	return g_nEnableCamera;
+	return g_nNumEnableCamera;
 }
 
 //=========================================================================================

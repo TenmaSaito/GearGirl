@@ -14,6 +14,8 @@
 //==========================================================================================
 // ****** ポーズの選択肢を変更するとき ******
 // "ヘッダー"、"テクスチャファイル名"、"UpdatePauseのENTERキーが押された場合"の3つを変更
+// それに応じてマクロ定義の LINE_SPACE も変更可だが、
+// HEIGHT_SIZE , WIDTH_SIZE はなるべく変更しない方が良し
 //==========================================================================================
 
 //=========================================================
@@ -210,33 +212,32 @@ void UpdatePause(void)
 		|| GetJoypadTrigger(1, JOYKEY_BACK) == true
 		|| GetKeyboardTrigger(DIK_P) == true)
 	{
-		for (int nCntPause = 0; nCntPause < MAX_POUSE; nCntPause++)
-		{
-			pVtx[0].col = D3DCOLOR_RGBA(255, 255, 255, 155);
-			pVtx[1].col = D3DCOLOR_RGBA(255, 255, 255, 155);
-			pVtx[2].col = D3DCOLOR_RGBA(255, 255, 255, 155);
-			pVtx[3].col = D3DCOLOR_RGBA(255, 255, 255, 155);
-		}
+		pVtx[0].col = D3DCOLOR_RGBA(255, 255, 255, 155);
+		pVtx[1].col = D3DCOLOR_RGBA(255, 255, 255, 155);
+		pVtx[2].col = D3DCOLOR_RGBA(255, 255, 255, 155);
+		pVtx[3].col = D3DCOLOR_RGBA(255, 255, 255, 155);
+		
 		nPauseData = 0;
 	}
 
-	////-------------------------------------
-	////ENTERキーが押された
-	//if (GetJoypadPress(0, JOYKEY_A) == true || GetJoypadPress(1, JOYKEY_A) == true || GetKeyboardPress(DIK_RETURN) == true)
-	//{
-	//	switch (nPauseData)
-	//	{
-	//	case PAUSE_MENU_RESTART:
-	//		SetFade(MODE_GAME);
-	//		break;
-	//	case PAUSE_MENU_RETITLE:
-	//		SetFade(MODE_TITLE);
-	//		break;
-	//	case PAUSE_MENU_CLOSE:
-	//		SetEnablePause(false);
-	//		break;
-	//	}
-	//}
+	//-------------------------------------
+	// ENTERキーが押された
+	if (GetJoypadPress(0, JOYKEY_A) == true || GetJoypadPress(1, JOYKEY_A) == true || GetKeyboardPress(DIK_RETURN) == true)
+	{
+		switch (nPauseData)
+		{
+		case PAUSE_MENU_RESTART:
+			SetFade(MODE_GAME);
+			break;
+		case PAUSE_MENU_RETITLE:
+			SetFade(MODE_TITLE);
+			break;
+		case PAUSE_MENU_CLOSE:
+			break;
+		}
+		
+		SetEnablePause(false);			// game.cppのUpdateの下部にあるモード変更を消したら起動します
+	}
 
 	// 頂点バッファをアンロック
 	g_pVtxBuffPause->Unlock();
@@ -247,14 +248,14 @@ void UpdatePause(void)
 //=========================================================
 void DrawPause(void)
 {
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();			//デバイスへのポインタ・取得
+	LPDIRECT3DDEVICE9 pDevice = GetDevice();			// デバイスへのポインタ・取得
 
 	//-------------------------------------
 	// 頂点バッファをデータストリームに設定
 	pDevice->SetStreamSource(0,
-							g_pVtxBuffPause,			//頂点バッファへのポインタ
+							g_pVtxBuffPause,			// 頂点バッファへのポインタ
 							0,
-							sizeof(VERTEX_2D));			//頂点情報構造体のサイズ
+							sizeof(VERTEX_2D));			// 頂点情報構造体のサイズ
 
 	//-------------------------------------
 	// 頂点フォーマットの設定
@@ -266,9 +267,9 @@ void DrawPause(void)
 		pDevice->SetTexture(0, g_apTexturePause[nCntPouse]);
 
 		// ポリゴンの描画
-		pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP,		//プリミティブの種類
-								nCntPouse * 4,			//描画する最初の頂点インデックス
-								2);						//プリミティブ(ポリゴン)数
+		pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP,		// プリミティブの種類
+								nCntPouse * 4,			// 描画する最初の頂点インデックス
+								2);						// プリミティブ(ポリゴン)数
 	}
 
 	// デバイスの破棄
