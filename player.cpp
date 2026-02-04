@@ -33,11 +33,12 @@ void SetMotionType(MOTIONTYPE motionTypeNext, bool bBlend, int nFrameBlend, Play
 // グローバル変数
 Player g_aPlayer[PLAYERTYPE_MAX];	// プレイヤーの樹応報
 int g_IdxShadowPlayer = -1;			// 使用する影の番号
-float g_sinrot = 0;					// sinカーブを用いると起用の変数
+float g_sinrot = 0;					// sinカーブを用いるとき用の変数
 int g_nNumPlayer = 1;				// プレイヤーのアクティブ人数
 int g_ActivePlayer = 0;				// 操作しているプレイヤータイプ
 int g_Functionkey = 0;
 int g_Land = 0;
+int g_nUseArm = 0;
 
 // =================================================
 // 初期化処理
@@ -114,8 +115,19 @@ void InitPlayer(void)
 		}
 	}
 
+	// === グローバル変数の初期化 === // 
+	g_nNumPlayer = 1;		// プレイ人数
+	g_ActivePlayer = 0;		// 現在の操作対象
+	g_Functionkey = 0;		
+	g_Land = 0;				
+	g_nUseArm = 0;			
+
+
 	// 影を設定
 	//g_IdxShadowPlayer = SetShadow();
+
+	// デバイスの破棄
+	EndDevice();
 }
 
 // =================================================
@@ -169,7 +181,7 @@ void UpdatePlayer(void)
 
 			if (pPlayer->bJump == true && pPlayer->motionType != MOTIONTYPE_LANDING && pPlayer->motionTypeBlend != MOTIONTYPE_LANDING)
 			{// 着地モーション
-				SetMotionType(MOTIONTYPE_LANDING, true , 10, (PlayerType)nCntPlayer);
+				SetMotionType(MOTIONTYPE_LANDING, true, 10, (PlayerType)nCntPlayer);
 				pPlayer->bUseLandMotion = true;
 				//g_Land++;
 			}
@@ -191,7 +203,7 @@ void UpdatePlayer(void)
 	// 操作する対象を切り替える
 	if (g_nNumPlayer == 1)
 	{// シングルプレイ時
-		if (GetJoypadPress(0, JOYKEY_LB) == true || GetKeyboardTrigger(DIK_Q) == true)
+		if (GetJoypadTrigger(0, JOYKEY_LB) == true || GetKeyboardTrigger(DIK_Q) == true)
 		{
 			if (g_ActivePlayer == 1)
 			{// ネズミ→少女
@@ -202,6 +214,12 @@ void UpdatePlayer(void)
 				g_ActivePlayer = 1;
 			}
 		}
+	}
+
+	// 装備を切り替える(アーム)
+	if (GetJoypadTrigger(0, JOYKEY_RB) == true || GetKeyboardTrigger(DIK_E) == true)
+	{
+
 	}
 
 	// === デバッグ処理 === // 
@@ -354,6 +372,7 @@ void DrawPlayer(void)
 		// 保存していたマテリアルを戻す
 		pDevice->SetMaterial(&matDef);
 	}
+
 	// デバイスの破棄
 	EndDevice();
 }
@@ -981,8 +1000,8 @@ void UpdateMotion(PlayerType Type)
 		if (pPlayer->nCounterBlend >= pPlayer->nFrameBlend)
 		{ // ブレンドカウンターがブレンドフレーム数を超えた場合	
 			pPlayer->bFinishMotion = true;
-		  SetMotionType(pPlayer->motionTypeBlend, false, 10, Type);
-		  //g_Land++;
+			SetMotionType(pPlayer->motionTypeBlend, false, 10, Type);
+			//g_Land++;
 
 		}
 	}

@@ -16,6 +16,7 @@
 #include "model.h"
 #include "input.h"
 #include "mathUtil.h"
+#include "player.h"
 #include "3Dmodel.h"
 #include "texture.h"
 
@@ -656,8 +657,10 @@ bool JudgeComent(char* pStr)
 // =================================================
 bool CollisionModel(D3DXVECTOR3* pPos, D3DXVECTOR3* pPosOld, D3DXVECTOR3* pMove)
 {
-	// “–‚½‚Á‚Ä‚¢‚é‚©‚Ç‚¤‚©‚ðbool Œ^‚Å•Ô‚·
+	// “–‚½‚Á‚Ä‚¢‚é‚©‚Ç‚¤‚©‚ðboolŒ^‚Å•Ô‚·
 	bool bLand = false;
+
+	Player* pPlayer = GetPlayer();
 
 	for (int nCntModel = 0; nCntModel < g_nNumModel; nCntModel++)
 	{
@@ -686,6 +689,7 @@ bool CollisionModel(D3DXVECTOR3* pPos, D3DXVECTOR3* pPosOld, D3DXVECTOR3* pMove)
 					pPos->y = g_ModelInfo[nCntModel].pos.y + g_Model[g_ModelInfo[nCntModel].nType].vtxMax.y;
 					bLand = true;
 					pMove->y = 0.0f;
+					pPlayer->bJump = false;
 				}
 
 				if (pPosOld->z <= g_ModelInfo[nCntModel].pos.z + g_Model[g_ModelInfo[nCntModel].nType].vtxMin.z)
