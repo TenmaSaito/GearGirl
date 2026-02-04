@@ -18,6 +18,8 @@ Camera g_aCamera[MAX_CAMERA];
 int		g_nNumEnableCamera;				// 起動させるカメラの数
 int		g_nActivePlayer;				// １P時の画面のキャラクター
 
+bool	g_bCameraDebug;					// カメラの情報
+
 //**************************************************************
 // プロトタイプ宣言
 void SetCameraOption(void);					// カメラ設定
@@ -39,6 +41,7 @@ void InitCamera(void)
 	// 各値の初期化
 	g_nNumEnableCamera = GetNumPlayer();	// プレイヤー数
 	g_nActivePlayer = 0;	// 画面のプレイヤー
+	g_bCameraDebug = false;
 
 	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCamera++)
 	{
@@ -119,6 +122,8 @@ void UninitCamera(void)
 //=========================================================================================
 void UpdateCamera(void)
 {
+	PrintDebugProc("\nCAMERAデバッグ表示切り替え：[F2]");
+
 	//**************************************************************
 	// 変数宣言
 	P_CAMERA pCamera = GetCamera();
@@ -160,10 +165,19 @@ void UpdateCamera(void)
 			pCamera->posV.y = pCamera->posR.y - cosf(D3DX_PI - pCamera->rot.x) * pCamera->fDist;
 			pCamera->posV.z = pCamera->posR.z + cosf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
 
-			PrintDebugProc("CAMERA %d\nposV : %~3f\nposR : %~3f\n", nCntCamera, pCamera->posV.x, pCamera->posV.y, pCamera->posV.z, pCamera->posR.x, pCamera->posR.y, pCamera->posR.z);
-			PrintDebugProc("rot  : %~3f\n", pCamera->rot.x, pCamera->rot.y, pCamera->rot.z);
+			if (g_bCameraDebug)
+			{
+				PrintDebugProc("CAMERA %d\nposV : %~3f\nposR : %~3f\n", nCntCamera, pCamera->posV.x, pCamera->posV.y, pCamera->posV.z, pCamera->posR.x, pCamera->posR.y, pCamera->posR.z);
+				PrintDebugProc("rot  : %~3f\n", pCamera->rot.x, pCamera->rot.y, pCamera->rot.z);
+			}
 		}
 	}
+
+	if (GetKeyboardTrigger(DIK_F2))
+	{
+		g_bCameraDebug = g_bCameraDebug ^ 1;
+	}
+		
 }
 
 //==============================================================
@@ -184,16 +198,19 @@ void CameraFollow(void)
 			//**************************************************************
 			// プレイヤーに追従
 			
-			if (CAMERA_PLFR_DEADZONE < pPlayer->move.x * pPlayer->move.x + pPlayer->move.z * pPlayer->move.z)
+			if (CAMERA_PLFR_DEADZONE < SQUARE(pPlayer->move.x) + SQUARE(pPlayer->move.z))
 			{// カメラを少し先へ
 				fPlayerFront = pCamera->fDist * 0.25f;
 				fPlayerMoveRot = atan2f(-pPlayer->move.x, -pPlayer->move.z);
 
 				pCamera->posRDest.x = pPlayer->pos.x - fPlayerFront * sinf(fPlayerMoveRot);
-				pCamera->posRDest.y = pPlayer->pos.y;
 				pCamera->posRDest.z = pPlayer->pos.z - fPlayerFront * cosf(fPlayerMoveRot);
 			}
-#if 0
+
+			// 高さは常に追従
+			pCamera->posRDest.y = pPlayer->pos.y;
+#if 0				
+
 			}
 			else
 			{
