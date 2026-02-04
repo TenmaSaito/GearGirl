@@ -29,7 +29,6 @@ void InitMeshRing(void)
 {
 	//**************************************************************
 	// 変数宣言
-	LPDIRECT3DDEVICE9	pDevice = GetDevice();		// デバイスへのポインタ
 	g_nSetMeshRing = 0;
 
 	//**************************************************************
@@ -140,6 +139,7 @@ void DrawMeshRing(void)
 			pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, 0, 0, g_aMeshRing[nCntMeshRing].nVerti, 0, g_aMeshRing[nCntMeshRing].nPrim);
 		}
 	}
+	EndDevice();// デバイス取得終了
 }
 
 //=========================================================================================
@@ -258,6 +258,7 @@ void SetMeshRing(vec3 pos, vec3 rot, float fInner, float fOuter, int nHeightDivi
 			break;
 		}
 	}
+	EndDevice();// デバイス取得終了
 }
 
 //=========================================================================================
