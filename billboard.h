@@ -1,7 +1,7 @@
 //================================================================================================================
 //
-// DirectXのデバッグ表示用ヘッダファイル [debugproc.h]
-// Author : TENMA
+// DirectXのデバッグ表示用ヘッダファイル [billboard.h]
+// Author : KOMATSU SHOTA
 //
 //================================================================================================================
 #ifndef _BILLBOARD_H_
@@ -17,8 +17,12 @@
 //**********************************************************************************
 typedef struct
 {
-	D3DXVECTOR3 pos;
-	int texID;
+	D3DXVECTOR3 pos;		// 位置
+	D3DXMATRIX mtxWorld;	// マトリックス
+	float fWidth;			// 幅
+	float fHeight;			// 高さ
+	int texID;				// 種類
+	bool bUse;				// 使用しているかどうか
 } BILLBOARD;
 
 //**********************************************************************************
@@ -29,6 +33,6 @@ void UninitBillboard(void);
 void UpdateBillboard(void);
 void DrawBillboard(void);
 
-void SetBillboard(D3DXVECTOR3 pos, int texID);
+void SetBillboard(D3DXVECTOR3 pos, float fWidth, float fHeight,int texID);
 
 #endif
