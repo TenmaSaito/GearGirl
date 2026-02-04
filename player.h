@@ -22,7 +22,7 @@
 #define	PLAYER_INI		(0.2f)			// プレイヤーの慣性
 #define	PLAYER_LIM		(50.0f)			// プレイヤーの移動制限
 #define	ATTACK_MOVE		(1.0f)			// 突進の移動速度
-#define	JUMP_FORCE		(4.1f)			// ジャンプ力
+#define	JUMP_FORCE		(7.1f)			// ジャンプ力
 
 #define	GRAVITY			(-0.3f)			// 重力
 #define	STICK_DEADAREA	(10000)			// ジョイスティックのデッドエリア
