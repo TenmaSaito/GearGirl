@@ -171,6 +171,9 @@
     <ClCompile Include="effect.cpp">
       <Filter>ソース ファイル\object</Filter>
     </ClCompile>
+    <ClCompile Include="gimmick.cpp">
+      <Filter>ソース ファイル\mode\game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h">
@@ -255,6 +258,9 @@
       <Filter>ヘッダー ファイル\object</Filter>
     </ClInclude>
     <ClInclude Include="timer.h">
+      <Filter>ヘッダー ファイル\mode\game</Filter>
+    </ClInclude>
+    <ClInclude Include="gimmick.h">
       <Filter>ヘッダー ファイル\mode\game</Filter>
     </ClInclude>
   </ItemGroup>
