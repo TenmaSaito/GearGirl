@@ -22,9 +22,9 @@ Item g_aItem[MAX_ITEM];								// アイテム情報
 ItemInfo g_aItemInfo[ITEMTYPE_MAX] =
 {
 	{"data\\MODEL\\Item\\GearLarge.x",-1},	 // [0] 新品ののねじ
-	{"data\\MODEL\\Item\\GearLarge.x",-1},	 // [1] 磨かれた小さな歯車
+	{"data\\MODEL\\Item\\GearSmall.x",-1},	 // [1] 磨かれた小さな歯車
 	{"data\\MODEL\\Item\\GearLarge.x",-1},	 // [2] 綺麗な大きい歯車
-	{"data\\MODEL\\Item\\GearLarge.x",-1},	 // [3] まっすぐな軸
+	{"data\\MODEL\\Item\\Shaft.x",-1},		 // [3] まっすぐな軸
 	{"data\\MODEL\\Item\\GearLarge.x",-1},	 // [4] 丁寧に直されたぜんまい
 	{"data\\MODEL\\Item\\GearLarge.x",-1},	 // [5] 古いねじ
 	{"data\\MODEL\\Item\\GearLarge.x",-1},	 // [6] 錆びた小さい歯車
@@ -66,7 +66,9 @@ void InitItem(void)
 	// 設置
 	g_nSetItemNum = 0;
 	SetItem(vec3(0.0f, 140.0f, 100.0f), vec3_ZERO, ITEMTYPE_GEARL_TRUE);
-	SetItem(vec3(0.0f, 140.0f, -100.0f), vec3_ZERO, ITEMTYPE_GEARL_FALSE);
+	SetItem(vec3(0.0f, 140.0f, -100.0f), vec3_ZERO, ITEMTYPE_SHAFT_TRUE);
+	SetItem(vec3(100.0f, 140.0f, 100.0f), vec3_ZERO, ITEMTYPE_GEARS_TRUE);
+	SetItem(vec3(100.0f, 140.0f, -100.0f), vec3_ZERO, ITEMTYPE_GEARL_FALSE);
 }
 
 //=========================================================================================

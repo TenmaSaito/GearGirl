@@ -25,7 +25,7 @@ TEXTURE_FILENAME = data/TEXTURE/road_mid.jpg		# [6]合流地点の道
 #------------------------------------------------------------------------------
 # モデル数
 #------------------------------------------------------------------------------
-NUM_MODEL = 19
+NUM_MODEL = 18	#19
 
 #------------------------------------------------------------------------------
 # モデルファイル名
@@ -41,14 +41,13 @@ MODEL_FILENAME = data/MODEL/Building//Bridge.x			# [7]橋
 MODEL_FILENAME = data/MODEL/Building//Flowerbed.x		# [8]花壇
 MODEL_FILENAME = data/MODEL/Objects//Airship.x			# [9]飛行船
 MODEL_FILENAME = data/MODEL/Building//Bench.x			# [10]ベンチ
-MODEL_FILENAME = data/MODEL/Building//Fountaini.x		# [11]噴水
+MODEL_FILENAME = data/MODEL/Building//Fountain.x		# [11]噴水
 MODEL_FILENAME = data/MODEL/Building//Streetlight.x		# [12]街頭
 MODEL_FILENAME = data/MODEL/Building//factory.x			# [13]工場
 MODEL_FILENAME = data/MODEL/Building//Box.x				# [14]仮
 MODEL_FILENAME = data/MODEL/Building//shop.x			# [15]便利屋(仮)
 MODEL_FILENAME = data/MODEL/Building/Building_0.x		# [16]家_0
 MODEL_FILENAME = data/MODEL/Building/Building_1.x		# [17]家_1
-MODEL_FILENAME = data/MODEL/99_allbody.x				# [18]キャラ
 
 #------------------------------------------------------------------------------
 # カメラ情報
@@ -98,7 +97,7 @@ END_MOUNTAINSET
 # 地面
 #--------------------------------------
 FIELDSET
-	TEXTYPE = 2#6			# テクスチャの種類
+	TEXTYPE = 2			# テクスチャの種類
 	POS = 1300 100 -300	# 位置
 	ROT = 0 0 0			# 向き
 	BLOCK = 10 13		# 分割数(Ｘ/Ｚ)
@@ -390,7 +389,7 @@ END_MODELSET
 
 
 MODELSET
-	TYPE = 18	# [18]キャラ
+	TYPE = 17	# [18]キャラ
 	POS = 470 100 550
 	ROT = 0 0 0
 	SHADOW = 0

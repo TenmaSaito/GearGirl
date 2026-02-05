@@ -11,7 +11,7 @@
 
 // =================================================
 // マクロ定義
-#define	MAX_TEX		(16)	// テクスチャの最大数
+#define	MAX_TEX		(25)	// テクスチャの最大数
 #define	MAX_MODEL	(512)	// モデルの最大数
 #define	PLAYER_XFIX	(30)	// プレイヤーのXサイズの補正
 #define	PLAYER_YFIX	(0)		// プレイヤーのYサイズの補正
