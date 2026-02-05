@@ -42,7 +42,7 @@ void InitTimer(bool bRanking)
     LPDIRECT3DDEVICE9 pDevice;
     pDevice = GetDevice();
 
-    D3DXCreateTextureFromFile(pDevice, "DATA\\TEXTURE\\number000.png", &g_pTextureTimer);
+    D3DXCreateTextureFromFile(pDevice, "DATA\\TEXTURE\\number003.png", &g_pTextureTimer);
 
     pDevice->CreateVertexBuffer(sizeof(VERTEX_2D) * 4 * NUM_PLACE,
         D3DUSAGE_WRITEONLY,
@@ -50,6 +50,8 @@ void InitTimer(bool bRanking)
         D3DPOOL_MANAGED,
         &g_pVtxBuffTimer,
         NULL);
+
+    EndDevice();
 
     g_bTimeover = false;
     g_bRanking = bRanking;
@@ -222,6 +224,8 @@ void DrawTimer(void)
     {
         pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, nCntNumber * 4, 2);
     }
+
+    EndDevice();
 }
 
 //===========================================================

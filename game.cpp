@@ -25,6 +25,7 @@
 #include "item.h"
 #include "debugproc.h"
 #include "prompt.h"
+#include "timer.h"
 
 //**********************************************************************************
 //*** マクロ定義 ***
@@ -39,6 +40,7 @@
 //**********************************************************************************
 int g_nIdx3DModel;		// 設置した3Dモデルのインデックス
 int g_nIdxCamera;		// 設置したカメラのインデックス
+int g_nCounterGame = 0;	// ゲームのカウンター
 bool g_bPause = false;	//ポーズ状態のON/OFF
 
 //==================================================================================
@@ -90,6 +92,10 @@ void InitGame(void)
 	/*** プロンプト初期化 ***/
 	InitPrompt();
 
+	/*** タイマー初期化 ***/
+	InitTimer(false);
+
+	g_nCounterGame = 0;
 	int nIdxPrompt, Tex;
 	LoadTexture("data/TEXTURE/TestPrompt.png", &Tex);
 	nIdxPrompt = SetPrompt(D3DXVECTOR3(100, 100, 200), D3DXVECTOR2(50.0f, 20.0f), Tex, true);
@@ -141,6 +147,9 @@ void UninitGame(void)
 
 	/*** プロンプトの終了 ***/
 	UninitPrompt();
+
+	/*** タイマーの終了 ***/
+	UninitTimer();
 }
 
 //==================================================================================
@@ -192,6 +201,16 @@ void UpdateGame(void)
 
 		/*** プロンプトの更新 ***/
 		UpdatePrompt();
+
+		/*** タイマーの更新 ***/
+		UpdateTimer();
+
+		if (g_nCounterGame % 60 == 0)
+		{
+			AddTimer(-1);
+		}
+
+		g_nCounterGame++;
 	}
 
 	PrintDebugProc("NumPlayer %d  ActivePlayer %d  CameraNum %d", GetNumPlayer(), GetActivePlayer(), GetCameraNum());
@@ -252,6 +271,9 @@ void DrawGame(void)
 
 		// VERTEX_2D ============================================
 		/*** Aの描画 ***/
+
+		/*** タイマーの描画 ***/
+		DrawTimer();
 	}
 }
 
