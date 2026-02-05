@@ -28,6 +28,7 @@ using namespace MyMathUtil;
 // プロトタイプ宣言
 void UpdateMotion(PlayerType Type);	// モーションのアップデート
 void SetMotionType(MOTIONTYPE motionTypeNext, bool bBlend, int nFrameBlend, PlayerType PlayerType);	// モーションの変更
+void CheckMotionMove(PlayerType nPlayer, Player *pPlayer);
 
 // =================================================
 // グローバル変数
@@ -39,6 +40,7 @@ int g_ActivePlayer = 0;				// 操作しているプレイヤータイプ
 int g_Functionkey = 0;
 int g_Land = 0;
 int g_nUseArm = 0;
+bool g_aMovePlayer[PLAYERTYPE_MAX];	// プレイヤーが動いているか
 
 // =================================================
 // 初期化処理
@@ -68,6 +70,9 @@ void InitPlayer(void)
 		g_aPlayer[nCntPlayer].motionType = MOTIONTYPE_NEUTRAL;
 		g_aPlayer[nCntPlayer].bFinishMotion = true;
 	}
+
+	g_aMovePlayer[0] = false;
+	g_aMovePlayer[1] = false;
 
 	// 少女のパーツ、モーションを読み込む
 	LoadMotion("data\\Scripts\\geargirl.txt", &aIdxMotion[PLAYERTYPE_GIRL]);			// モーションスクリプトを読み込む
@@ -151,6 +156,8 @@ void UpdatePlayer(void)
 
 	for (int nCntPlayer = 0; nCntPlayer < PLAYERTYPE_MAX; nCntPlayer++, pPlayer++)
 	{
+		g_aMovePlayer[nCntPlayer] = false;
+
 		// 現在位置の保存
 		pPlayer->posOld = pPlayer->pos;
 
@@ -160,8 +167,15 @@ void UpdatePlayer(void)
 
 		UpdateMotion((PlayerType)nCntPlayer);
 
-		if (pPlayer->bFinishMotion == true || (pPlayer->motionType != MOTIONTYPE_ACTION && pPlayer->motionType != MOTIONTYPE_JUMP && pPlayer->motionType != MOTIONTYPE_LANDING && pPlayer->motionType != MOTIONTYPE_MOVE
-			&& pPlayer->motionTypeBlend != MOTIONTYPE_ACTION && pPlayer->motionTypeBlend != MOTIONTYPE_JUMP && pPlayer->motionTypeBlend != MOTIONTYPE_LANDING && pPlayer->motionTypeBlend != MOTIONTYPE_MOVE))
+		if ((pPlayer->motionType != MOTIONTYPE_ACTION
+			&& pPlayer->motionType != MOTIONTYPE_JUMP 
+			&& pPlayer->motionType != MOTIONTYPE_LANDING 
+			&& pPlayer->motionTypeBlend != MOTIONTYPE_ACTION 
+			&& pPlayer->motionTypeBlend != MOTIONTYPE_JUMP 
+			&& pPlayer->motionTypeBlend != MOTIONTYPE_LANDING
+			&& pPlayer->motionType != MOTIONTYPE_NEUTRAL
+			&& pPlayer->motionTypeBlend != MOTIONTYPE_NEUTRAL
+			&& g_aMovePlayer[nCntPlayer] == false))
 		{
 			SetMotionType(MOTIONTYPE_NEUTRAL, true, 10, (PlayerType)nCntPlayer);
 		}
@@ -181,7 +195,9 @@ void UpdatePlayer(void)
 		{
 			pPlayer->pos.y = 100.0f;
 
-			if (pPlayer->bJump == true && pPlayer->motionType != MOTIONTYPE_LANDING && pPlayer->motionTypeBlend != MOTIONTYPE_LANDING)
+			if (pPlayer->bJump == true
+				&& pPlayer->motionType != MOTIONTYPE_LANDING
+				&& pPlayer->motionTypeBlend != MOTIONTYPE_LANDING)
 			{// 着地モーション
 				SetMotionType(MOTIONTYPE_LANDING, true, 10, (PlayerType)nCntPlayer);
 				pPlayer->bUseLandMotion = true;
@@ -414,12 +430,7 @@ void MovePlayer(PlayerType nPlayer)
 	{// 少女の操作
 		if (GetKeyboardPress(DIK_A) == true || GetJoypadPress(nPlayer, JOYKEY_LEFT) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_LEFT))
 		{//Aキーが押される	
-
-			if (pPlayer->motionType != MOTIONTYPE_MOVE && pPlayer->motionTypeBlend != MOTIONTYPE_MOVE && pPlayer->motionType != MOTIONTYPE_JUMP)
-			{
-				SetMotionType(MOTIONTYPE_MOVE, true, 10, nPlayer);
-				pPlayer->state = PLAYERSTATE_MOVE;
-			}
+			CheckMotionMove(nPlayer, pPlayer);
 
 			if (GetKeyboardPress(DIK_W) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
 			{// WとA(左上)の入力
@@ -457,6 +468,7 @@ void MovePlayer(PlayerType nPlayer)
 		}
 		else if (GetKeyboardPress(DIK_D) == true || GetJoypadPress(nPlayer, JOYKEY_RIGHT) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_RIGHT))
 		{//Dキーが押される
+			CheckMotionMove(nPlayer, pPlayer);
 
 			if (GetKeyboardPress(DIK_W) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
 			{// WとD(右上)の入力
@@ -494,6 +506,8 @@ void MovePlayer(PlayerType nPlayer)
 		}
 		else if (GetKeyboardPress(DIK_W) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
 		{//Wキーが押される
+			CheckMotionMove(nPlayer, pPlayer);
+
 			pPlayer->move.z += cosf(Camerarot.y) * PLAYER_MOVE;
 			pPlayer->move.x += sinf(Camerarot.y) * PLAYER_MOVE;
 
@@ -505,6 +519,8 @@ void MovePlayer(PlayerType nPlayer)
 		}
 		else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
 		{//Sキーが押される
+			CheckMotionMove(nPlayer, pPlayer);
+
 			pPlayer->move.z += cosf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
 			pPlayer->move.x += sinf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
 
@@ -519,11 +535,7 @@ void MovePlayer(PlayerType nPlayer)
 	{// ネズミの操作
 		if (GetKeyboardPress(DIK_LEFT) == true || GetJoypadPress(nPlayer, JOYKEY_LEFT) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_LEFT))
 		{// 左矢印が押される	
-			if (pPlayer->motionType != MOTIONTYPE_MOVE && pPlayer->motionTypeBlend != MOTIONTYPE_MOVE)
-			{
-				SetMotionType(MOTIONTYPE_MOVE, true, 10, nPlayer);
-				pPlayer->state = PLAYERSTATE_MOVE;
-			}
+			CheckMotionMove(nPlayer, pPlayer);
 
 			if (GetKeyboardPress(DIK_UP) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
 			{// 左上の入力
@@ -561,6 +573,8 @@ void MovePlayer(PlayerType nPlayer)
 		}
 		else if (GetKeyboardPress(DIK_RIGHT) == true || GetJoypadPress(nPlayer, JOYKEY_RIGHT) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_RIGHT))
 		{// 右矢印が押される
+			CheckMotionMove(nPlayer, pPlayer);
+
 			if (GetKeyboardPress(DIK_UP) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
 			{// 右上の入力
 				pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
@@ -597,6 +611,8 @@ void MovePlayer(PlayerType nPlayer)
 		}
 		else if (GetKeyboardPress(DIK_UP) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
 		{//上矢印が押される
+			CheckMotionMove(nPlayer, pPlayer);
+
 			pPlayer->move.z += cosf(Camerarot.y) * PLAYER_MOVE;
 			pPlayer->move.x += sinf(Camerarot.y) * PLAYER_MOVE;
 
@@ -608,6 +624,8 @@ void MovePlayer(PlayerType nPlayer)
 		}
 		else if (GetKeyboardPress(DIK_DOWN) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
 		{//下矢印が押される
+			CheckMotionMove(nPlayer, pPlayer);
+
 			pPlayer->move.z += cosf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
 			pPlayer->move.x += sinf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
 
@@ -622,6 +640,7 @@ void MovePlayer(PlayerType nPlayer)
 	// スティックでの操作
 	if (GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_RIGHT))
 	{// 右
+		CheckMotionMove(nPlayer, pPlayer);
 		pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
 		pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
 
@@ -633,6 +652,7 @@ void MovePlayer(PlayerType nPlayer)
 	}
 	if (GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_LEFT))
 	{// 左
+		CheckMotionMove(nPlayer, pPlayer);
 		pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
 		pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
 
@@ -644,6 +664,7 @@ void MovePlayer(PlayerType nPlayer)
 	}
 	if (GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
 	{// 上
+		CheckMotionMove(nPlayer, pPlayer);
 		pPlayer->move.z += cosf(Camerarot.y) * PLAYER_MOVE;
 		pPlayer->move.x += sinf(Camerarot.y) * PLAYER_MOVE;
 
@@ -655,6 +676,7 @@ void MovePlayer(PlayerType nPlayer)
 	}
 	if (GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
 	{// 下
+		CheckMotionMove(nPlayer, pPlayer);
 		pPlayer->move.z += cosf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
 		pPlayer->move.x += sinf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
 
@@ -720,6 +742,11 @@ void SetMotionType(MOTIONTYPE motionTypeNext, bool bBlend, int nFrameBlend, Play
 
 	if (bBlend == false)
 	{
+		if (motionTypeNext == MOTIONTYPE_LANDING)
+		{
+			OutputDebugString("...");
+		}
+
 		/*** 各変数を初期化し、次のモーションを設定 ***/
 		pPlayer->nCounterMotion = pPlayer->nCounterMotionBlend;
 		pPlayer->nKey = pPlayer->nKeyBlend;
@@ -986,14 +1013,14 @@ void UpdateMotion(PlayerType Type)
 
 			/** キーを一つ進める **/
 			pPlayer->nKey = ((pPlayer->nKey + 1) % pPlayer->aMotionInfo[pPlayer->motionType].nNumKey);
+			//PrintDebugProc("key %d\nFrame %d\nCounter %d\n", pPlayer->nKey, pInfo->nFrame, pPlayer->nCounterMotion);
 
-			if (pPlayer->nKey == 0 && pPlayer->bLoop == false)
+			if (pPlayer->nKey == pPlayer->aMotionInfo[pPlayer->motionType].nNumKey - 1 && pPlayer->bLoop == false)
 			{
 				pPlayer->bFinishMotion = true;
-				SetMotionType(MOTIONTYPE_NEUTRAL, true, 1, Type);
+				SetMotionType(MOTIONTYPE_NEUTRAL, true, 40, Type);
 				pPlayer->state = PLAYERSTATE_NEUTRAL;
 			}
-
 
 			pPlayer->nCounterMotion = 0;
 		}
@@ -1100,4 +1127,31 @@ void RotRepair(PlayerType nPlayer)
 	{
 		pPlayer->rot.y += D3DX_PI * 2;
 	}
+}
+
+// =================================================
+// モーションの確認処理
+// =================================================
+void CheckMotionMove(PlayerType nPlayer, Player *pPlayer)
+{
+	if (pPlayer->motionType != MOTIONTYPE_MOVE
+		&& pPlayer->motionTypeBlend != MOTIONTYPE_MOVE
+		&& pPlayer->motionTypeBlend != MOTIONTYPE_JUMP)
+	{
+		if (pPlayer->motionType == MOTIONTYPE_JUMP)
+		{
+			if (pPlayer->motionTypeBlend == MOTIONTYPE_LANDING)
+			{
+				SetMotionType(MOTIONTYPE_MOVE, true, 5, nPlayer);
+				pPlayer->state = PLAYERSTATE_MOVE;
+			}
+		}
+		else
+		{
+			SetMotionType(MOTIONTYPE_MOVE, true, 5, nPlayer);
+			pPlayer->state = PLAYERSTATE_MOVE;
+		}
+	}
+
+	g_aMovePlayer[nPlayer] = true;
 }
