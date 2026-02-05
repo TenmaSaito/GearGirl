@@ -35,6 +35,7 @@ void CheckMotionMove(PlayerType nPlayer, Player *pPlayer);
 void MouseKeepUp(void);				// シングルプレイ時ネズミが少女についてくる処理
 void UpdateArm(void);				// アームの切り替え処理
 void ChangeArmType(ArmType Type);	// アームの変更
+void ShotMouse(void);				// ネズミを発射
 
 // =================================================
 // グローバル変数
@@ -48,6 +49,8 @@ int g_Functionkey = 0;
 int g_Land = 0;
 int g_nUseArm = 0;
 bool g_aMovePlayer[PLAYERTYPE_MAX];	// プレイヤーが動いているか
+int	g_nMotionCounter = 0;			// モーションカウンター
+bool g_bShotMouse = false;			// ネズミを発射するフラグ
 
 // =================================================
 // 初期化処理
@@ -182,6 +185,9 @@ void UpdatePlayer(void)
 		if (nCntPlayer == PLAYERTYPE_GIRL)
 		{
 			UpdateArm();
+
+			// カタパルトを起動した後の処理
+			// ShotMouse();
 		}
 
 		UpdateMotion((PlayerType)nCntPlayer);
@@ -525,6 +531,8 @@ void ActionPlayer(PlayerType nPlayer, Player *pPlayer)
 			// CATAPULT
 			case ARMTYPE_CATAPULT:
 				SetMotionType(MOTIONTYPE_ACTION, true, 10, nPlayer);
+				g_nMotionCounter = 8;
+				g_bShotMouse = true;
 				break;
 
 			default:
@@ -1351,4 +1359,31 @@ void UpdateArm(void)
 void ChangeArmType(ArmType Type)
 {
 	g_armPlayer = Type;
+}
+
+// =================================================
+// ネズミを発射 未完成
+// =================================================
+void ShotMouse(void)
+{
+	if (g_bShotMouse)
+	{
+		g_nMotionCounter--;
+		if (g_nMotionCounter < 0)
+		{
+			static float fRadiation = 0;
+			fRadiation += 0.1f;
+
+			Player* pMouse = GetPlayer() + 1;
+
+			pMouse->move.x = 3.0f;
+			pMouse->move.y = sinf(fRadiation) * 0.5f;
+
+			if (g_nMotionCounter < -30)
+			{
+				g_bShotMouse = false;
+				g_nMotionCounter = 0;
+			}
+		}
+	}
 }

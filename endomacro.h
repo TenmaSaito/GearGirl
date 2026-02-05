@@ -22,5 +22,4 @@
 #define SQUARE(X)					((X) * (X))							// ÇQèÊ
 #define __ABSOLUTE(X)				(X < 0 ? X* -1:X)					// ê‚ëŒíl
 
-
 #endif // !_ENDOMACRO_H_

@@ -257,14 +257,13 @@ void CameraFollow(void)
 	P_CAMERA pCamera = GetCamera();				// カメラ情報
 	Player* pPlayer = GetPlayer();				// プレイヤー情報
 	float fPlayerFront;							// プレイヤーより前
-	static float fPlayerMoveRot;
+	float fPlayerMoveRot;						// プレイヤーが移動している方向
 	float fCameraFactor = CAMERA_FOLLOW_FACTOR;	// カメラ追従速度倍率
 
 	for (int nPlayer = 0; nPlayer < MAX_PLAYER; nPlayer++, pCamera++, pPlayer++)
 	{
 		//**************************************************************
 		// プレイヤーに追従
-			
 		if (CAMERA_PLFR_DEADZONE < SQUARE(pPlayer->move.x) + SQUARE(pPlayer->move.z))
 		{// カメラを少し先へ
 			fPlayerFront = pCamera->fDist * 0.25f;
@@ -274,30 +273,31 @@ void CameraFollow(void)
 			pCamera->posRDest.z = pPlayer->pos.z - fPlayerFront * cosf(fPlayerMoveRot);
 		}
 
-
 		//**************************************************************
 		// キャラクターに応じて調整
 		switch (nPlayer)
 		{
-		case PLAYER_ONE:				
+		case PLAYER_ONE:
 			pCamera->posRDest.y = pPlayer->pos.y + 10.0f; // 頭の高さに追従
 
+			// カメラ切り替え時の処理
 			if (0 < g_nSetCameraPosCounter)
 			{
-				pCamera->rot.x += (CAMERA_1P_ROT.x - pCamera->rot.x) * g_nSetCameraPosCounter / SETCAMERAPOS_COUNTER;
-				pCamera->fDist += (CAMERA_1P_DISTANS - pCamera->fDist) * g_nSetCameraPosCounter / SETCAMERAPOS_COUNTER;
+				pCamera->rot.x += (CAMERA_1P_ROT.x - pCamera->rot.x) * g_nSetCameraPosCounter / SETCAMERAPOS_COUNTER;	// 向きを戻す
+				pCamera->fDist += (CAMERA_1P_DISTANS - pCamera->fDist) * g_nSetCameraPosCounter / SETCAMERAPOS_COUNTER;	// 距離を戻す
 				g_nSetCameraPosCounter--;
 			}
 			break;
 
 		case PLAYER_TWO:
 			pCamera->posRDest.y = pPlayer->pos.y + 3.0f;	// 頭の高さに追従
-			fCameraFactor += 0.1f;						// ネズミは追従速度を上げる
+			fCameraFactor += 0.1f;							// ネズミは追従速度を上げる
 
+			// カメラ切り替え時の処理
 			if (0 < g_nSetCameraPosCounter)
 			{
-				pCamera->rot.x += (CAMERA_2P_ROT.x - pCamera->rot.x) * g_nSetCameraPosCounter / SETCAMERAPOS_COUNTER;
-				pCamera->fDist += (CAMERA_2P_DISTANS - pCamera->fDist) * g_nSetCameraPosCounter / SETCAMERAPOS_COUNTER;
+				pCamera->rot.x += (CAMERA_2P_ROT.x - pCamera->rot.x) * g_nSetCameraPosCounter / SETCAMERAPOS_COUNTER;	 // 向きを戻す
+				pCamera->fDist += (CAMERA_2P_DISTANS - pCamera->fDist) * g_nSetCameraPosCounter / SETCAMERAPOS_COUNTER;	 // 距離を戻す
 				g_nSetCameraPosCounter--;
 			}
 			break;
