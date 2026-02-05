@@ -35,12 +35,12 @@ int nCntData = 100;
 //**********************************************************************************
 const char* c_apFilenameTitle[MAX_TITLE] =
 {
-	"data\\TEXTURE\\TapToStart.png",
-	"data\\TEXTURE\\Start.png",
-	"data\\TEXTURE\\Option.png",
-	"data\\TEXTURE\\End.png",
-	"data\\TEXTURE\\1Player.png",
-	"data\\TEXTURE\\2Player.png",
+	"data\\TEXTURE\\TitleTapToStart.png",
+	"data\\TEXTURE\\TitleStart.png",
+	"data\\TEXTURE\\TitleOption.png",
+	"data\\TEXTURE\\TitleEnd.png",
+	"data\\TEXTURE\\Title1Player.png",
+	"data\\TEXTURE\\Title2Player.png",
 };
 
 //**********************************************************************************
@@ -260,7 +260,7 @@ void DrawTitle(void)
 	/*** Aの描画 ***/
 
 	/*** 2Dポリゴンの描画 ***/
-	Draw2DPolygon();
+	//Draw2DPolygon();
 
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();			// デバイスへのポインタ・取得
 
