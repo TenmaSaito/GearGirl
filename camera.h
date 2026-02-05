@@ -23,7 +23,7 @@
 #define CAMERA_1P_DISTANS		(30.0f)					// 少女の,カメラと注視点の距離
 #define CAMERA_2P_DISTANS		(15.0f)					// ネズミの,カメラと注視点の距離
 #define CAMERA_1P_ROT			vec3(1.3f, 0.0f, 0.0f)	// 少女のカメラの角度
-#define CAMERA_2P_ROT			vec3(1.6f, 0.0f, 0.0f)		// ネズミのカメラの角度
+#define CAMERA_2P_ROT			vec3(1.6f, 0.0f, 0.0f)	// ネズミのカメラの角度
 #define CAMERA_MOVE				(10.0f)					// カメラの移動速度
 #define CAMERA_SPIN				(0.01f)					// カメラの回転速度
 #define CAMERA_FOLLOW_FACTOR	(0.15f)					// カメラが追従移動する時の補正

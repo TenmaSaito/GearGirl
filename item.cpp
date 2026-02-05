@@ -48,7 +48,6 @@ void InitItem(void)
 	// •Ï”éŒ¾
 	P_ITEM		pItem = GetItem();
 	P_ITEMINFO	pItemInfo = &g_aItemInfo[0];
-	HRESULT		hr;
 
 	// ƒAƒCƒeƒ€î•ñ“Ç
 	for (int nCntItem = 0; nCntItem < ITEMTYPE_MAX; nCntItem++, pItemInfo++)
@@ -244,7 +243,7 @@ void SaveItemSet(void)
 {
 	//**************************************************************
 	// •Ï”éŒ¾
-	FILE* pFile;
+	//FILE* pFile;
 
 	// fopen(, pFile);
 }

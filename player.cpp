@@ -29,6 +29,7 @@ using namespace MyMathUtil;
 void UpdateMotion(PlayerType Type);	// モーションのアップデート
 void SetMotionType(MOTIONTYPE motionTypeNext, bool bBlend, int nFrameBlend, PlayerType PlayerType);	// モーションの変更
 void CheckMotionMove(PlayerType nPlayer, Player *pPlayer);
+void MouseKeepUp(void);				// シングルプレイ時ネズミが少女についてくる処理
 
 // =================================================
 // グローバル変数
@@ -161,9 +162,15 @@ void UpdatePlayer(void)
 		// 現在位置の保存
 		pPlayer->posOld = pPlayer->pos;
 
-		MovePlayer((PlayerType)nCntPlayer);	// 移動に関する処理
+		// ２人プレイもしくはアクティブなプレイヤーの処理
+		if (GetNumPlayer() == 2 || GetActivePlayer() == PlayerType(nCntPlayer))
+		{
+			MovePlayer((PlayerType)nCntPlayer);	// 移動に関する処理
 
-		JumpPlayer((PlayerType)nCntPlayer);	// ジャンプに関する処理
+			JumpPlayer((PlayerType)nCntPlayer);	// ジャンプに関する処理
+
+			MouseKeepUp();						// 少女にネズミが追従する処理
+		}
 
 		UpdateMotion((PlayerType)nCntPlayer);
 
@@ -1154,4 +1161,35 @@ void CheckMotionMove(PlayerType nPlayer, Player *pPlayer)
 	}
 
 	g_aMovePlayer[nPlayer] = true;
+}
+
+// =================================================
+// シングルプレイ時ネズミが少女についてくる処理
+// =================================================
+void MouseKeepUp(void)
+{
+	if (GetNumPlayer() == 1 && GetActivePlayer() == PLAYERTYPE_GIRL)
+	{
+		// 少女の位置情報
+		Player* pGirl = GetPlayer();
+
+		// ネズミの情報
+		Player* pMouse = pGirl + 1;
+
+		// ２人の距離
+		D3DXVECTOR3 playerDist = pGirl->pos - pMouse->pos;
+		float fPlayerDist = D3DXVec3Length(&playerDist);
+
+		if (5 < fPlayerDist)
+		{
+			// ネズミがいてほしい座標
+			D3DXVECTOR3 mousePosDest = D3DXVECTOR3(pGirl->pos.x + (sinf(pGirl->rot.y) * 5), pGirl->pos.y, pGirl->pos.z + (cosf(pGirl->rot.y) * 5));
+
+			// ネズミを移動
+			MyMathUtil::HomingPosToPos(mousePosDest, &pMouse->pos, fPlayerDist * 0.08f);
+
+			// 移動している方向に向く
+			pMouse->rot.y = atan2f(pMouse->posOld.x - pMouse->pos.x, pMouse->posOld.z - pMouse->pos.z);
+		}
+	}
 }
