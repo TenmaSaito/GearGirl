@@ -23,17 +23,23 @@ using namespace MyMathUtil;
 // =================================================
 // マクロ定義
 #define PLAYER_RANGE	(50.0f)		// プレイヤーとアイテムとの当たり判定の距離
+#define START_ARMTYPE	(14)		// アームの開始配列番号
+#define MAX_PARTS		(17)
 
 // =================================================
 // プロトタイプ宣言
+void ActionPlayer(PlayerType Type, Player *pPlayer);
 void UpdateMotion(PlayerType Type);	// モーションのアップデート
 void SetMotionType(MOTIONTYPE motionTypeNext, bool bBlend, int nFrameBlend, PlayerType PlayerType);	// モーションの変更
 void CheckMotionMove(PlayerType nPlayer, Player *pPlayer);
 void MouseKeepUp(void);				// シングルプレイ時ネズミが少女についてくる処理
+void UpdateArm(void);				// アームの切り替え処理
+void ChangeArmType(ArmType Type);	// アームの変更
 
 // =================================================
 // グローバル変数
 Player g_aPlayer[PLAYERTYPE_MAX];	// プレイヤーの樹応報
+ArmType g_armPlayer;				// 少女のアームタイプ
 int g_IdxShadowPlayer = -1;			// 使用する影の番号
 float g_sinrot = 0;					// sinカーブを用いるとき用の変数
 int g_nNumPlayer = 1;				// プレイヤーのアクティブ人数
@@ -121,14 +127,13 @@ void InitPlayer(void)
 		}
 	}
 
-
-
 	// === グローバル変数の初期化 === // 
 	g_nNumPlayer = 1;		// プレイ人数
 	g_ActivePlayer = 0;		// 現在の操作対象
 	g_Functionkey = 0;		// デバッグ表示の切り替え用
 	g_Land = 0;				// 着地モーションが再生された回数
 	g_nUseArm = 0;			// 現在使用しているアームのインデックス
+	g_armPlayer = ARMTYPE_NORMAL;	// 通常アーム
 
 	// 影を設定
 	//g_IdxShadowPlayer = SetShadow();
@@ -165,11 +170,18 @@ void UpdatePlayer(void)
 		// ２人プレイもしくはアクティブなプレイヤーの処理
 		if (GetNumPlayer() == 2 || GetActivePlayer() == PlayerType(nCntPlayer))
 		{
+			ActionPlayer(PlayerType(nCntPlayer), pPlayer);
+
 			MovePlayer((PlayerType)nCntPlayer);	// 移動に関する処理
 
 			JumpPlayer((PlayerType)nCntPlayer);	// ジャンプに関する処理
 
 			MouseKeepUp();						// 少女にネズミが追従する処理
+		}
+
+		if (nCntPlayer == PLAYERTYPE_GIRL)
+		{
+			UpdateArm();
 		}
 
 		UpdateMotion((PlayerType)nCntPlayer);
@@ -335,70 +347,145 @@ void DrawPlayer(void)
 		// 全モデル(パーツ)の描画
 		for (int nCntModel = 0; nCntModel < pPlayer->PartsInfo.nNumParts; nCntModel++)
 		{
-			D3DXMATRIX mtxRotModel, mtxTransModel;	// 計算用マトリックス
-			D3DXMATRIX mtxParent;	// 親のマトリックス
+			if (nCntModel < START_ARMTYPE)
+			{
+				D3DXMATRIX mtxRotModel, mtxTransModel;	// 計算用マトリックス
+				D3DXMATRIX mtxParent;	// 親のマトリックス
 
-			// パーツのワールドマトリックス初期化
-			D3DXMatrixIdentity(&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld);
+				// パーツのワールドマトリックス初期化
+				D3DXMatrixIdentity(&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld);
 
-			// パーツの向きを反映
-			D3DXMatrixRotationYawPitchRoll(&mtxRotModel,
-				pPlayer->PartsInfo.aParts[nCntModel].rot.y,
-				pPlayer->PartsInfo.aParts[nCntModel].rot.x,
-				pPlayer->PartsInfo.aParts[nCntModel].rot.z);
+				// パーツの向きを反映
+				D3DXMatrixRotationYawPitchRoll(&mtxRotModel,
+					pPlayer->PartsInfo.aParts[nCntModel].rot.y,
+					pPlayer->PartsInfo.aParts[nCntModel].rot.x,
+					pPlayer->PartsInfo.aParts[nCntModel].rot.z);
 
-			// かけ合わせる
-			D3DXMatrixMultiply(&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
-				&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
-				&mtxRotModel);
+				// かけ合わせる
+				D3DXMatrixMultiply(&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
+					&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
+					&mtxRotModel);
 
-			// パーツの位置(オフセット)を反映
-			D3DXMatrixTranslation(&mtxTransModel,
-				pPlayer->PartsInfo.aParts[nCntModel].pos.x,
-				pPlayer->PartsInfo.aParts[nCntModel].pos.y,
-				pPlayer->PartsInfo.aParts[nCntModel].pos.z);
+				// パーツの位置(オフセット)を反映
+				D3DXMatrixTranslation(&mtxTransModel,
+					pPlayer->PartsInfo.aParts[nCntModel].pos.x,
+					pPlayer->PartsInfo.aParts[nCntModel].pos.y,
+					pPlayer->PartsInfo.aParts[nCntModel].pos.z);
 
-			// かけ合わせる
-			D3DXMatrixMultiply(&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
-				&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
-				&mtxTransModel);
+				// かけ合わせる
+				D3DXMatrixMultiply(&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
+					&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
+					&mtxTransModel);
 
-			// パーツの「親マトリックス」の設定
-			if (pPlayer->PartsInfo.aParts[nCntModel].nIdxModelParent != -1)
-			{// 親モデルが存在する
-				mtxParent = pPlayer->PartsInfo.aParts[pPlayer->PartsInfo.aParts[nCntModel].nIdxModelParent].mtxWorld;
+				// パーツの「親マトリックス」の設定
+				if (pPlayer->PartsInfo.aParts[nCntModel].nIdxModelParent != -1)
+				{// 親モデルが存在する
+					mtxParent = pPlayer->PartsInfo.aParts[pPlayer->PartsInfo.aParts[nCntModel].nIdxModelParent].mtxWorld;
+				}
+				else
+				{// 親モデルが存在しない
+					mtxParent = pPlayer->mtxWorld;
+				}
+
+				// 算出した「パーツのワールドマトリックス」と「親のマトリックス」をかけ合わせる
+				D3DXMatrixMultiply(&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
+					&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
+					&mtxParent);
+
+				// パーツのワールドマトリックスの設定
+				pDevice->SetTransform(D3DTS_WORLD,
+					&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld);
+
+				LPMODELDATA pModelData = GetModelData(pPlayer->PartsInfo.aParts[nCntModel].nIdxModel);
+				if (pModelData != NULL)
+				{
+					// パーツの描画	
+						// マテリアルデータへのポインタを取得
+					pMat = (D3DXMATERIAL*)pModelData->pBuffMat->GetBufferPointer();
+
+					for (int nCntMat = 0; nCntMat < (int)pModelData->dwNumMat; nCntMat++)
+					{
+						// マテリアルの設定
+						pDevice->SetMaterial(&pMat[nCntMat].MatD3D);
+
+						// テクスチャの設定
+						pDevice->SetTexture(0, pModelData->apTexture[nCntMat]);
+
+						// モデル(パーツ)の描画
+						pModelData->pMesh->DrawSubset(nCntMat);
+					}
+				}
 			}
 			else
-			{// 親モデルが存在しない
-				mtxParent = pPlayer->mtxWorld;
-			}
-
-			// 算出した「パーツのワールドマトリックス」と「親のマトリックス」をかけ合わせる
-			D3DXMatrixMultiply(&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
-				&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
-				&mtxParent);
-
-			// パーツのワールドマトリックスの設定
-			pDevice->SetTransform(D3DTS_WORLD,
-				&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld);
-
-			LPMODELDATA pModelData = GetModelData(pPlayer->PartsInfo.aParts[nCntModel].nIdxModel);
-			if (pModelData != NULL)
 			{
-				// パーツの描画	
-					// マテリアルデータへのポインタを取得
-				pMat = (D3DXMATERIAL*)pModelData->pBuffMat->GetBufferPointer();
+				if (nCntModel >= MAX_PARTS) break;
+				int nCntModelArm = nCntModel + (3 * g_armPlayer);
 
-				for (int nCntMat = 0; nCntMat < (int)pModelData->dwNumMat; nCntMat++)
+				D3DXMATRIX mtxRotModel, mtxTransModel;	// 計算用マトリックス
+				D3DXMATRIX mtxParent;	// 親のマトリックス
+
+				// パーツのワールドマトリックス初期化
+				D3DXMatrixIdentity(&pPlayer->PartsInfo.aParts[nCntModelArm].mtxWorld);
+
+				// パーツの向きを反映
+				D3DXMatrixRotationYawPitchRoll(&mtxRotModel,
+					pPlayer->PartsInfo.aParts[nCntModelArm].rot.y,
+					pPlayer->PartsInfo.aParts[nCntModelArm].rot.x,
+					pPlayer->PartsInfo.aParts[nCntModelArm].rot.z);
+
+				// かけ合わせる
+				D3DXMatrixMultiply(&pPlayer->PartsInfo.aParts[nCntModelArm].mtxWorld,
+					&pPlayer->PartsInfo.aParts[nCntModelArm].mtxWorld,
+					&mtxRotModel);
+
+				// パーツの位置(オフセット)を反映
+				D3DXMatrixTranslation(&mtxTransModel,
+					pPlayer->PartsInfo.aParts[nCntModelArm].pos.x,
+					pPlayer->PartsInfo.aParts[nCntModelArm].pos.y,
+					pPlayer->PartsInfo.aParts[nCntModelArm].pos.z);
+
+				// かけ合わせる
+				D3DXMatrixMultiply(&pPlayer->PartsInfo.aParts[nCntModelArm].mtxWorld,
+					&pPlayer->PartsInfo.aParts[nCntModelArm].mtxWorld,
+					&mtxTransModel);
+
+				// パーツの「親マトリックス」の設定
+				if (pPlayer->PartsInfo.aParts[nCntModelArm].nIdxModelParent != -1)
+				{// 親モデルが存在する
+					mtxParent = pPlayer->PartsInfo.aParts[pPlayer->PartsInfo.aParts[nCntModelArm].nIdxModelParent].mtxWorld;
+				}
+				else
+				{// 親モデルが存在しない
+					mtxParent = pPlayer->mtxWorld;
+				}
+
+				// 算出した「パーツのワールドマトリックス」と「親のマトリックス」をかけ合わせる
+				D3DXMatrixMultiply(&pPlayer->PartsInfo.aParts[nCntModelArm].mtxWorld,
+					&pPlayer->PartsInfo.aParts[nCntModelArm].mtxWorld,
+					&mtxParent);
+
+				// パーツのワールドマトリックスの設定
+				pDevice->SetTransform(D3DTS_WORLD,
+					&pPlayer->PartsInfo.aParts[nCntModelArm].mtxWorld);
+
+				LPMODELDATA pModelData = GetModelData(pPlayer->PartsInfo.aParts[nCntModelArm].nIdxModel);
+				if (pModelData != NULL)
 				{
-					// マテリアルの設定
-					pDevice->SetMaterial(&pMat[nCntMat].MatD3D);
+					// パーツの描画	
+						// マテリアルデータへのポインタを取得
+					pMat = (D3DXMATERIAL*)pModelData->pBuffMat->GetBufferPointer();
 
-					// テクスチャの設定
-					pDevice->SetTexture(0, pModelData->apTexture[nCntMat]);
+					for (int nCntMat = 0; nCntMat < (int)pModelData->dwNumMat; nCntMat++)
+					{
+						// マテリアルの設定
+						pDevice->SetMaterial(&pMat[nCntMat].MatD3D);
 
-					// モデル(パーツ)の描画
-					pModelData->pMesh->DrawSubset(nCntMat);
+						// テクスチャの設定
+						pDevice->SetTexture(0, pModelData->apTexture[nCntMat]);
+
+						// モデル(パーツ)の描画
+						pModelData->pMesh->DrawSubset(nCntMat);
+					}
 				}
 			}
 		}
@@ -421,6 +508,38 @@ Player* GetPlayer(void)
 
 // =================================================
 // プレイヤーの行動関数
+// =================================================
+void ActionPlayer(PlayerType nPlayer, Player *pPlayer)
+{
+	if (nPlayer == PLAYERTYPE_GIRL)
+	{
+		if (GetKeyboardTrigger(DIK_RETURN))
+		{
+			switch (g_armPlayer)
+			{
+			// NORMAL
+			case ARMTYPE_NORMAL:
+
+				break;
+
+			// CATAPULT
+			case ARMTYPE_CATAPULT:
+				SetMotionType(MOTIONTYPE_ACTION, true, 10, nPlayer);
+				break;
+
+			default:
+				break;
+			}
+		}
+	}
+	else
+	{
+
+	}
+}
+
+// =================================================
+// プレイヤーの移動関数
 // =================================================
 void MovePlayer(PlayerType nPlayer)
 {
@@ -1149,7 +1268,7 @@ void CheckMotionMove(PlayerType nPlayer, Player *pPlayer)
 		{
 			if (pPlayer->motionTypeBlend == MOTIONTYPE_LANDING)
 			{
-				SetMotionType(MOTIONTYPE_MOVE, true, 5, nPlayer);
+				SetMotionType(MOTIONTYPE_MOVE, true, 15, nPlayer);
 				pPlayer->state = PLAYERSTATE_MOVE;
 			}
 		}
@@ -1190,6 +1309,46 @@ void MouseKeepUp(void)
 
 			// 移動している方向に向く
 			pMouse->rot.y = atan2f(pMouse->posOld.x - pMouse->pos.x, pMouse->posOld.z - pMouse->pos.z);
+
+			CheckMotionMove(PLAYERTYPE_MOUSE, &g_aPlayer[PLAYERTYPE_MOUSE]);
 		}
 	}
+}
+
+// =================================================
+// アームの更新
+// =================================================
+void UpdateArm(void)
+{
+	// アームの切り替え処理
+	if (GetKeyboardTrigger(DIK_9))
+	{
+		int nArm = g_armPlayer;
+		nArm--;
+		if (FAILED(CheckIndex(ARMTYPE_MAX, nArm, 0)))
+		{
+			nArm = ARMTYPE_MAX - 1;
+		}
+
+		g_armPlayer = (ArmType)nArm;
+	}
+	else if (GetKeyboardTrigger(DIK_0))
+	{
+		int nArm = g_armPlayer;
+		nArm++;
+		if (FAILED(CheckIndex(ARMTYPE_MAX, nArm)))
+		{
+			nArm = 0;
+		}
+
+		g_armPlayer = (ArmType)nArm;
+	}
+}
+
+// =================================================
+// アームの切り替え
+// =================================================
+void ChangeArmType(ArmType Type)
+{
+	g_armPlayer = Type;
 }

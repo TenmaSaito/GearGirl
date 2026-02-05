@@ -216,7 +216,7 @@ void UpdateGame(void)
 	PrintDebugProc("NumPlayer %d  ActivePlayer %d  CameraNum %d", GetNumPlayer(), GetActivePlayer(), GetCameraNum());
 
 	// ÉÇÅ[ÉhïœçX
-	if (GetKeyboardTrigger(DIK_RETURN)
+	if (GetKeyboardTrigger(DIK_BACK)
 		|| GetJoypadTrigger(0, JOYKEY_A)
 		|| GetJoypadTrigger(0, JOYKEY_START))
 	{

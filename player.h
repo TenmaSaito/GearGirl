@@ -43,8 +43,6 @@ typedef enum
 {
 	ARMTYPE_NORMAL = 0,	// 通常の腕
 	ARMTYPE_CATAPULT,	// カタパルトの腕
-	ARMTYPE_HUMMER,		// ハンマーの腕
-	ARMTYPE_PICCKING,	// ピッキング時の腕
 	ARMTYPE_MAX
 }ArmType;
 
