@@ -383,7 +383,8 @@ bool LoadModel(void)
 					}
 					if (strstr(&Realize[0], "END_FIELDSET") != NULL)
 					{
-						SetField(INTToFloat(pos), VECNULL, INTToFloat(rot), (float)Xsize, (float)Ysize, aIdxTexture[nIdxTexField], (float)Xdevide, (float)Ydevide,D3DCULL_CCW);
+						D3DXVECTOR3 rotVec = DegreeToRadian(INTToFloat(rot));
+						SetField(INTToFloat(pos), VECNULL, rotVec, (float)Xsize, (float)Ysize, aIdxTexture[nIdxTexField], (float)Xdevide, (float)Ydevide,D3DCULL_CCW);
 						nCntField++;
 						break;
 					}

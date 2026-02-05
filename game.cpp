@@ -229,6 +229,9 @@ void DrawGame(void)
 		// VERTEX_3D ============================================
 		/*** Aの描画 ***/
 
+		/*** 床の描画  ***/
+		DrawField();
+
 		/*** 3Dモデルの描画 ***/
 		Draw3DModel();
 
@@ -240,9 +243,6 @@ void DrawGame(void)
 
 		/*** アイテムの描画 ***/
 		DrawItem();
-
-		/*** 床の描画  ***/
-		DrawField();
 
 		/*** メッシュの描画 ***/
 		DrawMesh();

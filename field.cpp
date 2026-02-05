@@ -169,13 +169,13 @@ void UpdateField(void)
 		// 使われていれば
 		if (g_aField[nCntField].bUse == true)
 		{
-			g_aField[nCntField].nCounterAnim++;
+			//g_aField[nCntField].nCounterAnim++;
 
-			/*** テクスチャ座標の設定 ***/
-			pVtx[0].tex = D3DXVECTOR2(0.0f + (g_aField[nCntField].move.x * g_aField[nCntField].nCounterAnim), 0.0f + (g_aField[nCntField].move.z * g_aField[nCntField].nCounterAnim));
-			pVtx[1].tex = D3DXVECTOR2((1.0f * g_aField[nCntField].nXBlock) + (g_aField[nCntField].move.x * g_aField[nCntField].nCounterAnim), 0.0f + (g_aField[nCntField].move.z * g_aField[nCntField].nCounterAnim));
-			pVtx[2].tex = D3DXVECTOR2(0.0f + (g_aField[nCntField].move.x * g_aField[nCntField].nCounterAnim), (1.0f * g_aField[nCntField].nZBlock) + (g_aField[nCntField].move.z * g_aField[nCntField].nCounterAnim));
-			pVtx[3].tex = D3DXVECTOR2((1.0f * g_aField[nCntField].nXBlock) + (g_aField[nCntField].move.x * g_aField[nCntField].nCounterAnim), (1.0f * g_aField[nCntField].nZBlock) + (g_aField[nCntField].move.z * g_aField[nCntField].nCounterAnim));
+			///*** テクスチャ座標の設定 ***/
+			//pVtx[0].tex = D3DXVECTOR2(0.0f + (g_aField[nCntField].move.x * g_aField[nCntField].nCounterAnim), 0.0f + (g_aField[nCntField].move.z * g_aField[nCntField].nCounterAnim));
+			//pVtx[1].tex = D3DXVECTOR2((1.0f * g_aField[nCntField].nXBlock) + (g_aField[nCntField].move.x * g_aField[nCntField].nCounterAnim), 0.0f + (g_aField[nCntField].move.z * g_aField[nCntField].nCounterAnim));
+			//pVtx[2].tex = D3DXVECTOR2(0.0f + (g_aField[nCntField].move.x * g_aField[nCntField].nCounterAnim), (1.0f * g_aField[nCntField].nZBlock) + (g_aField[nCntField].move.z * g_aField[nCntField].nCounterAnim));
+			//pVtx[3].tex = D3DXVECTOR2((1.0f * g_aField[nCntField].nXBlock) + (g_aField[nCntField].move.x * g_aField[nCntField].nCounterAnim), (1.0f * g_aField[nCntField].nZBlock) + (g_aField[nCntField].move.z * g_aField[nCntField].nCounterAnim));
 		}
 
 		pVtx += 4;
@@ -194,14 +194,17 @@ void DrawField(void)
 	D3DXMATRIX mtxRot, mtxTrans;		// 計算用マトリックス
 	DWORD typeDef;						// カリングタイプ保存用
 
+	/*** 頂点バッファをデータストリームに設定 ***/
+	pDevice->SetStreamSource(0, g_pVtxBuffField, 0, sizeof(VERTEX_3D));
+
+	/*** 頂点フォーマットの設定 ***/
+	pDevice->SetFVF(FVF_VERTEX_3D);
+
 	for (int nCntField = 0; nCntField < MAX_FIELD; nCntField++)
 	{
 		// 使われていれば
 		if (g_aField[nCntField].bUse == true)
 		{
-			pDevice->GetRenderState(D3DRS_CULLMODE, &typeDef);
-			pDevice->SetRenderState(D3DRS_CULLMODE, g_aField[nCntField].type);
-
 			/*** ワールドマトリックスの初期化 ***/
 			D3DXMatrixIdentity(&g_aField[nCntField].mtxWorld);
 
@@ -224,12 +227,6 @@ void DrawField(void)
 			/*** ワールドマトリックスの設定 ***/
 			pDevice->SetTransform(D3DTS_WORLD, &g_aField[nCntField].mtxWorld);
 
-			/*** 頂点バッファをデータストリームに設定 ***/
-			pDevice->SetStreamSource(0, g_pVtxBuffField, 0, sizeof(VERTEX_3D));
-
-			/*** 頂点フォーマットの設定 ***/
-			pDevice->SetFVF(FVF_VERTEX_3D);
-
 			/*** テクスチャの設定 ***/
 			pDevice->SetTexture(0, GetTexture(g_aField[nCntField].nIndexTexture));
 
@@ -237,8 +234,6 @@ void DrawField(void)
 			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP,		// プリミティブの種類
 				4 * nCntField,								// 描画する最初の頂点インデックス
 				2);											// 描画するプリミティブの数
-
-			pDevice->SetRenderState(D3DRS_CULLMODE, typeDef);
 		}
 	}
 
@@ -252,16 +247,14 @@ void SetField(D3DXVECTOR3 pos, D3DXVECTOR3 move, D3DXVECTOR3 rot, float fWidth, 
 {
 	VERTEX_3D* pVtx;					// 頂点情報へのポインタ
 
+	/*** 頂点バッファの設定 ***/
+	g_pVtxBuffField->Lock(0, 0, (void**)&pVtx, 0);
+
 	for (int nCntField = 0; nCntField < MAX_FIELD; nCntField++)
 	{
 		// 床構造体が使われていなければ
 		if (g_aField[nCntField].bUse != true)
 		{
-			/*** 頂点バッファの設定 ***/
-			g_pVtxBuffField->Lock(0, 0, (void**)&pVtx, 0);
-
-			pVtx += 4 * nCntField;		// 頂点バッファをずらす
-
 			// 引数の情報を適用
 			g_aField[nCntField].pos = pos;
 			g_aField[nCntField].move = move;
@@ -299,12 +292,14 @@ void SetField(D3DXVECTOR3 pos, D3DXVECTOR3 move, D3DXVECTOR3 rot, float fWidth, 
 
 			g_aField[nCntField].bUse = true;		// 使用状態に設定
 
-			/*** 頂点バッファの設定を終了 ***/
-			g_pVtxBuffField->Unlock();
-
 			break;
 		}
+
+		pVtx += 4;		// 頂点バッファをずらす
 	}
+
+	/*** 頂点バッファの設定を終了 ***/
+	g_pVtxBuffField->Unlock();
 }
 
 //================================================================================================================
