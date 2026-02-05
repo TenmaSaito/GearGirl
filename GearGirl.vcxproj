@@ -184,6 +184,7 @@
     <ClCompile Include="timer.cpp" />
     <ClCompile Include="title.cpp" />
     <ClCompile Include="modeldata.cpp" />
+    <ClCompile Include="UIarm.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h" />
@@ -216,6 +217,7 @@
     <ClInclude Include="timer.h" />
     <ClInclude Include="title.h" />
     <ClInclude Include="modeldata.h" />
+    <ClInclude Include="UIarm.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

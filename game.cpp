@@ -26,6 +26,7 @@
 #include "debugproc.h"
 #include "prompt.h"
 #include "timer.h"
+#include "UIarm.h"
 
 //**********************************************************************************
 //*** マクロ定義 ***
@@ -95,6 +96,9 @@ void InitGame(void)
 	/*** タイマー初期化 ***/
 	InitTimer(false);
 
+	/*** UIアーム初期化 ***/
+	InitUIarm();
+
 	g_nCounterGame = 0;
 	int nIdxPrompt, Tex;
 	LoadTexture("data/TEXTURE/TestPrompt.png", &Tex);
@@ -150,6 +154,9 @@ void UninitGame(void)
 
 	/*** タイマーの終了 ***/
 	UninitTimer();
+
+	/*** UIアームの終了 ***/
+	UninitUIarm();
 }
 
 //==================================================================================
@@ -204,6 +211,9 @@ void UpdateGame(void)
 
 		/*** タイマーの更新 ***/
 		UpdateTimer();
+
+		/*** UIアームの更新 ***/
+		UpdateUIarm();
 
 		if (g_nCounterGame % 60 == 0)
 		{
@@ -274,6 +284,9 @@ void DrawGame(void)
 
 		/*** タイマーの描画 ***/
 		DrawTimer();
+
+		/*** UIアームの描画 ***/
+		DrawUIarm();
 	}
 }
 

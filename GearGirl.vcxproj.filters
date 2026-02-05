@@ -177,6 +177,9 @@
     <ClCompile Include="billboard.cpp">
       <Filter>ソース ファイル\object</Filter>
     </ClCompile>
+    <ClCompile Include="UIarm.cpp">
+      <Filter>ソース ファイル\mode\game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h">
@@ -268,6 +271,9 @@
     </ClInclude>
     <ClInclude Include="billboard.h">
       <Filter>ヘッダー ファイル\object</Filter>
+    </ClInclude>
+    <ClInclude Include="UIarm.h">
+      <Filter>ヘッダー ファイル\mode\game</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
