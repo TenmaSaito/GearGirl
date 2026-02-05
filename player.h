@@ -16,7 +16,7 @@
 
 #define	MAX_PLAYER		(2)				// プレイヤーの最大数
 #define PLAYER_POSDEF	D3DXVECTOR3(0.0f, 100.0f, 0.0f) // プレイヤーの初期位置
-#define	MAX_TEX			(16)			// テクスチャの最大数
+//#define	MAX_TEX			(16)			// テクスチャの最大数
 #define	PLAYER_MOVE		(0.5f)			// プレイヤーの移動速度
 #define	PLAYER_ROTMOVE	(0.3f)			// プレイヤーの回転速度
 #define	PLAYER_INI		(0.2f)			// プレイヤーの慣性

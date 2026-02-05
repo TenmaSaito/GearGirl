@@ -17,7 +17,7 @@
 Camera g_aCamera[MAX_CAMERA];
 int		g_nNumEnableCamera;				// 起動させるカメラの数
 int		g_nActivePlayer;				// １P時の画面のキャラクター
-
+int		g_nSetCameraPosCounter;			// カメラ切り替え後位置角度を修正するカウンター
 bool	g_bCameraDebug;					// カメラの情報
 
 //**************************************************************
@@ -40,8 +40,9 @@ void InitCamera(void)
 	//**************************************************************
 	// 各値の初期化
 	g_nNumEnableCamera = GetNumPlayer();	// プレイヤー数
-	g_nActivePlayer = 0;	// 画面のプレイヤー
+	g_nActivePlayer = 0;					// 画面のプレイヤー
 	g_bCameraDebug = false;
+	g_nSetCameraPosCounter = SETCAMERAPOS_COUNTER;
 
 	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCamera++)
 	{
@@ -144,13 +145,20 @@ void UpdateCamera(void)
 		g_aCamera[nActivePlayer].fDist = g_aCamera[g_nActivePlayer].fDist;
 
 		g_nActivePlayer = nActivePlayer;
+		g_nSetCameraPosCounter = SETCAMERAPOS_COUNTER;			// このフレーム数以内にカメラが戻る
+
 	}
 
-		if (GetKeyboardPress(CAM_2POPRAT))
-			CameraOrbit(pCamera + 1);
-		else
-			CameraOrbit(pCamera);
-
+	if (GetActivePlayer() == PLAYER_ONE)
+	{
+		CameraOrbit(pCamera);
+		CameraMove(pCamera);
+	}
+	else
+	{
+		CameraOrbit(pCamera + 1);
+		CameraMove(pCamera + 1);
+	}
 
 	CameraFollow();
 
@@ -168,7 +176,7 @@ void UpdateCamera(void)
 			if (g_bCameraDebug)
 			{
 				PrintDebugProc("CAMERA %d\nposV : %~3f\nposR : %~3f\n", nCntCamera, pCamera->posV.x, pCamera->posV.y, pCamera->posV.z, pCamera->posR.x, pCamera->posR.y, pCamera->posR.z);
-				PrintDebugProc("rot  : %~3f\n", pCamera->rot.x, pCamera->rot.y, pCamera->rot.z);
+				PrintDebugProc("rot  : %~3f\ndist ： %f\n", pCamera->rot.x, pCamera->rot.y, pCamera->rot.z,pCamera->fDist);
 			}
 		}
 	}
@@ -192,6 +200,7 @@ void CameraFollow(void)
 		Player* pPlayer = GetPlayer();				// プレイヤー情報
 		float fPlayerFront;							// プレイヤーより前
 		static float fPlayerMoveRot;
+		float fCameraFactor = CAMERA_FOLLOW_FACTOR;	// カメラ追従速度倍率
 
 		for (int nPlayer = 0; nPlayer < MAX_PLAYER; nPlayer++, pCamera++, pPlayer++)
 		{
@@ -207,43 +216,43 @@ void CameraFollow(void)
 				pCamera->posRDest.z = pPlayer->pos.z - fPlayerFront * cosf(fPlayerMoveRot);
 			}
 
-			// 高さは常に追従
-			pCamera->posRDest.y = pPlayer->pos.y;
-#if 0				
 
-			}
-			else
-			{
-				//**************************************************************
-				// 変数宣言
-				vec3 pos = GetAnchor();
-				g_camera.posRDest = pos;
-			}
-#endif
 			//**************************************************************
-			// キャラクターに応じて角度を変更
+			// キャラクターに応じて調整
 			switch (nPlayer)
 			{
-			case PLAYER_ONE:
-				pCamera->rot += (CAMERA_1P_ROT - pCamera->rot) * 0.25f;
-				pCamera->fDist += (CAMERA_1P_DISTANS - pCamera->fDist) * 0.25f;
+			case PLAYER_ONE:				
+				pCamera->posRDest.y = pPlayer->pos.y + 10.0f; // 頭の高さに追従
+
+				if (0 < g_nSetCameraPosCounter)
+				{
+					pCamera->rot.x += (CAMERA_1P_ROT.x - pCamera->rot.x) * g_nSetCameraPosCounter / SETCAMERAPOS_COUNTER;
+					pCamera->fDist += (CAMERA_1P_DISTANS - pCamera->fDist) * g_nSetCameraPosCounter / SETCAMERAPOS_COUNTER;
+					g_nSetCameraPosCounter--;
+				}
 				break;
 
 			case PLAYER_TWO:
-				pCamera->rot += (CAMERA_2P_ROT - pCamera->rot) * 0.25f;
-				pCamera->fDist += (CAMERA_2P_DISTANS - pCamera->fDist) * 0.25f;
+				pCamera->posRDest.y = pPlayer->pos.y + 3.0f;	// 頭の高さに追従
+				fCameraFactor += 0.1f;						// ネズミは追従速度を上げる
+
+				if (0 < g_nSetCameraPosCounter)
+				{
+					pCamera->rot.x += (CAMERA_2P_ROT.x - pCamera->rot.x) * g_nSetCameraPosCounter / SETCAMERAPOS_COUNTER;
+					pCamera->fDist += (CAMERA_2P_DISTANS - pCamera->fDist) * g_nSetCameraPosCounter / SETCAMERAPOS_COUNTER;
+					g_nSetCameraPosCounter--;
+				}
 				break;
 
 			default:
 				break;
 			}
 
-
 			//**************************************************************
 			// カメラの位置を補正
-			pCamera->posR.x += (pCamera->posRDest.x - pCamera->posR.x) * CAMERA_FOLLOW_FACTOR;
-			pCamera->posR.y += (pCamera->posRDest.y - pCamera->posR.y) * CAMERA_FOLLOW_FACTOR;
-			pCamera->posR.z += (pCamera->posRDest.z - pCamera->posR.z) * CAMERA_FOLLOW_FACTOR;
+			pCamera->posR.x += (pCamera->posRDest.x - pCamera->posR.x) * fCameraFactor;
+			pCamera->posR.y += (pCamera->posRDest.y - pCamera->posR.y) * fCameraFactor;
+			pCamera->posR.z += (pCamera->posRDest.z - pCamera->posR.z) * fCameraFactor;
 		}
 }
 
@@ -251,8 +260,9 @@ void CameraFollow(void)
 // カメラ移動（ポーズ中のみ
 void CameraMove(P_CAMERA pCamera)
 {
+#if 0
 	//**************************************************************
-	//移動
+	// 移動
 	if (GetKeyboardRepeat(CAM_MOVE_UP) == true)
 	{// 前
 		  pCamera->posR.z += -sinf(-pCamera->rot.y) * 5;
@@ -272,6 +282,18 @@ void CameraMove(P_CAMERA pCamera)
 	{// 右
 		 pCamera->posR.z += sinf(D3DX_PI * 0.5f - pCamera->rot.y) * 5;
 		 pCamera->posR.x += cosf(D3DX_PI * 0.5f - pCamera->rot.y) * 5;
+	}
+#endif
+
+	//**************************************************************
+	// 距離の変更
+	if (GetKeyboardPress(CAM_ZOOM_OUT))
+	{
+		pCamera->fDist += 1;
+	}
+	if (GetKeyboardPress(CAM_ZOOM_IN))
+	{
+		pCamera->fDist -= 1;
 	}
 }
 
