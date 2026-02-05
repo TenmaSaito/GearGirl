@@ -97,7 +97,7 @@ END_MOUNTAINSET
 # 地面
 #--------------------------------------
 FIELDSET
-	TEXTYPE = 2#6			# テクスチャの種類
+	TEXTYPE = 2			# テクスチャの種類
 	POS = 1300 100 -300	# 位置
 	ROT = 0 0 0			# 向き
 	BLOCK = 10 13		# 分割数(Ｘ/Ｚ)
@@ -389,7 +389,7 @@ END_MODELSET
 
 
 MODELSET
-	TYPE = 18	# [18]キャラ
+	TYPE = 17	# [18]キャラ
 	POS = 470 100 550
 	ROT = 0 0 0
 	SHADOW = 0
