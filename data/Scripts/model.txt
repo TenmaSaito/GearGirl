@@ -48,7 +48,6 @@ MODEL_FILENAME = data/MODEL/Building//Box.x				# [14]‰¼
 MODEL_FILENAME = data/MODEL/Building//shop.x			# [15]•Ö—˜‰®(‰¼)
 MODEL_FILENAME = data/MODEL/Building/Building_0.x		# [16]‰Æ_0
 MODEL_FILENAME = data/MODEL/Building/Building_1.x		# [17]‰Æ_1
-#	MODEL_FILENAME = data/MODEL/99_allbody.x				# [18]ƒLƒƒƒ‰
 
 #------------------------------------------------------------------------------
 # ƒJƒƒ‰î•ñ
