@@ -180,6 +180,9 @@
     <ClCompile Include="UIarm.cpp">
       <Filter>ソース ファイル\mode\game</Filter>
     </ClCompile>
+    <ClCompile Include="UImenu.cpp">
+      <Filter>ソース ファイル\mode\game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h">
@@ -273,6 +276,9 @@
       <Filter>ヘッダー ファイル\object</Filter>
     </ClInclude>
     <ClInclude Include="UIarm.h">
+      <Filter>ヘッダー ファイル\mode\game</Filter>
+    </ClInclude>
+    <ClInclude Include="UImenu.h">
       <Filter>ヘッダー ファイル\mode\game</Filter>
     </ClInclude>
   </ItemGroup>

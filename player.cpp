@@ -54,6 +54,7 @@ void DrawNormalPlayer(Player *pPlayer, int nCntModel, LPDIRECT3DDEVICE9 pDevice)
 void DrawShadowPlayer(Player *pPlayer, int nCntModel, LPDIRECT3DDEVICE9 pDevice);	// プレイヤーの影の描画
 void CreateShadowMatrix(LPDIRECT3DDEVICE9 pDevice, D3DXMATRIX *pMtxPlayer, ShadowMatrix *pOut);		// シャドウマトリックスの作成
 void SetEnableZFunction(LPDIRECT3DDEVICE9 pDevice, bool bEnable);
+void CalcMatrix(Player *pPlayer);
 
 // =================================================
 // グローバル変数
@@ -364,55 +365,15 @@ void DrawPlayer(void)
 		// 現在のマテリアルを取得(保存)
 		pDevice->GetMaterial(&matDef);
 
+		// 各パーツのマトリックスを計算
+		CalcMatrix(pPlayer);
+
 		// Zテストを無効に
 		SetEnableZFunction(pDevice, false);
 
 		// 全モデル(パーツ)の影の描画
 		for (int nCntModel = 0; nCntModel < pPlayer->PartsInfo.nNumParts; nCntModel++)
 		{
-			D3DXMATRIX mtxRotModel, mtxTransModel;	// 計算用マトリックス
-			D3DXMATRIX mtxParent;	// 親のマトリックス
-
-			// パーツのワールドマトリックス初期化
-			D3DXMatrixIdentity(&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld);
-
-			// パーツの向きを反映
-			D3DXMatrixRotationYawPitchRoll(&mtxRotModel,
-				pPlayer->PartsInfo.aParts[nCntModel].rot.y,
-				pPlayer->PartsInfo.aParts[nCntModel].rot.x,
-				pPlayer->PartsInfo.aParts[nCntModel].rot.z);
-
-			// かけ合わせる
-			D3DXMatrixMultiply(&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
-				&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
-				&mtxRotModel);
-
-			// パーツの位置(オフセット)を反映
-			D3DXMatrixTranslation(&mtxTransModel,
-				pPlayer->PartsInfo.aParts[nCntModel].pos.x,
-				pPlayer->PartsInfo.aParts[nCntModel].pos.y,
-				pPlayer->PartsInfo.aParts[nCntModel].pos.z);
-
-			// かけ合わせる
-			D3DXMatrixMultiply(&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
-				&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
-				&mtxTransModel);
-
-			// パーツの「親マトリックス」の設定
-			if (pPlayer->PartsInfo.aParts[nCntModel].nIdxModelParent != -1)
-			{// 親モデルが存在する
-				mtxParent = pPlayer->PartsInfo.aParts[pPlayer->PartsInfo.aParts[nCntModel].nIdxModelParent].mtxWorld;
-			}
-			else
-			{// 親モデルが存在しない
-				mtxParent = pPlayer->mtxWorld;
-			}
-
-			// 算出した「パーツのワールドマトリックス」と「親のマトリックス」をかけ合わせる
-			D3DXMatrixMultiply(&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
-				&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
-				&mtxParent);
-
 			if (nCntModel < START_ARMTYPE)
 			{
 				// 影の描画
@@ -458,6 +419,59 @@ void DrawPlayer(void)
 
 	// デバイスの破棄
 	EndDevice();
+}
+
+// =================================================
+// プレイヤーのマトリックスの計算処理
+// =================================================
+void CalcMatrix(Player *pPlayer)
+{
+	// 全モデル(パーツ)のマトリックスの計算
+	for (int nCntModel = 0; nCntModel < pPlayer->PartsInfo.nNumParts; nCntModel++)
+	{
+		D3DXMATRIX mtxRotModel, mtxTransModel;	// 計算用マトリックス
+		D3DXMATRIX mtxParent;	// 親のマトリックス
+
+		// パーツのワールドマトリックス初期化
+		D3DXMatrixIdentity(&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld);
+
+		// パーツの向きを反映
+		D3DXMatrixRotationYawPitchRoll(&mtxRotModel,
+			pPlayer->PartsInfo.aParts[nCntModel].rot.y,
+			pPlayer->PartsInfo.aParts[nCntModel].rot.x,
+			pPlayer->PartsInfo.aParts[nCntModel].rot.z);
+
+		// かけ合わせる
+		D3DXMatrixMultiply(&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
+			&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
+			&mtxRotModel);
+
+		// パーツの位置(オフセット)を反映
+		D3DXMatrixTranslation(&mtxTransModel,
+			pPlayer->PartsInfo.aParts[nCntModel].pos.x,
+			pPlayer->PartsInfo.aParts[nCntModel].pos.y,
+			pPlayer->PartsInfo.aParts[nCntModel].pos.z);
+
+		// かけ合わせる
+		D3DXMatrixMultiply(&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
+			&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
+			&mtxTransModel);
+
+		// パーツの「親マトリックス」の設定
+		if (pPlayer->PartsInfo.aParts[nCntModel].nIdxModelParent != -1)
+		{// 親モデルが存在する
+			mtxParent = pPlayer->PartsInfo.aParts[pPlayer->PartsInfo.aParts[nCntModel].nIdxModelParent].mtxWorld;
+		}
+		else
+		{// 親モデルが存在しない
+			mtxParent = pPlayer->mtxWorld;
+		}
+
+		// 算出した「パーツのワールドマトリックス」と「親のマトリックス」をかけ合わせる
+		D3DXMatrixMultiply(&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
+			&pPlayer->PartsInfo.aParts[nCntModel].mtxWorld,
+			&mtxParent);
+	}
 }
 
 // =================================================
