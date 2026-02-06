@@ -105,6 +105,7 @@ typedef struct
 	int nFrameBlend;			// ブレンドフレーム数
 	int nCounterBlend;			// ブレンドカウンター
 
+	// 判別用など
 	int nCntAllround;			// あらゆるカウントに使用
 	bool bUseLandMotion;		// 着地モーションを再生したかどうか
 }Player;

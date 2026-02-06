@@ -7507,7 +7507,7 @@ Mesh {
    0.000000;0.000000;0.000000;;
    0.000000;0.000000;0.000000;;
    TextureFilename {
-    "C:\\Users\\student\\Desktop\\DesktopFile\\git\\Team3DStage\\新しいフォルダー\\brickwall.jpg";
+    "data\\TEXTURE\\brickwall.jpg";
    }
   }
   Material {
@@ -7546,7 +7546,7 @@ Mesh {
    0.800000;0.800000;0.800000;;
    0.200000;0.200000;0.200000;;
    TextureFilename {
-    "C:\\Users\\student\\Desktop\\DesktopFile\\git\\Team3DStage\\新しいフォルダー\\clock.png";
+    "data\\TEXTURE\\clock.png";
    }
   }
  }

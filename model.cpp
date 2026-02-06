@@ -607,6 +607,9 @@ bool LoadModel(void)
 						{
 							if (pMat[nCntMat].pTextureFilename != NULL)
 							{// テクスチャファイルが存在する
+								// テクスチャ読み込みの際に絶対パスがないかどうか
+								CheckPath(pMat[nCntMat].pTextureFilename);
+
 								 //テクスチャを読み込む
 								D3DXCreateTextureFromFile(pDevice,
 									pMat[nCntMat].pTextureFilename,
