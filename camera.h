@@ -96,6 +96,7 @@ P_CAMERA GetCamera(void);									// カメラ除法配列の先頭アドレスを取得
 void GetCameraPos(int nCamNum, vec3* pPosV, vec3* pPosR);	// カメラの位置情報を取得
 void GetCameraRot(int nCamNum, vec3* pRot);					// カメラの角度情報を取得
 int GetCameraNum(void);										// 使用中のカメラの数を取得
+CameraType GetReadyCamera(void);							// 描画中のカメラ番号を取得
 void CameraReset(P_CAMERA pCamera);							// カメラリセット
 
 #endif// !_CAMERA_H_

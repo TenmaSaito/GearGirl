@@ -19,6 +19,7 @@ int		g_nNumEnableCamera;				// 起動させるカメラの数
 int		g_nActivePlayer;				// １P時の画面のキャラクター
 int		g_nSetCameraPosCounter;			// カメラ切り替え後位置角度を修正するカウンター
 bool	g_bCameraDebug;					// カメラの情報
+CameraType	g_readyCamera;				// 直近でセットしたカメラ
 
 //**************************************************************
 // プロトタイプ宣言
@@ -474,26 +475,29 @@ void SetCamera(void)
 	// 変数宣言
 	LPDIRECT3DDEVICE9	pDevice = GetDevice();		// デバイスへのポインタ
 	P_CAMERA			pCam = GetCamera();
-	static bool bCameraSwitch = false;				// 複数画面描画時カメラの切り替え
+	static bool			bCameraSwitch = false;		// 複数カメラ設置時、1Pを描画したらtrue
 	static float		fViewRadian = VIEW_RADIAN;	// 視野角
 
 	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCam++)
 	{
+		// 設置するカメラが一つなら
 		if (g_nNumEnableCamera == 1)
 		{
-			if (g_nActivePlayer == PLAYERTYPE_MOUSE)
-			{
-				pCam++;
+			// アクティブプレイヤーがネズミなら
+			if (g_nActivePlayer == PLAYERTYPE_MOUSE && nCntCamera != PLAYERTYPE_MOUSE)
+			{				
 				fViewRadian = VIEW_RADIAN_MOUSE;
+				continue;
 			}
 		}
-		else if (bCameraSwitch == true)
+		// 二つ設置する場合・
+		else if (bCameraSwitch == true && nCntCamera != PLAYERTYPE_MOUSE)
 		{// 2P用カメラ設置
-			pCam++;
 			bCameraSwitch = false;
 			fViewRadian = VIEW_RADIAN_MOUSE;
+			continue;
 		}
-		else
+		else if(nCntCamera == PLAYERTYPE_GIRL)
 		{// 1P用カメラ設置
 			bCameraSwitch = true;
 		}
@@ -529,7 +533,7 @@ void SetCamera(void)
 			pDevice->SetTransform(D3DTS_VIEW, &pCam->mtxView);
 
 			EndDevice();// デバイス取得終了
-
+			g_readyCamera = CameraType(nCntCamera);
 			return;
 		}
 	}
@@ -600,6 +604,14 @@ void GetCameraRot(int nCamNum, vec3* pRot)
 int GetCameraNum(void)
 {
 	return g_nNumEnableCamera;
+}
+
+//=========================================================================================
+// 描画中（直近でセットした）カメラの番号
+//=========================================================================================
+CameraType GetReadyCamera(void)
+{
+	return g_readyCamera;
 }
 
 //=========================================================================================
