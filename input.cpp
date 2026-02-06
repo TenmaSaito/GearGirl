@@ -318,6 +318,47 @@ bool GetJoypadStickLeft(int nPlayer, JOYKEY key)
 	}
 }
 
+//=======================================
+// ライトジョイスティックの情報
+//=======================================
+bool GetJoypadLeftStick(int nPlayer, D3DXVECTOR3* value)
+{
+
+	(*value).x = (float)g_Joypad[nPlayer].joykeyState.Gamepad.sThumbLX / 0x7fff;
+	(*value).y = (float)-g_Joypad[nPlayer].joykeyState.Gamepad.sThumbLY / 0x7fff;
+	(*value).z = -atan2f((float)-g_Joypad[nPlayer].joykeyState.Gamepad.sThumbLX, (float)g_Joypad[nPlayer].joykeyState.Gamepad.sThumbLY);
+
+	// デッドゾーン
+	if ((*value).x <= -DEADZONE_LEFTSTICK || DEADZONE_LEFTSTICK <= (*value).x ||
+		(*value).y <= -DEADZONE_LEFTSTICK || DEADZONE_LEFTSTICK <= (*value).y)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+//=======================================
+// ライトジョイスティックの情報
+//=======================================
+bool GetJoypadRightStick(int nPlayer, D3DXVECTOR3* value)
+{
+	if (value)
+	{
+		(*value).x = (float)g_Joypad[nPlayer].joykeyState.Gamepad.sThumbRX / 0x7fff;
+		(*value).y = (float)-g_Joypad[nPlayer].joykeyState.Gamepad.sThumbRY / 0x7fff;
+		(*value).z = -atan2f((float)-g_Joypad[nPlayer].joykeyState.Gamepad.sThumbRX, (float)g_Joypad[nPlayer].joykeyState.Gamepad.sThumbRY);
+	}
+
+	// デッドゾーン
+	if ((*value).x <= -DEADZONE_RIGHTSTICK || DEADZONE_RIGHTSTICK <= (*value).x ||
+		(*value).y <= -DEADZONE_RIGHTSTICK || DEADZONE_RIGHTSTICK <= (*value).y)
+	{
+		return false;
+	}
+	return true;
+}
+
 //=========================================================================================================
 // 振動の情報
 //=========================================================================================================
