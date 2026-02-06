@@ -1034,6 +1034,9 @@ int MyMathUtil::GenerateMessageBox(_In_ UINT nType, _In_ const char* pCaption, _
 		return -1;
 	}
 
+	// フォーマット取得失敗時
+	if (fmt == nullptr) return -1;
+
 	va_list ap;
 	va_start(ap, fmt);
 	const char* p1;

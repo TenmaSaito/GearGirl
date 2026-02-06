@@ -510,11 +510,20 @@ void Draw(void)
 			0,
 			NULL);
 
-		MyMathUtil::GenerateMessageBox(MB_ICONERROR,
-			"error",
-			(LPCTSTR)errorString);
+		if (errorString == nullptr)
+		{
+			MyMathUtil::GenerateMessageBox(MB_ICONERROR,
+				"error",
+				"Failed Get Error String");
+		}
+		else
+		{
+			MyMathUtil::GenerateMessageBox(MB_ICONERROR,
+				"error",
+				(LPCTSTR)errorString);
 
-		LocalFree(errorString);
+			LocalFree(errorString);
+		}
 	}
 #endif
 }

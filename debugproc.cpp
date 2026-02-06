@@ -8,6 +8,9 @@
 //*** インクルードファイル ***
 //**********************************************************************************
 #include "debugproc.h"
+#include "mathUtil.h"
+
+using namespace MyMathUtil;
 
 //*************************************************************************************************
 //*** マクロ定義 ***
@@ -92,6 +95,15 @@ void DrawDebugProc(void)
 void PrintDebugProc(const char *fmt, ...)
 {
 #ifdef _DEBUG
+	if (fmt == nullptr)
+	{
+		GenerateMessageBox(MB_ICONERROR,
+			"Failed",
+			"Failed Get String");
+
+		return;
+	}
+
 	va_list ap;
 	va_start(ap, fmt);
 	const char* p1;
