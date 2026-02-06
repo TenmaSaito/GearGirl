@@ -237,6 +237,7 @@ bool LoadModel(void)
 	int nRadius = 0;		// フィールドのサイズ
 
 	// === フィールドの情報を格納する変数 === //
+	D3DXVECTOR3 posField;
 	int nIdxTexField = 0;	// テクスチャのタイプ
 	int aIdxTexture[100] = {};	// テクスチャのタイプ
 	int nXdevideField, nYdevideField = 0;	// フィールドの分割数
@@ -424,7 +425,7 @@ bool LoadModel(void)
 							pEqual++;
 
 							// 地面の位置を読み込む
-							(void)sscanf(pEqual, "%d %d %d", &pos.x, &pos.y, &pos.z);
+							(void)sscanf(pEqual, "%f %f %f", &posField.x, &posField.y, &posField.z);
 						}
 					}
 					if (strstr(&Realize[0], "ROT") != NULL)
@@ -469,7 +470,7 @@ bool LoadModel(void)
 					if (strstr(&Realize[0], "END_FIELDSET") != NULL)
 					{
 						D3DXVECTOR3 rotVec = DegreeToRadian(INTToFloat(rot));
-						SetField(INTToFloat(pos), VECNULL, rotVec, (float)nXsize, (float)nYsize, aIdxTexture[nIdxTexField], (float)nXdevideField, (float)nYdevideField, D3DCULL_CCW);
+						SetField(posField, VECNULL, rotVec, (float)nXsize, (float)nYsize, aIdxTexture[nIdxTexField], (float)nXdevideField, (float)nYdevideField, D3DCULL_CCW);
 						nCntField++;
 						break;
 					}

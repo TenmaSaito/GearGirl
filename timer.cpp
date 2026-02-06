@@ -15,24 +15,34 @@
 //*************************************************************************************************
 //*** マクロ定義 ***
 //*************************************************************************************************
-#define NUM_PLACE   (4)          // 4桁
-#define Timer_POSX  (520.0f)     // タイマー表記　横
-#define Timer_POSY  (25.0f)      // タイマー表記　縦
-#define Timer_SIZEX (60.0f)      // タイマー伸ばし　横
-#define Timer_SIZEY (60.0f)      // タイマー伸ばし　縦
+#define NUM_PLACE   (5)          // 5枚
+#define Timer_POSX  (520.0f)
+#define Timer_POSY  (25.0f)
+#define Timer_SIZEX (60.0f)
+#define Timer_SIZEY (60.0f)
 
-#define TIMER_LIMIT_MIN   (4)   // 制限時間：4分
+// コロンのサイズ
+#define COLON_SIZEX (50.0f)
+#define COLON_SIZEY (60.0f)
+#define COLON_SHIFT (-20.0f)
+
+#define TIMER_LIMIT_MIN   (4)   // 4分(仮)
 #define FPS               (60)
 #define TIMER_LIMIT_FRAME (TIMER_LIMIT_MIN * 60 * FPS)
 
 //**********************************************************************************
 //*** グローバル変数 ***
 //**********************************************************************************
-LPDIRECT3DTEXTURE9 g_pTextureTimer = NULL;        // テクスチャへのポインタ
-LPDIRECT3DVERTEXBUFFER9 g_pVtxBuffTimer = NULL;   // 頂点バッファへのポインタ
-int  g_nTimer;        // 残りフレーム
-bool g_bTimeover;     // タイムオーバー
+LPDIRECT3DTEXTURE9 g_pTextureTimer = NULL;        // 数字テクスチャ
+LPDIRECT3DTEXTURE9 g_pTextureColon = NULL;        // コロンテクスチャ
+LPDIRECT3DVERTEXBUFFER9 g_pVtxBuffTimer = NULL;
+
+int  g_nTimer;
+bool g_bTimeover;
 bool g_bRanking;
+
+bool g_bColonVisible = true;   // コロン表示
+int  g_nColonTimer = 0;        // 点滅用カウンタ
 
 //===========================================================
 //  タイマーの初期化処理
@@ -42,7 +52,11 @@ void InitTimer(bool bRanking)
     LPDIRECT3DDEVICE9 pDevice;
     pDevice = GetDevice();
 
+    // 数字テクスチャ
     D3DXCreateTextureFromFile(pDevice, "DATA\\TEXTURE\\number003.png", &g_pTextureTimer);
+
+    // コロンテクスチャ
+    D3DXCreateTextureFromFile(pDevice, "DATA\\TEXTURE\\colon.png", &g_pTextureColon);
 
     pDevice->CreateVertexBuffer(sizeof(VERTEX_2D) * 4 * NUM_PLACE,
         D3DUSAGE_WRITEONLY,
@@ -63,25 +77,50 @@ void InitTimer(bool bRanking)
     {
         if (bRanking == false)
         {
-            // 秒の2桁
             float x = Timer_POSX + (nCntNumber * Timer_SIZEX);
-            if (nCntNumber >= 2) x += 20.0f;
+            if (nCntNumber >= 3) x += COLON_SHIFT;
 
-            pVtx[0].pos = D3DXVECTOR3(x, Timer_POSY, 0.0f);
-            pVtx[1].pos = D3DXVECTOR3(x + Timer_SIZEX, Timer_POSY, 0.0f);
-            pVtx[2].pos = D3DXVECTOR3(x, Timer_POSY + Timer_SIZEY, 0.0f);
-            pVtx[3].pos = D3DXVECTOR3(x + Timer_SIZEX, Timer_POSY + Timer_SIZEY, 0.0f);
+            if (nCntNumber == 2)
+            {
+                // コロン位置
+                float cx = Timer_POSX + (2 * Timer_SIZEX) + (COLON_SHIFT * 0.5f);
+
+                pVtx[0].pos = D3DXVECTOR3(cx, Timer_POSY, 0.0f);
+                pVtx[1].pos = D3DXVECTOR3(cx + COLON_SIZEX, Timer_POSY, 0.0f);
+                pVtx[2].pos = D3DXVECTOR3(cx, Timer_POSY + COLON_SIZEY, 0.0f);
+                pVtx[3].pos = D3DXVECTOR3(cx + COLON_SIZEX, Timer_POSY + COLON_SIZEY, 0.0f);
+            }
+            else
+            {
+                // 数字位置
+                pVtx[0].pos = D3DXVECTOR3(x, Timer_POSY, 0.0f);
+                pVtx[1].pos = D3DXVECTOR3(x + Timer_SIZEX, Timer_POSY, 0.0f);
+                pVtx[2].pos = D3DXVECTOR3(x, Timer_POSY + Timer_SIZEY, 0.0f);
+                pVtx[3].pos = D3DXVECTOR3(x + Timer_SIZEX, Timer_POSY + Timer_SIZEY, 0.0f);
+            }
+
         }
         else
         {
-            // スコア表示（残り時間）
-            float x = 330.0f + (nCntNumber * 120.0f);
-            if (nCntNumber >= 2) x += 20.0f;
+            // ランキング表示
+            float x = 300.0f + (nCntNumber * 110.0f);
+            if (nCntNumber >= 3) x += 20.0f;
 
-            pVtx[0].pos = D3DXVECTOR3(x, 350.0f, 0.0f);
-            pVtx[1].pos = D3DXVECTOR3(x + 100.0f, 350.0f, 0.0f);
-            pVtx[2].pos = D3DXVECTOR3(x, 450.0f, 0.0f);
-            pVtx[3].pos = D3DXVECTOR3(x + 100.0f, 450.0f, 0.0f);
+            if (nCntNumber == 2)
+            {
+                float cx = 300.0f + (2 * 110.0f) + 10.0f;
+                pVtx[0].pos = D3DXVECTOR3(cx, 350.0f, 0.0f);
+                pVtx[1].pos = D3DXVECTOR3(cx + COLON_SIZEX, 350.0f, 0.0f);
+                pVtx[2].pos = D3DXVECTOR3(cx, 450.0f, 0.0f);
+                pVtx[3].pos = D3DXVECTOR3(cx + COLON_SIZEX, 450.0f, 0.0f);
+            }
+            else
+            {
+                pVtx[0].pos = D3DXVECTOR3(x, 350.0f, 0.0f);
+                pVtx[1].pos = D3DXVECTOR3(x + 100.0f, 350.0f, 0.0f);
+                pVtx[2].pos = D3DXVECTOR3(x, 450.0f, 0.0f);
+                pVtx[3].pos = D3DXVECTOR3(x + 100.0f, 450.0f, 0.0f);
+            }
         }
 
         pVtx[0].rhw = 1.0f;
@@ -104,11 +143,20 @@ void InitTimer(bool bRanking)
             pVtx[3].col = D3DCOLOR_RGBA(255, 255, 255, 255);
         }
 
-        // 初期テクスチャ座標
-        pVtx[0].tex = D3DXVECTOR2(0.0f, 0.0f);
-        pVtx[1].tex = D3DXVECTOR2(0.1f, 0.0f);
-        pVtx[2].tex = D3DXVECTOR2(0.0f, 1.0f);
-        pVtx[3].tex = D3DXVECTOR2(0.1f, 1.0f);
+        if (nCntNumber == 2)
+        {
+            pVtx[0].tex = D3DXVECTOR2(0.0f, 0.0f);
+            pVtx[1].tex = D3DXVECTOR2(1.0f, 0.0f);
+            pVtx[2].tex = D3DXVECTOR2(0.0f, 1.0f);
+            pVtx[3].tex = D3DXVECTOR2(1.0f, 1.0f);
+        }
+        else
+        {
+            pVtx[0].tex = D3DXVECTOR2(0.0f, 0.0f);
+            pVtx[1].tex = D3DXVECTOR2(0.1f, 0.0f);
+            pVtx[2].tex = D3DXVECTOR2(0.0f, 1.0f);
+            pVtx[3].tex = D3DXVECTOR2(0.1f, 1.0f);
+        }
 
         pVtx += 4;
     }
@@ -117,7 +165,6 @@ void InitTimer(bool bRanking)
 
     if (g_bRanking == false)
     {
-        // 4分スタート
         g_nTimer = TIMER_LIMIT_FRAME;
     }
 }
@@ -131,6 +178,13 @@ void UninitTimer(void)
     {
         g_pTextureTimer->Release();
         g_pTextureTimer = NULL;
+    }
+
+    // コロン破棄
+    if (g_pTextureColon != NULL)
+    {
+        g_pTextureColon->Release();
+        g_pTextureColon = NULL;
     }
 
     if (g_pVtxBuffTimer != NULL)
@@ -147,63 +201,115 @@ void UpdateTimer(void)
 {
     if (g_bRanking == false)
     {
-        // 0未満に落とさない
+
+        //===========================
+        // タイマー減算
+        //===========================
         if (g_nTimer > 0)
         {
             g_nTimer--;
         }
 
-        int totalSec = g_nTimer / FPS;     // 残り秒
-        int min = totalSec / 60;           // 残り分
-        int sec = totalSec % 60;           // 残り秒
+        //===========================
+        // 時間変換
+        //===========================
+        int totalSec = g_nTimer / FPS;
+        int min = totalSec / 60;
+        int sec = totalSec % 60;
 
-        // 4桁
+        static int colonCnt = 0;
+
+        // 残り30秒で点滅を高速
+        int blinkSpeed = (totalSec <= 30) ? FPS / 4 : FPS;
+
+        colonCnt++;
+
+        if (colonCnt >= blinkSpeed)
+        {
+            colonCnt = 0;
+            g_bColonVisible = !g_bColonVisible;
+        }
+
         int aTexU[NUM_PLACE];
-        aTexU[0] = (min / 10) % 10;        // 分 十の位
-        aTexU[1] = (min % 10);             // 分 一の位
-        aTexU[2] = (sec / 10) % 10;        // 秒 十の位
-        aTexU[3] = (sec % 10);             // 秒 一の位
+        aTexU[0] = (min / 10) % 10;
+        aTexU[1] = (min % 10);
+        aTexU[2] = 0; // コロン
+        aTexU[3] = (sec / 10) % 10;
+        aTexU[4] = (sec % 10);
 
+        //===========================
+        // 頂点更新
+        //===========================
         VERTEX_2D* pVtx;
         g_pVtxBuffTimer->Lock(0, 0, (void**)&pVtx, 0);
 
         for (int nCntNumber = 0; nCntNumber < NUM_PLACE; nCntNumber++)
         {
-            pVtx[0].tex = D3DXVECTOR2(aTexU[nCntNumber] * 0.1f, 0.0f);
-            pVtx[1].tex = D3DXVECTOR2((aTexU[nCntNumber] + 1) * 0.1f, 0.0f);
-            pVtx[2].tex = D3DXVECTOR2(aTexU[nCntNumber] * 0.1f, 1.0f);
-            pVtx[3].tex = D3DXVECTOR2((aTexU[nCntNumber] + 1) * 0.1f, 1.0f);
+            // ---------- 数字更新 ----------
+            if (nCntNumber != 2)
+            {
+                pVtx[0].tex = D3DXVECTOR2(aTexU[nCntNumber] * 0.1f, 0.0f);
+                pVtx[1].tex = D3DXVECTOR2((aTexU[nCntNumber] + 1) * 0.1f, 0.0f);
+                pVtx[2].tex = D3DXVECTOR2(aTexU[nCntNumber] * 0.1f, 1.0f);
+                pVtx[3].tex = D3DXVECTOR2((aTexU[nCntNumber] + 1) * 0.1f, 1.0f);
+            }
 
-            // 残り秒 色変化
-            if (totalSec < 2 * 59 + 3)
+            // ---------- 色制御 ----------
+            D3DCOLOR col;
+
+            // ===== コロンは常に固定色 =====
+            if (nCntNumber == 2)
             {
-                // 残り1分で黄色に変化
-                pVtx[0].col = D3DCOLOR_RGBA(255, 255, 0, 255);
-                pVtx[1].col = D3DCOLOR_RGBA(255, 255, 0, 255);
-                pVtx[2].col = D3DCOLOR_RGBA(255, 255, 0, 255);
-                pVtx[3].col = D3DCOLOR_RGBA(255, 255, 0, 255);
+                col = D3DCOLOR_RGBA(255, 255, 255, 255);   // 常に白
             }
-            if (totalSec < 61)
+            else
             {
-                // 残り30秒で赤色に変化
-                pVtx[0].col = D3DCOLOR_RGBA(255, 0, 0, 255);
-                pVtx[1].col = D3DCOLOR_RGBA(255, 0, 0, 255);
-                pVtx[2].col = D3DCOLOR_RGBA(255, 0, 0, 255);
-                pVtx[3].col = D3DCOLOR_RGBA(255, 0, 0, 255);
+                // ===== 数字だけ時間で変化 =====
+                col = D3DCOLOR_RGBA(0, 255, 0, 255);
+
+                if (totalSec < 60)
+                    col = D3DCOLOR_RGBA(255, 255, 0, 255);
+
+                if (totalSec < 30)
+                    col = D3DCOLOR_RGBA(255, 0, 0, 255);
+
+                if (totalSec <= 10 && (g_nTimer / 5) % 2 == 0)
+                    col = D3DCOLOR_RGBA(255, 255, 255, 255);
             }
+
+
+            // ===== 残り10秒でフラッシュ =====
+            if (totalSec <= 10)
+            {
+                if ((g_nTimer / 5) % 2 == 0)   // 点滅
+                {
+                    col = D3DCOLOR_RGBA(255, 255, 255, 255); // 白く光る
+                }
+            }
+
+            // ---------- コロン点滅 ----------
+            if (nCntNumber == 2 && g_bColonVisible == false)
+            {
+                col = D3DCOLOR_RGBA(0, 0, 0, 0);           // 非表示
+            }
+
+            pVtx[0].col = col;
+            pVtx[1].col = col;
+            pVtx[2].col = col;
+            pVtx[3].col = col;
 
             pVtx += 4;
         }
 
         g_pVtxBuffTimer->Unlock();
 
-        if (g_nTimer <= 0)
+        //===========================
+        // タイムオーバー判定
+        //===========================
+        if (g_nTimer <= 0 && g_bTimeover == false)
         {
-            if (g_bTimeover == false)
-            {
-                g_bTimeover = true;
-                // SetFade(MODE_GAMEOVER);  // タイムオーバーでゲームオーバー
-            }
+            g_bTimeover = true;
+            // SetFade(MODE_GAMEOVER);
         }
     }
 }
@@ -218,23 +324,31 @@ void DrawTimer(void)
 
     pDevice->SetStreamSource(0, g_pVtxBuffTimer, 0, sizeof(VERTEX_2D));
     pDevice->SetFVF(FVF_VERTEX_2D);
-    pDevice->SetTexture(0, g_pTextureTimer);
 
     for (int nCntNumber = 0; nCntNumber < NUM_PLACE; nCntNumber++)
     {
+        // コロンだけテクスチャを差し替える
+        if (nCntNumber == 2)
+        {
+            pDevice->SetTexture(0, g_pTextureColon);
+        }
+        else
+        {
+            pDevice->SetTexture(0, g_pTextureTimer);
+        }
+
         pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, nCntNumber * 4, 2);
     }
 
-    EndDevice();
+     EndDevice();
 }
+
 
 //===========================================================
 //  タイマーの設定処理
 //===========================================================
 void SetTimer(int nElapsedFrame)
 {
-    int aTexU[NUM_PLACE];
-
     g_nTimer = TIMER_LIMIT_FRAME - nElapsedFrame;
     if (g_nTimer < 0) g_nTimer = 0;
     if (g_nTimer > TIMER_LIMIT_FRAME) g_nTimer = TIMER_LIMIT_FRAME;
@@ -243,20 +357,25 @@ void SetTimer(int nElapsedFrame)
     int min = totalSec / 60;
     int sec = totalSec % 60;
 
+    int aTexU[NUM_PLACE];
     aTexU[0] = (min / 10) % 10;
     aTexU[1] = (min % 10);
-    aTexU[2] = (sec / 10) % 10;
-    aTexU[3] = (sec % 10);
+    aTexU[2] = 0; // コロン
+    aTexU[3] = (sec / 10) % 10;
+    aTexU[4] = (sec % 10);
 
     VERTEX_2D* pVtx;
     g_pVtxBuffTimer->Lock(0, 0, (void**)&pVtx, 0);
 
     for (int nCntNumber = 0; nCntNumber < NUM_PLACE; nCntNumber++)
     {
-        pVtx[0].tex = D3DXVECTOR2(aTexU[nCntNumber] * 0.1f, 0.0f);
-        pVtx[1].tex = D3DXVECTOR2((aTexU[nCntNumber] + 1) * 0.1f, 0.0f);
-        pVtx[2].tex = D3DXVECTOR2(aTexU[nCntNumber] * 0.1f, 1.0f);
-        pVtx[3].tex = D3DXVECTOR2((aTexU[nCntNumber] + 1) * 0.1f, 1.0f);
+        if (nCntNumber != 2)
+        {
+            pVtx[0].tex = D3DXVECTOR2(aTexU[nCntNumber] * 0.1f, 0.0f);
+            pVtx[1].tex = D3DXVECTOR2((aTexU[nCntNumber] + 1) * 0.1f, 0.0f);
+            pVtx[2].tex = D3DXVECTOR2(aTexU[nCntNumber] * 0.1f, 1.0f);
+            pVtx[3].tex = D3DXVECTOR2((aTexU[nCntNumber] + 1) * 0.1f, 1.0f);
+        }
 
         pVtx += 4;
     }
@@ -269,8 +388,6 @@ void SetTimer(int nElapsedFrame)
 //===========================================================
 void AddTimer(int nValue)
 {
-    int aTexU[NUM_PLACE];
-
     g_nTimer += nValue;
     if (g_nTimer < 0) g_nTimer = 0;
     if (g_nTimer > TIMER_LIMIT_FRAME) g_nTimer = TIMER_LIMIT_FRAME;
@@ -279,20 +396,25 @@ void AddTimer(int nValue)
     int min = totalSec / 60;
     int sec = totalSec % 60;
 
+    int aTexU[NUM_PLACE];
     aTexU[0] = (min / 10) % 10;
     aTexU[1] = (min % 10);
-    aTexU[2] = (sec / 10) % 10;
-    aTexU[3] = (sec % 10);
+    aTexU[2] = 0; // コロン
+    aTexU[3] = (sec / 10) % 10;
+    aTexU[4] = (sec % 10);
 
     VERTEX_2D* pVtx;
     g_pVtxBuffTimer->Lock(0, 0, (void**)&pVtx, 0);
 
     for (int nCntNumber = 0; nCntNumber < NUM_PLACE; nCntNumber++)
     {
-        pVtx[0].tex = D3DXVECTOR2(aTexU[nCntNumber] * 0.1f, 0.0f);
-        pVtx[1].tex = D3DXVECTOR2((aTexU[nCntNumber] + 1) * 0.1f, 0.0f);
-        pVtx[2].tex = D3DXVECTOR2(aTexU[nCntNumber] * 0.1f, 1.0f);
-        pVtx[3].tex = D3DXVECTOR2((aTexU[nCntNumber] + 1) * 0.1f, 1.0f);
+        if (nCntNumber != 2)
+        {
+            pVtx[0].tex = D3DXVECTOR2(aTexU[nCntNumber] * 0.1f, 0.0f);
+            pVtx[1].tex = D3DXVECTOR2((aTexU[nCntNumber] + 1) * 0.1f, 0.0f);
+            pVtx[2].tex = D3DXVECTOR2(aTexU[nCntNumber] * 0.1f, 1.0f);
+            pVtx[3].tex = D3DXVECTOR2((aTexU[nCntNumber] + 1) * 0.1f, 1.0f);
+        }
 
         pVtx += 4;
     }

@@ -1,6 +1,6 @@
 //==================================================================================================================================
 //
-//			カメラ処理 [camera.cpp]
+//			プレイヤーカメラ処理 [camera.cpp]
 //			Author : ENDO HIDETO
 // 
 //==================================================================================================================================
@@ -533,7 +533,7 @@ void SetCamera(void)
 			pDevice->SetTransform(D3DTS_VIEW, &pCam->mtxView);
 
 			EndDevice();// デバイス取得終了
-			g_readyCamera = CameraType(nCntCamera);
+			g_readyCamera = (CameraType)nCntCamera;
 			return;
 		}
 	}
