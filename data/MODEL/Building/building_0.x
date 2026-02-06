@@ -999,7 +999,7 @@ Mesh {
    0.000000;0.000000;0.000000;;
    0.000000;0.000000;0.000000;;
    TextureFilename {
-    "C:\\Users\\student\\Desktop\\DesktopFile\\git\\Team3DStage\\新しいフォルダー\\block001.jpg";
+    "data\\TEXTURE\\block001.jpg";
    }
   }
   Material {
@@ -1008,7 +1008,7 @@ Mesh {
    0.000000;0.000000;0.000000;;
    0.000000;0.000000;0.000000;;
    TextureFilename {
-    "C:\\Users\\student\\Desktop\\DesktopFile\\git\\Team3DStage\\新しいフォルダー\\fence.png";
+    "data\\TEXTURE\\fence.png";
    }
   }
   Material {
@@ -1023,7 +1023,7 @@ Mesh {
    0.660000;0.660000;0.660000;;
    0.000000;0.000000;0.000000;;
    TextureFilename {
-    "C:\\Users\\student\\Desktop\\DesktopFile\\git\\Team3DStage\\新しいフォルダー\\window.png";
+    "data\\TEXTURE\\window.png";
    }
   }
   Material {
@@ -1032,7 +1032,7 @@ Mesh {
    0.000000;0.000000;0.000000;;
    0.000000;0.000000;0.000000;;
    TextureFilename {
-    "C:\\Users\\student\\Desktop\\DesktopFile\\git\\Team3DStage\\新しいフォルダー\\block001.jpg";
+    "data\\TEXTURE\\\\block001.jpg";
    }
   }
   Material {
@@ -1047,7 +1047,7 @@ Mesh {
    0.390000;0.390000;0.390000;;
    0.000000;0.000000;0.000000;;
    TextureFilename {
-    "C:\\Users\\student\\Desktop\\DesktopFile\\git\\Team3DStage\\新しいフォルダー\\loofwindow.png";
+    "data\\TEXTURE\\loofwindow.png";
    }
   }
   Material {
@@ -1056,7 +1056,7 @@ Mesh {
    0.000000;0.000000;0.000000;;
    0.000000;0.000000;0.000000;;
    TextureFilename {
-    "C:\\Users\\student\\Desktop\\DesktopFile\\git\\Team3DStage\\新しいフォルダー\\block001.jpg";
+    "data\\TEXTURE\\block001.jpg";
    }
   }
  }
