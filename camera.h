@@ -38,8 +38,8 @@
 #define CAM_2POPRAT		DIK_LCONTROL			// ２Pのカメラを操作
 
 #define CAM_RESET		DIK_TAB					// カメラ位置角度リセット
-#define CAM_MOVE_UP		DIK_W					// カメラ移動　前
-#define CAM_MOVE_DW		DIK_S					// カメラ移動　後
+#define CAM_MOVE_UP		DIK_W					// カメラ移動　上
+#define CAM_MOVE_DW		DIK_S					// カメラ移動　下
 #define CAM_MOVE_L		DIK_A					// カメラ移動　左
 #define CAM_MOVE_R		DIK_D					// カメラ移動　右
 
@@ -56,8 +56,8 @@
 //==============================================================
 typedef enum
 {
-	PLAYER_ONE = 0,						// 少女に追従カメラ
-	PLAYER_TWO,							// ネズミに追従カメラ
+	CAMERATYPE_PLAYER_ONE = 0,			// 少女に追従カメラ
+	CAMERATYPE_PLAYER_TWO,				// ネズミに追従カメラ
 	MAX_CAMERA
 }CameraType;
 
@@ -70,19 +70,23 @@ typedef struct Camera
 	D3DXVECTOR3 posR;					// 注視点
 	D3DXVECTOR3 posRDest;				// 目的の注視点
 	D3DXVECTOR3 rot;					// 向き
-	float fDist;						// 視点と注視点の距離
+	float		fDist;					// 視点と注視点の距離
 	D3DXVECTOR3 vecU;					// 上方向ベクトル
-	D3DXMATRIX mtxProjection;			// プロジェクションマトリックス
-	D3DXMATRIX mtxView;					// ビューマトリックス
+	D3DXMATRIX	mtxProjection;			// プロジェクションマトリックス
+	D3DXMATRIX	mtxView;				// ビューマトリックス
 	D3DVIEWPORT9 viewport;				// ビューポート
+	float		fViewRadian;			// 視野角
 
-	D3DFOGMODE fogMode;					// フォグモード
-	
-	bool bAoutRot;						// 自動で回り込み
-	int nCntAoutRot;					// 自動で回り込むまでのカウンタ
-	float fPlayerFront;					// プレイヤーより少し前
-	float fPlayerMoveRot;				// プレイヤーの移動方向
-	bool bUse;							// 配列を使っているか
+	bool		bFog;					// 霧を出すか
+	D3DXCOLOR	FogColor;				// 霧の色
+	float		fStart;					// 霧の開始距離
+	float		fEnd;					// 霧の終着距離
+
+	bool		bAoutRot;				// 自動で回り込み
+	int			nCntAoutRot;			// 自動で回り込むまでのカウンタ
+	float		fPlayerFront;			// プレイヤーより少し前
+	float		fPlayerMoveRot;			// プレイヤーの移動方向
+	bool		bUse;					// 配列を使っているか
 }Camera;
 POINTER(Camera, P_CAMERA);
 
@@ -92,13 +96,16 @@ POINTER(Camera, P_CAMERA);
 void InitCamera(void);
 void UninitCamera(void);
 void UpdateCamera(void);
-void SetCamera(void);										// カメラを設置（mainのDrawの最初にする）
-void ReleaseCamera(int nIdx);								// カメラを開放
-P_CAMERA GetCamera(void);									// カメラ除法配列の先頭アドレスを取得
-void GetCameraPos(int nCamNum, vec3* pPosV, vec3* pPosR);	// カメラの位置情報を取得
-void GetCameraRot(int nCamNum, vec3* pRot);					// カメラの角度情報を取得
-int GetCameraNum(void);										// 使用中のカメラの数を取得
-CameraType GetReadyCamera(void);							// 描画中のカメラ番号を取得
-void CameraReset(P_CAMERA pCamera);							// カメラリセット
+void SetCamera(void);													// カメラを設置（mainのDrawの最初にする）
+void ReleaseCamera(int nIdx);											// カメラを開放
+P_CAMERA GetCamera(void);												// カメラ除法配列の先頭アドレスを取得
+void GetCameraPos(int nCamNum, vec3* pPosV, vec3* pPosR);				// カメラの位置情報を取得
+void GetCameraRot(int nCamNum, vec3* pRot);								// カメラの角度情報を取得
+int GetCameraNum(void);													// 使用中のカメラの数を取得
+CameraType GetReadyCamera(void);										// 描画中のカメラ番号を取得
+void CameraReset(P_CAMERA pCamera);										// カメラリセット
+void FogEnable(CameraType type, bool bEnable = true, D3DXCOLOR col = colX_ZERO, float fStart = 0.0f, float fEnd = 0.0f);
+																		// 霧を有効化
+void CleanFog(void);													// 霧を削除
 
 #endif// !_CAMERA_H_

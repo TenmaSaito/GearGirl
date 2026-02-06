@@ -126,7 +126,7 @@ void DrawItem(void)
 	{
 		if (pItem->bUse && (pItem->bGet == false || pItem->bCollision))
 		{
-			if ((pItem->bGirl && GetReadyCamera() == PLAYER_ONE) || (pItem->bMouse && GetReadyCamera() == PLAYER_TWO))
+			if ((pItem->bGirl && GetReadyCamera() == CAMERATYPE_PLAYER_ONE) || (pItem->bMouse && GetReadyCamera() == CAMERATYPE_PLAYER_TWO))
 			{
 				// インデックスからモデルデータを取得
 				pModel = GetModelData(pItem->nIdxModel);

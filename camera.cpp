@@ -14,7 +14,7 @@
 
 //**************************************************************
 // グローバル変数宣言
-Camera g_aCamera[MAX_CAMERA];
+Camera	g_aCamera[MAX_CAMERA];			// カメラ情報
 int		g_nNumEnableCamera;				// 起動させるカメラの数
 int		g_nActivePlayer;				// １P時の画面のキャラクター
 int		g_nSetCameraPosCounter;			// カメラ切り替え後位置角度を修正するカウンター
@@ -57,9 +57,10 @@ void InitCamera(void)
 
 		switch (nCntCamera)
 		{
-		case PLAYER_TWO:	// 2P用のカメラ設定
+		case CAMERATYPE_PLAYER_TWO:	// 2P用のカメラ設定
 			pCamera->rot = CAMERA_2P_ROT;	// カメラの角度
 			pCamera->fDist = CAMERA_2P_DISTANS;
+
 			break;
 		default:			// その他のカメラ設定
 			pCamera->rot = CAMERA_1P_ROT;		// カメラの角度
@@ -82,6 +83,8 @@ void InitCamera(void)
 
 	// 画面分割設定
 	SetCameraOption();
+
+	FogEnable(CAMERATYPE_PLAYER_TWO, true, colX_ZERO, 0.5f, 3000.0f);
 }
 
 //=========================================================================================
@@ -102,6 +105,7 @@ void SetCameraOption(void)
 			pCamera->viewport.Y = 0.0f;								// 画面左上 Y 座標
 			pCamera->viewport.Width = SCREEN_WIDTH;					// 表示画面の横幅
 			pCamera->viewport.Height = SCREEN_HEIGHT;				// 表示画面の高さ
+			pCamera->fViewRadian = VIEW_RADIAN;						// 視野角
 		}
 		else
 		{// 2P
@@ -109,6 +113,7 @@ void SetCameraOption(void)
 			pCamera->viewport.Y = 0.0f;								// 画面左上 Y 座標
 			pCamera->viewport.Width = SCREEN_WIDTH * 0.5f;			// 表示画面の横幅
 			pCamera->viewport.Height = SCREEN_HEIGHT;				// 表示画面の高さ
+			pCamera->fViewRadian = VIEW_RADIAN_MOUSE;				// 視野角
 		}
 	}
 }
@@ -160,18 +165,20 @@ void UpdateCamera(void)
 
 	//**************************************************************
 	// カメラ
-	pCamera = GetCamera();
-	if (GetActivePlayer() == PLAYER_ONE && GetKeyboardPress(CAM_2POPRAT) == false)
+		pCamera = GetCamera();
+	if (g_bCameraDebug)
 	{
-		CameraOrbit(pCamera);		// 回転
-		CameraMove(pCamera);		// カメラ距離の変更
+		if (GetActivePlayer() == CAMERATYPE_PLAYER_ONE && GetKeyboardPress(CAM_2POPRAT) == false)
+		{
+			CameraOrbit(pCamera);		// 回転
+			CameraMove(pCamera);		// カメラ距離の変更
+		}
+		else
+		{
+			CameraOrbit(pCamera + 1);
+			CameraMove(pCamera + 1);
+		}
 	}
-	else
-	{
-		CameraOrbit(pCamera + 1);
-		CameraMove(pCamera + 1);
-	}
-
 	// 追従処理
 	CameraFollow();
 
@@ -190,6 +197,7 @@ void UpdateCamera(void)
 			{
 				PrintDebugProc("CAMERA %d\nposV : %~3f\nposR : %~3f\n", nCntCamera, pCamera->posV.x, pCamera->posV.y, pCamera->posV.z, pCamera->posR.x, pCamera->posR.y, pCamera->posR.z);
 				PrintDebugProc("rot  : %~3f\ndist ： %f\n", pCamera->rot.x, pCamera->rot.y, pCamera->rot.z,pCamera->fDist);
+				PrintDebugProc("視野角: %f\n", pCamera->fViewRadian);
 			}
 		}
 	}		
@@ -278,7 +286,7 @@ void CameraFollow(void)
 		// キャラクターに応じて調整
 		switch (nPlayer)
 		{
-		case PLAYER_ONE:
+		case CAMERATYPE_PLAYER_ONE:
 			pCamera->posRDest.y = pPlayer->pos.y + 10.0f; // 頭の高さに追従
 
 			// カメラ切り替え時の処理
@@ -290,7 +298,7 @@ void CameraFollow(void)
 			}
 			break;
 
-		case PLAYER_TWO:
+		case CAMERATYPE_PLAYER_TWO:
 			pCamera->posRDest.y = pPlayer->pos.y + 3.0f;	// 頭の高さに追従
 			fCameraFactor += 0.1f;							// ネズミは追従速度を上げる
 
@@ -485,12 +493,12 @@ void SetCamera(void)
 		{
 			// アクティブプレイヤーがネズミなら
 			if (g_nActivePlayer == PLAYERTYPE_MOUSE && nCntCamera != PLAYERTYPE_MOUSE)
-			{				
-				fViewRadian = VIEW_RADIAN_MOUSE;
+			{
+				fViewRadian = VIEW_RADIAN_MOUSE;				
 				continue;
 			}
 		}
-		// 二つ設置する場合・
+		// 二つ設置する場合
 		else if (bCameraSwitch == true && nCntCamera != PLAYERTYPE_MOUSE)
 		{// 2P用カメラ設置
 			bCameraSwitch = false;
@@ -504,6 +512,9 @@ void SetCamera(void)
 
 		if (pCam->bUse)
 		{
+			// 視野角保存
+			pCam->fViewRadian = fViewRadian;
+
 			//**************************************************************
 			// ビューポートの設定
 			pDevice->SetViewport(&pCam->viewport);
@@ -532,8 +543,19 @@ void SetCamera(void)
 			// ビューマトリックスの設定
 			pDevice->SetTransform(D3DTS_VIEW, &pCam->mtxView);
 
+			//**************************************************************
+			// フォグの処理
+			if (pCam->bFog)
+			{
+				pDevice->SetRenderState(D3DRS_FOGENABLE, TRUE);
+				pDevice->SetRenderState(D3DRS_FOGTABLEMODE, D3DFOG_LINEAR);
+				pDevice->SetRenderState(D3DRS_FOGCOLOR, pCam->FogColor);
+				pDevice->SetRenderState(D3DRS_FOGSTART,*(DWORD *)(&pCam->fStart));
+				pDevice->SetRenderState(D3DRS_FOGEND,*(DWORD *)(&pCam->fEnd));
+			}
+
 			EndDevice();// デバイス取得終了
-			g_readyCamera = (CameraType)nCntCamera;
+			g_readyCamera = (CameraType)nCntCamera;	// セットしたカメラの番号を保存
 			return;
 		}
 	}
@@ -630,4 +652,49 @@ void CameraReset(P_CAMERA pCamera)
 	pCamera->posV.x = pCamera->posR.x - cosf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
 	pCamera->posV.y = pCamera->posR.y - cosf(D3DX_PI - pCamera->rot.x) * pCamera->fDist;
 	pCamera->posV.z = pCamera->posR.z - sinf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
+}
+
+//=========================================================================================
+// 霧を有効化
+//=========================================================================================
+void FogEnable(CameraType type, bool bEnable, D3DXCOLOR col, float fStart, float fEnd)
+{
+	//**************************************************************
+	// 変数宣言
+	P_CAMERA pCamera = GetCamera();
+
+	//**************************************************************
+	// 値の保存
+	switch (type)
+	{
+	case CAMERATYPE_PLAYER_ONE:
+		pCamera->bFog = bEnable;
+		pCamera->FogColor = col;
+		pCamera->fStart = fStart;
+		pCamera->fEnd = fEnd;
+		break;
+
+	case CAMERATYPE_PLAYER_TWO:
+		pCamera++;
+		pCamera->bFog = bEnable;
+		pCamera->FogColor = col;
+		pCamera->fStart = fStart;
+		pCamera->fEnd = fEnd;
+		break;
+
+	default:
+		break;
+	}
+}
+
+//=========================================================================================
+// 霧を削除
+//=========================================================================================
+void CleanFog(void)
+{
+	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+
+	// Enable fog blending.
+	pDevice->SetRenderState(D3DRS_FOGENABLE, FALSE);
+	
 }
