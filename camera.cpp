@@ -160,7 +160,7 @@ void UpdateCamera(void)
 	//**************************************************************
 	// カメラ
 	pCamera = GetCamera();
-	if (GetActivePlayer() == PLAYER_ONE)
+	if (GetActivePlayer() == PLAYER_ONE && GetKeyboardPress(CAM_2POPRAT) == false)
 	{
 		CameraOrbit(pCamera);		// 回転
 		CameraMove(pCamera);		// カメラ距離の変更
@@ -475,6 +475,7 @@ void SetCamera(void)
 	LPDIRECT3DDEVICE9	pDevice = GetDevice();		// デバイスへのポインタ
 	P_CAMERA			pCam = GetCamera();
 	static bool bCameraSwitch = false;				// 複数画面描画時カメラの切り替え
+	static float		fViewRadian = VIEW_RADIAN;	// 視野角
 
 	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCam++)
 	{
@@ -483,12 +484,14 @@ void SetCamera(void)
 			if (g_nActivePlayer == PLAYERTYPE_MOUSE)
 			{
 				pCam++;
+				fViewRadian = VIEW_RADIAN_MOUSE;
 			}
 		}
 		else if (bCameraSwitch == true)
 		{// 2P用カメラ設置
 			pCam++;
 			bCameraSwitch = false;
+			fViewRadian = VIEW_RADIAN_MOUSE;
 		}
 		else
 		{// 1P用カメラ設置
@@ -507,7 +510,7 @@ void SetCamera(void)
 
 			// プロジェクションマトリックスを作成
 			D3DXMatrixPerspectiveFovLH(&pCam->mtxProjection,
-				D3DXToRadian(VIEW_RADIAN),					// 視野角
+				D3DXToRadian(fViewRadian),					// 視野角
 				(float)pCam->viewport.Width / (float)pCam->viewport.Height,	// アスペクト比
 				VIEW_MINDEPTH,								// 最短描画距離
 				VIEW_MAXDEPTH);								// 最大描画距離

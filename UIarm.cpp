@@ -35,7 +35,7 @@ void InitUIarm(void)
 
 	//-------------------------------------
 	// テクスチャの読み込み
-	D3DXCreateTextureFromFile(pDevice, "data\\TEXTURE\\TapToStart.png", &g_pTextureUIarm);
+	D3DXCreateTextureFromFile(pDevice, "data\\TEXTURE\\arm_tex.jpg", &g_pTextureUIarm);
 
 	//-------------------------------------
 	// 頂点バッファの作成
@@ -137,7 +137,7 @@ void UpdateUIarm(void)
 	// 頂点バッファをロックし、頂点情報へのポインタを獲得
 	g_pVtxBuffUIarm->Lock(0, 0, (void**)&pVtx, 0);
 
-	if (GetKeyboardTrigger(DIK_I) == true)
+	if (GetKeyboardTrigger(DIK_9) == true)
 	{
 		// テクスチャ座標の設定
 		pVtx[0].tex.x -= UI_TEX_SIZE;
@@ -145,8 +145,7 @@ void UpdateUIarm(void)
 		pVtx[2].tex.x -= UI_TEX_SIZE;
 		pVtx[3].tex.x -= UI_TEX_SIZE;
 	}
-
-	if (GetKeyboardTrigger(DIK_O) == true)
+	else if (GetKeyboardTrigger(DIK_0) == true)
 	{
 		// テクスチャ座標の設定
 		pVtx[0].tex.x += UI_TEX_SIZE;

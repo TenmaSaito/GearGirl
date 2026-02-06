@@ -16,6 +16,7 @@
 // マクロ定義
 //=========================================================================================
 #define VIEW_RADIAN				(45.0f)					// 視野角
+#define VIEW_RADIAN_MOUSE		(30.0f)					// ネズミの視野角
 #define VIEW_MINDEPTH			(5.0f)					// 最小描画距離
 #define VIEW_MAXDEPTH			(10000.0f)				// 最大描画距離
 #define CAMERA_V_DEFPOS			(0.0f, 350.0f, 500.0f)	// 視点のデフォ位置
