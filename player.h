@@ -16,7 +16,6 @@
 
 #define	MAX_PLAYER		(2)				// プレイヤーの最大数
 #define PLAYER_POSDEF	D3DXVECTOR3(0.0f, 100.0f, 0.0f) // プレイヤーの初期位置
-//#define	MAX_TEX			(16)			// テクスチャの最大数
 #define	PLAYER_MOVE		(0.5f)			// プレイヤーの移動速度
 #define	PLAYER_ROTMOVE	(0.3f)			// プレイヤーの回転速度
 #define	PLAYER_INI		(0.2f)			// プレイヤーの慣性
@@ -83,6 +82,7 @@ typedef struct
 	PARTS_INFO PartsInfo;		// プレイヤーのパーツの情報
 	Playerstate state;			// プレイヤーの状態
 	ArmType Armtype;			// 腕の種類
+	PlayerType playertype;		// 操作対象
 
 	// モーションの要素
 	MOTION_INFO aMotionInfo[MOTIONTYPE_MAX];	// モーション情報
@@ -116,12 +116,9 @@ void UninitPlayer(void);	// 終了処理
 void UpdatePlayer(void);	// 更新処理
 void DrawPlayer(void);		// 描画処理
 Player *GetPlayer(void);	// プレイヤー情報を渡す
-void MovePlayer(PlayerType nPlayer);	// プレイヤーの移動関数
-void JumpPlayer(PlayerType nPlayer);	// プレイヤーのジャンプ関数
 int GetNumPlayer(void);			// プレイ人数情報を渡す
 int GetActivePlayer(void);		// 操作しているプレイヤー情報を渡す
 void SetPlayer(D3DXVECTOR3* pPosGirl, D3DXVECTOR3* pPosMouse);	// プレイヤーの位置情報を渡す
 void ChangeNumPlayer(void);		// プレイ人数を切り替える(デバッグ用)
-void RotRepair(PlayerType nPlayer);	// rotにおける逆回りを防ぐ補正
 
 #endif

@@ -36,6 +36,9 @@ void MouseKeepUp(void);				// シングルプレイ時ネズミが少女についてくる処理
 void UpdateArm(void);				// アームの切り替え処理
 void ChangeArmType(ArmType Type);	// アームの変更
 void ShotMouse(void);				// ネズミを発射
+void MovePlayer(PlayerType nPlayer);	// プレイヤーの移動関数
+void JumpPlayer(PlayerType nPlayer);	// プレイヤーのジャンプ関数
+void RotRepair(PlayerType nPlayer);	// rotにおける逆回りを防ぐ補正
 
 // =================================================
 // グローバル変数
