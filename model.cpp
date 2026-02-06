@@ -14,6 +14,7 @@
 #include "field.h"
 #include "game.h"
 #include "model.h"
+#include "mesh.h"
 #include "input.h"
 #include "mathUtil.h"
 #include "player.h"
@@ -225,17 +226,24 @@ ModelInfo* GetModelInfo(void)
 // =================================================
 bool LoadModel(void)
 {	
-	// === フィールドの情報を格納する変数 === //
-	int nIdxTexField = 0;	// テクスチャのタイプ
-	int aIdxTexture[100] = {};	// テクスチャのタイプ
-	int Xdevide, Ydevide = 0;	// フィールドの分割数
-	int Xsize, Ysize = 0;		// フィールドのサイズ
-	int nCntField = 0;
-
-	// === モデル用の変数を用意 === //
+	// === 全項目共通で使用可能な変数 === //
 	MyMathUtil::INT_VECTOR3 pos;
 	MyMathUtil::INT_VECTOR3 rot;
 
+	// === スカイ用の変数を用意 === //
+	int nIdxTexSky = 0;
+	float fMove = 0.0f;
+	int nXdevideSky, nYdevideSky = 0;	// フィールドの分割数
+	int nRadius = 0;		// フィールドのサイズ
+
+	// === フィールドの情報を格納する変数 === //
+	int nIdxTexField = 0;	// テクスチャのタイプ
+	int aIdxTexture[100] = {};	// テクスチャのタイプ
+	int nXdevideField, nYdevideField = 0;	// フィールドの分割数
+	int nXsize, nYsize = 0;		// フィールドのサイズ
+	int nCntField = 0;
+
+	// === モデル用の変数を用意 === //
 	int nNumIdx = 0;			// モデルファイル名のインデックス
 	int nNumModel = 0;			// モデル数
 	char Realize[128];			// 判別用の変数
@@ -319,6 +327,73 @@ bool LoadModel(void)
 					}
 				}
 			}
+			if (strstr(&Realize[0], "SKYSET") != NULL)
+			{// 空の情報を代入
+				while (1)
+				{
+					fgets(&Realize[0], sizeof Realize, pFile);	// 最初に比較用文字の読み込み
+
+					if (strstr(&Realize[0], "TEXTYPE") != NULL)
+					{// テクスチャタイプを読み込む処理
+						pEqual = strstr(Realize, "=");
+
+						if (pEqual != NULL)
+						{
+							// アドレスを1こずらす
+							pEqual++;
+
+							// テクスチャのインデックスを読み込む
+							(void)sscanf(pEqual, "%d", &nIdxTexSky);
+						}
+					}
+					if (strstr(&Realize[0], "MOVE") != NULL)
+					{// テクスチャの移動量を読み込む処理
+						pEqual = strstr(Realize, "=");
+
+						if (pEqual != NULL)
+						{
+							// アドレスを1こずらす
+							pEqual++;
+
+							// テクスチャの移動量を読み込む
+							(void)sscanf(pEqual, "%f", &fMove);
+						}
+					}
+					if (strstr(&Realize[0], "SIZE") != NULL)
+					{// 半径を読み込む処理
+						pEqual = strstr(Realize, "=");
+
+						if (pEqual != NULL)
+						{
+							// アドレスを1こずらす
+							pEqual++;
+
+							// 半径を読み込む
+							(void)sscanf(pEqual, "%d", &nRadius);
+						}
+					}
+					if (strstr(&Realize[0], "BLOCK") != NULL)
+					{// 分割数を読み込む処理
+						pEqual = strstr(Realize, "=");
+
+						if (pEqual != NULL)
+						{
+							// アドレスを1こずらす
+							pEqual++;
+
+							// 分割数を読み込む
+							(void)sscanf(pEqual, "%d %d", &nXdevideSky, &nYdevideSky);
+						}
+					}
+					if (strstr(&Realize[0], "END_SKYSET") != NULL)
+					{
+						// 代入した情報をメッシュリングドームに反映
+						SetMeshDome(D3DXVECTOR3(0.0f, 0.0f, 0.0f), VECNULL,(float)nRadius, nYdevideSky, nYdevideSky, true, true, aIdxTexture[nIdxTexSky]);
+
+						break;
+					}
+				}
+			}
 			if (strstr(&Realize[0], "FIELDSET") != NULL)
 			{// フィールドの情報を代入
 				while (1)
@@ -335,7 +410,7 @@ bool LoadModel(void)
 							// アドレスを1こずらす
 							pEqual++;
 
-							// テクスチャの数を読み込む
+							// テクスチャのインデックスを読み込む
 							(void)sscanf(pEqual, "%d", &nIdxTexField);
 						}
 					}
@@ -348,7 +423,7 @@ bool LoadModel(void)
 							// アドレスを1こずらす
 							pEqual++;
 
-							// モデルの数を読み込む
+							// 地面の位置を読み込む
 							(void)sscanf(pEqual, "%d %d %d", &pos.x, &pos.y, &pos.z);
 						}
 					}
@@ -361,7 +436,7 @@ bool LoadModel(void)
 							// アドレスを1こずらす
 							pEqual++;
 
-							// モデルの数を読み込む
+							// 地面の向きを読み込む
 							(void)sscanf(pEqual, "%d %d %d", &rot.x, &rot.y, &rot.z);
 						}
 					}
@@ -374,8 +449,8 @@ bool LoadModel(void)
 							// アドレスを1こずらす
 							pEqual++;
 
-							// モデルの数を読み込む
-							(void)sscanf(pEqual, "%d %d", &Xdevide, &Ydevide);
+							// 分割数を読み込む
+							(void)sscanf(pEqual, "%d %d", &nXdevideField, &nYdevideField);
 						}
 					}
 					if (strstr(&Realize[0], "SIZE") != NULL)
@@ -387,20 +462,21 @@ bool LoadModel(void)
 							// アドレスを1こずらす
 							pEqual++;
 
-							// モデルの数を読み込む
-							(void)sscanf(pEqual, "%d %d", &Xsize, &Ysize);
+							// 縦横のサイズを読み込む
+							(void)sscanf(pEqual, "%d %d", &nXsize, &nYsize);
 						}
 					}
 					if (strstr(&Realize[0], "END_FIELDSET") != NULL)
 					{
 						D3DXVECTOR3 rotVec = DegreeToRadian(INTToFloat(rot));
-						SetField(INTToFloat(pos), VECNULL, rotVec, (float)Xsize, (float)Ysize, aIdxTexture[nIdxTexField], (float)Xdevide, (float)Ydevide,D3DCULL_CCW);
+						SetField(INTToFloat(pos), VECNULL, rotVec, (float)nXsize, (float)nYsize, aIdxTexture[nIdxTexField], (float)nXdevideField, (float)nYdevideField, D3DCULL_CCW);
 						nCntField++;
 						break;
 					}
 				}
 
 			}
+
 			if (strstr(&Realize[0], "NUM_MODEL") != NULL)
 			{// モデルの数を代入
 				// 「=」の場所を見つける

@@ -62,6 +62,8 @@ typedef struct Item
 	bool			bUse;				// 構造体を使用しているかどうか
 	bool			bGet;				// プレイヤーが取得したかどうか
 	bool			bCollision;			// 衝突するか(true)、取得するか(false)
+	bool			bGirl;				// 少女に見えるか
+	bool			bMouse;				// ネズミに見えるか
 	int				nIdxModel;			// モデルデータのインデックス
 	D3DXMATRIX		mtxWorld;			// ワールドマトリックス
 }Item;
