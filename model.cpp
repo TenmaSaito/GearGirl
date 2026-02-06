@@ -231,10 +231,16 @@ bool LoadModel(void)
 	MyMathUtil::INT_VECTOR3 rot;
 
 	// === スカイ用の変数を用意 === //
-	int nIdxTexSky = 0;
-	float fMove = 0.0f;
-	int nXdevideSky, nYdevideSky = 0;	// フィールドの分割数
-	int nRadius = 0;		// フィールドのサイズ
+	int nIdxTexSky = 0;					// 空用のテクスチャのインデックス
+	float fMoveSky = 0.0f;				// 空の移動量
+	int nXdevideSky, nYdevideSky = 0;	// 空の分割数
+	int nRadiusSky = 0;					// 空のサイズ
+
+	// === 雲用の変数を用意 === // 
+	int nIdxTexCloud = 0;	// 雲のテクスチャのインデックス
+	int nRadiusCloud = 0;	// 雲の半径
+	int nHeightCloud = 0;	// 雲のテクスチャの高さ
+	int nXdevideCloud, nYdevideCloud = 0;	// 雲のテクスチャの分割数
 
 	// === フィールドの情報を格納する変数 === //
 	D3DXVECTOR3 posField;
@@ -357,7 +363,7 @@ bool LoadModel(void)
 							pEqual++;
 
 							// テクスチャの移動量を読み込む
-							(void)sscanf(pEqual, "%f", &fMove);
+							(void)sscanf(pEqual, "%f", &fMoveSky);
 						}
 					}
 					if (strstr(&Realize[0], "SIZE") != NULL)
@@ -370,7 +376,7 @@ bool LoadModel(void)
 							pEqual++;
 
 							// 半径を読み込む
-							(void)sscanf(pEqual, "%d", &nRadius);
+							(void)sscanf(pEqual, "%d", &nRadiusSky);
 						}
 					}
 					if (strstr(&Realize[0], "BLOCK") != NULL)
@@ -389,8 +395,73 @@ bool LoadModel(void)
 					if (strstr(&Realize[0], "END_SKYSET") != NULL)
 					{
 						// 代入した情報をメッシュリングドームに反映
-						SetMeshDome(D3DXVECTOR3(0.0f, 0.0f, 0.0f), VECNULL,(float)nRadius, nYdevideSky, nYdevideSky, true, true, aIdxTexture[nIdxTexSky]);
+						SetMeshDome(D3DXVECTOR3(0.0f, 0.0f, 0.0f), VECNULL,(float)nRadiusSky, nYdevideSky, nXdevideSky, true, true, aIdxTexture[nIdxTexSky]);
+						break;
+					}
+				}
+			}
+			if (strstr(&Realize[0], "CLOUDSET") != NULL)
+			{// 雲の情報を代入
+				while (1)
+				{
+					fgets(&Realize[0], sizeof Realize, pFile);	// 最初に比較用文字の読み込み
 
+					if (strstr(&Realize[0], "TEXTYPE") != NULL)
+					{// テクスチャタイプを読み込む処理
+						pEqual = strstr(Realize, "=");
+
+						if (pEqual != NULL)
+						{
+							// アドレスを1こずらす
+							pEqual++;
+
+							// テクスチャのインデックスを読み込む
+							(void)sscanf(pEqual, "%d", &nIdxTexCloud);
+						}
+					}
+					if (strstr(&Realize[0], "SIZE") != NULL)
+					{// 半径を読み込む処理
+						pEqual = strstr(Realize, "=");
+
+						if (pEqual != NULL)
+						{
+							// アドレスを1こずらす
+							pEqual++;
+
+							// 半径を読み込む
+							(void)sscanf(pEqual, "%d", &nRadiusCloud);
+						}
+					}
+					if (strstr(&Realize[0], "HEIGHT") != NULL)
+					{// テクスチャの移動量を読み込む処理
+						pEqual = strstr(Realize, "=");
+
+						if (pEqual != NULL)
+						{
+							// アドレスを1こずらす
+							pEqual++;
+
+							// テクスチャの移動量を読み込む
+							(void)sscanf(pEqual, "%d", &nHeightCloud);
+						}
+					}
+					if (strstr(&Realize[0], "BLOCK") != NULL)
+					{// 分割数を読み込む処理
+						pEqual = strstr(Realize, "=");
+
+						if (pEqual != NULL)
+						{
+							// アドレスを1こずらす
+							pEqual++;
+
+							// 分割数を読み込む
+							(void)sscanf(pEqual, "%d %d", &nXdevideCloud, &nYdevideCloud);
+						}
+					}
+					if (strstr(&Realize[0], "END_CLOUDSET") != NULL)
+					{
+						// 代入した情報をメッシュリングドームに反映
+						SetMeshCylinder(D3DXVECTOR3(0.0f, 0.0f, 0.0f), VECNULL, (float)nRadiusCloud, (float)nHeightCloud, nYdevideCloud, nXdevideCloud, true, true, aIdxTexture[nIdxTexCloud]);
 						break;
 					}
 				}
