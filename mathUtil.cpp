@@ -365,6 +365,36 @@ float MyMathUtil::GetPTPLength(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2)
 }
 
 //==================================================================
+// --- 2ì_ä‘ÇÃãóó£ÇãÅÇﬂÇÈèàóù ---
+//==================================================================
+float MyMathUtil::GetPTPLength3D(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2)
+{
+	float fLength = 0.0f;
+
+	if (pos1.x >= pos2.x
+		&& pos1.z >= pos2.z)
+	{
+		fLength = sqrtf(powf((pos1.x - pos2.x), 2) + powf((pos1.z - pos2.z), 2));
+	}
+	else if (pos1.x >= pos2.x
+		&& pos1.z <= pos2.z)
+	{
+		fLength = sqrtf(powf((pos1.x - pos2.x), 2) + powf((pos2.z - pos1.z), 2));
+	}
+	else if (pos1.x <= pos2.x
+		&& pos1.z >= pos2.z)
+	{
+		fLength = sqrtf(powf((pos2.x - pos1.x), 2) + powf((pos1.z - pos2.z), 2));
+	}
+	else
+	{
+		fLength = sqrtf(powf((pos2.x - pos1.x), 2) + powf((pos2.z - pos1.z), 2));
+	}
+
+	return fLength;
+}
+
+//==================================================================
 // --- É|ÉäÉSÉìÇâÒì]Ç≥ÇπÇÈèàóù ---
 //==================================================================
 void MyMathUtil::RollPolygon(VERTEX_2D* pVtx, D3DXVECTOR3 pos, float fWidth, float fHeight, float fRot, int nSpeed)
