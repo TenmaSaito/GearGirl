@@ -1,6 +1,6 @@
 //==================================================================================================================================
 //
-//			カメラ処理 [camera.h]
+//			プレイヤーカメラ処理 [camera.h]
 //			Author : ENDO HIDETO
 // 
 //==================================================================================================================================
@@ -21,7 +21,7 @@
 #define VIEW_MAXDEPTH			(10000.0f)				// 最大描画距離
 #define CAMERA_V_DEFPOS			(0.0f, 350.0f, 500.0f)	// 視点のデフォ位置
 #define CAMERA_R_DEFPOS			(0.0f, 0.0f, 0.0f)		// 注視点のデフォ位置
-#define CAMERA_1P_DISTANS		(30.0f)					// 少女の,カメラと注視点の距離
+#define CAMERA_1P_DISTANS		(40.0f)					// 少女の,カメラと注視点の距離
 #define CAMERA_2P_DISTANS		(15.0f)					// ネズミの,カメラと注視点の距離
 #define CAMERA_1P_ROT			vec3(1.3f, 0.0f, 0.0f)	// 少女のカメラの角度
 #define CAMERA_2P_ROT			vec3(1.6f, 0.0f, 0.0f)	// ネズミのカメラの角度
@@ -76,6 +76,8 @@ typedef struct Camera
 	D3DXMATRIX mtxView;					// ビューマトリックス
 	D3DVIEWPORT9 viewport;				// ビューポート
 
+	D3DFOGMODE fogMode;					// フォグモード
+	
 	bool bAoutRot;						// 自動で回り込み
 	int nCntAoutRot;					// 自動で回り込むまでのカウンタ
 	float fPlayerFront;					// プレイヤーより少し前

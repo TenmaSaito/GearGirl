@@ -242,13 +242,6 @@ void UpdateGame(void)
 //==================================================================================
 void DrawGame(void)
 {
-	//ポーズ状態がONの時
-	if (g_bPause == true)
-	{
-		/*** ポーズの描画 ***/
-		DrawPause();
-	}
-
 	// カメラの数分だけ描画
 	for (int nCntDraw = 0; nCntDraw < GetCameraNum(); nCntDraw++)
 	{		
@@ -287,6 +280,13 @@ void DrawGame(void)
 
 		/*** UIアームの描画 ***/
 		DrawUIarm();
+	}
+
+	//ポーズ状態がONの時
+	if (g_bPause == true)
+	{
+		/*** ポーズの描画 ***/
+		DrawPause();
 	}
 }
 
