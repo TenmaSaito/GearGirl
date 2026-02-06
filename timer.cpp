@@ -22,7 +22,7 @@
 #define Timer_SIZEY (60.0f)
 
 // コロンのサイズ
-#define COLON_SIZEX (50.0f)
+#define COLON_SIZEX (60.0f)
 #define COLON_SIZEY (60.0f)
 #define COLON_SHIFT (-20.0f)
 
@@ -265,7 +265,7 @@ void UpdateTimer(void)
             else
             {
                 // ===== 数字だけ時間で変化 =====
-                col = D3DCOLOR_RGBA(0, 255, 0, 255);
+                col = D3DCOLOR_RGBA(255, 255, 255, 255);
 
                 if (totalSec < 60)
                     col = D3DCOLOR_RGBA(255, 255, 0, 255);
