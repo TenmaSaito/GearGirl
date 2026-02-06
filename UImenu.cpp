@@ -13,7 +13,17 @@
 //**********************************************************************************
 //*** マクロ定義 ***
 //**********************************************************************************
-#define PATH_GEAR	"data/TEXTURE/"
+#define PATH_GEAR	"data/TEXTURE/"		// テクスチャパス
+
+//**********************************************************************************
+//*** 頂点バッファ構造体 ***
+//**********************************************************************************
+typedef struct
+{
+	LPDIRECT3DVERTEXBUFFER9 pVtxBuff;	// 頂点バッファ
+	HRESULT hr;		// 直前のエラーコード
+	bool bSafe;		// 格納状態
+}SAFE_VERTEX;
 
 //**********************************************************************************
 //*** プロンプト構造体 ***
@@ -23,11 +33,16 @@ typedef struct
 	D3DXVECTOR3 pos;					// 位置
 	D3DXVECTOR3 rot;					// 角度
 	D3DXVECTOR2 size;					// サイズ
-	LPDIRECT3DVERTEXBUFFER9 pVtxBuff;	// 頂点バッファ
+	SAFE_VERTEX vtxSafe;				// 頂点バッファ
 	int nIdxTexture;					// テクスチャインデックス
 	bool bUse;							// 使用状況
 	bool bDisp;							// 描画するか
 } UImenu, *LPUIMENU;
+
+//**********************************************************************************
+//*** プロトタイプ宣言 ***
+//**********************************************************************************
+void CreateVtx(SAFE_VERTEX *pSafeVtx, bool bErrorOutput);
 
 //**********************************************************************************
 //*** グローバル変数 ***
@@ -39,22 +54,26 @@ UImenu g_menu;
 //==================================================================================
 void InitUImenu(void)
 {
-	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-
-	// 頂点バッファの作成
-	pDevice->CreateVertexBuffer(sizeof(VERTEX_2D) * 4,
-		D3DUSAGE_WRITEONLY,
-		FVF_VERTEX_2D,
-		D3DPOOL_MANAGED,
-		&g_menu.pVtxBuff,
-		NULL);
+	if (g_menu.vtxSafe.pVtxBuff == nullptr)
+	{
+		OutputDebugString(TEXT("頂点バッファの生成に失敗しちゃいました......"));
+		return;
+	}
 
 	// テクスチャの読み込み
+	LoadTexture(PATH_GEAR, &g_menu.nIdxTexture);
 
-	// デバイスの取得終了
+	
+
+	VERTEX_2D *pVtx = nullptr;
 
 	// 頂点設定
+	//g_menu.pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+	if (pVtx == nullptr)
+	{
+		OutputDebugString(TEXT("頂点バッファへのアクセスに失敗しました？！"));
+		return;
+	}
 
 
 }
@@ -89,4 +108,33 @@ void DrawUImenu(void)
 void SetEnableUImenu(bool bDisp, int nIdxUImenu)
 {
 
+}
+
+//==================================================================================
+// --- 頂点バッファの作成 ---
+//==================================================================================
+void CreateVtx(SAFE_VERTEX *pSafeVtx, bool bErrorOutput)
+{
+	// デバイスの取得
+	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	HRESULT hr;
+
+	// 頂点バッファの作成
+	hr = pDevice->CreateVertexBuffer(sizeof(VERTEX_2D) * 4,
+		D3DUSAGE_WRITEONLY,
+		FVF_VERTEX_2D,
+		D3DPOOL_MANAGED,
+		&pSafeVtx->pVtxBuff,
+		NULL);
+
+	if (FAILED(hr))
+	{
+		pSafeVtx->bSafe = false;
+		if (bErrorOutput) OutputDebugString(TEXT("Failed CreateVertexBuffer"));
+	}
+
+	pSafeVtx->hr = hr;
+
+	// デバイスの取得終了
+	EndDevice();
 }

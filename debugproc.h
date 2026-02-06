@@ -25,4 +25,5 @@ void UpdateDebugProc(void);
 void DrawDebugProc(void);
 
 void PrintDebugProc(const char *fmt, ...);
+void PrintDebugProc(int nIdxFont, const char* fmt, ...);
 #endif
