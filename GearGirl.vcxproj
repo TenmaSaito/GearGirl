@@ -167,6 +167,7 @@
     <ClCompile Include="light.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mathUtil.cpp" />
+    <ClCompile Include="particle.cpp" />
     <ClCompile Include="UImenu.cpp" />
     <ClCompile Include="mesh.cpp" />
     <ClCompile Include="meshcylinder.cpp" />
@@ -205,6 +206,7 @@
     <ClInclude Include="light.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="mathUtil.h" />
+    <ClInclude Include="particle.h" />
     <ClInclude Include="UImenu.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="mode.h" />

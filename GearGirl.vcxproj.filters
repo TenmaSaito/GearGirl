@@ -183,6 +183,9 @@
     <ClCompile Include="UImenu.cpp">
       <Filter>ソース ファイル\mode\game</Filter>
     </ClCompile>
+    <ClCompile Include="particle.cpp">
+      <Filter>ソース ファイル\object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h">
@@ -280,6 +283,9 @@
     </ClInclude>
     <ClInclude Include="UImenu.h">
       <Filter>ヘッダー ファイル\mode\game</Filter>
+    </ClInclude>
+    <ClInclude Include="particle.h">
+      <Filter>ヘッダー ファイル\object</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
