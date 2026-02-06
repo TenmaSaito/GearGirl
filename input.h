@@ -15,6 +15,9 @@
 #define NUM_KEY_MAX		(256)			// ƒL[ƒ{[ƒh‚ÌÅ‘å”
 #define NUM_JOY_MAX		(JOYKEY_MAX)	// ƒWƒ‡ƒCƒpƒbƒh‚ÌÅ‘å”
 #define MAX_PLAYER		(2)				// Å‘ål”
+#define DEADZONE_LEFTSTICK	(300)			// ¶ƒXƒeƒBƒbƒN‚Ìƒfƒbƒhƒ][ƒ“
+#define DEADZONE_RIGHTSTICK	(300)			// ‰EƒXƒeƒBƒbƒN‚Ìƒfƒbƒhƒ][ƒ“
+
 
 //=========================================================
 // ƒWƒ‡ƒCƒpƒbƒh\‘¢‘Ì‚Ì’è‹`
@@ -101,6 +104,10 @@ bool GetJoypadTrigger(int nPlayer, JOYKEY key);			// ƒWƒ‡ƒCƒpƒbƒh‚ÌƒgƒŠƒK[î•ñ‚
 bool GetJoypadRepeat(int nPlayer, JOYKEY key);			// ƒWƒ‡ƒCƒpƒbƒh‚ÌƒŠƒs[ƒgî•ñ‚ğæ“¾
 bool GetJoypadRelease(int nPlayer, JOYKEY key);			// ƒWƒ‡ƒCƒpƒbƒh‚ÌƒŠƒŠ[ƒXî•ñ‚ğæ“¾
 bool GetJoypadStickLeft(int nPlayer, JOYKEY key);		// ƒWƒ‡ƒCƒpƒbƒh‚Ì¶ƒXƒeƒBƒbƒNî•ñ‚ğæ“¾
+
+bool GetJoypadLeftStick(int nPlayer, D3DXVECTOR3* value);			// ƒWƒ‡ƒCƒpƒbƒh‚Ì¶ƒXƒeƒBƒbƒNî•ñ‚ğæ“¾
+bool GetJoypadRightStick(int nPlayer, D3DXVECTOR3* value);			// ƒWƒ‡ƒCƒpƒbƒh‚Ì‰EƒXƒeƒBƒbƒNî•ñ‚ğæ“¾
+
 														   
 XINPUT_VIBRATION* GetXInput(void);						// U“®‚Ìî•ñ
 void SetVibration(int nPlayer, int nLeftMotor, int nRightMotor, int nTime);

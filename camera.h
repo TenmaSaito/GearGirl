@@ -86,6 +86,7 @@ typedef struct Camera
 	int			nCntAoutRot;			// 自動で回り込むまでのカウンタ
 	float		fPlayerFront;			// プレイヤーより少し前
 	float		fPlayerMoveRot;			// プレイヤーの移動方向
+	CameraType	type;					// カメラタイプ
 	bool		bUse;					// 配列を使っているか
 }Camera;
 POINTER(Camera, P_CAMERA);

@@ -57,12 +57,18 @@ void InitCamera(void)
 
 		switch (nCntCamera)
 		{
-		case CAMERATYPE_PLAYER_TWO:	// 2P用のカメラ設定
-			pCamera->rot = CAMERA_2P_ROT;	// カメラの角度
-			pCamera->fDist = CAMERA_2P_DISTANS;
-
+		case CAMERATYPE_PLAYER_ONE:	// 1P用のカメラ設定
+			pCamera->rot = CAMERA_1P_ROT;								// カメラの角度
+			pCamera->fDist = CAMERA_1P_DISTANS;							// 視点と注視点の距離
+			pCamera->type = CAMERATYPE_PLAYER_ONE;
 			break;
-		default:			// その他のカメラ設定
+
+		case CAMERATYPE_PLAYER_TWO:	// 2P用のカメラ設定
+			pCamera->rot = CAMERA_2P_ROT;
+			pCamera->fDist = CAMERA_2P_DISTANS;
+			pCamera->type = CAMERATYPE_PLAYER_TWO;
+			break;
+		default:// その他のカメラ設定
 			pCamera->rot = CAMERA_1P_ROT;		// カメラの角度
 			pCamera->fDist = CAMERA_1P_DISTANS;							// 視点と注視点の距離
 			break;
@@ -440,9 +446,20 @@ void CameraOrbit(P_CAMERA pCamera)
 	}
 
 	// コントローラー操作
-	//if (GetJoypadRightStick(&rightStick))
+	 if (GetJoypadRightStick((int)pCamera->type,&rightStick))
+	{
+		pCamera->rot.y += rightStick.x * CAMERA_SPIN;
+		bUse = true;
+	}
+	//if (GetJoypadPress((int)pCamera->type,JOYKEY_RIGHT_STICK_LEFT))
 	//{
-	//	pCamera->rot.y += rightStick.x * REV_PLAYER;
+	//	pCamera->rot.y += CAMERA_SPIN;
+	//	bUse = true;
+	//}
+
+	//if (GetJoypadPress((int)pCamera->type,JOYKEY_RIGHT_STICK_RIGHT))
+	//{
+	//	pCamera->rot.y -= CAMERA_SPIN;
 	//	bUse = true;
 	//}
 
