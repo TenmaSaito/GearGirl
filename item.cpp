@@ -7,10 +7,12 @@
 //**************************************************************
 // インクルード
 #include "item.h"
-#include "Texture.h"
+
+#include "camera.h"
 #include "debugproc.h"
 #include "input.h"
 #include "mathUtil.h"
+#include "Texture.h"
 
 using  namespace MyMathUtil;
 
@@ -35,7 +37,7 @@ ItemInfo g_aItemInfo[ITEMTYPE_MAX] =
 //**************************************************************
 // プロトタイプ宣言
 void LoadItemSet(void);															// アイテムの配置情報を読み込み
-void SetItem(vec3 pos, vec3 rot, ITEMTYPE type, bool bColi = false);			// アイテム設置
+void SetItem(vec3 pos, vec3 rot, ITEMTYPE type, bool bReflectGirl = true, bool bReflectMouse = true, bool bColi = false);			// アイテム設置
 void SaveItemSet(void);															// アイテムの配置情報を書き出し
 P_ITEM GetItem(void);															// 先頭アドレス取得
 
@@ -64,8 +66,8 @@ void InitItem(void)
 
 	// 設置
 	g_nSetItemNum = 0;
-	SetItem(vec3(0.0f, 140.0f, 100.0f), vec3_ZERO, ITEMTYPE_GEARL_TRUE);
-	SetItem(vec3(0.0f, 140.0f, -100.0f), vec3_ZERO, ITEMTYPE_SHAFT_TRUE);
+	SetItem(vec3(0.0f, 140.0f, 100.0f), vec3_ZERO, ITEMTYPE_GEARL_TRUE,false,true);
+	SetItem(vec3(0.0f, 140.0f, -100.0f), vec3_ZERO, ITEMTYPE_SHAFT_TRUE,true,false);
 	SetItem(vec3(100.0f, 140.0f, 100.0f), vec3_ZERO, ITEMTYPE_GEARS_TRUE);
 	SetItem(vec3(100.0f, 140.0f, -100.0f), vec3_ZERO, ITEMTYPE_GEARL_FALSE);
 }
@@ -122,48 +124,51 @@ void DrawItem(void)
 
 	for (int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++, pItem++)
 	{
-		if (pItem->bUse &&( pItem->bGet == false || pItem->bCollision))
+		if (pItem->bUse && (pItem->bGet == false || pItem->bCollision))
 		{
-			// インデックスからモデルデータを取得
-			pModel = GetModelData(pItem->nIdxModel);
-			
-			//**************************************************************
-			// ワールドマトリックスの初期化
-			D3DXMatrixIdentity(&pItem->mtxWorld);
-
-			// 向きを反映
-			D3DXMatrixRotationYawPitchRoll(&mtxRot, pItem->rot.y, pItem->rot.x, pItem->rot.z);
-			D3DXMatrixMultiply(&pItem->mtxWorld, &pItem->mtxWorld, &mtxRot);
-
-			// 位置を反映
-			D3DXMatrixTranslation(&mtxTrans, pItem->pos.x, pItem->pos.y, pItem->pos.z);
-			D3DXMatrixMultiply(&pItem->mtxWorld, &pItem->mtxWorld, &mtxTrans);
-
-			// ワールドマトリックスの設定
-			pDevice->SetTransform(D3DTS_WORLD, &pItem->mtxWorld);
-
-			//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-			// 現在のマテリアルを取得
-			pDevice->GetMaterial(&matDef);
-
-			// マテリアルデータへのポインタを取得
-			pMat = (D3DXMATERIAL*)pModel->pBuffMat->GetBufferPointer();
-
-			for (int nCntMat = 0; nCntMat < (int)pModel->dwNumMat; nCntMat++)
+			if ((pItem->bGirl && GetReadyCamera() == PLAYER_ONE) || (pItem->bMouse && GetReadyCamera() == PLAYER_TWO))
 			{
-				// マテリアルの設定
-				pDevice->SetMaterial(&pMat[nCntMat].MatD3D);
+				// インデックスからモデルデータを取得
+				pModel = GetModelData(pItem->nIdxModel);
 
-				// テクスチャの設定
-				pDevice->SetTexture(0, pModel->apTexture[nCntMat]);
+				//**************************************************************
+				// ワールドマトリックスの初期化
+				D3DXMatrixIdentity(&pItem->mtxWorld);
 
-				// モデル(パーツ)の描画
-				pModel->pMesh->DrawSubset(nCntMat);
+				// 向きを反映
+				D3DXMatrixRotationYawPitchRoll(&mtxRot, pItem->rot.y, pItem->rot.x, pItem->rot.z);
+				D3DXMatrixMultiply(&pItem->mtxWorld, &pItem->mtxWorld, &mtxRot);
+
+				// 位置を反映
+				D3DXMatrixTranslation(&mtxTrans, pItem->pos.x, pItem->pos.y, pItem->pos.z);
+				D3DXMatrixMultiply(&pItem->mtxWorld, &pItem->mtxWorld, &mtxTrans);
+
+				// ワールドマトリックスの設定
+				pDevice->SetTransform(D3DTS_WORLD, &pItem->mtxWorld);
+
+				//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+				// 現在のマテリアルを取得
+				pDevice->GetMaterial(&matDef);
+
+				// マテリアルデータへのポインタを取得
+				pMat = (D3DXMATERIAL*)pModel->pBuffMat->GetBufferPointer();
+
+				for (int nCntMat = 0; nCntMat < (int)pModel->dwNumMat; nCntMat++)
+				{
+					// マテリアルの設定
+					pDevice->SetMaterial(&pMat[nCntMat].MatD3D);
+
+					// テクスチャの設定
+					pDevice->SetTexture(0, pModel->apTexture[nCntMat]);
+
+					// モデル(パーツ)の描画
+					pModel->pMesh->DrawSubset(nCntMat);
+				}
+
+				// 保存していたマテリアルに戻す
+				pDevice->SetMaterial(&matDef);
+				//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 			}
-
-			// 保存していたマテリアルに戻す
-			pDevice->SetMaterial(&matDef);
-			//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 		}
 	}
 	EndDevice();
@@ -211,7 +216,7 @@ void CollisionItem(vec3 pos, float fRange)
 
 //=========================================================================================
 // 単体アイテム設置
-void SetItem(vec3 pos, vec3 rot, ITEMTYPE type, bool bColi)
+void SetItem(vec3 pos, vec3 rot, ITEMTYPE type, bool bReflectGirl, bool bReflectMouse, bool bColi)
 {
 	//**************************************************************
 	// 変数宣言
@@ -229,6 +234,8 @@ void SetItem(vec3 pos, vec3 rot, ITEMTYPE type, bool bColi)
 				pItem->type = type;								// アイテムタイプ
 				pItem->nIdxModel = g_aItemInfo[type].nNumGet;	// モデルデータインデックス
 				pItem->bCollision = bColi;
+				pItem->bGirl = bReflectGirl;
+				pItem->bMouse = bReflectMouse;
 				pItem->bGet = false;
 				pItem->bUse = true;
 				break;
