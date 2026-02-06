@@ -39,8 +39,6 @@ void InitMeshDome(void)
 		g_aMeshDome[nCntMeshDome].nCircleDivision = 0;
 		g_aMeshDome[nCntMeshDome].nVerti = 0;
 		g_aMeshDome[nCntMeshDome].nPrim = 0;
-		g_aMeshDome[nCntMeshDome].bInner = false;
-		g_aMeshDome[nCntMeshDome].bOuter = false;
 		g_aMeshDome[nCntMeshDome].bUse = false;
 	}
 }
@@ -86,40 +84,41 @@ void DrawMeshDome(void)
 {
 	//**************************************************************
 	// 変数宣言
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();		// デバイスへのポインタ
-	D3DXMATRIX mtxRot, mtxTrans;					// マトリックス計算用
+	LPDIRECT3DDEVICE9	pDevice = GetDevice();		// デバイスへのポインタ
+	P_MESH				pMesh = GetMeshDome();		// メッシュ情報
+	D3DXMATRIX			mtxRot, mtxTrans;			// マトリックス計算用
 
-	for (int nCntMeshDome = 0; nCntMeshDome < MAX_MESHDOME; nCntMeshDome++)
+	for (int nCntMeshDome = 0; nCntMeshDome < MAX_MESHDOME; nCntMeshDome++,pMesh++)
 	{
-		if (g_aMeshDome[nCntMeshDome].bUse)
+		if (pMesh->bUse)
 		{
 			//**************************************************************
 			// ワールドマトリックスの初期化
-			D3DXMatrixIdentity(&g_aMeshDome[nCntMeshDome].mtxWorld);
+			D3DXMatrixIdentity(&pMesh->mtxWorld);
 
 			//**************************************************************
 			// 向きを反映
-			D3DXMatrixRotationYawPitchRoll(&mtxRot, g_aMeshDome[nCntMeshDome].rot.y, g_aMeshDome[nCntMeshDome].rot.x, g_aMeshDome[nCntMeshDome].rot.z);
-			D3DXMatrixMultiply(&g_aMeshDome[nCntMeshDome].mtxWorld, &g_aMeshDome[nCntMeshDome].mtxWorld, &mtxRot);
+			D3DXMatrixRotationYawPitchRoll(&mtxRot, pMesh->rot.y, pMesh->rot.x, pMesh->rot.z);
+			D3DXMatrixMultiply(&pMesh->mtxWorld, &pMesh->mtxWorld, &mtxRot);
 
 			//**************************************************************
 			// 位置を反映
-			D3DXMatrixTranslation(&mtxTrans, g_aMeshDome[nCntMeshDome].pos.x, g_aMeshDome[nCntMeshDome].pos.y, g_aMeshDome[nCntMeshDome].pos.z);
-			D3DXMatrixMultiply(&g_aMeshDome[nCntMeshDome].mtxWorld, &g_aMeshDome[nCntMeshDome].mtxWorld, &mtxTrans);
+			D3DXMatrixTranslation(&mtxTrans, pMesh->pos.x, pMesh->pos.y, pMesh->pos.z);
+			D3DXMatrixMultiply(&pMesh->mtxWorld, &pMesh->mtxWorld, &mtxTrans);
 
 			//**************************************************************
 			// ワールドマトリックスの設定
-			pDevice->SetTransform(D3DTS_WORLD, &g_aMeshDome[nCntMeshDome].mtxWorld);
+			pDevice->SetTransform(D3DTS_WORLD, &pMesh->mtxWorld);
 
 			//**************************************************************
 			// 頂点バッファをデータストリームに設定
 			pDevice->SetStreamSource(0,
-				g_aMeshDome[nCntMeshDome].pVtxBuff,
+				pMesh->pVtxBuff,
 				0,
 				sizeof(VERTEX_3D));
 
 			// インデックスバッファを設定
-			pDevice->SetIndices(g_aMeshDome[nCntMeshDome].pIdxBuffer);
+			pDevice->SetIndices(pMesh->pIdxBuffer);
 
 			//**************************************************************
 			// 頂点フォーマットの設定
@@ -127,11 +126,15 @@ void DrawMeshDome(void)
 
 			//**************************************************************
 			// テクスチャの設定
-			pDevice->SetTexture(0, GetTexture(g_aMeshDome[nCntMeshDome].nIdxTexture));
+			pDevice->SetTexture(0, GetTexture(pMesh->nIdxTexture));
+
+			//**************************************************************
+			// カリングモードの設定
+			pDevice->SetRenderState(D3DRS_CULLMODE, pMesh->culling);
 
 			//**************************************************************
 			// フィールドの描画
-			pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, 0, 0, g_aMeshDome[nCntMeshDome].nVerti, 0, g_aMeshDome[nCntMeshDome].nPrim);
+			pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, 0, 0, pMesh->nVerti, 0, pMesh->nPrim);
 		}
 	}
 	EndDevice();// デバイス取得終了
@@ -140,7 +143,7 @@ void DrawMeshDome(void)
 //=========================================================================================
 // 壁を設置
 //=========================================================================================
-void SetMeshDome(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int nCircleDivision, bool bInner, bool bOuter, int nTex)
+void SetMeshDome(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int nCircleDivision, D3DCULL cull, int nTex, bool bPat)
 {
 	//**************************************************************
 	// 変数宣言
@@ -167,9 +170,9 @@ void SetMeshDome(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int nCi
 			pMesh->nCircleDivision = nCircleDivision;
 			pMesh->nVerti = nHeightVerti * nCircleVerti;
 			pMesh->nPrim = (nHeightDivision * (nCircleDivision + 2) - 2) * 2;
-			pMesh->bInner = bInner;
-			pMesh->bOuter = bOuter;
 			angle = vec3((float)D3DX_PI / nHeightDivision * 0.5f, (float)(2 * D3DX_PI / nCircleDivision), (float)D3DX_PI / nHeightDivision);
+			pMesh->bPattanrn = bPat;
+			pMesh->culling = cull;
 
 			//**************************************************************
 			// 頂点バッファの読み込み
@@ -213,8 +216,17 @@ void SetMeshDome(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int nCi
 					// 頂点カラー設定
 					pVtx[nCntVer].col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 
-					// テクスチャ座標を設定
-					pVtx[nCntVer].tex = D3DXVECTOR2((float)nCntCircle, (float)nCntHeight);
+					if (bPat)
+					{// テクスチャを繰り返す場合
+						// テクスチャ座標を設定
+						pVtx[nCntVer].tex = D3DXVECTOR2((float)nCntCircle, (float)nCntHeight);
+
+					}
+					else
+					{// 繰り返さない場合
+						// テクスチャ座標を設定
+						pVtx[nCntVer].tex = D3DXVECTOR2((float)nCntCircle / nCircleDivision, (float)nCntHeight / nHeightDivision);
+					}
 				}
 			}
 

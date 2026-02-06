@@ -26,23 +26,22 @@ void InitMeshCylinder(void)
 	//**************************************************************
 	// 変数宣言
 	g_nSetMeshCylinder = 0;
+	P_MESH pMesh = GetMeshCylinder();
 
 	//**************************************************************
 	// 位置・サイズの初期化
-	for (int nCntMeshCylinder = 0; nCntMeshCylinder < MAX_MESHCYLINDER; nCntMeshCylinder++)
+	for (int nCntMeshCylinder = 0; nCntMeshCylinder < MAX_MESHCYLINDER; nCntMeshCylinder++,pMesh++)
 	{
-		g_aMeshCylinder[nCntMeshCylinder].pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		g_aMeshCylinder[nCntMeshCylinder].rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		g_aMeshCylinder[nCntMeshCylinder].size = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		g_aMeshCylinder[nCntMeshCylinder].pVtxBuff = NULL;
-		g_aMeshCylinder[nCntMeshCylinder].pIdxBuffer = NULL;
-		g_aMeshCylinder[nCntMeshCylinder].nHeightDivision = 0;
-		g_aMeshCylinder[nCntMeshCylinder].nCircleDivision = 0;
-		g_aMeshCylinder[nCntMeshCylinder].nVerti = 0;
-		g_aMeshCylinder[nCntMeshCylinder].nPrim = 0;
-		g_aMeshCylinder[nCntMeshCylinder].bInner = false;
-		g_aMeshCylinder[nCntMeshCylinder].bOuter = false;
-		g_aMeshCylinder[nCntMeshCylinder].bUse = false;
+		pMesh->pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		pMesh->rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		pMesh->size = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		pMesh->pVtxBuff = NULL;
+		pMesh->pIdxBuffer = NULL;
+		pMesh->nHeightDivision = 0;
+		pMesh->nCircleDivision = 0;
+		pMesh->nVerti = 0;
+		pMesh->nPrim = 0;
+		pMesh->bUse = false;
 	}
 }
 
@@ -96,40 +95,41 @@ void DrawMeshCylinder(void)
 {
 	//**************************************************************
 	// 変数宣言
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();		// デバイスへのポインタ
-	D3DXMATRIX mtxRot, mtxTrans;					// マトリックス計算用
+	LPDIRECT3DDEVICE9	pDevice = GetDevice();		// デバイスへのポインタ
+	P_MESH				pMesh = GetMeshCylinder();	// メッシュ情報
+	D3DXMATRIX			mtxRot, mtxTrans;					// マトリックス計算用
 
-	for (int nCntMeshCylinder = 0; nCntMeshCylinder < MAX_MESHCYLINDER; nCntMeshCylinder++)
+	for (int nCntMeshCylinder = 0; nCntMeshCylinder < MAX_MESHCYLINDER; nCntMeshCylinder++, pMesh++)
 	{
-		if (g_aMeshCylinder[nCntMeshCylinder].bUse)
+		if (pMesh->bUse)
 		{
 			//**************************************************************
 			// ワールドマトリックスの初期化
-			D3DXMatrixIdentity(&g_aMeshCylinder[nCntMeshCylinder].mtxWorld);
+			D3DXMatrixIdentity(&pMesh->mtxWorld);
 
 			//**************************************************************
 			// 向きを反映
-			D3DXMatrixRotationYawPitchRoll(&mtxRot, g_aMeshCylinder[nCntMeshCylinder].rot.y, g_aMeshCylinder[nCntMeshCylinder].rot.x, g_aMeshCylinder[nCntMeshCylinder].rot.z);
-			D3DXMatrixMultiply(&g_aMeshCylinder[nCntMeshCylinder].mtxWorld, &g_aMeshCylinder[nCntMeshCylinder].mtxWorld, &mtxRot);
+			D3DXMatrixRotationYawPitchRoll(&mtxRot, pMesh->rot.y, pMesh->rot.x, pMesh->rot.z);
+			D3DXMatrixMultiply(&pMesh->mtxWorld, &pMesh->mtxWorld, &mtxRot);
 
 			//**************************************************************
 			// 位置を反映
-			D3DXMatrixTranslation(&mtxTrans, g_aMeshCylinder[nCntMeshCylinder].pos.x, g_aMeshCylinder[nCntMeshCylinder].pos.y, g_aMeshCylinder[nCntMeshCylinder].pos.z);
-			D3DXMatrixMultiply(&g_aMeshCylinder[nCntMeshCylinder].mtxWorld, &g_aMeshCylinder[nCntMeshCylinder].mtxWorld, &mtxTrans);
+			D3DXMatrixTranslation(&mtxTrans, pMesh->pos.x, pMesh->pos.y, pMesh->pos.z);
+			D3DXMatrixMultiply(&pMesh->mtxWorld, &pMesh->mtxWorld, &mtxTrans);
 
 			//**************************************************************
 			// ワールドマトリックスの設定
-			pDevice->SetTransform(D3DTS_WORLD, &g_aMeshCylinder[nCntMeshCylinder].mtxWorld);
+			pDevice->SetTransform(D3DTS_WORLD, &pMesh->mtxWorld);
 
 			//**************************************************************
 			// 頂点バッファをデータストリームに設定
 			pDevice->SetStreamSource(0,
-				g_aMeshCylinder[nCntMeshCylinder].pVtxBuff,
+				pMesh->pVtxBuff,
 				0,
 				sizeof(VERTEX_3D));
 
 			// インデックスバッファを設定
-			pDevice->SetIndices(g_aMeshCylinder[nCntMeshCylinder].pIdxBuffer);
+			pDevice->SetIndices(pMesh->pIdxBuffer);
 
 			//**************************************************************
 			// 頂点フォーマットの設定
@@ -137,11 +137,15 @@ void DrawMeshCylinder(void)
 
 			//**************************************************************
 			// テクスチャの設定
-			pDevice->SetTexture(0, GetTexture(g_aMeshCylinder[nCntMeshCylinder].nIdxTexture));
+			pDevice->SetTexture(0, GetTexture(pMesh->nIdxTexture));
+			
+			//**************************************************************
+			// カリングモードの設定
+			pDevice->SetRenderState(D3DRS_CULLMODE, pMesh->culling);
 
 			//**************************************************************
 			// フィールドの描画
-			pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, 0, 0, g_aMeshCylinder[nCntMeshCylinder].nVerti, 0, g_aMeshCylinder[nCntMeshCylinder].nPrim);
+			pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, 0, 0, pMesh->nVerti, 0, pMesh->nPrim);
 		}
 	}
 
@@ -151,13 +155,13 @@ void DrawMeshCylinder(void)
 //=========================================================================================
 // 壁を設置
 //=========================================================================================
-//void SetMeshCylinder(D3DXVECTOR3 pos, D3DXVECTOR3 rot, D3DXVECTOR3 size, int nHeightDivision, int nCircleDivision,bool bInside, bool bOutside)
-void SetMeshCylinder(vec3 pos, vec3 rot, float fRadius, float fHeight, int nHeightDivision, int nCircleDivision, bool bInner, bool bOuter, int nTex)
+void SetMeshCylinder(vec3 pos, vec3 rot, float fRadius, float fHeight, int nHeightDivision, int nCircleDivision, D3DCULL cull, int nTex, bool bPat)
 
 {
 	//**************************************************************
 	// 変数宣言
 	LPDIRECT3DDEVICE9	pDevice = GetDevice();				// デバイスへのポインタ
+	P_MESH				pMesh = GetMeshCylinder();			// メッシュ情報
 	VERTEX_3D*			pVtx;								// 頂点情報へのポインタ
 	WORD*				pIdx;								// インデックス情報へのポインタ
 	D3DXVECTOR3			vecDir;								// 法線ベクトル計算用
@@ -166,35 +170,31 @@ void SetMeshCylinder(vec3 pos, vec3 rot, float fRadius, float fHeight, int nHeig
 	int					nBoth = 0;
 	float				fAngle = 0.0f;
 
-	for (int nCntMeshCylinder = 0; nCntMeshCylinder < MAX_MESHCYLINDER; nCntMeshCylinder++)
+	for (int nCntMeshCylinder = 0; nCntMeshCylinder < MAX_MESHCYLINDER; nCntMeshCylinder++, pMesh++)
 	{
-		if (g_aMeshCylinder[nCntMeshCylinder].bUse == false)
+		if (pMesh->bUse == false)
 		{
 			// 値の保存
-			g_aMeshCylinder[nCntMeshCylinder].pos = pos;
-			g_aMeshCylinder[nCntMeshCylinder].rot = rot;
+			pMesh->pos = pos;
+			pMesh->rot = rot;
 
-			g_aMeshCylinder[nCntMeshCylinder].size = vec3(fRadius, fHeight, fRadius);
-			g_aMeshCylinder[nCntMeshCylinder].nHeightDivision = nHeightDivision;
-			g_aMeshCylinder[nCntMeshCylinder].nCircleDivision = nCircleDivision;
+			pMesh->size = vec3(fRadius, fHeight, fRadius);
+			pMesh->nHeightDivision = nHeightDivision;
+			pMesh->nCircleDivision = nCircleDivision;
 			fAngle = (float)(2 * D3DX_PI / nCircleDivision);
-			g_aMeshCylinder[nCntMeshCylinder].nVerti = nHeightVerti * nCircleVerti;
-			g_aMeshCylinder[nCntMeshCylinder].nPrim = (nHeightDivision * (nCircleDivision + 2) - 2) * 2;
-			g_aMeshCylinder[nCntMeshCylinder].bInner = bInner;
-			if (bInner)
-				nBoth++;
-			g_aMeshCylinder[nCntMeshCylinder].bOuter = bOuter;
-			if (bOuter)
-				nBoth++;
-			g_aMeshCylinder[nCntMeshCylinder].nIdxTexture = nTex;
+			pMesh->nVerti = nHeightVerti * nCircleVerti;
+			pMesh->nPrim = (nHeightDivision * (nCircleDivision + 2) - 2) * 2;
+			pMesh->nIdxTexture = nTex;
+			pMesh->bPattanrn = bPat;
+			pMesh->culling = cull;
 
 			//**************************************************************
 			// 頂点バッファの読み込み
-			pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * g_aMeshCylinder[nCntMeshCylinder].nVerti,
+			pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * pMesh->nVerti,
 				D3DUSAGE_WRITEONLY,
 				FVF_VERTEX_3D,
 				D3DPOOL_MANAGED,
-				&g_aMeshCylinder[nCntMeshCylinder].pVtxBuff,
+				&pMesh->pVtxBuff,
 				NULL);
 
 			//**************************************************************
@@ -203,21 +203,21 @@ void SetMeshCylinder(vec3 pos, vec3 rot, float fRadius, float fHeight, int nHeig
 				D3DUSAGE_WRITEONLY,
 				D3DFMT_INDEX16,
 				D3DPOOL_MANAGED,
-				&g_aMeshCylinder[nCntMeshCylinder].pIdxBuffer,
+				&pMesh->pIdxBuffer,
 				NULL);
 
 			//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 			// 頂点バッファをロックし、頂点情報へのポインタを取得
-			g_aMeshCylinder[nCntMeshCylinder].pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+			pMesh->pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
 			for (int nCntDepth = 0, nCntVer = 0; nCntDepth <= nHeightDivision; nCntDepth++)
 			{
 				for (int nCntCircle = 0; nCntCircle <= nCircleDivision; nCntCircle++, nCntVer++)
 				{
 					// 頂点座標を設定
-					pVtx[nCntVer].pos = D3DXVECTOR3(g_aMeshCylinder[nCntMeshCylinder].size.x * sinf(fAngle * nCntCircle),
-						(g_aMeshCylinder[nCntMeshCylinder].size.y / nHeightDivision) * nCntDepth,
-						g_aMeshCylinder[nCntMeshCylinder].size.z * cosf(fAngle * nCntCircle));
+					pVtx[nCntVer].pos = D3DXVECTOR3(pMesh->size.x * sinf(fAngle * nCntCircle),
+						(pMesh->size.y / nHeightDivision) * nCntDepth,
+						 pMesh->size.z * cosf(fAngle * nCntCircle));
 
 					// 法線ベクトルの設定(正規化)
 					vecDir = D3DXVECTOR3(pVtx[nCntVer].pos.x, 0.0f, pVtx[nCntVer].pos.z); // 頂点座標<=真横なのでYだけ消す
@@ -227,18 +227,27 @@ void SetMeshCylinder(vec3 pos, vec3 rot, float fRadius, float fHeight, int nHeig
 					// 頂点カラー設定
 					pVtx[nCntVer].col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 
-					// テクスチャ座標を設定
-					pVtx[nCntVer].tex = D3DXVECTOR2((float)nCntCircle, (float)nCntDepth);
+					if (bPat)
+					{// テクスチャを繰り返す場合
+						// テクスチャ座標を設定
+						pVtx[nCntVer].tex = D3DXVECTOR2((float)nCntCircle, (float)nCntDepth);
+
+					}
+					else
+					{// 繰り返さない場合
+						// テクスチャ座標を設定
+						pVtx[nCntVer].tex = D3DXVECTOR2((float)nCntCircle / nCircleDivision, (float)nCntDepth / nHeightDivision);
+					}
 				}
 			}
 
 			// 頂点バッファのロック解除
-			g_aMeshCylinder[nCntMeshCylinder].pVtxBuff->Unlock();
+			pMesh->pVtxBuff->Unlock();
 			//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 			//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 			// インデックスバッファをロックし、頂点番号データへのポインタを取得
-			g_aMeshCylinder[nCntMeshCylinder].pIdxBuffer->Lock(0, 0, (void**)&pIdx, 0);
+			pMesh->pIdxBuffer->Lock(0, 0, (void**)&pIdx, 0);
 			// 頂点番号データの設定
 			for (int nCntDepth = 0; nCntDepth < nHeightDivision; nCntDepth++)
 			{
@@ -257,10 +266,10 @@ void SetMeshCylinder(vec3 pos, vec3 rot, float fRadius, float fHeight, int nHeig
 			}
 
 			// インデックスバッファのロック解除
-			g_aMeshCylinder[nCntMeshCylinder].pIdxBuffer->Unlock();
+			pMesh->pIdxBuffer->Unlock();
 			//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
-			g_aMeshCylinder[nCntMeshCylinder].bUse = true;
+			pMesh->bUse = true;
 			g_nSetMeshCylinder++;
 			break;
 		}

@@ -82,8 +82,8 @@ void DrawMeshSphere(void)
 	//**************************************************************
 	// 変数宣言
 	LPDIRECT3DDEVICE9	pDevice = GetDevice();		// デバイスへのポインタ
-	P_MESH				pMesh = GetMeshSphere();
-	D3DXMATRIX mtxRot, mtxTrans;					// マトリックス計算用
+	P_MESH				pMesh = GetMeshSphere();	// メッシュ情報
+	D3DXMATRIX			mtxRot, mtxTrans;			// マトリックス計算用
 
 	for (int nCntMeshSphere = 0; nCntMeshSphere < MAX_MESHSPHERE; nCntMeshSphere++, pMesh++)
 	{
@@ -126,6 +126,10 @@ void DrawMeshSphere(void)
 			pDevice->SetTexture(0, GetTexture(pMesh->nIdxTexture));
 
 			//**************************************************************
+			// カリングモードの設定
+			pDevice->SetRenderState(D3DRS_CULLMODE, pMesh->culling);
+
+			//**************************************************************
 			// スフィアの描画
 			pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, 0, 0, pMesh->nVerti, 0, pMesh->nPrim);
 		}
@@ -137,7 +141,7 @@ void DrawMeshSphere(void)
 //=========================================================================================
 // スフィアを設置
 //=========================================================================================
-void SetMeshSphere(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int nCircleDivision, bool bInner, bool bOuter, int nTex)
+void SetMeshSphere(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int nCircleDivision, D3DCULL cull, int nTex, bool bPat)
 {
 	//**************************************************************
 	// 変数宣言
@@ -165,9 +169,9 @@ void SetMeshSphere(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int n
 			angle = vec3((float)D3DX_PI / nHeightDivision,(float)(2 * D3DX_PI / nCircleDivision),(float)D3DX_PI / nHeightDivision);
 			pMesh->nVerti = nHeightVerti * nCircleVerti;
 			pMesh->nPrim = (nHeightDivision * (nCircleDivision + 2) - 2) * 2;
-			pMesh->bInner = bInner;
-			pMesh->bOuter = bOuter;
 			pMesh->nIdxTexture = nTex;
+			pMesh->bPattanrn = bPat;
+			pMesh->culling = cull;
 
 			//**************************************************************
 			// 頂点バッファの読み込み
@@ -211,8 +215,17 @@ void SetMeshSphere(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int n
 					// 頂点カラー設定
 					pVtx[nCntVer].col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 
-					// テクスチャ座標を設定
-					pVtx[nCntVer].tex = D3DXVECTOR2((float)nCntCircle / nCircleDivision, (float)nCntHeight / nHeightDivision);
+					if (bPat)
+					{// テクスチャを繰り返す場合
+						// テクスチャ座標を設定
+						pVtx[nCntVer].tex = D3DXVECTOR2((float)nCntCircle, (float)nCntHeight);
+
+					}
+					else
+					{// 繰り返さない場合
+						// テクスチャ座標を設定
+						pVtx[nCntVer].tex = D3DXVECTOR2((float)nCntCircle / nCircleDivision, (float)nCntHeight / nHeightDivision);
+					}
 				}
 			}
 

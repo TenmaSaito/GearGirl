@@ -48,9 +48,9 @@ typedef struct MeshInfo
 	LPDIRECT3DVERTEXBUFFER9	pVtxBuff;			// 頂点バッファ
 	LPDIRECT3DINDEXBUFFER9	pIdxBuffer;			// インデックスバッファ
 	int						nIdxTexture;		// テスクチャ番号
+	bool					bPattanrn;			// テクスチャを繰り返すか、一枚か
 
-	bool					bInner;				// 内面カリング
-	bool					bOuter;				// 外面カリング
+	D3DCULL					culling;			// カリングタイプ
 	bool					bUse;				// 使ってるか
 }MeshInfo;
 POINTER(MeshInfo, P_MESH);
@@ -82,10 +82,10 @@ void DrawMeshDome(void);
 void DrawMeshCylinder(void);
 void DrawMeshRing(void);
 
-void SetMeshSphere	(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int nCircleDivision, bool bInner = false, bool bOuter = true, int nTex = -1);
-void SetMeshDome	(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int nCircleDivision, bool bInner = false, bool bOuter = true, int nTex = -1);
-void SetMeshCylinder(vec3 pos, vec3 rot, float fRadius,float fHeight, int nHeightDivision, int nCircleDivision, bool bInner = false, bool bOuter = true, int nTex = -1);
-void SetMeshRing	(vec3 pos, vec3 rot, float fInner, float fOuter, int nHeightDivision, int nCircleDivision, bool bInner = false, bool bOuter = true, int nTex = -1);
+void SetMeshSphere	(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int nCircleDivision, D3DCULL cull = D3DCULL_CCW, int nTex = -1, bool bPat = false);
+void SetMeshDome	(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int nCircleDivision, D3DCULL cull = D3DCULL_CCW, int nTex = -1, bool bPat = false);
+void SetMeshCylinder(vec3 pos, vec3 rot, float fRadius,float fHeight, int nHeightDivision, int nCircleDivision, D3DCULL cull = D3DCULL_CCW, int nTex = -1, bool bPat = false);
+void SetMeshRing	(vec3 pos, vec3 rot, float fInner, float fOuter, int nHeightDivision, int nCircleDivision,  D3DCULL cull = D3DCULL_CCW, int nTex = -1, bool bPat = false);
 
 P_MESH GetMeshSphere(void);
 P_MESH GetMeshDome(void);
