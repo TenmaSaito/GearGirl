@@ -177,7 +177,6 @@ void SetMeshCylinder(vec3 pos, vec3 rot, float fRadius, float fHeight, int nHeig
 			// ’l‚Ì•Û‘¶
 			pMesh->pos = pos;
 			pMesh->rot = rot;
-
 			pMesh->size = vec3(fRadius, fHeight, fRadius);
 			pMesh->nHeightDivision = nHeightDivision;
 			pMesh->nCircleDivision = nCircleDivision;

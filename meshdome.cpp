@@ -168,9 +168,10 @@ void SetMeshDome(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int nCi
 			pMesh->size = vec3(fRadius, fRadius * 0.5f, fRadius);
 			pMesh->nHeightDivision = nHeightDivision;
 			pMesh->nCircleDivision = nCircleDivision;
+			angle = vec3((float)D3DX_PI / nHeightDivision * 0.5f, (float)(2 * D3DX_PI / nCircleDivision), (float)D3DX_PI / nHeightDivision);
 			pMesh->nVerti = nHeightVerti * nCircleVerti;
 			pMesh->nPrim = (nHeightDivision * (nCircleDivision + 2) - 2) * 2;
-			angle = vec3((float)D3DX_PI / nHeightDivision * 0.5f, (float)(2 * D3DX_PI / nCircleDivision), (float)D3DX_PI / nHeightDivision);
+			pMesh->nIdxTexture = nTex;
 			pMesh->bPattanrn = bPat;
 			pMesh->culling = cull;
 
