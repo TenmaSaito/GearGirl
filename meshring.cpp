@@ -163,7 +163,6 @@ void SetMeshRing(vec3 pos, vec3 rot, float fInner, float fOuter, int nHeightDivi
 	float				fThick;								// ì‡åaÇ∆äOåaÇÃç∑
 	int					nHeightVerti = nHeightDivision + 1,
 						nCircleVerti = nCircleDivision + 1;	// ècí∏ì_êîÇ∆â°í∏ì_êî
-	int					nBoth = 0;
 
 	for (int nCntMeshRing = 0; nCntMeshRing < MAX_MESHRING; nCntMeshRing++, pMesh++)
 	{
