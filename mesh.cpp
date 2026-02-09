@@ -177,6 +177,7 @@ void DrawMeshOne(P_MESH pMesh, int nMax)
 	// 変数宣言
 	LPDIRECT3DDEVICE9	pDevice = GetDevice();		// デバイスへのポインタ
 	D3DXMATRIX			mtxRot, mtxTrans;			// マトリックス計算用
+	D3DCULL				culling;					// 変更前のカリング
 
 	for (int nCntMesh = 0; nCntMesh < nMax; nCntMesh++, pMesh++)
 	{
@@ -220,11 +221,14 @@ void DrawMeshOne(P_MESH pMesh, int nMax)
 
 			//**************************************************************
 			// カリングモードの設定
+			pDevice->GetRenderState(D3DRS_CULLMODE,(DWORD*)(&culling));
 			pDevice->SetRenderState(D3DRS_CULLMODE, pMesh->culling);
 
 			//**************************************************************
 			// スフィアの描画
 			pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, 0, 0, pMesh->nVerti, 0, pMesh->nPrim);
+
+			pDevice->SetRenderState(D3DRS_CULLMODE, culling);
 		}
 	}
 
