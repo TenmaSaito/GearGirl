@@ -167,7 +167,6 @@ void SetMeshCylinder(vec3 pos, vec3 rot, float fRadius, float fHeight, int nHeig
 	D3DXVECTOR3			vecDir;								// 法線ベクトル計算用
 	int					nHeightVerti = nHeightDivision + 1,
 						nCircleVerti = nCircleDivision + 1;	// 縦頂点数と横頂点数
-	int					nBoth = 0;
 	float				fAngle = 0.0f;
 
 	for (int nCntMeshCylinder = 0; nCntMeshCylinder < MAX_MESHCYLINDER; nCntMeshCylinder++, pMesh++)
@@ -198,7 +197,7 @@ void SetMeshCylinder(vec3 pos, vec3 rot, float fRadius, float fHeight, int nHeig
 
 			//**************************************************************
 			// インデックスバッファの生成
-			pDevice->CreateIndexBuffer(sizeof(WORD) * 2 * (nHeightDivision * (nCircleDivision + 2) - 1) * nBoth,
+			pDevice->CreateIndexBuffer(sizeof(WORD) * 2 * (nHeightDivision * (nCircleDivision + 2) - 1),
 				D3DUSAGE_WRITEONLY,
 				D3DFMT_INDEX16,
 				D3DPOOL_MANAGED,
