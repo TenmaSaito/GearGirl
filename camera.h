@@ -17,8 +17,10 @@
 //=========================================================================================
 #define VIEW_RADIAN				(45.0f)					// 視野角
 #define VIEW_RADIAN_MOUSE		(30.0f)					// ネズミの視野角
-#define VIEW_MINDEPTH			(5.0f)					// 最小描画距離
-#define VIEW_MAXDEPTH			(10000.0f)				// 最大描画距離
+#define VIEW_1P_MINDEPTH		(5.0f)					// 最小描画距離
+#define VIEW_1P_MAXDEPTH		(10000.0f)				// 最大描画距離
+#define VIEW_2P_MINDEPTH		(5.0f)					// 最小描画距離
+#define VIEW_2P_MAXDEPTH		(1000.0f)				// 最大描画距離
 #define CAMERA_V_DEFPOS			(0.0f, 350.0f, 500.0f)	// 視点のデフォ位置
 #define CAMERA_R_DEFPOS			(0.0f, 0.0f, 0.0f)		// 注視点のデフォ位置
 #define CAMERA_1P_DISTANS		(40.0f)					// 少女の,カメラと注視点の距離
@@ -71,6 +73,8 @@ typedef struct Camera
 	D3DXVECTOR3 posRDest;				// 目的の注視点
 	D3DXVECTOR3 rot;					// 向き
 	float		fDist;					// 視点と注視点の距離
+	float		fViewMin;				// 最小描画距離
+	float		fViewMax;				// 最大描画距離
 	D3DXVECTOR3 vecU;					// 上方向ベクトル
 	D3DXMATRIX	mtxProjection;			// プロジェクションマトリックス
 	D3DXMATRIX	mtxView;				// ビューマトリックス

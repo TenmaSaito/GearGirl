@@ -208,13 +208,13 @@ void SetMeshCylinder(vec3 pos, vec3 rot, float fRadius, float fHeight, int nHeig
 			// 頂点バッファをロックし、頂点情報へのポインタを取得
 			pMesh->pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
-			for (int nCntDepth = 0, nCntVer = 0; nCntDepth <= nHeightDivision; nCntDepth++)
+			for (int nCntHeight = 0, nCntVer = 0; nCntHeight <= nHeightDivision; nCntHeight++)
 			{
 				for (int nCntCircle = 0; nCntCircle <= nCircleDivision; nCntCircle++, nCntVer++)
 				{
 					// 頂点座標を設定
 					pVtx[nCntVer].pos = D3DXVECTOR3(pMesh->size.x * sinf(fAngle * nCntCircle),
-						(pMesh->size.y / nHeightDivision) * nCntDepth,
+						 pMesh->size.y - (pMesh->size.y / nHeightDivision) * nCntHeight,
 						 pMesh->size.z * cosf(fAngle * nCntCircle));
 
 					// 法線ベクトルの設定(正規化)
@@ -228,13 +228,13 @@ void SetMeshCylinder(vec3 pos, vec3 rot, float fRadius, float fHeight, int nHeig
 					if (bPat)
 					{// テクスチャを繰り返す場合
 						// テクスチャ座標を設定
-						pVtx[nCntVer].tex = D3DXVECTOR2((float)nCntCircle, (float)nCntDepth);
+						pVtx[nCntVer].tex = D3DXVECTOR2((float)nCntCircle, (float)nCntHeight);
 
 					}
 					else
 					{// 繰り返さない場合
 						// テクスチャ座標を設定
-						pVtx[nCntVer].tex = D3DXVECTOR2((float)nCntCircle / nCircleDivision, (float)nCntDepth / nHeightDivision);
+						pVtx[nCntVer].tex = D3DXVECTOR2((float)nCntCircle / nCircleDivision, (float)nCntHeight / nHeightDivision);
 					}
 				}
 			}
@@ -247,17 +247,17 @@ void SetMeshCylinder(vec3 pos, vec3 rot, float fRadius, float fHeight, int nHeig
 			// インデックスバッファをロックし、頂点番号データへのポインタを取得
 			pMesh->pIdxBuffer->Lock(0, 0, (void**)&pIdx, 0);
 			// 頂点番号データの設定
-			for (int nCntDepth = 0; nCntDepth < nHeightDivision; nCntDepth++)
+			for (int nCntHeight = 0; nCntHeight < nHeightDivision; nCntHeight++)
 			{
 				for (int nCntWidth = 0; nCntWidth <= nCircleDivision; nCntWidth++, pIdx += 2)
 				{
-					pIdx[0] = nCircleVerti * (nCntDepth + 1) + nCntWidth;
-					pIdx[1] = nCircleVerti * nCntDepth + nCntWidth;
+					pIdx[0] = nCircleVerti * (nCntHeight + 1) + nCntWidth;
+					pIdx[1] = nCircleVerti * nCntHeight + nCntWidth;
 
-					if (nCntDepth + 1 < nHeightDivision && nCntWidth == nCircleDivision)
+					if (nCntHeight + 1 < nHeightDivision && nCntWidth == nCircleDivision)
 					{
-						pIdx[2] = nCircleVerti * nCntDepth + nCntWidth;
-						pIdx[3] = nCircleVerti * (nCntDepth + 2);
+						pIdx[2] = nCircleVerti * nCntHeight + nCntWidth;
+						pIdx[3] = nCircleVerti * (nCntHeight + 2);
 						pIdx += 2;
 					}
 				}

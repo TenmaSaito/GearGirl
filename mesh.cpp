@@ -152,19 +152,15 @@ void MeshDebug(void)
 void DrawMesh(void)
 {
 	// Sphere
-	// DrawMeshSphere();
 	DrawMeshOne(GetMeshSphere(), MAX_MESHSPHERE);
 
 	// Dome
-	// DrawMeshDome();
 	DrawMeshOne(GetMeshDome(), MAX_MESHDOME);
 
 	// Cylinder
-	// DrawMeshCylinder();
 	DrawMeshOne(GetMeshCylinder(), MAX_MESHCYLINDER);
 
 	// Ring
-	// DrawMeshRing();
 	DrawMeshOne(GetMeshRing(), MAX_MESHRING);
 }
 
@@ -220,14 +216,15 @@ void DrawMeshOne(P_MESH pMesh, int nMax)
 			pDevice->SetTexture(0, GetTexture(pMesh->nIdxTexture));
 
 			//**************************************************************
-			// カリングモードの設定
-			pDevice->GetRenderState(D3DRS_CULLMODE,(DWORD*)(&culling));
-			pDevice->SetRenderState(D3DRS_CULLMODE, pMesh->culling);
+			// カリングの設定
+			pDevice->GetRenderState(D3DRS_CULLMODE,(DWORD*)(&culling));		// 以前のモードを保存
+			pDevice->SetRenderState(D3DRS_CULLMODE, pMesh->culling);		// 設定
 
 			//**************************************************************
 			// スフィアの描画
 			pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, 0, 0, pMesh->nVerti, 0, pMesh->nPrim);
 
+			// カリングをもとに戻す
 			pDevice->SetRenderState(D3DRS_CULLMODE, culling);
 		}
 	}

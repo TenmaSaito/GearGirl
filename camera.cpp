@@ -60,12 +60,16 @@ void InitCamera(void)
 		case CAMERATYPE_PLAYER_ONE:	// 1P—p‚ÌƒJƒƒ‰Ý’è
 			pCamera->rot = CAMERA_1P_ROT;								// ƒJƒƒ‰‚ÌŠp“x
 			pCamera->fDist = CAMERA_1P_DISTANS;							// Ž‹“_‚Æ’Ž‹“_‚Ì‹——£
+			pCamera->fViewMin = VIEW_1P_MINDEPTH;						// Å¬•`‰æ‹——£
+			pCamera->fViewMax = VIEW_1P_MAXDEPTH;						// Å‘å•`‰æ‹——£
 			pCamera->type = CAMERATYPE_PLAYER_ONE;
 			break;
 
 		case CAMERATYPE_PLAYER_TWO:	// 2P—p‚ÌƒJƒƒ‰Ý’è
 			pCamera->rot = CAMERA_2P_ROT;
 			pCamera->fDist = CAMERA_2P_DISTANS;
+			pCamera->fViewMin = VIEW_2P_MINDEPTH;						// Å¬•`‰æ‹——£
+			pCamera->fViewMax = VIEW_2P_MAXDEPTH;						// Å‘å•`‰æ‹——£
 			pCamera->type = CAMERATYPE_PLAYER_TWO;
 			break;
 		default:// ‚»‚Ì‘¼‚ÌƒJƒƒ‰Ý’è
@@ -544,8 +548,8 @@ void SetCamera(void)
 			D3DXMatrixPerspectiveFovLH(&pCam->mtxProjection,
 				D3DXToRadian(fViewRadian),					// Ž‹–ìŠp
 				(float)pCam->viewport.Width / (float)pCam->viewport.Height,	// ƒAƒXƒyƒNƒg”ä
-				VIEW_MINDEPTH,								// Å’Z•`‰æ‹——£
-				VIEW_MAXDEPTH);								// Å‘å•`‰æ‹——£
+				pCam->fViewMin,								// Å’Z•`‰æ‹——£
+				pCam->fViewMax);							// Å‘å•`‰æ‹——£
 
 			// ƒvƒƒWƒFƒNƒVƒ‡ƒ“ƒ}ƒgƒŠƒbƒNƒX‚ðÝ’è
 			pDevice->SetTransform(D3DTS_PROJECTION, &pCam->mtxProjection);
