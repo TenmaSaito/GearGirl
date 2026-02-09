@@ -122,7 +122,7 @@ int Set2DPolygon(D3DXVECTOR3 pos, D3DXVECTOR3 rot, D3DXVECTOR2 size, int nIdText
 				/*** 頂点バッファの生成 ***/
 				pDevice->CreateVertexBuffer(sizeof(VERTEX_2D) * 4,
 					D3DUSAGE_WRITEONLY,
-					FVF_VERTEX_3D,
+					FVF_VERTEX_2D,
 					D3DPOOL_MANAGED,
 					&p2DPoly->pVtxBuff,
 					NULL);

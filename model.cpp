@@ -395,7 +395,7 @@ bool LoadModel(void)
 					if (strstr(&Realize[0], "END_SKYSET") != NULL)
 					{
 						// 代入した情報をメッシュリングドームに反映
-						SetMeshDome(D3DXVECTOR3(0.0f, 0.0f, 0.0f), VECNULL,(float)nRadiusSky, nYdevideSky, nXdevideSky, true, true, aIdxTexture[nIdxTexSky]);
+						SetMeshDome(D3DXVECTOR3(0.0f, 0.0f, 0.0f), VECNULL,(float)nRadiusSky, nYdevideSky, nXdevideSky, D3DCULL_CW, aIdxTexture[nIdxTexSky]);
 						break;
 					}
 				}
@@ -461,7 +461,7 @@ bool LoadModel(void)
 					if (strstr(&Realize[0], "END_CLOUDSET") != NULL)
 					{
 						// 代入した情報をメッシュリングドームに反映
-						SetMeshCylinder(D3DXVECTOR3(0.0f, 0.0f, 0.0f), VECNULL, (float)nRadiusCloud, (float)nHeightCloud, nYdevideCloud, nXdevideCloud, true, true, aIdxTexture[nIdxTexCloud]);
+						SetMeshCylinder(D3DXVECTOR3(0.0f, 0.0f, 0.0f), VECNULL, (float)nRadiusCloud, (float)nHeightCloud, nYdevideCloud, nXdevideCloud, D3DCULL_CW, aIdxTexture[nIdxTexCloud]);
 						break;
 					}
 				}
