@@ -14,7 +14,10 @@
 //**********************************************************************************
 //*** マクロ定義 ***
 //**********************************************************************************
-#define PATH_GEAR	"data/TEXTURE/"		// テクスチャパス
+#define PATH_GEAR		"data/TEXTURE/menugear.png"			// テクスチャパス
+#define DEF_MENU_POS	D3DXVECTOR3(0, SCREEN_HEIGHT, 0)	// 初期位置
+#define DEF_MENU_SIZE	D3DXVECTOR2(100, 100)				// デフォルトサイズ
+#define OPEN_SIZE		(DEF_MENU_SIZE * 5)					// 拡大後のサイズ
 
 //**********************************************************************************
 //*** 頂点バッファ構造体 ***
@@ -36,6 +39,7 @@ typedef struct
 	D3DXVECTOR2 size;					// サイズ
 	SAFE_VERTEX vtxSafe;				// 頂点バッファ
 	float s;							// Lerp変換用
+	float fAngle;						// 回転用
 	int nIdxTexture;					// テクスチャインデックス
 	bool bUse;							// 使用状況
 	bool bEnable;						// メニューとして描画するか
@@ -47,6 +51,7 @@ typedef struct
 void CreateSafeVtx(SAFE_VERTEX *pSafeVtx, bool bErrorOutput);
 
 D3DXVECTOR3 GetPTPLerp(D3DXVECTOR3 Start, D3DXVECTOR3 End, float s);
+D3DXVECTOR2 GetPTPLerp(D3DXVECTOR2 Start, D3DXVECTOR2 End, float s);
 D3DXCOLOR GetColLerp(D3DXCOLOR Start, D3DXCOLOR End, float s);
 void DrawPolygon(LPDIRECT3DDEVICE9 pDevice, 
 	LPDIRECT3DVERTEXBUFFER9 pVtxBuff,
@@ -101,16 +106,26 @@ void InitUImenu(void)
 
 	ZeroMemory(&g_menu, sizeof(g_menu));
 
+	// 初期設定
+	pMenu->pos = DEF_MENU_POS;
+	pMenu->size = DEF_MENU_SIZE;
+	pMenu->s = 0.001f;
+
 	// 頂点生成
 	CreateSafeVtx(&pMenu->vtxSafe, true);
 
 	if (pMenu->vtxSafe.bSafe == false)
 	{
+		OutputDebugString(TEXT("頂点バッファの作成に失敗しちゃいました......"));
 		return;
 	}
 
 	// テクスチャの読み込み
-	LoadTexture(PATH_GEAR, &g_menu.nIdxTexture);
+	if (FAILED(LoadTexture(PATH_GEAR, &g_menu.nIdxTexture)))
+	{
+		OutputDebugString(TEXT("テクスチャの読み込みに失敗しました......"));
+		return;
+	}
 
 	VERTEX_2D *pVtx = nullptr;
 
@@ -129,12 +144,14 @@ void InitUImenu(void)
 	MyMathUtil::SetPolygonRHW(pVtx);
 
 	// ポリゴンカラーを設定
-	MyMathUtil::SetDefaultColor<VERTEX_2D>(pVtx);
+	MyMathUtil::SetDefaultColor(pVtx);
 
 	// ポリゴンテクスチャを設定
-	MyMathUtil::SetDefaultTexture<VERTEX_2D>(pVtx);
+	MyMathUtil::SetDefaultTexture(pVtx);
 
 	pMenu->vtxSafe.pVtxBuff->Unlock();
+
+	pMenu->bUse = true;
 }
 
 //==================================================================================
@@ -160,7 +177,7 @@ void UpdateUImenu(void)
 	{
 		if (pMenu->s < 1.0f)
 		{
-			pMenu->s += 0.01f;
+			pMenu->s += 0.02f;
 			if (pMenu->s >= 1.0f)
 			{
 				pMenu->s = 1.0f;
@@ -169,26 +186,32 @@ void UpdateUImenu(void)
 	}
 	else
 	{
-		if (pMenu->s > 0.0f)
+		if (pMenu->s > 0.001f)
 		{
-			pMenu->s -= 0.01f;
-			if (pMenu->s <= 0.0f)
+			pMenu->s *= 0.93f;
+			if (pMenu->s <= 0.001f)
 			{
-				pMenu->s = 0.0f;
+				pMenu->s = 0.001f;
 			}
 		}
 	}
+
+	pMenu->fAngle += 0.01f;
 
 	VERTEX_2D* pVtx = nullptr;
 	pMenu->vtxSafe.pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 	if (pVtx == nullptr) return;
 
 	// 描画座標をLerp変換で求める
-		// (※ Lerp変換めっちゃ便利だよおおおお！！！！！！
-		//	   元居た位置を覚えていなくても良いし！)
-		// 
-		// 頂点位置を設定
-	MyMathUtil::SetPolygonPos(pVtx, GetPTPLerp(pMenu->pos, WINDOW_MID, pMenu->s), pMenu->size);
+	// (※ Lerp変換めっちゃ便利だよおおおお！！！！！！
+	//	   元居た位置を覚えていなくても良いし！)
+
+	MyMathUtil::RollPolygon(pVtx, 
+		GetPTPLerp(pMenu->pos, WINDOW_MID, pMenu->s), 
+		GetPTPLerp(pMenu->size, OPEN_SIZE, pMenu->s).x,
+		GetPTPLerp(pMenu->size, OPEN_SIZE, pMenu->s).y,
+		pMenu->fAngle,
+		0);
 
 	pMenu->vtxSafe.pVtxBuff->Unlock();
 }
@@ -202,12 +225,15 @@ void DrawUImenu(void)
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 	LPUIMENU pMenu = &g_menu;
 
-	DrawPolygonTextureFromIndex(pDevice,
-		pMenu->vtxSafe.pVtxBuff,
-		pMenu->nIdxTexture,
-		sizeof(VERTEX_2D),
-		FVF_VERTEX_2D,
-		1);
+	if (pMenu->bUse == true)
+	{
+		DrawPolygonTextureFromIndex(pDevice,
+			pMenu->vtxSafe.pVtxBuff,
+			pMenu->nIdxTexture,
+			sizeof(VERTEX_2D),
+			FVF_VERTEX_2D,
+			1);
+	}
 
 	// デバイスの終了
 	EndDevice();
@@ -218,7 +244,19 @@ void DrawUImenu(void)
 //==================================================================================
 void SetEnableUImenu(bool bDisp, int nIdxUImenu)
 {
-	
+	LPUIMENU pMenu = &g_menu;
+
+	pMenu->bEnable = bDisp;
+}
+
+//==================================================================================
+// --- メニュー画面のオンオフ取得 ---
+//==================================================================================
+bool GetEnableUImenu(void)
+{
+	LPUIMENU pMenu = &g_menu;
+
+	return pMenu->bEnable;
 }
 
 //==================================================================================
@@ -245,6 +283,7 @@ void CreateSafeVtx(SAFE_VERTEX *pSafeVtx, bool bErrorOutput)
 	}
 
 	pSafeVtx->hr = hr;
+	pSafeVtx->bSafe = true;
 
 	// デバイスの取得終了
 	EndDevice();
@@ -256,6 +295,25 @@ void CreateSafeVtx(SAFE_VERTEX *pSafeVtx, bool bErrorOutput)
 D3DXVECTOR3 GetPTPLerp(D3DXVECTOR3 Start, D3DXVECTOR3 End, float s)
 {
 	D3DXVECTOR3 returnLerp = D3DXVECTOR3(0, 0, 0);
+
+	// ベクトルの差分を求める
+	returnLerp = End - Start;
+
+	// 差分をsを使用して割合計算
+	returnLerp *= s;
+
+	// 開始位置から加算して位置を取得
+	returnLerp += Start;
+
+	return returnLerp;
+}
+
+//==================================================================================
+// --- 二点間のLerp変換 Vector2 ---
+//==================================================================================
+D3DXVECTOR2 GetPTPLerp(D3DXVECTOR2 Start, D3DXVECTOR2 End, float s)
+{
+	D3DXVECTOR2 returnLerp = D3DXVECTOR2(0, 0);
 
 	// ベクトルの差分を求める
 	returnLerp = End - Start;

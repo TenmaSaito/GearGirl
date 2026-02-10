@@ -95,11 +95,6 @@ void MeshDebug(void)
 	// ガイド表示
 	if (GetKeyboardPress(DEBUG_MESH_KEY))
 	{
-		PrintDebugProc("\nM + S => MESH_SPHERE   [ %d / %d ]\n", GetNumMeshSphere(), MAX_MESHSPHERE);
-		PrintDebugProc("\nM + D => MESH_DOME     [ %d / %d ]\n", GetNumMeshDome(), MAX_MESHDOME);
-		PrintDebugProc("\nM + C => MESH_CYLINDER [ %d / %d ]\n", GetNumMeshCylinder(), MAX_MESHCYLINDER);
-		PrintDebugProc("\nM + R => MESH_RING     [ %d / %d ]\n", GetNumMeshRing(), MAX_MESHRING);
-
 		//**************************************************************
 		// 各メッシュタイプごとの表示切り替え
 		if (GetKeyboardTrigger(DEBUG_SPHERE_KEY))
@@ -141,9 +136,6 @@ void MeshDebug(void)
 	{
 		pMesh[3] = GetMeshRing();
 	}
-
-
-
 }
 
 //=========================================================================================

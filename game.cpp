@@ -27,6 +27,7 @@
 #include "prompt.h"
 #include "timer.h"
 #include "UIarm.h"
+#include "UImenu.h"
 
 //**********************************************************************************
 //*** マクロ定義 ***
@@ -99,6 +100,9 @@ void InitGame(void)
 	/*** UIアーム初期化 ***/
 	InitUIarm();
 
+	/*** UIメニュー初期化 ***/
+	InitUImenu();
+
 	g_nCounterGame = 0;
 	int nIdxPrompt, Tex;
 	LoadTexture("data/TEXTURE/TestPrompt.png", &Tex);
@@ -157,6 +161,9 @@ void UninitGame(void)
 
 	/*** UIアームの終了 ***/
 	UninitUIarm();
+
+	/*** UIメニュー初期化 ***/
+	UninitUImenu();
 }
 
 //==================================================================================
@@ -215,9 +222,17 @@ void UpdateGame(void)
 		/*** UIアームの更新 ***/
 		UpdateUIarm();
 
+		/*** UIメニュー更新 ***/
+		UpdateUImenu();
+
 		if (g_nCounterGame % 60 == 0)
 		{
 			AddTimer(-1);
+		}
+
+		if (GetKeyboardTrigger(DIK_5))
+		{
+			SetEnableUImenu(!GetEnableUImenu(), 0);
 		}
 
 		g_nCounterGame++;
@@ -283,6 +298,9 @@ void DrawGame(void)
 
 	/*** UIアームの描画 ***/
 	DrawUIarm();
+
+	/*** UIメニュー描画 ***/
+	DrawUImenu();
 
 	//ポーズ状態がONの時
 	if (g_bPause == true)

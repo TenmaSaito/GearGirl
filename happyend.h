@@ -1,11 +1,11 @@
 //==================================================================================
 //
-// DirectXのMenuのUI表示処理 [UImenu.h]
+// DirectXのハッピーエンド用のヘッダーファイル [happyend.h]
 // Author : TENMA
 //
 //==================================================================================
-#ifndef _UIMENU_H_		// IncludeGuard
-#define _UIMENU_H_
+#ifndef _HAPPYEND_H_
+#define _HAPPYEND_H_
 
 //**********************************************************************************
 //*** インクルードファイル ***
@@ -19,11 +19,8 @@
 //**********************************************************************************
 //*** プロトタイプ宣言 ***
 //**********************************************************************************
-void InitUImenu(void);
-void UninitUImenu(void);
-void UpdateUImenu(void);
-void DrawUImenu(void);
-
-void SetEnableUImenu(bool bDisp, int nIdxUImenu);
-bool GetEnableUImenu(void);
+void InitHappyEnd(void);
+void UninitHappyEnd(void);
+void UpdateHappyEnd(void);
+void DrawHappyEnd(void);
 #endif

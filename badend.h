@@ -1,11 +1,11 @@
 //==================================================================================
 //
-// DirectXのMenuのUI表示処理 [UImenu.h]
+// DirectXのバッドエンド用のヘッダーファイル [badend.h]
 // Author : TENMA
 //
 //==================================================================================
-#ifndef _UIMENU_H_		// IncludeGuard
-#define _UIMENU_H_
+#ifndef _BADEND_H_
+#define _BADEND_H_
 
 //**********************************************************************************
 //*** インクルードファイル ***
@@ -19,11 +19,8 @@
 //**********************************************************************************
 //*** プロトタイプ宣言 ***
 //**********************************************************************************
-void InitUImenu(void);
-void UninitUImenu(void);
-void UpdateUImenu(void);
-void DrawUImenu(void);
-
-void SetEnableUImenu(bool bDisp, int nIdxUImenu);
-bool GetEnableUImenu(void);
+void InitBadEnd(void);
+void UninitBadEnd(void);
+void UpdateBadEnd(void);
+void DrawBadEnd(void);
 #endif
