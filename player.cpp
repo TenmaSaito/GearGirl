@@ -98,6 +98,15 @@ void InitPlayer(void)
 		g_aPlayer[nCntPlayer].state = PLAYERSTATE_NEUTRAL;
 		g_aPlayer[nCntPlayer].motionType = MOTIONTYPE_NEUTRAL;
 		g_aPlayer[nCntPlayer].bFinishMotion = true;
+		
+		if (nCntPlayer == 0)
+		{
+			g_aPlayer[nCntPlayer].playertype = PLAYERTYPE_GIRL;
+		}
+		else
+		{
+			g_aPlayer[nCntPlayer].playertype = PLAYERTYPE_MOUSE;
+		}
 	}
 
 	g_aMovePlayer[0] = false;
