@@ -110,7 +110,7 @@ void SetCameraOption(void)
 	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCamera++)
 	{
 		if (g_nNumEnableCamera < 2)
-		{// 1P
+		{// 1P プレイ時
 			pCamera->viewport.X = 0.0f;								// 画面左上 X 座標
 			pCamera->viewport.Y = 0.0f;								// 画面左上 Y 座標
 			pCamera->viewport.Width = SCREEN_WIDTH;					// 表示画面の横幅
@@ -118,12 +118,12 @@ void SetCameraOption(void)
 			pCamera->fViewRadian = VIEW_RADIAN;						// 視野角
 		}
 		else
-		{// 2P
+		{// 2P プレイ時
 			pCamera->viewport.X = SCREEN_WIDTH * 0.5f * nCntCamera;	// 画面左上 X 座標
 			pCamera->viewport.Y = 0.0f;								// 画面左上 Y 座標
 			pCamera->viewport.Width = SCREEN_WIDTH * 0.5f;			// 表示画面の横幅
 			pCamera->viewport.Height = SCREEN_HEIGHT;				// 表示画面の高さ
-			pCamera->fViewRadian = VIEW_RADIAN_MOUSE;				// 視野角
+			pCamera->fViewRadian = VIEW_RADIAN;				// 視野角
 		}
 	}
 }
@@ -141,12 +141,16 @@ void UninitCamera(void)
 //=========================================================================================
 void UpdateCamera(void)
 {
-	PrintDebugProc("\nCAMERAデバッグ表示切り替え：[F2]");
+	PrintDebugProc("\nCAMERAデバッグ表示切り替え：[F2] : ");
 	if (GetKeyboardTrigger(DIK_F2))
 	{
 		g_bCameraDebug = g_bCameraDebug ^ 1;
 	}
-
+	if(g_bCameraDebug)
+		PrintDebugProc("ON\n");
+	else
+		PrintDebugProc("OFF\n");
+	
 	//**************************************************************
 	// 変数宣言
 	P_CAMERA	pCamera;
@@ -165,17 +169,19 @@ void UpdateCamera(void)
 	// ２人プレイ時
 	if (GetNumPlayer() == 2)
 	{
+		// 近ければ結合
 		NearCameraIntegration();
 	}
 	// 操作キャラが変わったら
 	else if (g_nActivePlayer != nActivePlayer)
 	{
+		// 切り替え
 		CameraChange();
 	}
 
 	//**************************************************************
 	// カメラ
-		pCamera = GetCamera();
+	pCamera = GetCamera();
 	if (g_bCameraDebug)
 	{
 		if (GetActivePlayer() == CAMERATYPE_PLAYER_ONE && GetKeyboardPress(CAM_2POPRAT) == false)
@@ -185,8 +191,9 @@ void UpdateCamera(void)
 		}
 		else
 		{
-			CameraOrbit(pCamera + 1);
-			CameraMove(pCamera + 1);
+			pCamera++;					// 2Pのカメラにする
+			CameraOrbit(pCamera);
+			CameraMove(pCamera);
 		}
 	}
 	// 追従処理
@@ -205,9 +212,9 @@ void UpdateCamera(void)
 
 			if (g_bCameraDebug)
 			{
-				PrintDebugProc("CAMERA %d\nposV : %~3f\nposR : %~3f\n", nCntCamera, pCamera->posV.x, pCamera->posV.y, pCamera->posV.z, pCamera->posR.x, pCamera->posR.y, pCamera->posR.z);
-				PrintDebugProc("rot  : %~3f\ndist ： %f\n", pCamera->rot.x, pCamera->rot.y, pCamera->rot.z,pCamera->fDist);
-				PrintDebugProc("視野角: %f\n", pCamera->fViewRadian);
+				PrintDebugProc("\nCAMERA %d\nposV : %d %d %d\nposR : %d %d %d\n", nCntCamera, (int)pCamera->posV.x, (int)pCamera->posV.y, (int)pCamera->posV.z, (int)pCamera->posR.x, (int)pCamera->posR.y, (int)pCamera->posR.z);
+				PrintDebugProc("rot  : %d %d %d\ndist ： %d\n", (int)pCamera->rot.x, (int)pCamera->rot.y, (int)pCamera->rot.z, (int)pCamera->fDist);
+				PrintDebugProc("視野角: %d\n", (int)pCamera->fViewRadian);
 			}
 		}
 	}		
@@ -228,11 +235,14 @@ void NearCameraIntegration(void)
 	// 一定距離近づいたら
 	if (SQUARE(playerDist.x) + SQUARE(playerDist.y) + SQUARE(playerDist.z) < 1000)
 	{
-		// 画面を統合
-		pCamera->viewport.X = 0.0f;								// 画面左上 X 座標
-		pCamera->viewport.Y = 0.0f;								// 画面左上 Y 座標
-		pCamera->viewport.Width = SCREEN_WIDTH;					// 表示画面の横幅
-		pCamera->viewport.Height = SCREEN_HEIGHT;				// 表示画面の高さ
+		for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCamera++)
+		{
+			// 画面を統合
+			pCamera->viewport.X = 0.0f;								// 画面左上 X 座標
+			pCamera->viewport.Y = 0.0f;								// 画面左上 Y 座標
+			pCamera->viewport.Width = SCREEN_WIDTH;					// 表示画面の横幅
+			pCamera->viewport.Height = SCREEN_HEIGHT;				// 表示画面の高さ
+		}
 		g_nNumEnableCamera = 1;
 	}
 	else // 普段は分離
@@ -247,7 +257,6 @@ void NearCameraIntegration(void)
 			pCamera->viewport.Height = SCREEN_HEIGHT;				// 表示画面の高さ
 		}
 	}
-
 }
 
 //==============================================================
@@ -283,7 +292,8 @@ void CameraFollow(void)
 	{
 		//**************************************************************
 		// プレイヤーに追従
-		if (CAMERA_PLFR_DEADZONE < SQUARE(pPlayer->move.x) + SQUARE(pPlayer->move.z))
+		if (CAMERA_PLFR_DEADZONE < SQUARE(pPlayer->move.x) + SQUARE(pPlayer->move.z)
+			|| CAMERA_PLFR_DEADZONE < SQUARE(pPlayer->pos.x - pPlayer->posOld.x) + SQUARE(pPlayer->pos.z - pPlayer->posOld.z))
 		{// カメラを少し先へ
 			fPlayerFront = pCamera->fDist * 0.25f;
 			fPlayerMoveRot = atan2f(-pPlayer->move.x, -pPlayer->move.z);
@@ -436,37 +446,21 @@ void CameraOrbit(P_CAMERA pCamera)
 	if (GetKeyboardPress(CAM_ORBIT_UP))
 	{
 		pCamera->rot.x -= CAMERA_SPIN;
-		pCamera->posV.x = pCamera->posR.x - cosf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
-		pCamera->posV.y = pCamera->posR.y - cosf(D3DX_PI - pCamera->rot.x) * pCamera->fDist;
-		pCamera->posV.z = pCamera->posR.z + sinf(D3DX_PI - pCamera->rot.x) * pCamera->fDist;
+		bUse = true;
 
 	}
 	if (GetKeyboardPress(CAM_ORBIT_DW))
 	{
 		pCamera->rot.x += CAMERA_SPIN;
-		pCamera->posV.x = pCamera->posR.x - cosf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
-		pCamera->posV.y = pCamera->posR.y - cosf(D3DX_PI - pCamera->rot.x) * pCamera->fDist;
-		pCamera->posV.z = pCamera->posR.z + sinf(D3DX_PI - pCamera->rot.x) * pCamera->fDist;
+		bUse = true;
 	}
 
 	// コントローラー操作
 	 if (GetJoypadRightStick((int)pCamera->type,&rightStick))
-	{
+	 {
 		pCamera->rot.y += rightStick.x * CAMERA_SPIN;
 		bUse = true;
-	}
-	//if (GetJoypadPress((int)pCamera->type,JOYKEY_RIGHT_STICK_LEFT))
-	//{
-	//	pCamera->rot.y += CAMERA_SPIN;
-	//	bUse = true;
-	//}
-
-	//if (GetJoypadPress((int)pCamera->type,JOYKEY_RIGHT_STICK_RIGHT))
-	//{
-	//	pCamera->rot.y -= CAMERA_SPIN;
-	//	bUse = true;
-	//}
-
+	 }
 
 	//**************************************************************
 	// -πからπまでにする	
@@ -505,18 +499,24 @@ void SetCamera(void)
 	LPDIRECT3DDEVICE9	pDevice = GetDevice();		// デバイスへのポインタ
 	P_CAMERA			pCam = GetCamera();
 	static bool			bCameraSwitch = false;		// 複数カメラ設置時、1Pを描画したらtrue
-	static float		fViewRadian = VIEW_RADIAN;	// 視野角
+	static float		fViewRadian;				// 視野角
 
+		// 視野角の初期値
+		fViewRadian = VIEW_RADIAN;
 	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCam++)
 	{
+
 		// 設置するカメラが一つなら
 		if (g_nNumEnableCamera == 1)
 		{
-			// アクティブプレイヤーがネズミなら
-			if (g_nActivePlayer == PLAYERTYPE_MOUSE && nCntCamera != PLAYERTYPE_MOUSE)
+			if (GetNumPlayer() == 1)
 			{
-				fViewRadian = VIEW_RADIAN_MOUSE;				
-				continue;
+				// アクティブプレイヤーがネズミなら
+				if (g_nActivePlayer == PLAYERTYPE_MOUSE && nCntCamera != PLAYERTYPE_MOUSE)
+				{
+					fViewRadian = VIEW_RADIAN_MOUSE;
+					continue;
+				}
 			}
 		}
 		// 二つ設置する場合

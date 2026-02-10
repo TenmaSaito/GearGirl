@@ -76,16 +76,6 @@ void UninitMeshCylinder(void)
 void UpdateMeshCylinder(void)
 {
 	P_MESH pMesh = &g_aMeshCylinder[0];
-
-	for (int nCntMeshCylinder = 0; nCntMeshCylinder < MAX_MESHCYLINDER; nCntMeshCylinder++,pMesh++)
-	{
-		if (pMesh->bUse)
-		{
-			PrintDebugProc("MESH CYLINDER %d\n pos : %~3f\n", nCntMeshCylinder,pMesh->pos.x, pMesh->pos.y, pMesh->pos.z);
-			PrintDebugProc(" radius %f\n height %f",pMesh->size.x, pMesh->size.y);
-
-		}
-	}
 }
 
 //=========================================================================================
