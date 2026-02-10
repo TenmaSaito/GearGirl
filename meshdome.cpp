@@ -32,7 +32,6 @@ void InitMeshDome(void)
 	{
 		g_aMeshDome[nCntMeshDome].pos = D3DXVECTOR3_NULL;
 		g_aMeshDome[nCntMeshDome].rot = D3DXVECTOR3_NULL;
-		//g_aMeshDome[nCntMeshDome].fSize = VECTOR3_ZERO;
 		g_aMeshDome[nCntMeshDome].pVtxBuff = NULL;
 		g_aMeshDome[nCntMeshDome].pIdxBuffer = NULL;
 		g_aMeshDome[nCntMeshDome].nHeightDivision = 0;
