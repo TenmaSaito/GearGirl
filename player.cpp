@@ -217,6 +217,12 @@ void UpdatePlayer(void)
 			// カタパルトを起動した後の処理
 			// ShotMouse();
 		}
+		else if (nCntPlayer == PLAYERTYPE_MOUSE)
+		{
+			// 少女にネズミが追従する処理
+			MouseKeepUp();
+		}
+
 
 		UpdateMotion((PlayerType)nCntPlayer);
 
