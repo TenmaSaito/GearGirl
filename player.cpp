@@ -98,8 +98,8 @@ void InitPlayer(void)
 		g_aPlayer[nCntPlayer].state = PLAYERSTATE_NEUTRAL;
 		g_aPlayer[nCntPlayer].motionType = MOTIONTYPE_NEUTRAL;
 		g_aPlayer[nCntPlayer].bFinishMotion = true;
-		
-		if (nCntPlayer == 0)
+
+		if (nCntPlayer == PLAYERTYPE_GIRL)
 		{
 			g_aPlayer[nCntPlayer].playertype = PLAYERTYPE_GIRL;
 		}
@@ -1076,15 +1076,31 @@ void JumpPlayer(PlayerType nPlayer)
 	else
 	{// ネズミ
 		// ジャンプする
-		if ((GetKeyboardTrigger(DIK_RSHIFT) == true || GetJoypadTrigger(nPlayer, JOYKEY_A)) && pPlayer->bJump == false)
-		{
-			//PlaySound(SOUND_LABEL_JUMP);
-			pPlayer->state = PLAYERSTATE_JUMP;
-			SetMotionType(MOTIONTYPE_JUMP, true, 10, nPlayer);
-			//g_Land++;
+		if (g_nNumPlayer == 2)
+		{// 2人プレイ時
+			if ((GetKeyboardTrigger(DIK_RSHIFT) == true || GetJoypadTrigger(nPlayer, JOYKEY_A)) && pPlayer->bJump == false)
+			{
+				//PlaySound(SOUND_LABEL_JUMP);
+				pPlayer->state = PLAYERSTATE_JUMP;
+				SetMotionType(MOTIONTYPE_JUMP, true, 10, nPlayer);
+				//g_Land++;
 
-			pPlayer->move.y = JUMP_FORCE;
-			pPlayer->bJump = true;
+				pPlayer->move.y = JUMP_FORCE;
+				pPlayer->bJump = true;
+			}
+		}
+		else
+		{// 1人プレイ時
+			if ((GetKeyboardTrigger(DIK_SPACE) == true || GetJoypadTrigger(nPlayer, JOYKEY_A)) && pPlayer->bJump == false)
+			{
+				//PlaySound(SOUND_LABEL_JUMP);
+				pPlayer->state = PLAYERSTATE_JUMP;
+				SetMotionType(MOTIONTYPE_JUMP, true, 10, nPlayer);
+				//g_Land++;
+
+				pPlayer->move.y = JUMP_FORCE;
+				pPlayer->bJump = true;
+			}
 		}
 	}
 }
