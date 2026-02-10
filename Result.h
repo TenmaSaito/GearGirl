@@ -21,9 +21,9 @@
 //**********************************************************************************
 typedef enum
 {
-	ENDTYPE_BAD,
-	ENDTYPE_NORMAL,
-	ENDTYPE_HAPPY,
+	ENDTYPE_BAD,		// バッドエンド
+	ENDTYPE_NORMAL,		// ノーマルエンド
+	ENDTYPE_HAPPY,		// スーパーハッピーエンド!!!!!!
 	ENDTYPE_MAX
 }ENDTYPE;
 

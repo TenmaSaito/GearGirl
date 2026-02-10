@@ -1,11 +1,11 @@
 //==================================================================================
 //
-// DirectXのMenuのUI表示処理 [UImenu.h]
+// DirectXのノーマルエンド用のヘッダーファイル [normalend.h]
 // Author : TENMA
 //
 //==================================================================================
-#ifndef _UIMENU_H_		// IncludeGuard
-#define _UIMENU_H_
+#ifndef _NORMALEND_H_
+#define _NORMALEND_H_
 
 //**********************************************************************************
 //*** インクルードファイル ***
@@ -19,11 +19,8 @@
 //**********************************************************************************
 //*** プロトタイプ宣言 ***
 //**********************************************************************************
-void InitUImenu(void);
-void UninitUImenu(void);
-void UpdateUImenu(void);
-void DrawUImenu(void);
-
-void SetEnableUImenu(bool bDisp, int nIdxUImenu);
-bool GetEnableUImenu(void);
+void InitNormalEnd(void);
+void UninitNormalEnd(void);
+void UpdateNormalEnd(void);
+void DrawNormalEnd(void);
 #endif

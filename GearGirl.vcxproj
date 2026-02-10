@@ -153,6 +153,7 @@
   <ItemGroup>
     <ClCompile Include="2Dpolygon.cpp" />
     <ClCompile Include="3Dmodel.cpp" />
+    <ClCompile Include="badend.cpp" />
     <ClCompile Include="billboard.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="debugproc.cpp" />
@@ -162,11 +163,13 @@
     <ClCompile Include="field.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="gimmick.cpp" />
+    <ClCompile Include="happyend.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="item.cpp" />
     <ClCompile Include="light.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mathUtil.cpp" />
+    <ClCompile Include="normalend.cpp" />
     <ClCompile Include="particle.cpp" />
     <ClCompile Include="UImenu.cpp" />
     <ClCompile Include="mesh.cpp" />
@@ -191,6 +194,7 @@
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h" />
     <ClInclude Include="3Dmodel.h" />
+    <ClInclude Include="badend.h" />
     <ClInclude Include="billboard.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="debugproc.h" />
@@ -201,11 +205,13 @@
     <ClInclude Include="field.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="gimmick.h" />
+    <ClInclude Include="happyend.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="item.h" />
     <ClInclude Include="light.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="mathUtil.h" />
+    <ClInclude Include="normalend.h" />
     <ClInclude Include="particle.h" />
     <ClInclude Include="UImenu.h" />
     <ClInclude Include="mesh.h" />

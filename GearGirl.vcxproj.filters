@@ -76,6 +76,12 @@
     <Filter Include="ヘッダー ファイル\mode\Result">
       <UniqueIdentifier>{3026b0c2-5f38-45d6-8eb9-e4702993757e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ヘッダー ファイル\mode\Result\ending">
+      <UniqueIdentifier>{3cc594af-fe75-4752-8ae6-13c18ea97729}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\mode\Result\ending">
+      <UniqueIdentifier>{5af5f42b-9360-46bf-861d-b7b4ec26b908}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Texture.cpp">
@@ -186,6 +192,15 @@
     <ClCompile Include="particle.cpp">
       <Filter>ソース ファイル\object</Filter>
     </ClCompile>
+    <ClCompile Include="badend.cpp">
+      <Filter>ソース ファイル\mode\Result\ending</Filter>
+    </ClCompile>
+    <ClCompile Include="happyend.cpp">
+      <Filter>ソース ファイル\mode\Result\ending</Filter>
+    </ClCompile>
+    <ClCompile Include="normalend.cpp">
+      <Filter>ソース ファイル\mode\Result\ending</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h">
@@ -286,6 +301,15 @@
     </ClInclude>
     <ClInclude Include="particle.h">
       <Filter>ヘッダー ファイル\object</Filter>
+    </ClInclude>
+    <ClInclude Include="badend.h">
+      <Filter>ヘッダー ファイル\mode\Result\ending</Filter>
+    </ClInclude>
+    <ClInclude Include="happyend.h">
+      <Filter>ヘッダー ファイル\mode\Result\ending</Filter>
+    </ClInclude>
+    <ClInclude Include="normalend.h">
+      <Filter>ヘッダー ファイル\mode\Result\ending</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

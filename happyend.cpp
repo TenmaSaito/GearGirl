@@ -1,17 +1,12 @@
 //==================================================================================
 //
-// DirectXのリザルト関連用のcppファイル [Result.cpp]
+// DirectXのハッピーエンド用のcppファイル [happyend.cpp]
 // Author : TENMA
 //
 //==================================================================================
 //**********************************************************************************
 //*** インクルードファイル ***
 //**********************************************************************************
-#include "Result.h"
-#include "input.h"
-#include "fade.h"
-#include "badend.h"
-#include "normalend.h"
 #include "happyend.h"
 
 //**********************************************************************************
@@ -25,121 +20,35 @@
 //**********************************************************************************
 //*** グローバル変数 ***
 //**********************************************************************************
-ENDTYPE g_endType = ENDTYPE_NORMAL;		// エンディングタイプ
 
 //==================================================================================
 // --- 初期化 ---
 //==================================================================================
-void InitResult(void)
+void InitHappyEnd(void)
 {
-	/*** エンディングの初期化 ***/
-	switch (g_endType)
-	{
-	// バッドエンド
-	case ENDTYPE_BAD:
-		InitBadEnd();
-		break;
 
-	// ノーマルエンド
-	case ENDTYPE_NORMAL:
-		InitNormalEnd();
-		break;
-
-	// ハッピーエンド
-	case ENDTYPE_HAPPY:
-		InitHappyEnd();
-		break;
-
-	// 例外エンド
-	default:
-		break;
-	}
 }
 
 //==================================================================================
 // --- 終了 ---
 //==================================================================================
-void UninitResult(void)
+void UninitHappyEnd(void)
 {
-	/*** 各エンディングの終了 ***/
-	UninitBadEnd();
-	UninitNormalEnd();
-	UninitHappyEnd();
+
 }
 
 //==================================================================================
 // --- 更新 ---
 //==================================================================================
-void UpdateResult(void)
+void UpdateHappyEnd(void)
 {
-	// モード変更
-	if (GetKeyboardTrigger(DIK_RETURN)
-		|| GetJoypadTrigger(0, JOYKEY_A)
-		|| GetJoypadTrigger(0, JOYKEY_START))
-	{
-		if (GetFade() == FADE_NONE)
-		{
-			SetFade(MODE_TITLE);
-		}
-	}
 
-	/*** エンディングの更新 ***/
-	switch (g_endType)
-	{
-		// バッドエンド
-	case ENDTYPE_BAD:
-		UpdateBadEnd();
-		break;
-
-		// ノーマルエンド
-	case ENDTYPE_NORMAL:
-		UpdateNormalEnd();
-		break;
-
-		// ハッピーエンド
-	case ENDTYPE_HAPPY:
-		UpdateHappyEnd();
-		break;
-
-		// 例外エンド
-	default:
-		break;
-	}
 }
 
 //==================================================================================
 // --- 描画 ---
 //==================================================================================
-void DrawResult(void)
+void DrawHappyEnd(void)
 {
-	/*** エンディングの描画 ***/
-	switch (g_endType)
-	{
-		// バッドエンド
-	case ENDTYPE_BAD:
-		DrawBadEnd();
-		break;
 
-		// ノーマルエンド
-	case ENDTYPE_NORMAL:
-		DrawNormalEnd();
-		break;
-
-		// ハッピーエンド
-	case ENDTYPE_HAPPY:
-		DrawHappyEnd();
-		break;
-
-		// 例外エンド
-	default:
-		break;
-	}
-}
-
-//==================================================================================
-// --- エンディングタイプの指定 ---
-//==================================================================================
-void SetEndingType(ENDTYPE end)
-{
-	g_endType = end;
 }
