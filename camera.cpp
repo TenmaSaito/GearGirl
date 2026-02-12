@@ -293,7 +293,7 @@ void CameraFollow(void)
 		//**************************************************************
 		// プレイヤーに追従
 		if (CAMERA_PLFR_DEADZONE < SQUARE(pPlayer->move.x) + SQUARE(pPlayer->move.z)
-			|| CAMERA_PLFR_DEADZONE < SQUARE(pPlayer->pos.x - pPlayer->posOld.x) + SQUARE(pPlayer->pos.z - pPlayer->posOld.z))
+			|| (CAMERA_PLFR_DEADZONE < SQUARE(pPlayer->pos.x - pPlayer->posOld.x) + SQUARE(pPlayer->pos.z - pPlayer->posOld.z)))
 		{// カメラを少し先へ
 			fPlayerFront = pCamera->fDist * 0.25f;
 			fPlayerMoveRot = atan2f(-pPlayer->move.x, -pPlayer->move.z);
