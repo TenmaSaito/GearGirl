@@ -13,6 +13,7 @@
 #include "debugproc.h"
 #include "thread.h"
 #include "fade.h"
+#include "sound.h"
 
 // MODE
 #include "mode.h"
@@ -377,6 +378,13 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 		return E_FAIL;
 	}
 
+	// サウンドの初期化処理
+	if (FAILED(InitSound(hWnd)))
+	{
+		MessageBox(hWnd, "InitSoundに失敗しました。", "Error (3)", MB_ICONERROR);
+		return E_FAIL;
+	}
+
 	//// マウスの初期化処理
 	//if (FAILED(InitMouse(hWnd)))
 	//{
@@ -424,6 +432,9 @@ void Uninit(void)
 	// デバッグフォント削除
 	UninitDebugProc();
 
+	// サウンドの終了処理
+	UninitSound();
+
 	// Direct3Dデバイスの破棄
 	RELEASE(g_pD3DDevice);
 
@@ -459,6 +470,9 @@ void Update(void)
 
 	// フェードの更新処理
 	UpdateFade();
+
+	// サウンドの更新処理
+	UpdateSound();
 }
 
 //================================================================================================================

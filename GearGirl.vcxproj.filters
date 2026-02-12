@@ -201,6 +201,9 @@
     <ClCompile Include="normalend.cpp">
       <Filter>ソース ファイル\mode\Result\ending</Filter>
     </ClCompile>
+    <ClCompile Include="sound.cpp">
+      <Filter>ソース ファイル\main\DirectX</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h">
@@ -310,6 +313,9 @@
     </ClInclude>
     <ClInclude Include="normalend.h">
       <Filter>ヘッダー ファイル\mode\Result\ending</Filter>
+    </ClInclude>
+    <ClInclude Include="sound.h">
+      <Filter>ヘッダー ファイル\main\DirectX</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -171,6 +171,7 @@
     <ClCompile Include="mathUtil.cpp" />
     <ClCompile Include="normalend.cpp" />
     <ClCompile Include="particle.cpp" />
+    <ClCompile Include="sound.cpp" />
     <ClCompile Include="UImenu.cpp" />
     <ClCompile Include="mesh.cpp" />
     <ClCompile Include="meshcylinder.cpp" />
@@ -213,6 +214,7 @@
     <ClInclude Include="mathUtil.h" />
     <ClInclude Include="normalend.h" />
     <ClInclude Include="particle.h" />
+    <ClInclude Include="sound.h" />
     <ClInclude Include="UImenu.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="mode.h" />
