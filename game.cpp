@@ -30,6 +30,7 @@
 #include "UIarm.h"
 #include "UImenu.h"
 #include "gimmick.h"
+#include "judgeEnd.h"
 
 //**********************************************************************************
 //*** ƒ}ƒNƒ’è‹` ***
