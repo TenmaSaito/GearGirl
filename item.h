@@ -18,6 +18,7 @@
 //=========================================================================================
 #define MAX_ITEM		(16)		// アイテム最大数
 #define ITEM_RANK		(2)			// アイテムの等級段数
+#define NUM_PUTOUTITEM	(5)			// 提出アイテム数
 #define ITEM_RANGE		(25.0f)		// アイテム当たり判定範囲
 
 #define SPIN_ITEM		(0.02f)		// アイテムの回転速度
@@ -46,8 +47,8 @@ typedef enum
 //==============================================================
 typedef struct ItemInfo
 {
-	const char* pModelFile;
-	int			nNumGet;
+	const char* pModelFile;			// ファイル名
+	int			nNumGet;			// モデルを読み込めたかの判定が入る
 
 }ItemInfo;
 POINTER(ItemInfo, P_ITEMINFO);
@@ -60,7 +61,7 @@ typedef struct Item
 	vec3			pos;
 	vec3			rot;
 	float			fRange;				// 当たり判定範囲（球）
-	ITEMTYPE		type;
+	ITEMTYPE		type;				// アイテムの種類
 	bool			bUse;				// 構造体を使用しているかどうか
 	bool			bGet;				// プレイヤーが取得したかどうか
 	bool			bCollision;			// 衝突するか(true)、取得するか(false)
@@ -68,10 +69,9 @@ typedef struct Item
 	bool			bMouse;				// ネズミに見えるか
 	int				nIdxModel;			// モデルデータのインデックス
 	D3DXMATRIX		mtxWorld;			// ワールドマトリックス
+	int				nIdxQuota;			// 表示用の枠のインデックス
 }Item;
 POINTER(Item, P_ITEM);
-
-
 
 //=========================================================================================
 //プロトタイプ宣言
@@ -80,7 +80,9 @@ void InitItem(void);
 void UninitItem(void);
 void UpdateItem(void);
 void DrawItem(void);
+void SetItem(vec3 pos, vec3 rot, ITEMTYPE type, bool bReflectGirl = true, bool bReflectMouse = true, bool bColi = false);			// アイテム設置
 void CollisionItem(vec3 pos,float fRange);			// 当たり判定
 bool IsGetItem(ITEMTYPE type);
+void EnableItemPut(void);							// アイテム提出フラグを切り替え
 
 #endif // !_ITEM_H_

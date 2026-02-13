@@ -20,6 +20,7 @@
 #include "player.h"
 #include "3Dmodel.h"
 #include "texture.h"
+#include "item.h"
 
 using  namespace MyMathUtil;
 
@@ -27,6 +28,7 @@ using  namespace MyMathUtil;
 // マクロ定義
 #define	MODEL_TXT	"data\\Scripts\\model.txt"	// モデルの外部ファイル
 #define STR_SUCCESS(Realize)			(Realize != NULL)	// strstrでの成功判定
+#define LOAD_ITEM	"ITEMSET"			// Item設置
 
 // =================================================
 // グローバル変数
@@ -543,6 +545,66 @@ bool LoadModel(void)
 						D3DXVECTOR3 rotVec = DegreeToRadian(INTToFloat(rot));
 						SetField(posField, VECNULL, rotVec, (float)nXsize, (float)nYsize, aIdxTexture[nIdxTexField], (float)nXdevideField, (float)nYdevideField, D3DCULL_CCW);
 						nCntField++;
+						break;
+					}
+				}
+
+			}
+
+			if (strstr(&Realize[0], LOAD_ITEM) != NULL)
+			{// アイテムの情報を代入
+				D3DXVECTOR3 position;
+				INT_VECTOR3 rotation;
+				ITEMTYPE Type;
+
+				while (1)
+				{
+					fgets(&Realize[0], sizeof Realize, pFile);	// 最初に比較用文字の読み込み
+
+					if (strstr(&Realize[0], "ITEMTYPE") != NULL)
+					{
+						// 「=」の場所を見つける
+						pEqual = strstr(Realize, "=");
+
+						if (pEqual != NULL)
+						{
+							// アドレスを1こずらす
+							pEqual++;
+
+							// アイテムのインデックスを読み込む
+							(void)sscanf(pEqual, "%d", &Type);
+						}
+					}
+					if (strstr(&Realize[0], "POS") != NULL)
+					{
+						pEqual = strstr(Realize, "=");
+
+						if (pEqual != NULL)
+						{
+							// アドレスを1こずらす
+							pEqual++;
+
+							// 地面の位置を読み込む
+							(void)sscanf(pEqual, "%f %f %f", &position.x, &position.y, &position.z);
+						}
+					}
+					if (strstr(&Realize[0], "ROT") != NULL)
+					{
+						pEqual = strstr(Realize, "=");
+
+						if (pEqual != NULL)
+						{
+							// アドレスを1こずらす
+							pEqual++;
+
+							// 地面の向きを読み込む
+							(void)sscanf(pEqual, "%d %d %d", &rotation.x, &rotation.y, &rotation.z);
+						}
+					}
+					if (strstr(&Realize[0], "END_ITEMSET") != NULL)
+					{
+						D3DXVECTOR3 rotationF = DegreeToRadian(INTToFloat(rotation));
+						SetItem(position, rotationF, Type);
 						break;
 					}
 				}

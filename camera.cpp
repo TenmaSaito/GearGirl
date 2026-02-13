@@ -80,6 +80,12 @@ void InitCamera(void)
 			break;
 		}
 
+		pCamera->viewport.X = 0.0f;								// 画面左上 X 座標
+		pCamera->viewport.Y = 0.0f;								// 画面左上 Y 座標
+		pCamera->viewport.Width = SCREEN_WIDTH;					// 表示画面の横幅
+		pCamera->viewport.Height = SCREEN_HEIGHT;				// 表示画面の高さ
+		pCamera->fViewRadian = VIEW_RADIAN;						// 視野角
+
 		// 画面設定等
 		pCamera->viewport.MinZ = 0.0f;									
 		pCamera->viewport.MaxZ = 1.0f;
@@ -177,7 +183,7 @@ void UpdateCamera(void)
 	}
 
 	//**************************************************************
-	// カメラ
+	// カメラ動かす処理
 	pCamera = GetCamera();
 	if (GetActivePlayer() == CAMERATYPE_PLAYER_ONE && GetKeyboardPress(CAM_2POPRAT) == false)
 	{
@@ -190,8 +196,8 @@ void UpdateCamera(void)
 		CameraOrbit(pCamera);
 		CameraMove(pCamera);
 	}
-	// 追従処理
-	CameraFollow();
+
+	CameraFollow();	// 追従
 
 	//**************************************************************
 	// 注視点から視点を求める
@@ -499,7 +505,6 @@ void SetCamera(void)
 		fViewRadian = VIEW_RADIAN;
 	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCam++)
 	{
-
 		// 設置するカメラが一つなら
 		if (g_nNumEnableCamera == 1)
 		{
@@ -709,7 +714,7 @@ void CleanFog(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
-	// Enable fog blending.
+	// Disable fog blending.
 	pDevice->SetRenderState(D3DRS_FOGENABLE, FALSE);
 	
 }

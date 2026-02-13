@@ -65,9 +65,9 @@ void JudgmentEnding(ITEMTYPE *pIn, UINT size)
 {
 	ENDTYPE result = ENDTYPE_BAD;		// エンディングタイプ
 	ITEMTYPE aTypeTrue[ITEMTYPE_MAX];	// アイテムの種類
-	int nCntTrue = 0;					// 正しいアイテムの数
+	UINT nCntTrue = 0;					// 正しいアイテムの数
 	ITEMTYPE aTypeFalse[ITEMTYPE_MAX];	// アイテムの種類
-	int nCntFalse = 0;					// 間違ったアイテムの数
+	UINT nCntFalse = 0;					// 間違ったアイテムの数
 
 	// 値保存
 	for (UINT nCntItem = 0; nCntItem < size; nCntItem++)
