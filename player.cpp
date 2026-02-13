@@ -16,6 +16,7 @@
 #include "modeldata.h"
 #include "motion.h"
 #include "player.h"
+#include "prompt.h"
 #include "titleselect.h"
 #include "MathUtil.h"
 
@@ -297,6 +298,9 @@ void UpdatePlayer(void)
 		// アイテムとの当たり判定
 		CollisionItem(pPlayer->pos, PLAYER_RANGE);
 	}
+
+	// プロンプトを描画
+	DetectionPrompt(g_aPlayer[PLAYERTYPE_GIRL].pos, 50.0f);
 
 	// 操作する対象を切り替える
 	if (g_nNumPlayer == 1)
