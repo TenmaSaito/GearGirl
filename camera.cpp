@@ -443,6 +443,8 @@ void CameraOrbit(P_CAMERA pCamera)
 		pCamera->rot.y += CAMERA_SPIN;
 		bUse = true;
 	}
+
+#if FALSE
 	if (GetKeyboardPress(CAM_ORBIT_UP))
 	{
 		pCamera->rot.x -= CAMERA_SPIN;
@@ -454,7 +456,7 @@ void CameraOrbit(P_CAMERA pCamera)
 		pCamera->rot.x += CAMERA_SPIN;
 		bUse = true;
 	}
-
+#endif
 	// コントローラー操作
 	 if (GetJoypadRightStick((int)pCamera->type,&rightStick))
 	 {

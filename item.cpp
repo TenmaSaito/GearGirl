@@ -109,8 +109,6 @@ void InitItem(void)
 
 	// 設置
 	g_nSetItemNum = 0;	// 配置数を初期化
-
-	SetItem(vec3(1600.0f, 140.0f, -600.0f), vec3_ZERO, ITEMTYPE_GEARS_TRUE);
 }
 
 //=========================================================================================
@@ -168,6 +166,7 @@ void UpdateMapItem(void)
 void UpdatePouchItem(void)
 {
 	P_ITEMQUOTA pItemQuota = &g_aItemQuota[0];
+	P_ITEMQUOTA pPutQuota = &g_aPutQuota[0];
 
 	// 提出フラグが立っていたら
 	if (g_bPutOut)
@@ -178,9 +177,17 @@ void UpdatePouchItem(void)
 	}
 	else
 	{
-		// 位置を変更
+		// 所持アイテム枠の位置を変更
 		for (int nCntQuota = 0; nCntQuota < ITEMTYPE_MAX; nCntQuota++, pItemQuota++)
 			SetPosition2DPolygon(pItemQuota->nIdxBox,vec3(SCREEN_WIDTH / ITEMTYPE_MAX * (nCntQuota + 0.5f), SCREEN_HEIGHT * 0.9f, 0.0f));
+
+		// 提出枠を消す
+		for (int nCntQuota = 0; nCntQuota < NUM_PUTOUTITEM; nCntQuota++, pPutQuota++)
+		{
+			SetColor2DPolygon(pPutQuota->nIdxBox, colX(0.8f, 0.8f, 0.8f, 0.0f));	// 消す
+			pPutQuota->nType = -1;
+			pPutQuota->bUse = false;
+		}
 
 		P_ITEMQUOTA pItemQuota = &g_aItemQuota[0];		// ポインタを先頭に戻す
 		if (GetEnableUImenu())
