@@ -26,7 +26,7 @@ typedef struct ItemQuota
 	vec3		pos;
 	colX		col;
 	int			nType;			// 表示するアイテムの種類
-	int			nIdxBox;		// 個の構造体の番号
+	int			nIdxBox;		// この構造体の番号
 	bool		bUse;			// 構造体を使用しているかどうか
 }ItemQuota;
 POINTER(ItemQuota, P_ITEMQUOTA);
@@ -34,9 +34,11 @@ POINTER(ItemQuota, P_ITEMQUOTA);
 //**************************************************************
 // グローバル変数宣言
 int				g_nSetItemNum = 0;								// 設置済みのアイテム数
+int				g_nSelectPut = -1;								// 提出時のカーソル
 bool			g_bPutOut = false;								// アイテムを提出するときtrue
 Item			g_aItem[MAX_ITEM];								// アイテム情報
-ItemQuota		g_aItemQuota[ITEMTYPE_MAX + NUM_PUTOUTITEM];	// アイテムを表示する枠のインデックス
+ItemQuota		g_aItemQuota[ITEMTYPE_MAX];						// 所持アイテムを表示する枠のインデックス
+ItemQuota		g_aPutQuota[NUM_PUTOUTITEM];					// 提出アイテムを表示する枠のインデックス
 ITEMTYPE		g_aPutOut[NUM_PUTOUTITEM];						// 提出したアイテム
 ItemInfo		g_aItemInfo[ITEMTYPE_MAX] =
 {
@@ -54,13 +56,11 @@ ItemInfo		g_aItemInfo[ITEMTYPE_MAX] =
 };
 //**************************************************************
 // プロトタイプ宣言
-void UpdateMapItem(void);														// マップ上のアイテムを更新
-void UpdatePouchItem(void);														// 取得済みのアイテムを更新
-void PutOut(P_ITEMQUOTA* ppItemQuota);											// 提出できるアイテムを表示
-void SelectItem(P_ITEMQUOTA* ppItemQuota);										// 提出アイテムの選択
-void LoadItemSet(void);															// アイテムの配置情報を読み込み
-void SaveItemSet(void);															// アイテムの配置情報を書き出し
-P_ITEM GetItem(void);															// 先頭アドレス取得
+void UpdateMapItem(void);			// マップ上のアイテムを更新
+void UpdatePouchItem(void);			// 取得済みのアイテムを更新
+void PutOut(void);					// 提出できるアイテムを表示
+void SelectItem(void);				// 提出アイテムの選択
+P_ITEM GetItem(void);				// 先頭アドレス取得
 
 //=========================================================================================
 // アイテム初期化
@@ -72,8 +72,10 @@ void InitItem(void)
 	P_ITEM		pItem = GetItem();
 	P_ITEMINFO	pItemInfo = &g_aItemInfo[0];
 	P_ITEMQUOTA pItemQuota = &g_aItemQuota[0];
+	P_ITEMQUOTA pPutQuota = &g_aPutQuota[0];
 
 	g_bPutOut = false;		// アイテムを提出状態ではない
+	g_nSelectPut = -1;		// 提出時のカーソル
 
 	// アイテム情報読込
 	for (int nCntItem = 0; nCntItem < ITEMTYPE_MAX; nCntItem++, pItemInfo++)
@@ -96,21 +98,17 @@ void InitItem(void)
 	}
 
 	// 提出時用の枠を取得
-	for (int nCntQuota = 0; nCntQuota < NUM_PUTOUTITEM; nCntQuota++, pItemQuota++)
+	for (int nCntQuota = 0; nCntQuota < NUM_PUTOUTITEM; nCntQuota++, pPutQuota++)
 	{
-		pItemQuota->nIdxBox = Set2DPolygon(vec3_ZERO, vec3_ZERO, vec2_ZERO, -1, colX_ZERO);
-		pItemQuota->nType = -1;
-		pItemQuota->bUse = false;
+		pPutQuota->nIdxBox = Set2DPolygon(vec3_ZERO, vec3_ZERO, vec2(SCREEN_WIDTH * 0.05f, SCREEN_WIDTH * 0.05f), -1, colX_ZERO);
+		pPutQuota->nType = -1;
+		pPutQuota->bUse = false;
 	}
 
 	// 設置
 	g_nSetItemNum = 0;	// 配置数を初期化
 
-	SetItem(vec3(0.0f, 140.0f, 100.0f), vec3_ZERO, ITEMTYPE_GEARL_TRUE,false,true);
 	SetItem(vec3(1600.0f, 140.0f, -600.0f), vec3_ZERO, ITEMTYPE_GEARS_TRUE);
-	SetItem(vec3(0.0f, 140.0f, -100.0f), vec3_ZERO, ITEMTYPE_SHAFT_TRUE,true,false);
-	SetItem(vec3(50.0f, 140.0f, -200.0f), vec3_ZERO, ITEMTYPE_SPRING_TRUE);
-	SetItem(vec3(100.0f, 140.0f, -100.0f), vec3_ZERO, ITEMTYPE_SCREW_FALSE);
 }
 
 //=========================================================================================
@@ -172,9 +170,9 @@ void UpdatePouchItem(void)
 	// 提出フラグが立っていたら
 	if (g_bPutOut)
 	{
-		PutOut(&pItemQuota);		// 取得済みアイテム表示
+		PutOut();		// 取得済みアイテム表示
 
-		SelectItem(&pItemQuota);	// 選んだアイテム表示
+		SelectItem();	// 選んだアイテム表示
 	}
 	else
 	{
@@ -265,14 +263,6 @@ void DrawItem(void)
 }
 
 //=========================================================================================
-// アイテムの配置情報を読み込み
-//=========================================================================================
-void LoadItemSet(void)
-{
-
-}
-
-//=========================================================================================
 // 当たり判定
 //=========================================================================================
 void CollisionItem(vec3 pos, float fRange)
@@ -313,9 +303,9 @@ void CollisionItem(vec3 pos, float fRange)
 
 //=========================================================================================
 // 提出処理
-void PutOut(P_ITEMQUOTA* ppItemQuota)
+void PutOut(void)
 {
-	P_ITEMQUOTA pItemQuota = *ppItemQuota;
+	P_ITEMQUOTA pItemQuota = &g_aItemQuota[0];
 
 	for (int nCntQuota = 0; nCntQuota < ITEMTYPE_MAX; nCntQuota++, pItemQuota++)
 	{
@@ -324,36 +314,87 @@ void PutOut(P_ITEMQUOTA* ppItemQuota)
 
 		if (pItemQuota->bUse)
 		{// アイテムが登録されている
-			SetColor2DPolygon(pItemQuota->nIdxBox, colX(1.0f, 1.0f, 1.0f, 0.5f));// 枠を明るく				
-				// 選択中なら
-					// 枠内のアイテムを動かす
+			if (pItemQuota->nIdxBox == g_nSelectPut)
+			{// 選択中なら
+				// 枠内のアイテムを動かす
+				SetColor2DPolygon(pItemQuota->nIdxBox, colX(1.0f, 0.8f, 0.8f, 0.5f));// 枠を明るく				
+			}
+			else
+			{
+				SetColor2DPolygon(pItemQuota->nIdxBox, colX(0.8f, 0.8f, 0.8f, 0.5f));// 枠を明るく				
+			}
 		}
 		else
 		{// されてない
 			SetColor2DPolygon(pItemQuota->nIdxBox, colX(0.3f, 0.3f, 0.3f, 0.3f));// 枠を薄暗く
 		}
 	}
-	
+	// アイテムを選ぶ
+	if (GetKeyboardTrigger(DIK_D) || GetKeyboardTrigger(DIK_RIGHT))
+	{
+		g_nSelectPut++;
+		if (ITEMTYPE_MAX < g_nSelectPut)
+		{
+			g_nSelectPut = -1;
+		}
+	}
+
+	if (GetKeyboardTrigger(DIK_A) || GetKeyboardTrigger(DIK_LEFT))
+	{
+		g_nSelectPut--;
+		if (g_nSelectPut < -1)
+		{
+			g_nSelectPut = ITEMTYPE_MAX;
+		}
+	}	
+
+	PrintDebugProc("\nSelect : %d\n", g_nSelectPut);
 }
 
 //=========================================================================================
 // アイテム選択
-void SelectItem(P_ITEMQUOTA* ppItemQuota)
+void SelectItem(void)
 {
-	P_ITEMQUOTA pItemQuota = *ppItemQuota;
+	P_ITEMQUOTA pItemQuota = &g_aItemQuota[0];
 
-	for (int nCntQuota = 0; nCntQuota < NUM_PUTOUTITEM; nCntQuota++, pItemQuota++)
+	P_ITEMQUOTA pPutQuota = &g_aPutQuota[0];
+
+	// 選択中のアイテムを表示
+	for (int nCntQuota = 0; nCntQuota < NUM_PUTOUTITEM; nCntQuota++, pPutQuota++)
 	{
+		// 位置を更新
+		SetPosition2DPolygon(pPutQuota->nIdxBox, vec3(SCREEN_WIDTH / NUM_PUTOUTITEM * (nCntQuota + 0.5f), SCREEN_HEIGHT * 0.4f, 0.0f));
 
+		if (pPutQuota->bUse)
+		{// アイテムが選ばれた枠
+			// 未確定の枠
+			SetColor2DPolygon(pPutQuota->nIdxBox, colX(0.8f, 0.8f, 0.8f, 0.8f));	// 枠を明るく
+		}
+		else
+		{
+			// 未確定の枠
+			SetColor2DPolygon(pPutQuota->nIdxBox, colX(0.6f, 0.6f, 0.6f, 0.8f));	// 枠を暗く
+		}
 	}
-}
 
-//=========================================================================================
-// 持ってるか判定
-//=========================================================================================
-bool IsGetItem(ITEMTYPE type)
-{
-	return false;
+	// 選択処理
+	if (GetKeyboardTrigger(DIK_RETURN))
+	{
+		// アイテムが入っていたら
+		if (g_aItemQuota[g_nSelectPut].bUse == true)
+		{
+			for (int nCnt = 0; nCnt < NUM_PUTOUTITEM; nCnt++)
+			{
+				// 入れていない枠に
+				if (g_aPutQuota[nCnt].bUse == false)
+				{
+					g_aPutQuota[nCnt].nType = g_aItemQuota[g_nSelectPut].nType;
+					g_aPutQuota[nCnt].bUse = true;
+					break;
+				}
+			}
+		}
+	}
 }
 
 //=========================================================================================
@@ -384,17 +425,6 @@ void SetItem(vec3 pos, vec3 rot, ITEMTYPE type, bool bReflectGirl, bool bReflect
 			}
 		}
 	}
-}
-
-//=========================================================================================
-// アイテム設置位置保存
-void SaveItemSet(void)
-{
-	//**************************************************************
-	// 変数宣言
-	//FILE* pFile;
-
-	// fopen(, pFile);
 }
 
 //=========================================================================================

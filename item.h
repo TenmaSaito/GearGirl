@@ -82,7 +82,6 @@ void UpdateItem(void);
 void DrawItem(void);
 void SetItem(vec3 pos, vec3 rot, ITEMTYPE type, bool bReflectGirl = true, bool bReflectMouse = true, bool bColi = false);			// アイテム設置
 void CollisionItem(vec3 pos,float fRange);			// 当たり判定
-bool IsGetItem(ITEMTYPE type);
 void EnableItemPut(void);							// アイテム提出フラグを切り替え
 
 #endif // !_ITEM_H_
