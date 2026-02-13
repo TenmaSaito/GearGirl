@@ -81,6 +81,7 @@ void InitHappyEnd(void)
 	/*** 頂点バッファの設定を終了 ***/
 	g_pVtxBuffHappyend->Unlock();
 
+	// デバイスの破棄
 	EndDevice();
 }
 
@@ -138,4 +139,7 @@ void DrawHappyEnd(void)
 		// ポリゴンの描画
 		pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0 + (4 * nCntHappyend), 2);
 	}
+
+	// デバイスの破棄
+	EndDevice();
 }

@@ -15,6 +15,7 @@
 #include "modeldata.h"
 #include "Texture.h"
 #include "3Dmodel.h"
+#include "2Dpolygon.h"
 #include "field.h"
 #include "player.h"
 #include "pause.h"
@@ -66,6 +67,9 @@ void InitGame(void)
 
 	/*** 3Dモデルの初期化 ***/
 	Init3DModel();
+
+	/*** 2Dポリゴンの初期化 ***/
+	Init2DPolygon();
 
 	/*** 床の初期化 ***/
 	InitField();
@@ -132,6 +136,9 @@ void UninitGame(void)
 	/*** 3Dモデルの終了 ***/
 	Uninit3DModel();
 
+	/*** 2Dポリゴンの終了 ***/
+	Uninit2DPolygon();
+
 	/*** 床の終了 ***/
 	UninitField();
 
@@ -194,6 +201,9 @@ void UpdateGame(void)
 
 		/*** 3Dモデルの更新 ***/
 		Update3DModel();
+
+		/*** 2Dポリゴンの更新 ***/
+		Update2DPolygon();
 
 		/*** 床の更新 ***/
 		UpdateField();
@@ -301,6 +311,9 @@ void DrawGame(void)
 
 	/*** UIメニュー描画 ***/
 	DrawUImenu();
+
+	/*** 2Dポリゴンの描画 ***/
+	Draw2DPolygon();
 
 	//ポーズ状態がONの時
 	if (g_bPause == true)
