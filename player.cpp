@@ -53,7 +53,6 @@ void RotRepair(PlayerType nPlayer);	// rotにおける逆回りを防ぐ補正
 void DrawNormalPlayer(Player* pPlayer, int nCntModel, LPDIRECT3DDEVICE9 pDevice);	// プレイヤーの通常描画
 void DrawShadowPlayer(Player* pPlayer, int nCntModel, LPDIRECT3DDEVICE9 pDevice);	// プレイヤーの影の描画
 void CreateShadowMatrix(LPDIRECT3DDEVICE9 pDevice, D3DXMATRIX* pMtxPlayer, ShadowMatrix* pOut);		// シャドウマトリックスの作成
-void SetEnableZFunction(LPDIRECT3DDEVICE9 pDevice, bool bEnable);
 void CalcMatrix(Player* pPlayer);
 
 // =================================================
@@ -1636,31 +1635,5 @@ void ShotMouse(void)
 				g_nMotionCounter = 0;
 			}
 		}
-	}
-}
-
-// =================================================
-// Zテストの設定
-// =================================================
-void SetEnableZFunction(LPDIRECT3DDEVICE9 pDevice, bool bEnable)
-{
-	// 各NULLCHECK
-	if (pDevice == nullptr)
-	{
-		OutputDebugString(TEXT("pDeviceが設定されていませんよ！"));
-		return;
-	}
-
-	if (bEnable == true)
-	{
-		/*** Zテストを有効にする ***/
-		pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
-		pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
-	}
-	else
-	{
-		/*** Zテストを無効にする ***/
-		pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
-		pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
 	}
 }

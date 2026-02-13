@@ -12,6 +12,12 @@
 //**********************************************************************************
 #include "main.h"
 
+// modeldata.hが存在する場合
+#if __has_include("modeldata.h")
+#include "modeldata.h"
+#define MODELDATA_INCLUDED
+#endif
+
 //**********************************************************************************
 //*** マクロ定義 ***
 //**********************************************************************************
@@ -19,32 +25,21 @@
 #define INT_VECTOR3_NULL		(INT_VECTOR3{ 0, 0, 0 })		// INT_VECTOR3初期化
 #define INT_VECTOR2_NULL		(INT_VECTOR2{ 0, 0 })			// INT_VECTOR2初期化
 #define D3DCOLOR_NULL			(D3DCOLOR_RGBA(255, 255, 255, 255)) // D3DCOLOR_NULL
-#define INT_INFINITY			(0x7FFFFFFF)					// int_infinity
+#define INT_INFINITY			(0x7FFFFFFF)					// int型の最大(signed intの最大値)
 #define VECNULL					D3DXVECTOR3(0.0f,0.0f,0.0f)		// 省略版vectorNull
 #define VEC_X(x)				D3DXVECTOR3(x, 0.0f, 0.0f)		// Xのみ変更
 #define VEC_Y(y)				D3DXVECTOR3(0.0f, y, 0.0f)		// Yのみ変更
 #define VEC_Z(z)				D3DXVECTOR3(0.0f, 0.0f, z)		// Zのみ変更
-#define InitedVec3(name)		D3DXVECTOR3 name = {}			// 初期化済みVector3
-#define OptVec3(name, x, y, z)	D3DXVECTOR3 name = D3DXVECTOR3(x, y, z)	// 初期化混合変数宣言
 #define InitRot(x, y, z)		RepairedRot(D3DXVECTOR3(x, y, z))	// 修正済み角度
 #define DEF_COL					D3DXCOLOR_NULL					// デフォルトカラー
-#define COL_R(r)				D3DXCOLOR(r, 1.0f, 1.0f, 1.0f)	// R値変更
-#define COL_A(a)				D3DXCOLOR(1.0f, 1.0f, 1.0f, a)	// A値変更
-#define IS_SAME(a, b)			_Generic((a), (b) : 1, default 0)
+
+//----------------------------------------------------------------------------------
+/*** フラグ関連 ***/
+#define END_SHADER				(0xffffffff)						// シェーダーの終了コード
+//----------------------------------------------------------------------------------
 
 namespace MyMathUtil
 {
-	//**********************************************************************************
-	//*** カリングタイプ ***
-	//**********************************************************************************
-	typedef enum
-	{
-		CULLINGTYPE_NONE = 0,		// カリング無し
-		CULLINGTYPE_FRONT,			// 表面カリング
-		CULLINGTYPE_BACK,			// 背面カリング
-		CULLINGTYPE_MAX
-	}CULLINGTYPE;
-
 	//**********************************************************************************
 	//*** int型Vector3構造体 ***
 	//**********************************************************************************
@@ -67,26 +62,46 @@ namespace MyMathUtil
 	//**********************************************************************************
 	//*** プロトタイプ宣言 ***
 	//**********************************************************************************
+
+	//----------------------------------------------------------------------------------
+	/*** 当たり判定、角度関連 ***/
 	bool CollisionBox(RECT rect, D3DXVECTOR3 pos);
 	bool CollisionBoxZ(D3DXVECTOR4 rect, D3DXVECTOR3 pos);
-	HRESULT CheckIndex(int TargetIndexMax, int Index, int TargetIndexMin = 0);
-	POINT_RECT SetPointRect(D3DXVECTOR3 p1, D3DXVECTOR3 p2, D3DXVECTOR3 p3, D3DXVECTOR3 p4);
-	POINT_RECT SetRectToPointRect(RECT rect);
-	void HomingPosToPos(D3DXVECTOR3 posTarget, D3DXVECTOR3* posMover, float fSpeed);
-	float GetPosToPos(D3DXVECTOR3 posTarget, D3DXVECTOR3 posMover);
+	void RepairFloat(float* fRepairTarget, int nCnt = 3);
 	float RepairRot(float fRot);
 	void RepairRot(float* pOut, const float* fAngle);
 	void RepairRot(D3DXVECTOR3* pOut, const D3DXVECTOR3* pIn);
 	float InverseRot(float fRot);
 	D3DXVECTOR3 InverseRot(D3DXVECTOR3 fRot);
 	D3DXVECTOR3 RepairedRot(const D3DXVECTOR3 pIn);
+	D3DXVECTOR3 DegreeToRadian(D3DXVECTOR3 degree);
+	D3DXVECTOR3 RadianToDegree(D3DXVECTOR3 radian);
+	//----------------------------------------------------------------------------------
+
+	//----------------------------------------------------------------------------------
+	/*** D3DXVECTOR3の位置関連 ***/
+	D3DXVECTOR3 GetPTPLerp(D3DXVECTOR3 Start, D3DXVECTOR3 End, float s);
+	void HomingPosToPos(D3DXVECTOR3 posTarget, D3DXVECTOR3* posMover, float fSpeed);
+	float GetPosToPos(D3DXVECTOR3 posTarget, D3DXVECTOR3 posMover);
 	D3DXVECTOR3 GetPosBetweenPos(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2);
-	D3DXCOLOR GetRandomColor(bool bUseAlphaRand);
 	float GetPTPLength(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2);
 	float GetPTPLength3D(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2);
+	//----------------------------------------------------------------------------------
+
+	//----------------------------------------------------------------------------------
+	/*** D3DXCOLOR関連 ***/
+	D3DXCOLOR GetColLerp(D3DXCOLOR Start, D3DXCOLOR End, float s);
+	//----------------------------------------------------------------------------------
+	
+	//----------------------------------------------------------------------------------
+	/*** ランダムな値取得関連 ***/
+	D3DXVECTOR3 GetRandomVector3(int mx, int my, int mz);
+	D3DXCOLOR GetRandomColor(bool bUseAlphaRand);
+	//----------------------------------------------------------------------------------
+
+	//----------------------------------------------------------------------------------
+	/*** 頂点情報関連 ***/
 	void RollPolygon(VERTEX_2D* pVtx, D3DXVECTOR3 pos, float fWidth, float fHeight, float fRot, int nSpeed);
-	void SetVtxTexture(VERTEX_2D* pVtx, float x, float y);
-	void SetVtxTexture(VERTEX_3D* pVtx, float x, float y);
 	void SetFullScreenPolygon(VERTEX_2D* pVtx);
 	void SetPolygonSize(VERTEX_3D* pVtx, D3DXVECTOR2 size, bool bY);
 	void SetPolygonPos(VERTEX_2D* pVtx, D3DXVECTOR3 pos, D3DXVECTOR2 size);
@@ -114,20 +129,122 @@ namespace MyMathUtil
 		pVtx[2].col = col;
 		pVtx[3].col = col;
 	}
-	
-	void SetPolygonNormal(VERTEX_3D *pVtx, D3DXVECTOR3 nor);
-	void SetPolygonRHW(VERTEX_2D *pVtx);
-	D3DXVECTOR3 DegreeToRadian(D3DXVECTOR3 degree);
-	D3DXVECTOR3 RadianToDegree(D3DXVECTOR3 radian);
+
+	void SetPolygonNormal(VERTEX_3D* pVtx, D3DXVECTOR3 nor);
+	void SetPolygonRHW(VERTEX_2D* pVtx);
+	//----------------------------------------------------------------------------------
+
+	//----------------------------------------------------------------------------------
+	/*** 変換関連 ***/
 	D3DXVECTOR3 INTToFloat(INT_VECTOR3 nVector3);
 	D3DXVECTOR2 INTToFloat(INT_VECTOR2 nVector2);
-	D3DXVECTOR3 GetRandomVector3(int mx, int my, int mz);
-	void SetIndexedVertex(VERTEX_3D* pVtx, D3DXVECTOR3 pos, int nXBlock, int nZBlock, float fWidth, float fDepth);
-	int SetIndex(_Inout_ WORD* pIdx, _In_ int nXBlock, _In_ int nZBlock, _In_ int nOffSet = 0, _Inout_opt_ WORD* pIdxSub = NULL);
-	void RepairFloat(float* fRepairTarget, int nCnt = 3);
+	//----------------------------------------------------------------------------------
+
+	//----------------------------------------------------------------------------------
+	/*** 描画関連 ***/
+	void DrawPolygon(_In_ LPDIRECT3DDEVICE9 pDevice,
+		_In_ LPDIRECT3DVERTEXBUFFER9 pVtxBuff,
+		_In_opt_ LPDIRECT3DTEXTURE9 pTexture,
+		_In_ UINT VertexFormatSize,
+		_In_ DWORD FVF,
+		_In_ int nNumPolygon,
+		_In_opt_ UINT OffSet = NULL);
+
+	void DrawPolygonTextureArray(_In_ LPDIRECT3DDEVICE9 pDevice,
+		_In_ LPDIRECT3DVERTEXBUFFER9 pVtxBuff,
+		_In_ LPDIRECT3DTEXTURE9 *pTexture,
+		_In_ UINT nNumTexture,
+		_In_ const int *pArrayTexNo,
+		_In_ UINT VertexFormatSize,
+		_In_ DWORD FVF,
+		_In_ int nNumPolygon,
+		_In_opt_ UINT OffSet = NULL);
+
+	void DrawPolygonTextureFromIndex(_In_ LPDIRECT3DDEVICE9 pDevice,
+		_In_ LPDIRECT3DVERTEXBUFFER9 pVtxBuff,
+		_In_ int nIdxTexture,
+		_In_ UINT VertexFormatSize,
+		_In_ DWORD FVF,
+		_In_ int nNumPolygon,
+		_In_opt_ UINT OffSet = NULL);
+
+#pragma push_macro("NULL")
+#undef NULL
+#define NULL nullptr
+
+	void Draw3DModelFromXFile(_In_ LPDIRECT3DDEVICE9 pDevice,
+		_In_ const D3DXMATERIAL *pMat,
+		_In_ DWORD dwNumMat,
+		_In_ LPDIRECT3DTEXTURE9 *ppTexture,
+		_In_ LPD3DXMESH pMesh,
+		_In_ const D3DXMATRIX *pMtxWorld,
+		_In_opt_ const D3DXMATRIX *pMtxShadow = NULL);
+
+	void Draw3DModelByCustomColorFromXFile(_In_ LPDIRECT3DDEVICE9 pDevice,
+		_In_ const D3DXMATERIAL* pMat,
+		_In_ DWORD dwNumMat,
+		_In_ LPDIRECT3DTEXTURE9* ppTexture,
+		_In_ LPD3DXMESH pMesh,
+		_In_ const D3DXMATRIX* pMtxWorld,
+		_In_ D3DCOLORVALUE CustomColor);
+
+#ifdef MODELDATA_INCLUDED
+	void Draw3DModelFromModelData(_In_ LPDIRECT3DDEVICE9 pDevice,
+		_In_ const MODELDATA *pModelData,
+		_In_ const D3DXMATRIX *pMtxWorld,
+		_In_opt_ const D3DXMATRIX *pMtxShadow = NULL);
+
+	void Draw3DModelByCustomColorFromModelData(_In_ LPDIRECT3DDEVICE9 pDevice,
+		_In_ const MODELDATA* pModelData,
+		_In_ const D3DXMATRIX* pMtxWorld,
+		_In_ D3DCOLORVALUE CustomColor);
+#endif
+#pragma pop_macro("NULL")
+
+	D3DXMATRIX *CalcWorldMatrix(_Inout_ D3DXMATRIX *pMtxWorld,
+		_In_ D3DXVECTOR3 pos,
+		_In_ D3DXVECTOR3 rot);
+
+	D3DXMATRIX *CalcWorldMatrixFromParent(_Inout_ D3DXMATRIX *pMtxWorld,
+		_In_ const D3DXMATRIX *pMtxParent,
+		_In_ D3DXVECTOR3 pos,
+		_In_ D3DXVECTOR3 rot);
+
+	D3DXMATRIX *CreateShadowMatrix(_In_ LPDIRECT3DDEVICE9 pDevice,
+		_In_ const D3DXMATRIX *pMtxWorld,
+		_In_ D3DXVECTOR3 pos,
+		_In_ D3DXVECTOR3 nor,
+		_In_ UINT nIdxLight,
+		_Out_ D3DXMATRIX *pOut);
+
+	void SetEnableZFunction(_In_ LPDIRECT3DDEVICE9 pDevice,
+		_In_ bool bEnable);
+
+	void SetUpPixelFog(_In_ D3DXCOLOR Col,
+		_In_ float fStart,
+		_In_ float fEnd);
+
+	void CleanUpPixelFog(void);
+	//----------------------------------------------------------------------------------
+
+	//----------------------------------------------------------------------------------
+	/*** シェーダー関連 ***/
+	void SetSheder(_In_ LPD3DXEFFECT pEffect,
+		_In_ const char *TechniqueName,
+		_In_ UINT Pass);
+
+	void RemovePass(_In_ LPD3DXEFFECT pEffect,
+		_In_ UINT NextPass = END_SHADER);
+	//----------------------------------------------------------------------------------
+
+	//----------------------------------------------------------------------------------
+	/*** システム関連 ***/
+	HRESULT CheckIndex(int TargetIndexMax, int Index, int TargetIndexMin = NULL);
 	bool CheckPath(_In_ const char* pFileName);
-	char* UniteChar(char* pOut, const char* fmt, ...);
+	char *UniteChar(char* pOut, const char* fmt, ...);
 	int GenerateMessageBox(_In_ UINT nType, _In_ const char* pCaption, _In_ const char* fmt, ...);
-	void SetCullingType(D3DCULL type);
+	char *GetErrorMessage(_In_ HRESULT hr, char *pOut, size_t size, bool bPopupMessageBox);
+	//----------------------------------------------------------------------------------
 }
+
 #endif

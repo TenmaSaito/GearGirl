@@ -26,6 +26,7 @@ typedef struct
 	float fWidth;			// 横幅
 	float fSize;			// 縦もしくは横幅
 	int nIdTexture;			// テクスチャ番号
+	D3DXCOLOR col;			// 色
 	LPDIRECT3DVERTEXBUFFER9 pVtxBuff;	// 頂点バッファのポインタ
 	bool bUse;
 }_2DPOLYGON, *LP2DPOLYGON;
@@ -100,7 +101,7 @@ void Draw2DPolygon(void)
 //================================================================================================================
 // --- ポリゴンの設置処理 ---
 //================================================================================================================
-int Set2DPolygon(D3DXVECTOR3 pos, D3DXVECTOR3 rot, D3DXVECTOR2 size, int nIdTexture)
+int Set2DPolygon(D3DXVECTOR3 pos, D3DXVECTOR3 rot, D3DXVECTOR2 size, int nIdTexture, D3DXCOLOR col)
 {
 	/*** デバイスの取得 ***/
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
@@ -115,6 +116,7 @@ int Set2DPolygon(D3DXVECTOR3 pos, D3DXVECTOR3 rot, D3DXVECTOR2 size, int nIdText
 			p2DPoly->fWidth = size.x;
 			p2DPoly->fSize = size.y;
 			p2DPoly->nIdTexture = nIdTexture;
+			p2DPoly->col = col;
 			p2DPoly->bUse = true;
 
 			if (p2DPoly->pVtxBuff == NULL)
@@ -138,7 +140,7 @@ int Set2DPolygon(D3DXVECTOR3 pos, D3DXVECTOR3 rot, D3DXVECTOR2 size, int nIdText
 			MyMathUtil::SetPolygonRHW(pVtx);
 
 			/*** 頂点カラー設定 ***/
-			MyMathUtil::SetDefaultColor<VERTEX_2D>(pVtx);
+			MyMathUtil::SetDefaultColor<VERTEX_2D>(pVtx, col);
 
 			/*** テクスチャ設定 ***/
 			MyMathUtil::SetDefaultTexture<VERTEX_2D>(pVtx);
@@ -187,6 +189,30 @@ void SetPosition2DPolygon(int nId2DPolygon, D3DXVECTOR3 pos)
 	pVtx[3].pos.x = pos.x + (p2DPoly->fWidth * 0.5f);
 	pVtx[3].pos.y = pos.y + (p2DPoly->fSize * 0.5f);
 	pVtx[3].pos.z = 0.0f;
+
+	/*** 頂点バッファの設定を終了 ***/
+	p2DPoly->pVtxBuff->Unlock();
+}
+
+//================================================================================================================
+// --- ポリゴンの色を変更する処置 ---
+//================================================================================================================
+void SetColor2DPolygon(int nId2DPolygon, D3DXCOLOR col)
+{
+	if (nId2DPolygon == -1 || nId2DPolygon >= (sizeof g_a2DPolygon / sizeof(_2DPOLYGON))) return;
+	LP2DPOLYGON p2DPoly = &g_a2DPolygon[nId2DPolygon];
+	VERTEX_2D* pVtx;					// 頂点情報へのポインタ
+
+	p2DPoly->col = col;
+
+	/*** 頂点バッファの設定 ***/
+	p2DPoly->pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+
+	/*** 頂点座標の設定 ***/
+	pVtx[0].col = col;
+	pVtx[1].col = col;
+	pVtx[2].col = col;
+	pVtx[3].col = col;
 
 	/*** 頂点バッファの設定を終了 ***/
 	p2DPoly->pVtxBuff->Unlock();

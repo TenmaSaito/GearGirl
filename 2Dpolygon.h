@@ -24,7 +24,8 @@ void Uninit2DPolygon(void);
 void Update2DPolygon(void);
 void Draw2DPolygon(void);
 
-int Set2DPolygon(D3DXVECTOR3 pos, D3DXVECTOR3 rot, D3DXVECTOR2 size, int nIdTexture = -1);
-void SetPosition2DPolygon(int nIdPolygon, D3DXVECTOR3 pos);
-void Destroy2DPolygon(int nIdx2DPolygon);
+int Set2DPolygon(D3DXVECTOR3 pos, D3DXVECTOR3 rot, D3DXVECTOR2 size, int nIdTexture = -1, D3DXCOLOR col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
+void SetPosition2DPolygon(int nId2DPolygon, D3DXVECTOR3 pos);
+void SetColor2DPolygon(int nId2DPolygon, D3DXCOLOR col);
+void Destroy2DPolygon(int nId2DPolygon);
 #endif
