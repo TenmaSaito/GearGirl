@@ -81,6 +81,7 @@ void InitNormalEnd(void)
 	/*** 頂点バッファの設定を終了 ***/
 	g_pVtxBuffNormalend->Unlock();
 
+	// デバイスの破棄
 	EndDevice();
 }
 
@@ -138,4 +139,6 @@ void DrawNormalEnd(void)
 		// ポリゴンの描画
 		pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0 + (4 * nCntNormalend), 2);
 	}
+	// デバイスの破棄
+	EndDevice();
 }
