@@ -195,7 +195,7 @@ void SetPosition2DPolygon(int nId2DPolygon, D3DXVECTOR3 pos)
 }
 
 //================================================================================================================
-// --- ポリゴンの色を変更する処置 ---
+// --- ポリゴンの色を変更する処理 ---
 //================================================================================================================
 void SetColor2DPolygon(int nId2DPolygon, D3DXCOLOR col)
 {
@@ -216,6 +216,43 @@ void SetColor2DPolygon(int nId2DPolygon, D3DXCOLOR col)
 
 	/*** 頂点バッファの設定を終了 ***/
 	p2DPoly->pVtxBuff->Unlock();
+}
+
+//================================================================================================================
+// --- ポリゴンのサイズを変更する処理 ---
+//================================================================================================================
+void SetSize2DPolygon(int nId2DPolygon, D3DXVECTOR2 size)
+{
+	if (nId2DPolygon == -1 || nId2DPolygon >= (sizeof g_a2DPolygon / sizeof(_2DPOLYGON))) return;
+	LP2DPOLYGON p2DPoly = &g_a2DPolygon[nId2DPolygon];
+	VERTEX_2D* pVtx;					// 頂点情報へのポインタ
+
+	p2DPoly->fWidth = size.x;
+	p2DPoly->fSize = size.y;
+
+	/*** 頂点バッファの設定 ***/
+	p2DPoly->pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+
+	/*** 頂点座標の設定 ***/
+	pVtx[0].pos.x = p2DPoly->pos.x - (p2DPoly->fWidth * 0.5f);
+	pVtx[0].pos.y = p2DPoly->pos.y - (p2DPoly->fSize * 0.5f);
+	pVtx[0].pos.z = 0.0f;
+
+	pVtx[1].pos.x = p2DPoly->pos.x + (p2DPoly->fWidth * 0.5f);
+	pVtx[1].pos.y = p2DPoly->pos.y - (p2DPoly->fSize * 0.5f);
+	pVtx[1].pos.z = 0.0f;
+
+	pVtx[2].pos.x = p2DPoly->pos.x - (p2DPoly->fWidth * 0.5f);
+	pVtx[2].pos.y = p2DPoly->pos.y + (p2DPoly->fSize * 0.5f);
+	pVtx[2].pos.z = 0.0f;
+
+	pVtx[3].pos.x = p2DPoly->pos.x + (p2DPoly->fWidth * 0.5f);
+	pVtx[3].pos.y = p2DPoly->pos.y + (p2DPoly->fSize * 0.5f);
+	pVtx[3].pos.z = 0.0f;
+
+	/*** 頂点バッファの設定を終了 ***/
+	p2DPoly->pVtxBuff->Unlock();
+
 }
 
 //================================================================================================================
