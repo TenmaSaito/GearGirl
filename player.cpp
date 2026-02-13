@@ -16,6 +16,7 @@
 #include "modeldata.h"
 #include "motion.h"
 #include "player.h"
+#include "titleselect.h"
 #include "MathUtil.h"
 
 using namespace MyMathUtil;
@@ -160,7 +161,7 @@ void InitPlayer(void)
 	}
 
 	// === グローバル変数の初期化 === // 
-	g_nNumPlayer = 1;		// プレイ人数
+	g_nNumPlayer = GetPlayerNum();		// プレイ人数
 	g_ActivePlayer = 0;		// 現在の操作対象
 	g_Functionkey = 0;		// デバッグ表示の切り替え用
 	g_Land = 0;				// 着地モーションが再生された回数
@@ -168,6 +169,7 @@ void InitPlayer(void)
 	g_armPlayer = ARMTYPE_NORMAL;	// 通常アーム
 	g_aMovePlayer[0] = false;
 	g_aMovePlayer[1] = false;
+
 
 	// デバイスの破棄
 	EndDevice();
