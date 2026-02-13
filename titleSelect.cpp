@@ -322,7 +322,10 @@ void ChangePhase(void)
 				g_nPlayerNum = 2;
 			}
 
-			SetFade(MODE_GAME);
+			if (GetFade() == FADE_NONE)
+			{
+				SetFade(MODE_GAME);
+			}
 		}
 	}
 	else if (GetKeyboardTrigger(DIK_BACK) && g_nPhaseSelect > 0)

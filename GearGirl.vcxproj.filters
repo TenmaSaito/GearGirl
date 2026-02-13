@@ -207,6 +207,9 @@
     <ClCompile Include="titleSelect.cpp">
       <Filter>ソース ファイル\mode\Title</Filter>
     </ClCompile>
+    <ClCompile Include="judgeEnd.cpp">
+      <Filter>ソース ファイル\mode\game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h">
@@ -322,6 +325,9 @@
     </ClInclude>
     <ClInclude Include="titleSelect.h">
       <Filter>ヘッダー ファイル\mode\Title</Filter>
+    </ClInclude>
+    <ClInclude Include="judgeEnd.h">
+      <Filter>ヘッダー ファイル\mode\game</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
