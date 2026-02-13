@@ -92,7 +92,7 @@ void InitItem(void)
 	{
 		pItemQuota->nIdxBox = Set2DPolygon(vec3(SCREEN_WIDTH / ITEMTYPE_MAX * (nCntQuota + 0.5f), SCREEN_HEIGHT * 0.9f, 0.0f), vec3_ZERO, vec2(SCREEN_WIDTH * 0.05f, SCREEN_WIDTH * 0.05f), -1, colX_ZERO);
 		pItemQuota->nType = -1;
-		pItemQuota->bUse = true;
+		pItemQuota->bUse = false;
 	}
 
 	// ’ñoŽž—p‚Ì˜g‚ðŽæ“¾
@@ -100,7 +100,7 @@ void InitItem(void)
 	{
 		pItemQuota->nIdxBox = Set2DPolygon(vec3_ZERO, vec3_ZERO, vec2_ZERO, -1, colX_ZERO);
 		pItemQuota->nType = -1;
-		pItemQuota->bUse = true;
+		pItemQuota->bUse = false;
 	}
 
 	// Ý’u
@@ -301,6 +301,7 @@ void CollisionItem(vec3 pos, float fRange)
 						pItemQuota->bUse = true;
 						pItemQuota->nType = (int)pItem->type;
 						pItem->nIdxQuota = nCntQuota;
+						break;
 					}
 				}
 				pItem->bGet = true;
@@ -321,7 +322,7 @@ void PutOut(P_ITEMQUOTA* ppItemQuota)
 		// ˆÊ’u‚ðXV
 		SetPosition2DPolygon(pItemQuota->nIdxBox, vec3(SCREEN_WIDTH / ITEMTYPE_MAX * (nCntQuota + 0.5f), SCREEN_HEIGHT * 0.5f, 0.0f));
 
-		if (pItemQuota->nType != -1)
+		if (pItemQuota->bUse)
 		{// ƒAƒCƒeƒ€‚ª“o˜^‚³‚ê‚Ä‚¢‚é
 			SetColor2DPolygon(pItemQuota->nIdxBox, colX(1.0f, 1.0f, 1.0f, 0.5f));// ˜g‚ð–¾‚é‚­				
 				// ‘I‘ð’†‚È‚ç
@@ -330,7 +331,6 @@ void PutOut(P_ITEMQUOTA* ppItemQuota)
 		else
 		{// ‚³‚ê‚Ä‚È‚¢
 			SetColor2DPolygon(pItemQuota->nIdxBox, colX(0.3f, 0.3f, 0.3f, 0.3f));// ˜g‚ð”–ˆÃ‚­
-
 		}
 	}
 	
