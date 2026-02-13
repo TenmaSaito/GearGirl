@@ -36,5 +36,5 @@ void UninitTitleSelect(void);
 void UpdateTitleSelect(void);
 void DrawTitleSelect(void);
 
-TITLE_MENU GetMenuType(void);
+int GetPlayerNum(void);
 #endif

@@ -243,7 +243,7 @@ void UpdateTitle(void)
 	{
 		if (GetFade() == FADE_NONE)
 		{
-			SetFade(MODE_GAME);
+//			SetFade(MODE_GAME);
 		}
 	}
 
