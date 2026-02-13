@@ -556,6 +556,8 @@ bool LoadModel(void)
 				D3DXVECTOR3 position;
 				INT_VECTOR3 rotation;
 				ITEMTYPE Type;
+				int nVisible = 0;
+				bool bVisible[2] = {};
 
 				while (1)
 				{
@@ -601,10 +603,38 @@ bool LoadModel(void)
 							(void)sscanf(pEqual, "%d %d %d", &rotation.x, &rotation.y, &rotation.z);
 						}
 					}
+					if (strstr(&Realize[0], "VISIBLE") != NULL)
+					{
+						pEqual = strstr(Realize, "=");
+
+						if (pEqual != NULL)
+						{
+							// アドレスを1こずらす
+							pEqual++;
+
+							// 地面の向きを読み込む
+							(void)sscanf(pEqual, "%d", &nVisible);
+							if (nVisible == 0)
+							{
+								bVisible[0] = true;
+								bVisible[1] = true;
+							}
+							else if (nVisible == 1)
+							{
+								bVisible[0] = true;
+								bVisible[1] = false;
+							}
+							else
+							{
+								bVisible[0] = false;
+								bVisible[1] = true;
+							}
+						}
+					}
 					if (strstr(&Realize[0], "END_ITEMSET") != NULL)
 					{
 						D3DXVECTOR3 rotationF = DegreeToRadian(INTToFloat(rotation));
-						SetItem(position, rotationF, Type);
+						SetItem(position, rotationF, Type, bVisible[0], bVisible[1]);
 						break;
 					}
 				}

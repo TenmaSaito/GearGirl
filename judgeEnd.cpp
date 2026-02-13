@@ -100,7 +100,7 @@ void JudgmentEnding(ITEMTYPE *pIn, UINT size)
 	{
 		for (UINT nCntItemFalse = 0; nCntItemFalse < nCntFalse; nCntItemFalse++)
 		{
-			if (aTypeTrue[nCntItem] == aTypeFalse[nCntItemFalse])
+			if (aTypeTrue[nCntItem] == aTypeFalse[nCntItemFalse] - 5)
 			{
 				aSuffer[nCountTrue] = true;
 				nCountTrue++;
