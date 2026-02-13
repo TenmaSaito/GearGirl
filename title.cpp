@@ -10,29 +10,34 @@
 #include "title.h"
 #include "input.h"
 #include "fade.h"
-#include "2Dpolygon.h"
+#include "titleSelect.h"
 
 //**********************************************************************************
 //*** マクロ定義 ***
 //**********************************************************************************
+#if 0
 #define MAX_TITLE			TITLE_MENU_MAX		// タイトルの種類
 #define HEIGHT_SIZE_TITLE	50.0f 				// 縦サイズ
 #define WIDTH_SIZE_TITLE	300.0f				// 横サイズ
 #define LINE_SPACE_TITLE	5.0f				// 行間隔
 #define WIDTH_CENTER_LINE	SCREEN_WIDTH / 2	// 横中央線
+#endif
 
 //**********************************************************************************
 //*** プロトタイプ宣言 ***
 //**********************************************************************************
+#if 0
 LPDIRECT3DTEXTURE9		g_apTextureTitle[MAX_TITLE] = {};	// テクスチャへのポインタ
 LPDIRECT3DVERTEXBUFFER9	g_pVtxBuffTitle = NULL;				// 頂点バッファへのポインタ
 D3DXVECTOR3				g_posTitle[MAX_TITLE];				// 位置
 int nTitleData;
 int nCntData = 100;
+#endif
 
 //**********************************************************************************
 // テクスチャファイル名
 //**********************************************************************************
+#if 0
 const char* c_apFilenameTitle[MAX_TITLE] =
 {
 	"data\\TEXTURE\\TitleTapToStart.png",
@@ -42,6 +47,7 @@ const char* c_apFilenameTitle[MAX_TITLE] =
 	"data\\TEXTURE\\Title1Player.png",
 	"data\\TEXTURE\\Title2Player.png",
 };
+#endif
 
 //**********************************************************************************
 //*** グローバル変数 ***
@@ -53,14 +59,10 @@ int g_nIdx2DPolygon;		// 設置した2Dポリゴンのインデックス
 //==================================================================================
 void InitTitle(void)
 {
+	InitTitleSelect();
+
+#if 0
 	/*** Aの初期化 ***/
-
-	/*** 2Dポリゴンの初期化 ***/
-	Init2DPolygon();
-
-	/*** 2Dポリゴンの設置(例) ***/
-	g_nIdx2DPolygon = Set2DPolygon(WINDOW_MID, D3DXVECTOR3_NULL, D3DXVECTOR2(SCREEN_WIDTH, SCREEN_HEIGHT));
-
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();		// デバイスへのポインタの取得
 	VERTEX_2D* pVtx;								// 頂点情報へのポインタ
 
@@ -146,6 +148,7 @@ void InitTitle(void)
 	//-------------------------------------
 	// 頂点バッファをアンロック
 	g_pVtxBuffTitle->Unlock();
+#endif
 }
 
 //==================================================================================
@@ -154,10 +157,9 @@ void InitTitle(void)
 void UninitTitle(void)
 {
 	/*** Aの終了 ***/
+	UninitTitleSelect();
 
-	/*** 2Dポリゴンの終了 ***/
-	Uninit2DPolygon();
-
+#if 0
 	//-------------------------------------
 	// テクスチャの破棄
 	//-------------------------------------
@@ -178,6 +180,7 @@ void UninitTitle(void)
 		g_pVtxBuffTitle->Release();
 		g_pVtxBuffTitle = NULL;
 	}
+#endif
 }
 
 //==================================================================================
@@ -185,6 +188,7 @@ void UninitTitle(void)
 //==================================================================================
 void UpdateTitle(void)
 {
+#if 0
 	VERTEX_2D* pVtx;			// 頂点情報へのポインタ
 	FADE pFade = GetFade();		// フェード情報の取得
 	nCntData++;
@@ -231,6 +235,7 @@ void UpdateTitle(void)
 	//頂点バッファをアンロック
 	g_pVtxBuffTitle->Unlock();
 
+#endif
 	// モード変更
 	if (GetKeyboardTrigger(DIK_RETURN)
 		|| GetJoypadTrigger(0, JOYKEY_A)
@@ -243,9 +248,7 @@ void UpdateTitle(void)
 	}
 
 	/*** Aの更新 ***/
-
-	/*** 2Dポリゴンの更新 ***/
-	Update2DPolygon();
+	UpdateTitleSelect();
 }
 
 //==================================================================================
@@ -253,6 +256,7 @@ void UpdateTitle(void)
 //==================================================================================
 void DrawTitle(void)
 {
+#if 0
 	// VERTEX_3D ============================================
 	/*** Aの描画 ***/
 
@@ -285,4 +289,7 @@ void DrawTitle(void)
 			nCntTitle * 4,			// 描画する最初の頂点インデックス
 			2);						// プリミティブ(ポリゴン)数
 	}
+#endif
+
+	DrawTitleSelect();
 }

@@ -8,6 +8,7 @@
 //*** インクルードファイル ***
 //**********************************************************************************
 #include "mathUtil.h"
+#include "Texture.h"
 
 //**********************************************************************************
 //*** グローバル変数 ***
@@ -58,36 +59,6 @@ HRESULT MyMathUtil::CheckIndex(int TargetIndexMax, int Index, int TargetIndexMin
 	}
 
 	return S_OK;
-}
-
-//================================================
-// --- 四点指定処理 ---
-//================================================
-POINT_RECT MyMathUtil::SetPointRect(D3DXVECTOR3 p1, D3DXVECTOR3 p2, D3DXVECTOR3 p3, D3DXVECTOR3 p4)
-{
-	POINT_RECT pointrect = {};
-
-	pointrect.point1 = p1;
-	pointrect.point2 = p2;
-	pointrect.point3 = p3;
-	pointrect.point4 = p4;
-
-	return pointrect;
-}
-
-//================================================
-// --- RECTからPointRectへの変換処理 ---
-//================================================
-POINT_RECT MyMathUtil::SetRectToPointRect(RECT rect)
-{
-	POINT_RECT prRect = {};
-
-	prRect.point1 = D3DXVECTOR3((float)rect.left, (float)rect.top, 0.0f);
-	prRect.point2 = D3DXVECTOR3((float)rect.right, (float)rect.top, 0.0f);
-	prRect.point3 = D3DXVECTOR3((float)rect.left, (float)rect.bottom, 0.0f);
-	prRect.point4 = D3DXVECTOR3((float)rect.right, (float)rect.bottom, 0.0f);
-
-	return prRect;
 }
 
 //==================================================================
@@ -451,13 +422,25 @@ void MyMathUtil::SetFullScreenPolygon(VERTEX_2D* pVtx)
 	pVtx[3].pos.x = SCREEN_WIDTH;
 	pVtx[3].pos.y = SCREEN_HEIGHT;
 	pVtx[3].pos.z = 0.0f;
-}
 
-//==================================================================
-// --- ポリゴンのテクスチャを設定する処理 ---
-//==================================================================
-//template<typename VERTEX>
-//void MyMathUtil::SetDefaultTexture(VERTEX* pVtx);
+	/*** 座標変換用係数の設定 ***/
+	pVtx[0].rhw = 1.0f;
+	pVtx[1].rhw = 1.0f;
+	pVtx[2].rhw = 1.0f;
+	pVtx[3].rhw = 1.0f;
+
+	/*** 頂点カラー設定 ***/
+	pVtx[0].col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	pVtx[1].col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	pVtx[2].col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	pVtx[3].col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+
+	/*** テクスチャ座標の設定 ***/
+	pVtx[0].tex = D3DXVECTOR2(0.0f, 0.0f);
+	pVtx[1].tex = D3DXVECTOR2(1.0f, 0.0f);
+	pVtx[2].tex = D3DXVECTOR2(0.0f, 1.0f);
+	pVtx[3].tex = D3DXVECTOR2(1.0f, 1.0f);
+}
 
 //==================================================================
 // --- ポリゴンの法線を設定する処理 ---
@@ -641,52 +624,6 @@ D3DXVECTOR2 MyMathUtil::INTToFloat(INT_VECTOR2 nVector2)
 }
 
 //==================================================================
-// --- テクスチャ設定処理 ---
-//==================================================================
-void MyMathUtil::SetVtxTexture(VERTEX_2D* pVtx, float x, float y)
-{
-	if (pVtx == NULL)
-	{
-		return;
-	}
-
-	pVtx[0].tex.x = 0.0f;
-	pVtx[0].tex.y = 0.0f;
-
-	pVtx[1].tex.x = 1.0f * x;
-	pVtx[1].tex.y = 0.0f;
-
-	pVtx[2].tex.x = 0.0f;
-	pVtx[2].tex.y = 1.0f * y;
-
-	pVtx[3].tex.x = 1.0f * x;
-	pVtx[3].tex.y = 1.0f * y;
-}
-
-//==================================================================
-// --- テクスチャ設定処理 ---
-//==================================================================
-void MyMathUtil::SetVtxTexture(VERTEX_3D* pVtx, float x, float y)
-{
-	if (pVtx == NULL)
-	{
-		return;
-	}
-
-	pVtx[0].tex.x = 0.0f;
-	pVtx[0].tex.y = 0.0f;
-
-	pVtx[1].tex.x = 1.0f * x;
-	pVtx[1].tex.y = 0.0f;
-
-	pVtx[2].tex.x = 0.0f;
-	pVtx[2].tex.y = 1.0f * y;
-
-	pVtx[3].tex.x = 1.0f * x;
-	pVtx[3].tex.y = 1.0f * y;
-}
-
-//==================================================================
 // --- 位置ランダム設定処理 ---
 //==================================================================
 D3DXVECTOR3 MyMathUtil::GetRandomVector3(int mx, int my, int mz)
@@ -703,127 +640,6 @@ D3DXVECTOR3 MyMathUtil::GetRandomVector3(int mx, int my, int mz)
 	Vector3.z = (FLOAT)z;
 
 	return Vector3;
-}
-
-//==================================================================
-// --- インデックスを利用したメッシュ頂点座標設定処理 ---
-//==================================================================
-void MyMathUtil::SetIndexedVertex(VERTEX_3D* pVtx, D3DXVECTOR3 pos, int nXBlock, int nZBlock, float fWidth, float fDepth)
-{
-	float fOnceWidth = fWidth / (nXBlock + 1);
-	float fOnceDepth = fDepth / (nZBlock + 1);
-	float fX = ((nXBlock - 1) / 2);
-
-	/*** NULLチェック ***/
-	if (pVtx == NULL)
-	{
-		return;
-	}
-
-	for (int nCntZBlock = 0; nCntZBlock < (nZBlock + 1); nCntZBlock++)
-	{
-		for (int nCntXBlock = 0; nCntXBlock < (nXBlock + 1); nCntXBlock++)
-		{
-			pVtx[nCntXBlock + (nCntZBlock * (nXBlock + 1))].pos.x = pos.x - (fWidth * 0.5f) + (fOnceWidth * nCntXBlock);
-			pVtx[nCntXBlock + (nCntZBlock * (nXBlock + 1))].pos.y = pos.y;
-			pVtx[nCntXBlock + (nCntZBlock * (nXBlock + 1))].pos.z = pos.z + (fDepth * 0.5f) - (fOnceDepth * nCntZBlock);
-			pVtx[nCntXBlock + (nCntZBlock * (nXBlock + 1))].tex.x = (nCntXBlock * 1.0f);
-			pVtx[nCntXBlock + (nCntZBlock * (nXBlock + 1))].tex.y = (nCntZBlock * 1.0f);
-			pVtx[nCntXBlock + (nCntZBlock * (nXBlock + 1))].nor = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
-			pVtx[nCntXBlock + (nCntZBlock * (nXBlock + 1))].col = D3DXCOLOR_NULL;
-		}
-	}
-}
-
-//==================================================================
-// --- インデックスの頂点番号設定処理 ---
-//==================================================================
-int MyMathUtil::SetIndex(_Inout_ WORD *pIdx, _In_ int nXBlock, _In_ int nZBlock, _In_ int nOffSet, _Inout_opt_ WORD *pIdxSub)
-{
-	int nMaxIndex = (((nXBlock + 1) * 2) * nZBlock) + (2 * (nZBlock - 1));
-	int nCount = 0;
-	int nCounts = 0;
-	int nLine = 0;
-	int nCntIndex;
-	if (pIdx == NULL)
-	{
-		return -1;
-	}
-
-	for (nCntIndex = 0; nCntIndex < nMaxIndex; nCntIndex++)
-	{
-		if (nCntIndex != 0 && nCounts == (nXBlock + 1))
-		{ // 0ではなく、且つ上辺の点が右端に着いたとき
-			nCounts--;
-			pIdx[nCntIndex] = nCounts + ((nXBlock + 1) * nLine);
-
-			if (pIdxSub != NULL)
-			{
-				pIdxSub[nCntIndex] = pIdx[nCntIndex];
-			}
-
-			pIdx[nCntIndex] += nOffSet;
-
-			nCounts = 0;
-		}
-		else if (nCntIndex != 0 && nCount == (nXBlock + 1) && nCounts == 0)
-		{ // 0ではなく、且つ右端の多重設定が済んでいる且つ、下辺の点が右端に着いたとき
-			nCount = 0;
-			nLine++;
-			pIdx[nCntIndex] = nCount + ((nXBlock + 1) * (nLine + 1));
-
-			if (pIdxSub != NULL)
-			{
-				pIdxSub[nCntIndex] = pIdx[nCntIndex];
-			}
-
-			pIdx[nCntIndex] += nOffSet;
-		}
-		else
-		{
-			if (nCntIndex == 0)
-			{ // 初回限定0の場合
-				pIdx[nCntIndex] = nCount + ((nXBlock + 1) * (nLine + 1));
-
-				if (pIdxSub != NULL)
-				{
-					pIdxSub[nCntIndex] = pIdx[nCntIndex];
-				}
-
-				pIdx[nCntIndex] += nOffSet;
-
-				nCount++;
-			}
-			else if (nCntIndex % 2 == 0)
-			{ // 偶数の場合	
-				pIdx[nCntIndex] = nCount + ((nXBlock + 1) * (nLine + 1));
-
-				if (pIdxSub != NULL)
-				{
-					pIdxSub[nCntIndex] = pIdx[nCntIndex];
-				}
-
-				pIdx[nCntIndex] += nOffSet;
-
-				nCount++;
-			}
-			else
-			{ // 奇数の場合
-				pIdx[nCntIndex] = nCounts + ((nXBlock + 1) * nLine);
-
-				if (pIdxSub != NULL)
-				{
-					pIdxSub[nCntIndex] = pIdx[nCntIndex];
-				}
-
-				pIdx[nCntIndex] += nOffSet;
-
-				nCounts++;
-			}
-		}
-	}
-
-	return nCntIndex;
 }
 
 //==================================================================
@@ -860,7 +676,7 @@ bool MyMathUtil::CheckPath(_In_ const char *pFileName)
 //==================================================================
 // --- 書式付き文字列設定処理 ---
 //==================================================================
-char * MyMathUtil::UniteChar(char* pOut, const char* fmt, ...)
+char *MyMathUtil::UniteChar(char* pOut, const char* fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -895,7 +711,7 @@ char * MyMathUtil::UniteChar(char* pOut, const char* fmt, ...)
 
 			case 'f':
 
-				f = va_arg(ap, double);
+				f = (float)va_arg(ap, double);
 				nc += sprintf(&aStr[0], "%f", f);
 
 				/*** 文字列を結合 ***/
@@ -1049,7 +865,7 @@ char * MyMathUtil::UniteChar(char* pOut, const char* fmt, ...)
 
 	strcpy(pOut, &aStrOut[0]);
 
-	return &aStrOut[0];
+	return pOut;
 }
 
 //==================================================================
@@ -1057,15 +873,16 @@ char * MyMathUtil::UniteChar(char* pOut, const char* fmt, ...)
 //==================================================================
 int MyMathUtil::GenerateMessageBox(_In_ UINT nType, _In_ const char* pCaption, _In_ const char* fmt, ...)
 {
-#ifdef _DEBUG
 	HWND hWnd = GetHandleWindow();
 	if (hWnd == NULL)
 	{
 		return -1;
 	}
 
-	// フォーマット取得失敗時
-	if (fmt == nullptr) return -1;
+	if (pCaption == NULL || fmt == NULL)
+	{
+		return -1;
+	}
 
 	va_list ap;
 	va_start(ap, fmt);
@@ -1100,7 +917,7 @@ int MyMathUtil::GenerateMessageBox(_In_ UINT nType, _In_ const char* pCaption, _
 
 			case 'f':
 
-				f = va_arg(ap, double);
+				f = (float)va_arg(ap, double);
 				nc += sprintf(&aStr[0], "%f", f);
 
 				/*** 文字列を結合 ***/
@@ -1168,7 +985,7 @@ int MyMathUtil::GenerateMessageBox(_In_ UINT nType, _In_ const char* pCaption, _
 					{
 						memset(aStr, 0, sizeof aStr);
 
-						f = va_arg(ap, double);
+						f = (float)va_arg(ap, double);
 						nc += sprintf(&aStr[0], "%f ", f);
 
 						/*** 文字列を結合 ***/
@@ -1254,17 +1071,707 @@ int MyMathUtil::GenerateMessageBox(_In_ UINT nType, _In_ const char* pCaption, _
 
 	int nReturn = MessageBox(hWnd, &aStrOut[0], pCaption, nType);
 	return nReturn;
-#endif
-
-	return 0;
 }
 
-//==================================================================
-// --- カリングタイプ設定処理 ---
-//==================================================================
-void MyMathUtil::SetCullingType(D3DCULL type)
+//==================================================================================
+// --- 二点間のLerp変換 ---
+//==================================================================================
+D3DXVECTOR3 MyMathUtil::GetPTPLerp(D3DXVECTOR3 Start, D3DXVECTOR3 End, float s)
+{
+	D3DXVECTOR3 returnLerp = D3DXVECTOR3(0, 0, 0);
+
+	// ベクトルの差分を求める
+	returnLerp = End - Start;
+
+	// 差分をsを使用して割合計算
+	returnLerp *= s;
+
+	// 開始位置から加算して位置を取得
+	returnLerp += Start;
+
+	return returnLerp;
+}
+
+//==================================================================================
+// --- 二色間のLerp変換 ---
+//==================================================================================
+D3DXCOLOR MyMathUtil::GetColLerp(D3DXCOLOR Start, D3DXCOLOR End, float s)
+{
+	D3DXCOLOR returnCol = D3DXCOLOR(1, 1, 1, 1);
+
+	returnCol = End - Start;
+	returnCol *= s;
+	returnCol += Start;
+
+	return returnCol;
+}
+
+//==================================================================================
+// --- ポリゴン描画(テクスチャバッファ使用) ---
+//==================================================================================
+void MyMathUtil::DrawPolygon(_In_ const LPDIRECT3DDEVICE9 pDevice,
+	_In_ const LPDIRECT3DVERTEXBUFFER9 pVtxBuff,
+	_In_opt_ const LPDIRECT3DTEXTURE9 pTexture,
+	_In_ UINT VertexFormatSize,
+	_In_ DWORD FVF,
+	_In_ int nNumPolygon,
+	_In_opt_ UINT OffSet)
+{
+	// NULLCHECK
+	if (pDevice == nullptr)
+	{
+		OutputDebugString(TEXT("pDeviceが設定されていません！"));
+		return;
+	}
+
+	// NULLCHECK
+	if (pVtxBuff == nullptr)
+	{
+		OutputDebugString(TEXT("pVtxBuffが設定されていません！"));
+		return;
+	}
+
+	for (int nCntPoly = OffSet; nCntPoly < nNumPolygon; nCntPoly++)
+	{
+		/*** 頂点バッファをデータストリームに設定 ***/
+		pDevice->SetStreamSource(0, pVtxBuff, 0, VertexFormatSize);
+
+		/*** 頂点フォーマットの設定 ***/
+		pDevice->SetFVF(FVF);
+
+		/*** テクスチャの設定 ***/
+		pDevice->SetTexture(0, pTexture);
+
+		/*** ポリゴンの描画 ***/
+		pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP,		// プリミティブの種類
+			4 * nCntPoly,								// 描画する最初の頂点インデックス
+			2);											// 描画するプリミティブの数
+	}
+}
+
+//==================================================================================
+// --- ポリゴン描画(配列テクスチャバッファ使用) ---
+//==================================================================================
+void MyMathUtil::DrawPolygonTextureArray(_In_ LPDIRECT3DDEVICE9 pDevice,
+	_In_ LPDIRECT3DVERTEXBUFFER9 pVtxBuff,
+	_In_ LPDIRECT3DTEXTURE9* pTexture,
+	_In_ UINT nNumTexture,
+	_In_ const int* pArrayTexNo,
+	_In_ UINT VertexFormatSize,
+	_In_ DWORD FVF,
+	_In_ int nNumPolygon,
+	_In_opt_ UINT OffSet)
+{
+	// NULLCHECK
+	if (pDevice == nullptr)
+	{
+		OutputDebugString(TEXT("pDeviceが設定されていません！"));
+		return;
+	}
+
+	// NULLCHECK
+	if (pVtxBuff == nullptr)
+	{
+		OutputDebugString(TEXT("pVtxBuffが設定されていません！"));
+		return;
+	}
+
+	// NULLCHECK
+	if (pArrayTexNo == nullptr)
+	{
+		OutputDebugString(TEXT("pArrayTexNoが設定されていません！"));
+		return;
+	}
+
+	for (int nCntPoly = OffSet; nCntPoly < nNumPolygon; nCntPoly++)
+	{
+		/*** 頂点バッファをデータストリームに設定 ***/
+		pDevice->SetStreamSource(0, pVtxBuff, 0, VertexFormatSize);
+
+		/*** 頂点フォーマットの設定 ***/
+		pDevice->SetFVF(FVF);
+
+		/*** テクスチャの設定 ***/
+		pDevice->SetTexture(0, pTexture[pArrayTexNo[nCntPoly]]);
+
+		/*** ポリゴンの描画 ***/
+		pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP,		// プリミティブの種類
+			4 * nCntPoly,								// 描画する最初の頂点インデックス
+			2);											// 描画するプリミティブの数
+	}
+}
+
+//==================================================================================
+// --- ポリゴン描画(GetTexture使用) ---
+//==================================================================================
+void MyMathUtil::DrawPolygonTextureFromIndex(_In_ LPDIRECT3DDEVICE9 pDevice,
+	_In_ LPDIRECT3DVERTEXBUFFER9 pVtxBuff,
+	_In_ int nIdxTexture,
+	_In_ UINT VertexFormatSize,
+	_In_ DWORD FVF,
+	_In_ int nNumPolygon,
+	_In_opt_ UINT OffSet)
+{
+	// NULLCHECK
+	if (pDevice == nullptr)
+	{
+		OutputDebugString(TEXT("pDeviceが設定されていません！"));
+		return;
+	}
+
+	// NULLCHECK
+	if (pVtxBuff == nullptr)
+	{
+		OutputDebugString(TEXT("pVtxBuffがnullですわ～！おバカですわ～！"));
+		return;
+	}
+
+	for (int nCntPoly = OffSet; nCntPoly < nNumPolygon; nCntPoly++)
+	{
+		/*** 頂点バッファをデータストリームに設定 ***/
+		pDevice->SetStreamSource(0, pVtxBuff, 0, VertexFormatSize);
+
+		/*** 頂点フォーマットの設定 ***/
+		pDevice->SetFVF(FVF);
+
+		/*** テクスチャの設定 ***/
+		pDevice->SetTexture(0, GetTexture(nIdxTexture));
+
+		/*** ポリゴンの描画 ***/
+		pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP,		// プリミティブの種類
+			4 * nCntPoly,								// 描画する最初の頂点インデックス
+			2);											// 描画するプリミティブの数
+	}
+}
+
+//==================================================================================
+// --- モデル描画 ---
+//==================================================================================
+void MyMathUtil::Draw3DModelFromXFile(_In_ LPDIRECT3DDEVICE9 pDevice,
+	_In_ const D3DXMATERIAL *pMat,
+	_In_ DWORD dwNumMat,
+	_In_ LPDIRECT3DTEXTURE9* ppTexture,
+	_In_ LPD3DXMESH pMesh,
+	_In_ const D3DXMATRIX *pMtxWorld,
+	_In_opt_ const D3DXMATRIX *pMtxShadow)
+{
+	// NULLCHECK
+	if (pDevice == nullptr)
+	{
+		OutputDebugString(TEXT("pDeviceが設定されていません！"));
+		return;
+	}
+
+	// NULLCHECK
+	if (pMat == nullptr)
+	{
+		OutputDebugString(TEXT("pMatがないよ！"));
+		return;
+	}
+
+	// NULLCHECK
+	if (ppTexture == nullptr)
+	{
+		OutputDebugString(TEXT("ppTextureが...ぐっ！"));
+		return;
+	}
+
+	// NULLCHECK
+	if (pMesh == nullptr)
+	{
+		OutputDebugString(TEXT("pMeshが...無い。"));
+		return;
+	}
+
+	if (pMtxShadow != nullptr)
+	{ // シャドウマトリックスが付与されていた場合、影に設定
+		/*** ワールドマトリックスの設定 ***/
+		pDevice->SetTransform(D3DTS_WORLD, pMtxShadow);
+	}
+	else
+	{
+		/*** ワールドマトリックスの設定 ***/
+		pDevice->SetTransform(D3DTS_WORLD, pMtxWorld);
+	}
+
+	for (int nCntMat = 0; nCntMat < (int)dwNumMat; nCntMat++)
+	{
+		D3DMATERIAL9 shadowMat = pMat[nCntMat].MatD3D;
+
+		if (pMtxShadow != nullptr)
+		{ // シャドウマトリックスが付与されていた場合、影に設定
+			shadowMat.Diffuse = { 0, 0, 0, 1 };
+		}
+
+		/*** マテリアルの設定 ***/
+		pDevice->SetMaterial(&shadowMat);
+
+		/*** テクスチャの設定 ***/
+		pDevice->SetTexture(0, ppTexture[nCntMat]);
+
+		/*** モデル(パーツ)の描画 ***/
+		pMesh->DrawSubset(nCntMat);
+	}
+}
+
+//==================================================================================
+// --- 色変更後のモデル描画 ---
+//==================================================================================
+void MyMathUtil::Draw3DModelByCustomColorFromXFile(_In_ LPDIRECT3DDEVICE9 pDevice,
+	_In_ const D3DXMATERIAL* pMat,
+	_In_ DWORD dwNumMat,
+	_In_ LPDIRECT3DTEXTURE9* ppTexture,
+	_In_ LPD3DXMESH pMesh,
+	_In_ const D3DXMATRIX* pMtxWorld,
+	_In_ D3DCOLORVALUE CustomColor)
+{
+	// NULLCHECK
+	if (pDevice == nullptr)
+	{
+		OutputDebugString(TEXT("pDeviceが設定されていません！"));
+		return;
+	}
+
+	// NULLCHECK
+	if (pMat == nullptr)
+	{
+		OutputDebugString(TEXT("pMatがないよ！"));
+		return;
+	}
+
+	// NULLCHECK
+	if (ppTexture == nullptr)
+	{
+		OutputDebugString(TEXT("ppTextureが...ぐっ！"));
+		return;
+	}
+
+	// NULLCHECK
+	if (pMesh == nullptr)
+	{
+		OutputDebugString(TEXT("pMeshが...無い。"));
+		return;
+	}
+
+	/*** ワールドマトリックスの設定 ***/
+	pDevice->SetTransform(D3DTS_WORLD, pMtxWorld);
+
+	for (int nCntMat = 0; nCntMat < (int)dwNumMat; nCntMat++)
+	{
+		D3DMATERIAL9 customMat = pMat[nCntMat].MatD3D;
+
+		customMat.Diffuse = CustomColor;
+
+		/*** マテリアルの設定 ***/
+		pDevice->SetMaterial(&customMat);
+
+		/*** テクスチャの設定 ***/
+		pDevice->SetTexture(0, ppTexture[nCntMat]);
+
+		/*** モデル(パーツ)の描画 ***/
+		pMesh->DrawSubset(nCntMat);
+	}
+}
+
+//==================================================================================
+// --- モデル描画(ModelData使用) ---
+//==================================================================================
+#ifdef MODELDATA_INCLUDED
+void MyMathUtil::Draw3DModelFromModelData(_In_ LPDIRECT3DDEVICE9 pDevice,
+	_In_ const MODELDATA *pModelData,
+	_In_ const D3DXMATRIX *pMtxWorld,
+	_In_opt_ const D3DXMATRIX *pMtxShadow)
+{
+	// NULLCHECK
+	if (pDevice == nullptr)
+	{
+		OutputDebugString(TEXT("pDeviceが設定されていません！"));
+		return;
+	}
+
+	// NULLCHECK
+	if (pModelData == nullptr)
+	{
+		OutputDebugString(TEXT("pModelDataがnullだよ～"));
+		return;
+	}
+
+	if (pMtxShadow != nullptr)
+	{ // シャドウマトリックスが付与されていた場合、影に設定
+		/*** ワールドマトリックスの設定 ***/
+		pDevice->SetTransform(D3DTS_WORLD, pMtxShadow);
+	}
+	else
+	{
+		/*** ワールドマトリックスの設定 ***/
+		pDevice->SetTransform(D3DTS_WORLD, pMtxWorld);
+	}
+
+	D3DMATERIAL9 matDef;				// 現在のマテリアル保存用
+	D3DXMATERIAL* pMat;					// マテリアルデータへのポインタ
+
+		/*** 現在のマテリアルを保存 ***/
+	pDevice->GetMaterial(&matDef);
+
+	/*** マテリアルデータへのポインタを取得 ***/
+	pMat = (D3DXMATERIAL*)pModelData->pBuffMat->GetBufferPointer();
+
+	for (int nCntMat = 0; nCntMat < (int)pModelData->dwNumMat; nCntMat++)
+	{
+		D3DMATERIAL9 shadowMat = pMat[nCntMat].MatD3D;
+
+		if (pMtxShadow != nullptr)
+		{ // シャドウマトリックスが付与されていた場合、影に設定
+			shadowMat.Diffuse = { 0, 0, 0, 1 };
+			shadowMat.Ambient = { 0, 0, 0, 1 };
+			shadowMat.Emissive = { 0, 0, 0, 1 };
+			shadowMat.Specular = { 0, 0, 0, 1 };
+		}
+
+		/*** マテリアルの設定 ***/
+		pDevice->SetMaterial(&shadowMat);
+
+		/*** テクスチャの設定 ***/
+		pDevice->SetTexture(0, pModelData->apTexture[nCntMat]);
+
+		/*** モデル(パーツ)の描画 ***/
+		pModelData->pMesh->DrawSubset(nCntMat);
+	}
+
+	/*** 保存していたマテリアルを戻す！ ***/
+	pDevice->SetMaterial(&matDef);
+}
+
+//==================================================================================
+// --- 色変更後のモデル描画(ModelData使用) ---
+//==================================================================================
+void MyMathUtil::Draw3DModelByCustomColorFromModelData(_In_ LPDIRECT3DDEVICE9 pDevice,
+	_In_ const MODELDATA* pModelData,
+	_In_ const D3DXMATRIX* pMtxWorld,
+	_In_ D3DCOLORVALUE CustomColor)
+{
+	// NULLCHECK
+	if (pDevice == nullptr)
+	{
+		OutputDebugString(TEXT("pDeviceが設定されていません！"));
+		return;
+	}
+
+	// NULLCHECK
+	if (pModelData == nullptr)
+	{
+		OutputDebugString(TEXT("pModelDataがnullだよ～"));
+		return;
+	}
+
+	/*** ワールドマトリックスの設定 ***/
+	pDevice->SetTransform(D3DTS_WORLD, pMtxWorld);
+
+	D3DMATERIAL9 matDef;				// 現在のマテリアル保存用
+	D3DXMATERIAL* pMat;					// マテリアルデータへのポインタ
+
+	/*** 現在のマテリアルを保存 ***/
+	pDevice->GetMaterial(&matDef);
+
+	/*** マテリアルデータへのポインタを取得 ***/
+	pMat = (D3DXMATERIAL*)pModelData->pBuffMat->GetBufferPointer();
+
+	for (int nCntMat = 0; nCntMat < (int)pModelData->dwNumMat; nCntMat++)
+	{
+		D3DMATERIAL9 customMat = pMat[nCntMat].MatD3D;
+
+		customMat.Diffuse = CustomColor;
+
+		/*** マテリアルの設定 ***/
+		pDevice->SetMaterial(&customMat);
+
+		/*** テクスチャの設定 ***/
+		pDevice->SetTexture(0, pModelData->apTexture[nCntMat]);
+
+		/*** モデル(パーツ)の描画 ***/
+		pModelData->pMesh->DrawSubset(nCntMat);
+	}
+
+	/*** 保存していたマテリアルを戻す！ ***/
+	pDevice->SetMaterial(&matDef);
+}
+#endif
+
+//==================================================================================
+// --- マトリックス計算 ---
+//==================================================================================
+D3DXMATRIX *MyMathUtil::CalcWorldMatrix(_Inout_ D3DXMATRIX *pMtxWorld,
+	_In_ D3DXVECTOR3 pos,
+	_In_ D3DXVECTOR3 rot)
+{
+	// NULLCHECK
+	if (pMtxWorld == nullptr)
+	{
+		OutputDebugString(TEXT("pMtxWorldが設定されていませんよ！"));
+		return nullptr;
+	}
+
+	D3DXMATRIX mtxRot, mtxTrans;		// 計算用マトリックス
+
+	/*** ワールドマトリックスの初期化 ***/
+	D3DXMatrixIdentity(pMtxWorld);
+
+	/*** 向きを反映 (※ 位置を反映する前に必ず行うこと！) ***/
+	D3DXMatrixRotationYawPitchRoll(&mtxRot,
+		rot.y,			// Y軸回転
+		rot.x,			// X軸回転
+		rot.z);			// Z軸回転
+
+	D3DXMatrixMultiply(pMtxWorld, pMtxWorld, &mtxRot);
+
+	/*** 位置を反映 (※ 向きを反映したのちに行うこと！) ***/
+	D3DXMatrixTranslation(&mtxTrans,
+		pos.x,
+		pos.y,
+		pos.z);
+
+	D3DXMatrixMultiply(pMtxWorld, pMtxWorld, &mtxTrans);
+
+	return pMtxWorld;
+}
+
+//==================================================================================
+// --- マトリックス計算 (親マトリックス使用) ---
+//==================================================================================
+D3DXMATRIX *MyMathUtil::CalcWorldMatrixFromParent(_Inout_ D3DXMATRIX *pMtxWorld,
+	_In_ const D3DXMATRIX *pMtxParent,
+	_In_ D3DXVECTOR3 pos,
+	_In_ D3DXVECTOR3 rot)
+{
+	// NULLCHECK
+	if (pMtxWorld == nullptr)
+	{
+		OutputDebugString(TEXT("pMtxWorldが設定されていませんよ！"));
+		return nullptr;
+	}
+
+	// NULLCHECK
+	if (pMtxParent == nullptr)
+	{
+		OutputDebugString(TEXT("pMtxParentが設定されていませんよ！"));
+		return nullptr;
+	}
+
+	D3DXMATRIX mtxRot, mtxTrans;	// 計算用マトリックス
+
+	// パーツのワールドマトリックス初期化
+	D3DXMatrixIdentity(pMtxWorld);
+
+	// パーツの向きを反映
+	D3DXMatrixRotationYawPitchRoll(&mtxRot,
+		rot.y,
+		rot.x,
+		rot.z);
+
+	// かけ合わせる
+	D3DXMatrixMultiply(pMtxWorld,
+		pMtxWorld,
+		&mtxRot);
+
+	// パーツの位置(オフセット)を反映
+	D3DXMatrixTranslation(&mtxTrans,
+		pos.x,
+		pos.y,
+		pos.z);
+
+	// かけ合わせる
+	D3DXMatrixMultiply(pMtxWorld,
+		pMtxWorld,
+		&mtxTrans);
+
+	// 算出した「パーツのワールドマトリックス」と「親のマトリックス」をかけ合わせる
+	D3DXMatrixMultiply(pMtxWorld,
+		pMtxWorld,
+		pMtxParent);
+
+	return pMtxWorld;
+}
+
+//==================================================================================
+// ---シャドウマトリックスの作成処理 ---
+//==================================================================================
+D3DXMATRIX *MyMathUtil::CreateShadowMatrix(_In_ LPDIRECT3DDEVICE9 pDevice,
+	_In_ const D3DXMATRIX *pMtxWorld,
+	_In_ D3DXVECTOR3 pos,
+	_In_ D3DXVECTOR3 nor,
+	_In_ UINT nIdxLight,
+	_Out_ D3DXMATRIX *pOut)
+{
+	// 各NULLCHECK
+	if (pDevice == nullptr)
+	{
+		OutputDebugString(TEXT("pDeviceが設定されていませんよ！"));
+		return nullptr;
+	}
+
+	if (pMtxWorld == nullptr)
+	{
+		OutputDebugString(TEXT("pMtxWorldが設定されていませんよ！"));
+		return nullptr;
+	}
+
+	if (pOut == nullptr)
+	{
+		OutputDebugString(TEXT("pOutが設定されていませんよ！"));
+		return nullptr;
+	}
+
+	D3DLIGHT9 light;
+	D3DXVECTOR4 LightPos;
+	D3DXPLANE plane;
+
+	// ライトの位置を設定
+	pDevice->GetLight(nIdxLight, &light);
+	LightPos = D3DXVECTOR4(-light.Direction.x, -light.Direction.y, -light.Direction.z, 0.0f);
+
+	// 平面作成
+	D3DXPlaneFromPointNormal(&plane, &pos, &nor);
+
+	// シャドウマトリックスの初期化
+	D3DXMatrixIdentity(pOut);
+
+	// シャドウマトリックスの作成
+	D3DXMatrixShadow(pOut, &LightPos, &plane);
+	D3DXMatrixMultiply(pOut, pMtxWorld, pOut);
+
+	return pOut;
+}
+
+//==================================================================================
+// --- Zテストの設定 ---
+//==================================================================================
+void MyMathUtil::SetEnableZFunction(_In_ LPDIRECT3DDEVICE9 pDevice, _In_ bool bEnable)
+{
+	// 各NULLCHECK
+	if (pDevice == nullptr)
+	{
+		OutputDebugString(TEXT("pDeviceが設定されていませんよ！"));
+		return;
+	}
+
+	if (bEnable == true)
+	{
+		/*** Zテストを有効にする ***/
+		pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
+		pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+	}
+	else
+	{
+		/*** Zテストを無効にする ***/
+		pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+		pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
+	}
+}
+
+//==================================================================================
+// --- フォグの設定 ---
+//==================================================================================
+void MyMathUtil::SetUpPixelFog(_In_ D3DXCOLOR Col,
+	_In_ float fStart,
+	_In_ float fEnd)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
-	pDevice->SetRenderState(D3DRS_CULLMODE, type);
+	// Enable fog blending.
+	pDevice->SetRenderState(D3DRS_FOGENABLE, TRUE);
+
+	// Set the fog color.
+	pDevice->SetRenderState(D3DRS_FOGCOLOR, Col);
+
+	// Set fog parameters.
+	pDevice->SetRenderState(D3DRS_FOGTABLEMODE, D3DFOG_LINEAR);
+	pDevice->SetRenderState(D3DRS_FOGSTART, (DWORD)(&fStart));
+	pDevice->SetRenderState(D3DRS_FOGEND, (DWORD)(&fEnd));
+}
+
+//==================================================================================
+// --- フォグの終了 ---
+//==================================================================================
+void MyMathUtil::CleanUpPixelFog(void)
+{
+	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+
+	// Enable fog blending.
+	pDevice->SetRenderState(D3DRS_FOGENABLE, FALSE);
+}
+
+//==================================================================================
+// --- エラーコード変換 ---
+//==================================================================================
+char *MyMathUtil::GetErrorMessage(_In_ HRESULT hr, char *pOut, size_t size, bool bPopupMessageBox)
+{
+	if (pOut == nullptr) return nullptr;
+
+	LPVOID* errorString;		// エラー文取得用
+
+	FormatMessage(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER					// テキストのメモリ割り当てを要求する
+		| FORMAT_MESSAGE_FROM_SYSTEM					// エラーメッセージはWindowsが用意しているものを使用
+		| FORMAT_MESSAGE_IGNORE_INSERTS,				// 次の引数を無視してエラーコードに対するエラーメッセージを作成する
+		NULL,
+		hr,
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),		// 言語を指定
+		(LPTSTR)&errorString,							// メッセージテキストが保存されるバッファへのポインタ
+		0,
+		NULL);
+
+	if (errorString != nullptr)
+	{
+		// 文字列を格納
+		strcpy_s(pOut, size, (LPCSTR)errorString);
+
+		if (bPopupMessageBox == true)
+		{
+			MyMathUtil::GenerateMessageBox(MB_ICONERROR,
+				"Error!",
+				(LPCTSTR)errorString);
+		}
+
+		LocalFree(errorString);
+	}
+
+	return pOut;
+}
+
+//==================================================================================
+// --- シェーダーの開始 ---
+//==================================================================================
+void MyMathUtil::SetSheder(_In_ LPD3DXEFFECT pEffect,
+	_In_ const char *TechniqueName,
+	_In_ UINT Pass)
+{
+	// テクニックの設定
+	pEffect->SetTechnique(TechniqueName);
+
+	UINT Passes;
+
+	// 開始
+	pEffect->Begin(&Passes, 0);
+
+	// パス指定
+	pEffect->BeginPass(Pass);
+}
+
+//==================================================================================
+// --- パスの終了 ---
+//==================================================================================
+void MyMathUtil::RemovePass(_In_ LPD3DXEFFECT pEffect,
+	_In_ UINT NextPass)
+{
+	// パスの終了
+	pEffect->EndPass();
+
+	if (NextPass != END_SHADER)
+	{ // 指定されていた場合、パスを開始
+		pEffect->BeginPass(NextPass);
+	}
+	else
+	{ // シェーダーの利用終了
+		pEffect->End();
+	}
 }

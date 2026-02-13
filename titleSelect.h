@@ -24,7 +24,8 @@ typedef enum
 	TITLE_MENU_OUTGAME,			// ゲームをやめる
 	TITLE_MENU_ONEPLAY,			// 1人プレイ
 	TITLE_MENU_TWOPLAY,			// 2人プレイ
-	TITLE_MENU_MAX
+	TITLE_MENU_MAX,
+	TITLE_MENU_NONE				// 未選択
 }TITLE_MENU;
 
 //**********************************************************************************
@@ -35,4 +36,5 @@ void UninitTitleSelect(void);
 void UpdateTitleSelect(void);
 void DrawTitleSelect(void);
 
+TITLE_MENU GetMenuType(void);
 #endif
