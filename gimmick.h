@@ -21,7 +21,7 @@
 //**********************************************************************************
 typedef enum
 {
-	GIMMICKTYPE_LOCKDOOR = 0,		// 鍵付きドア
+	GIMMICKTYPE_DUCT = 0,		// ダクト
 	GIMMICKTYPE_MAX
 }GIMMICKTYPE;
 

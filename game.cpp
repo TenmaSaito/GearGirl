@@ -29,6 +29,7 @@
 #include "timer.h"
 #include "UIarm.h"
 #include "UImenu.h"
+#include "gimmick.h"
 
 //**********************************************************************************
 //*** マクロ定義 ***
@@ -107,6 +108,12 @@ void InitGame(void)
 	/*** UIメニュー初期化 ***/
 	InitUImenu();
 
+	/*** ギミックの初期化 ***/
+	InitGimmick();
+
+	/***ギミックの設置 ***/
+	SetGimmick(D3DXVECTOR3(1100.0f, 0.0f, 300.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), GIMMICKTYPE_DUCT);
+
 	g_nCounterGame = 0;
 	int nIdxPrompt, Tex;
 	LoadTexture("data/TEXTURE/TestPrompt.png", &Tex);
@@ -169,8 +176,11 @@ void UninitGame(void)
 	/*** UIアームの終了 ***/
 	UninitUIarm();
 
-	/*** UIメニュー初期化 ***/
+	/*** UIメニュー終了 ***/
 	UninitUImenu();
+
+	/*** ギミックの終了 ***/
+	UninitGimmick();
 }
 
 //==================================================================================
@@ -235,6 +245,9 @@ void UpdateGame(void)
 		/*** UIメニュー更新 ***/
 		UpdateUImenu();
 
+		/*** ギミックの更新 ***/
+		UpdateGimmick();
+
 		if (g_nCounterGame % 60 == 0)
 		{
 			AddTimer(-1);
@@ -295,6 +308,9 @@ void DrawGame(void)
 
 		/*** プロンプトの描画 ***/
 		DrawPrompt();
+
+		/*** ギミックの描画 ***/
+		DrawGimmick();
 
 		/*** フォグをクリア ***/
 		CleanFog();

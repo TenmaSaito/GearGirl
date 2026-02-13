@@ -58,7 +58,7 @@ typedef struct
 Gimmick g_aGimmick[GIMMICKTYPE_MAX];		// ÉMÉ~ÉbÉNèÓïÒ
 const char *g_apMotionPath[GIMMICKTYPE_MAX] =
 {
-	"data/",
+	"data/Scripts/Gimmick.txt",
 };
 
 //==================================================================================
