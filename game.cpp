@@ -118,7 +118,7 @@ void InitGame(void)
 	g_nCounterGame = 0;
 	int nIdxPrompt, Tex;
 	LoadTexture("data/TEXTURE/TestPrompt.png", &Tex);
-	nIdxPrompt = SetPrompt(D3DXVECTOR3(100, 100, 200), D3DXVECTOR2(50.0f, 20.0f), Tex, true);
+	nIdxPrompt = SetPrompt(D3DXVECTOR3(1463, 116, -455), D3DXVECTOR2(10.0f, 5.0f), Tex, true);
 	SetEnablePrompt(true, nIdxPrompt);
 }
 
