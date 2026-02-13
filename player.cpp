@@ -24,7 +24,11 @@ using namespace MyMathUtil;
 // マクロ定義
 #define PLAYER_RANGE	(50.0f)		// プレイヤーとアイテムとの当たり判定の距離
 #define START_ARMTYPE	(14)		// アームの開始配列番号
-#define MAX_PARTS		(17)
+#define MAX_PARTS		(17)		// 少女の全パーツ数
+#define MAX_ZMOVE1		(-1590)		// Z軸移動可能領域1
+#define MAX_ZMOVE2		(990)		// Z軸移動可能領域2
+#define MAX_XMOVE1		(315)		// X軸移動可能領域1
+#define MAX_XMOVE2		(2290)		// X軸移動可能領域2
 
 // =================================================
 // 平面投影の構造体
@@ -86,7 +90,7 @@ void InitPlayer(void)
 	// 各種変数を初期化(0固定)
 	for (int nCntPlayer = 0; nCntPlayer < PLAYERTYPE_MAX; nCntPlayer++)
 	{
-		g_aPlayer[nCntPlayer].posOri = D3DXVECTOR3(0.0f, 100.0f, 0.0f);
+		g_aPlayer[nCntPlayer].posOri = PLAYER_POSDEF;
 		g_aPlayer[nCntPlayer].pos = PLAYER_POSDEF;
 		g_aPlayer[nCntPlayer].posOld = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_aPlayer[nCntPlayer].rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
@@ -108,8 +112,6 @@ void InitPlayer(void)
 		}
 	}
 
-	g_aMovePlayer[0] = false;
-	g_aMovePlayer[1] = false;
 
 	// 少女のパーツ、モーションを読み込む
 	LoadMotion("data\\Scripts\\geargirl.txt", &aIdxMotion[PLAYERTYPE_GIRL]);			// モーションスクリプトを読み込む
@@ -164,9 +166,8 @@ void InitPlayer(void)
 	g_Land = 0;				// 着地モーションが再生された回数
 	g_nUseArm = 0;			// 現在使用しているアームのインデックス
 	g_armPlayer = ARMTYPE_NORMAL;	// 通常アーム
-
-	// 影を設定
-	//g_IdxShadowPlayer = SetShadow();
+	g_aMovePlayer[0] = false;
+	g_aMovePlayer[1] = false;
 
 	// デバイスの破棄
 	EndDevice();
@@ -241,6 +242,25 @@ void UpdatePlayer(void)
 		// 重力をかけ続ける
 		pPlayer->move.y += GRAVITY;
 
+		// === マップの限界値まで行った時に、各移動量を0にする
+		if (pPlayer->pos.z <= MAX_ZMOVE1)
+		{// Z軸
+			pPlayer->pos.z = MAX_ZMOVE1;
+		}
+		if (pPlayer->pos.z >= MAX_ZMOVE2)
+		{
+			pPlayer->pos.z = MAX_ZMOVE2;
+
+		}
+		if (pPlayer->pos.x <= MAX_XMOVE1)
+		{// X軸
+			pPlayer->pos.x = MAX_XMOVE1;
+		}
+		if (pPlayer->pos.x >= MAX_XMOVE2)
+		{
+			pPlayer->pos.x = MAX_XMOVE2;
+		}
+
 		// 移動量の更新
 		pPlayer->pos += pPlayer->move;
 
@@ -293,7 +313,7 @@ void UpdatePlayer(void)
 	}
 
 	// 装備を切り替える(アーム)
-	if (GetJoypadTrigger(0, JOYKEY_RB) == true || GetKeyboardTrigger(DIK_E) == true)
+	if (GetJoypadTrigger(0, JOYKEY_RB) == true || GetKeyboardTrigger(DIK_9) == true)
 	{
 		g_nUseArm++;	// 種類を進める
 
@@ -1004,57 +1024,6 @@ void MovePlayer(PlayerType nPlayer)
 			}
 		}
 	}
-
-
-	//// スティックでの操作
-	//if (GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_RIGHT))
-	//{// 右
-	//	CheckMotionMove(nPlayer, pPlayer);
-	//	pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
-	//	pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
-
-	//	pPlayer->rotDest.y = -D3DX_PI * 0.5f + Camerarot.y;	// 目標の角度を設定
-	//	pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-	//	// rotの補正
-	//	RotRepair(nPlayer);
-	//}
-	//if (GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_LEFT))
-	//{// 左
-	//	CheckMotionMove(nPlayer, pPlayer);
-	//	pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
-	//	pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
-
-	//	pPlayer->rotDest.y = D3DX_PI * 0.5f + Camerarot.y;	// 目標の角度を設定
-	//	pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-	//	// rotの補正
-	//	RotRepair(nPlayer);
-	//}
-	//if (GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
-	//{// 上
-	//	CheckMotionMove(nPlayer, pPlayer);
-	//	pPlayer->move.z += cosf(Camerarot.y) * PLAYER_MOVE;
-	//	pPlayer->move.x += sinf(Camerarot.y) * PLAYER_MOVE;
-
-	//	pPlayer->rotDest.y = D3DX_PI + Camerarot.y;	// 目標の角度を設定
-	//	pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-	//	// rotの補正
-	//	RotRepair(nPlayer);
-	//}
-	//if (GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
-	//{// 下
-	//	CheckMotionMove(nPlayer, pPlayer);
-	//	pPlayer->move.z += cosf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
-	//	pPlayer->move.x += sinf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
-
-	//	pPlayer->rotDest.y = Camerarot.y;	// 目標の角度を設定
-	//	pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-	//	// rotの補正
-	//	RotRepair(nPlayer);
-	//}
 }
 
 // =================================================

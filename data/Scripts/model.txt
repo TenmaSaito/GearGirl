@@ -81,7 +81,7 @@ END_LIGHTSET
 SKYSET
 	TEXTYPE = 0		# テクスチャのインデックス
 	MOVE = 0.00002	# 移動量
-	SIZE = 3000		# 半径
+	SIZE = 6000		# 半径
 	BLOCK  = 15 15 	# 分割数
 END_SKYSET
 
