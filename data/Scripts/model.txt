@@ -25,7 +25,7 @@ TEXTURE_FILENAME = data/TEXTURE/road_mid.jpg		# [6]合流地点の道
 #------------------------------------------------------------------------------
 # モデル数
 #------------------------------------------------------------------------------
-NUM_MODEL = 19	#20
+NUM_MODEL = 23	#24
 
 #------------------------------------------------------------------------------
 # モデルファイル名
@@ -48,7 +48,11 @@ MODEL_FILENAME = data/MODEL/Building//Box.x				# [14]仮
 MODEL_FILENAME = data/MODEL/Building//shop.x			# [15]便利屋(仮)
 MODEL_FILENAME = data/MODEL/Building/Building_0.x		# [16]家_0
 MODEL_FILENAME = data/MODEL/Building/Building_1.x		# [17]家_1
-MODEL_FILENAME = data/MODEL/Gimmick/whole.x			# [18]ダクト
+MODEL_FILENAME = data/MODEL/Gimmick/whole.x			# [18]ネズミの通路
+MODEL_FILENAME = data/MODEL/Item/GearLarge.x			# [19]ギア大
+MODEL_FILENAME = data/MODEL/Item/GearSmall.x			# [20]ギア小
+MODEL_FILENAME = data/MODEL/Item/GearLargeDificit.x			# [21]はずれギア
+MODEL_FILENAME = data/MODEL/Item/Shaft.x			# [22]シャフト
 
 #------------------------------------------------------------------------------
 # カメラ情報
@@ -3761,14 +3765,36 @@ MODELSET
 	SHADOW = 0
 END_MODELSET
 
-
 MODELSET
 	TYPE = 18	# [18]ギミック(仮)
-	POS = 1400 100 -725
-	ROT = 0 90 0
+	POS = 1600 100 -1025
+	ROT = 0 0 0
 	SHADOW = 0
 END_MODELSET
 
+ITEMSET
+	ITEMTYPE = 2	# [19]ギア大
+	POS = 1400 130 -825
+	ROT = 0 0 0
+END_ITEMSET
+
+ITEMSET
+	ITEMTYPE = 1	# [20]ギア小
+	POS = 1600 130 -50
+	ROT = 0 0 0
+END_ITEMSET
+
+ITEMSET
+	ITEMTYPE = 6	# [21]はずれギア
+	POS = 1500 130 -280
+	ROT = 0 0 0
+END_ITEMSET
+
+ITEMSET
+	ITEMTYPE = 3	# [22]シャフト
+	POS = 1700 130 -600
+	ROT = 0 0 0
+END_ITEMSET
 
 #---------------------------------------
 
