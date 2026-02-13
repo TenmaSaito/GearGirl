@@ -216,9 +216,9 @@ void UpdatePlayer(void)
 		if (nCntPlayer == PLAYERTYPE_GIRL)
 		{
 			UpdateArm();
-
+		
 			// カタパルトを起動した後の処理
-			// ShotMouse();
+			//ShotMouse();
 		}
 		else if (nCntPlayer == PLAYERTYPE_MOUSE)
 		{
@@ -253,7 +253,6 @@ void UpdatePlayer(void)
 		if (pPlayer->pos.z >= MAX_ZMOVE2)
 		{
 			pPlayer->pos.z = MAX_ZMOVE2;
-
 		}
 		if (pPlayer->pos.x <= MAX_XMOVE1)
 		{// X軸
@@ -331,7 +330,7 @@ void UpdatePlayer(void)
 
 	// ***************************************************************************
 	// デバッグ処理
-		// デバッグ用のプレイ人数切り替え処理
+	// デバッグ用のプレイ人数切り替え処理
 	ChangeNumPlayer();
 
 	// F1キーを押して、デバッグ表示のON/OFFを切り替える
@@ -354,19 +353,10 @@ void UpdatePlayer(void)
 	{
 		PrintDebugProc("\nPlayer切り替え : [Q] : [%d]\n", g_ActivePlayer);
 		PrintDebugProc("操作対象 : 0 → 少女\n                1 → ネズミ\n");
-		PrintDebugProc("アームの切り替え [E] : ArmType [%d]\n", g_nUseArm);
+		PrintDebugProc("アームの切り替え [9] : ArmType [%d]\n", g_nUseArm);
 
 		PrintDebugProc("\nPlayer0 : [SPACE] :  JUMP\n");
 		PrintDebugProc("Player1 : [RSHIFT] :  JUMP\n");
-
-		PrintDebugProc("Player1 : nCounterMotion [%d]\n", g_aPlayer[0].nCounterMotion);
-		PrintDebugProc("Player1 : nCounterMotionBlend [%d]\n", g_aPlayer[0].nCounterMotionBlend);
-		PrintDebugProc("Player1 : [%d]\n", g_aPlayer[0].bLoop);
-		PrintDebugProc("Player1 : BlendMotion [%d]\n", g_aPlayer[0].bBlendMotion);
-		PrintDebugProc("Player1 : Motiontype [%d]\n", g_aPlayer[0].motionType);
-		PrintDebugProc("Player1 : MotiontypeBlend [%d]\n", g_aPlayer[0].motionTypeBlend);
-		PrintDebugProc("Player0 : PlayerState [%d]\n", g_aPlayer[0].state);
-
 	}
 	// ***************************************************************************
 }
