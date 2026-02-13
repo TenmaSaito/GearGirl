@@ -276,13 +276,18 @@ void CreateSafeVtx(SAFE_VERTEX *pSafeVtx, bool bErrorOutput)
 		&pSafeVtx->pVtxBuff,
 		NULL);
 
+	pSafeVtx->hr = hr;
+
 	if (FAILED(hr))
 	{
 		pSafeVtx->bSafe = false;
 		if (bErrorOutput) OutputDebugString(TEXT("Failed CreateVertexBuffer"));
+
+		// デバイスの取得終了
+		EndDevice();
+		return;
 	}
 
-	pSafeVtx->hr = hr;
 	pSafeVtx->bSafe = true;
 
 	// デバイスの取得終了
