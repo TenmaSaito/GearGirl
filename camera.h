@@ -60,7 +60,7 @@ typedef enum
 {
 	CAMERATYPE_PLAYER_ONE = 0,			// 少女に追従カメラ
 	CAMERATYPE_PLAYER_TWO,				// ネズミに追従カメラ
-	CAMERATYPE_FOCUS,					// 集中して見せる
+	CAMERATYPE_2D,						// 2Dポリゴン描画用設定
 	MAX_CAMERA
 }CameraType;
 
@@ -103,7 +103,7 @@ void InitCamera(void);
 void UninitCamera(void);
 void UpdateCamera(void);
 void SetCamera(void);													// カメラを設置（mainのDrawの最初にする）
-void ReleaseCamera(int nIdx);											// カメラを開放
+// void ReleaseCamera(int nIdx);											// カメラを開放
 P_CAMERA GetCamera(void);												// カメラ除法配列の先頭アドレスを取得
 void GetCameraPos(int nCamNum, vec3* pPosV, vec3* pPosR);				// カメラの位置情報を取得
 void GetCameraRot(int nCamNum, vec3* pRot);								// カメラの角度情報を取得

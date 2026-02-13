@@ -14,11 +14,13 @@
 //=========================================================================================
 // マクロ定義
 //=========================================================================================
-#define vec2		D3DXVECTOR2
-#define vec3		D3DXVECTOR3
-#define vec3_ZERO	D3DXVECTOR3(0.0f,0.0f,0.0f)
-#define colX		D3DXCOLOR
-#define colX_ZERO	D3DXCOLOR(0.0f,0.0f,0.0f,0.0f)
+#define vec2			D3DXVECTOR2
+#define vec2_ZERO		D3DXVECTOR2(0.0f,0.0f)
+#define vec3			D3DXVECTOR3
+#define vec3_ZERO		D3DXVECTOR3(0.0f,0.0f,0.0f)
+#define colX			D3DXCOLOR
+#define colX_ZERO		D3DXCOLOR(0.0f,0.0f,0.0f,0.0f)
+#define colX_WHITE		D3DXCOLOR(1.0f,1.0f,1.0f,1.0f)
 #define POINTER(mold,name)			typedef struct mold* name			// (mold) のポインタ型の (name) を定義する
 #define MIDCHECK(MIN,N,MAX)			(MIN < N && N < MAX)				// 最小最大のチェック
 #define SQUARE(X)					((X) * (X))							// ２乗
