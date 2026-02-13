@@ -303,9 +303,6 @@ void DrawGame(void)
 	// VERTEX_2D ============================================
 	/*** Aの描画 ***/
 
-	/*** 2Dポリゴンの描画 ***/
-	Draw2DPolygon();
-
 	/*** タイマーの描画 ***/
 	DrawTimer();
 
@@ -314,6 +311,9 @@ void DrawGame(void)
 
 	/*** UIメニュー描画 ***/
 	DrawUImenu();
+
+	/*** 2Dポリゴンの描画 ***/
+	Draw2DPolygon();
 
 	//ポーズ状態がONの時
 	if (g_bPause == true)
