@@ -3783,7 +3783,7 @@ ITEMSET
 	ITEMTYPE = 1	# [1]ÉMÉAè¨
 	POS = 1600 130 -50
 	ROT = 0 0 0
-	VISIBLE = 0
+	VISIBLE = 2
 END_ITEMSET
 
 ITEMSET
@@ -3811,7 +3811,7 @@ ITEMSET
 	ITEMTYPE = 0	# [0]êVïiÇÃÇÀÇ∂
 	POS = 1600 130 -1200
 	ROT = 0 0 0
-	VISIBLE = 0
+	VISIBLE = 1
 END_ITEMSET
 
 #---------------------------------------
