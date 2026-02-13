@@ -204,6 +204,9 @@
     <ClCompile Include="sound.cpp">
       <Filter>ソース ファイル\main\DirectX</Filter>
     </ClCompile>
+    <ClCompile Include="titleSelect.cpp">
+      <Filter>ソース ファイル\mode\Title</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h">
@@ -316,6 +319,9 @@
     </ClInclude>
     <ClInclude Include="sound.h">
       <Filter>ヘッダー ファイル\main\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="titleSelect.h">
+      <Filter>ヘッダー ファイル\mode\Title</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

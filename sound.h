@@ -11,7 +11,7 @@
 
 // マクロ定義
 #define SOUND_BGMSTART		(SOUND_LABEL_BGM_TITLE)		// BGMの開始位置
-#define SOUND_SESTART		(SOUND_LABEL_SE_ENTER)		// SEの開始位置
+#define SOUND_SESTART		(SOUND_LABEL_SE_WALK)		// SEの開始位置
 #define SOUND_STANDARD		(0.8f)						// 初期音量
 
 #ifndef NDEBUG
@@ -28,18 +28,7 @@
 typedef enum
 {
 	SOUND_LABEL_BGM_TITLE = 0,		// タイトル画面のBGM
-	SOUND_LABEL_BGM_TUTORIAL,		// チュートリアル画面のBGM
-	SOUND_LABEL_BGM_GAME,			// ゲーム画面のBGM
-	SOUND_LABEL_BGM_GAMECLEAR,		// クリア画面のBGM
-	SOUND_LABEL_BGM_GAMEOVER,		// ゲームオーバー画面のBGM
-	SOUND_LABEL_BGM_RANKING,		// ランキング画面のBGM
-	SOUND_LABEL_SE_ENTER,			// 選択音
-	SOUND_LABEL_SE_SELECT,			// セレクト音
 	SOUND_LABEL_SE_WALK,			// 歩行音
-	SOUND_LABEL_SE_JUMP,			// ジャンプ音
-	SOUND_LABEL_SE_SHOT,			// 投擲音
-	SOUND_LABEL_SE_FIND,			// 取得音
-	SOUND_LABEL_SE_CATCH,			// 衝突音
 	SOUND_LABEL_MAX,
 } SOUND_LABEL;
 
