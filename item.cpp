@@ -15,6 +15,7 @@
 #include "Texture.h"
 #include "2Dpolygon.h"
 #include "UImenu.h"
+#include "judgeEnd.h"
 
 using  namespace MyMathUtil;
 
@@ -103,6 +104,7 @@ void InitItem(void)
 		pPutQuota->nIdxBox = Set2DPolygon(vec3_ZERO, vec3_ZERO, vec2(SCREEN_WIDTH * 0.05f, SCREEN_WIDTH * 0.05f), -1, colX_ZERO);
 		pPutQuota->nType = -1;
 		pPutQuota->bUse = false;
+		g_aPutOut[nCntQuota] = ITEMTYPE_SPRING_FALSE;
 	}
 
 	// 設置
@@ -389,10 +391,15 @@ void SelectItem(void)
 				if (g_aPutQuota[nCnt].bUse == false)
 				{
 					g_aPutQuota[nCnt].nType = g_aItemQuota[g_nSelectPut].nType;
+					g_aPutOut[nCnt] = (ITEMTYPE)g_aPutQuota[nCnt].nType;
 					g_aPutQuota[nCnt].bUse = true;
 					break;
 				}
 			}
+		}
+		else
+		{// アイテム以外（決定ボタン）を選択していたら
+			JudgmentEnding(&g_aPutOut[0],5);
 		}
 	}
 }
