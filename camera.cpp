@@ -50,10 +50,11 @@ void InitCamera(void)
 	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCamera++)
 	{
 		// カメラ座標等
-		pCamera->posV = D3DXVECTOR3 CAMERA_V_DEFPOS;					// 視点
+		pCamera->bUse = true;
+		pCamera->posV = vec3 CAMERA_V_DEFPOS;					// 視点
 		pCamera->posR = PLAYER_POSDEF;									// 注視点
 		pCamera->posRDest = PLAYER_POSDEF;								// 目的の注視点
-		pCamera->vecU = D3DXVECTOR3(0.0f, 1.0f, 0.0f);					// 上方向ベクトル
+		pCamera->vecU = vec3(0.0f, 1.0f, 0.0f);					// 上方向ベクトル
 
 		switch (nCntCamera)
 		{
@@ -73,22 +74,18 @@ void InitCamera(void)
 			pCamera->type = CAMERATYPE_PLAYER_TWO;
 			break;
 		default:// その他のカメラ設定
-			pCamera->rot = CAMERA_1P_ROT;		// カメラの角度
+			pCamera->rot = CAMERA_1P_ROT;								// カメラの角度
 			pCamera->fDist = CAMERA_1P_DISTANS;							// 視点と注視点の距離
+			pCamera->bUse = false;
 			break;
 		}
 
 		// 画面設定等
-		pCamera->viewport.X = SCREEN_WIDTH * 0.5f * nCntCamera;			// 画面左上 X 座標
-		pCamera->viewport.Y = 0.0f;										// 画面左上 Y 座標
-		pCamera->viewport.Width = SCREEN_WIDTH * 0.5f;					// 表示画面の横幅
-		pCamera->viewport.Height = SCREEN_HEIGHT;						// 表示画面の高さ
-
 		pCamera->viewport.MinZ = 0.0f;									
-		pCamera->viewport.MaxZ = 1.0f;									
+		pCamera->viewport.MaxZ = 1.0f;
+
 		pCamera->nCntAoutRot = 0;										// 自動で回り込み ONにするまでのカウンタ
 		pCamera->bAoutRot = false;										//		〃		  OFF
-		pCamera->bUse = true;
 	}
 
 	// 画面分割設定
@@ -107,7 +104,7 @@ void SetCameraOption(void)
 
 	g_nNumEnableCamera = GetNumPlayer();	// プレイヤー数
 
-	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCamera++)
+	for (int nCntCamera = 0; nCntCamera <= CAMERATYPE_PLAYER_TWO; nCntCamera++, pCamera++)
 	{
 		if (g_nNumEnableCamera < 2)
 		{// 1P プレイ時
@@ -123,7 +120,7 @@ void SetCameraOption(void)
 			pCamera->viewport.Y = 0.0f;								// 画面左上 Y 座標
 			pCamera->viewport.Width = SCREEN_WIDTH * 0.5f;			// 表示画面の横幅
 			pCamera->viewport.Height = SCREEN_HEIGHT;				// 表示画面の高さ
-			pCamera->fViewRadian = VIEW_RADIAN;				// 視野角
+			pCamera->fViewRadian = VIEW_RADIAN;						// 視野角
 		}
 	}
 }
@@ -182,19 +179,16 @@ void UpdateCamera(void)
 	//**************************************************************
 	// カメラ
 	pCamera = GetCamera();
-	if (g_bCameraDebug)
+	if (GetActivePlayer() == CAMERATYPE_PLAYER_ONE && GetKeyboardPress(CAM_2POPRAT) == false)
 	{
-		if (GetActivePlayer() == CAMERATYPE_PLAYER_ONE && GetKeyboardPress(CAM_2POPRAT) == false)
-		{
-			CameraOrbit(pCamera);		// 回転
-			CameraMove(pCamera);		// カメラ距離の変更
-		}
-		else
-		{
-			pCamera++;					// 2Pのカメラにする
-			CameraOrbit(pCamera);
-			CameraMove(pCamera);
-		}
+		CameraOrbit(pCamera);		// 回転
+		CameraMove(pCamera);		// カメラ距離の変更
+	}
+	else
+	{
+		pCamera++;					// 2Pのカメラにする
+		CameraOrbit(pCamera);
+		CameraMove(pCamera);
 	}
 	// 追従処理
 	CameraFollow();
@@ -213,7 +207,7 @@ void UpdateCamera(void)
 			if (g_bCameraDebug)
 			{
 				PrintDebugProc("\nCAMERA %d\nposV : %d %d %d\nposR : %d %d %d\n", nCntCamera, (int)pCamera->posV.x, (int)pCamera->posV.y, (int)pCamera->posV.z, (int)pCamera->posR.x, (int)pCamera->posR.y, (int)pCamera->posR.z);
-				PrintDebugProc("rot  : %d %d %d\ndist ： %d\n", (int)pCamera->rot.x, (int)pCamera->rot.y, (int)pCamera->rot.z, (int)pCamera->fDist);
+				PrintDebugProc("rot  : %~3f\ndist ： %d\n", pCamera->rot.x, pCamera->rot.y, pCamera->rot.z, (int)pCamera->fDist);
 				PrintDebugProc("視野角: %d\n", (int)pCamera->fViewRadian);
 			}
 		}
@@ -295,7 +289,7 @@ void CameraFollow(void)
 		if (CAMERA_PLFR_DEADZONE < SQUARE(pPlayer->move.x) + SQUARE(pPlayer->move.z)
 			|| (CAMERA_PLFR_DEADZONE < SQUARE(pPlayer->pos.x - pPlayer->posOld.x) + SQUARE(pPlayer->pos.z - pPlayer->posOld.z)))
 		{// カメラを少し先へ
-			fPlayerFront = pCamera->fDist * 0.25f;
+			fPlayerFront = pCamera->fDist * 0.2f;
 			fPlayerMoveRot = atan2f(-pPlayer->move.x, -pPlayer->move.z);
 
 			pCamera->posRDest.x = pPlayer->pos.x - fPlayerFront * sinf(fPlayerMoveRot);
@@ -307,7 +301,7 @@ void CameraFollow(void)
 		switch (nPlayer)
 		{
 		case CAMERATYPE_PLAYER_ONE:
-			pCamera->posRDest.y = pPlayer->pos.y + 10.0f; // 頭の高さに追従
+			pCamera->posRDest.y = pPlayer->pos.y + 15.0f; // 頭の高さに追従
 
 			// カメラ切り替え時の処理
 			if (0 < g_nSetCameraPosCounter)
@@ -319,7 +313,7 @@ void CameraFollow(void)
 			break;
 
 		case CAMERATYPE_PLAYER_TWO:
-			pCamera->posRDest.y = pPlayer->pos.y + 3.0f;	// 頭の高さに追従
+			pCamera->posRDest.y = pPlayer->pos.y + 5.0f;	// 頭の高さに追従
 			fCameraFactor += 0.1f;							// ネズミは追従速度を上げる
 
 			// カメラ切り替え時の処理

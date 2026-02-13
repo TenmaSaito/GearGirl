@@ -16,7 +16,7 @@
 // マクロ定義
 //=========================================================================================
 #define VIEW_RADIAN				(45.0f)					// 視野角
-#define VIEW_RADIAN_MOUSE		(30.0f)					// ネズミの視野角
+#define VIEW_RADIAN_MOUSE		(90.0f)					// ネズミの視野角
 #define VIEW_1P_MINDEPTH		(5.0f)					// 最小描画距離
 #define VIEW_1P_MAXDEPTH		(10000.0f)				// 最大描画距離
 #define VIEW_2P_MINDEPTH		(5.0f)					// 最小描画距離
@@ -24,9 +24,9 @@
 #define CAMERA_V_DEFPOS			(0.0f, 350.0f, 500.0f)	// 視点のデフォ位置
 #define CAMERA_R_DEFPOS			(0.0f, 0.0f, 0.0f)		// 注視点のデフォ位置
 #define CAMERA_1P_DISTANS		(40.0f)					// 少女の,カメラと注視点の距離
-#define CAMERA_2P_DISTANS		(15.0f)					// ネズミの,カメラと注視点の距離
+#define CAMERA_2P_DISTANS		(10.0f)					// ネズミの,カメラと注視点の距離
 #define CAMERA_1P_ROT			vec3(1.3f, 0.0f, 0.0f)	// 少女のカメラの角度
-#define CAMERA_2P_ROT			vec3(1.6f, 0.0f, 0.0f)	// ネズミのカメラの角度
+#define CAMERA_2P_ROT			vec3(1.12f, 0.0f, 0.0f)	// ネズミのカメラの角度
 #define CAMERA_MOVE				(10.0f)					// カメラの移動速度
 #define CAMERA_SPIN				(0.01f)					// カメラの回転速度
 #define CAMERA_FOLLOW_FACTOR	(0.15f)					// カメラが追従移動する時の補正
@@ -47,8 +47,8 @@
 
 #define CAM_ORBIT_UP	DIK_T					// カメラ移動回転　上
 #define CAM_ORBIT_DW	DIK_B					// カメラ移動回転　下
-#define CAM_ORBIT_L		DIK_Z					// カメラ移動回転　左
-#define CAM_ORBIT_R		DIK_C					// カメラ移動回転　右
+#define CAM_ORBIT_L		DIK_C					// カメラ移動回転　左
+#define CAM_ORBIT_R		DIK_Z					// カメラ移動回転　右
 
 #define CAM_ZOOM_OUT	DIK_R					// ズームアウト
 #define CAM_ZOOM_IN		DIK_V					// ズームイン (+スペース
@@ -60,6 +60,7 @@ typedef enum
 {
 	CAMERATYPE_PLAYER_ONE = 0,			// 少女に追従カメラ
 	CAMERATYPE_PLAYER_TWO,				// ネズミに追従カメラ
+	CAMERATYPE_FOCUS,					// 集中して見せる
 	MAX_CAMERA
 }CameraType;
 
@@ -112,5 +113,6 @@ void CameraReset(P_CAMERA pCamera);										// カメラリセット
 void FogEnable(CameraType type, bool bEnable = true, D3DXCOLOR col = colX_ZERO, float fStart = 0.0f, float fEnd = 0.0f);
 																		// 霧を有効化
 void CleanFog(void);													// 霧を削除
+void Focus(vec3 pos); // フォーカス
 
 #endif// !_CAMERA_H_
