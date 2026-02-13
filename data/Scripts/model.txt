@@ -25,7 +25,7 @@ TEXTURE_FILENAME = data/TEXTURE/road_mid.jpg		# [6]合流地点の道
 #------------------------------------------------------------------------------
 # モデル数
 #------------------------------------------------------------------------------
-NUM_MODEL = 18	#19
+NUM_MODEL = 19	#20
 
 #------------------------------------------------------------------------------
 # モデルファイル名
@@ -48,6 +48,7 @@ MODEL_FILENAME = data/MODEL/Building//Box.x				# [14]仮
 MODEL_FILENAME = data/MODEL/Building//shop.x			# [15]便利屋(仮)
 MODEL_FILENAME = data/MODEL/Building/Building_0.x		# [16]家_0
 MODEL_FILENAME = data/MODEL/Building/Building_1.x		# [17]家_1
+MODEL_FILENAME = data/MODEL/Gimmick/whole.x			# [18]ダクト
 
 #------------------------------------------------------------------------------
 # カメラ情報
@@ -3759,6 +3760,16 @@ MODELSET
 	ROT = 0 -90 0
 	SHADOW = 0
 END_MODELSET
+
+
+MODELSET
+	TYPE = 18	# [18]ギミック(仮)
+	POS = 1400 100 -725
+	ROT = 0 90 0
+	SHADOW = 0
+END_MODELSET
+
+
 #---------------------------------------
 
 #------------------------------------------------------------------------------
