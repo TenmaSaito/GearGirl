@@ -32,6 +32,7 @@ typedef enum
 	ITEMTYPE_GEARL_TRUE,			// [2] 綺麗な大きい歯車
 	ITEMTYPE_SHAFT_TRUE,			// [3] まっすぐな軸
 	ITEMTYPE_SPRING_TRUE,			// [4] 丁寧に直されたぜんまい
+
 	ITEMTYPE_SCREW_FALSE,			// [5] 古いねじ
 	ITEMTYPE_GEARS_FALSE,			// [6] 錆びた小さい歯車
 	ITEMTYPE_GEARL_FALSE,			// [7] 欠けた大きい歯車
@@ -39,6 +40,7 @@ typedef enum
 	ITEMTYPE_SPRING_FALSE,			// [9] ゆがんだぜんまい
 	ITEMTYPE_MAX
 }ITEMTYPE;
+
 //==============================================================
 // アイテム情報構造体定義
 //==============================================================
@@ -79,6 +81,6 @@ void UninitItem(void);
 void UpdateItem(void);
 void DrawItem(void);
 void CollisionItem(vec3 pos,float fRange);			// 当たり判定
-
+bool IsGetItem(ITEMTYPE type);
 
 #endif // !_ITEM_H_
