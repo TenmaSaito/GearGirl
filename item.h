@@ -42,6 +42,15 @@ typedef enum
 	ITEMTYPE_MAX
 }ITEMTYPE;
 
+typedef enum
+{
+	PUTOUT_BG = 0,					// 背景
+	PUTOUT_ITEMBOX,					// 所持アイテムの大枠
+	PUTOUT_ENTRYBOX,				// 提出アイテムの大枠
+	PUTOUT_ENTER,					// 決定ボタン
+	PUTOUTUI_MAX
+}PUTOUTUI;
+
 //==============================================================
 // アイテム情報構造体定義
 //==============================================================
@@ -80,6 +89,7 @@ void InitItem(void);
 void UninitItem(void);
 void UpdateItem(void);
 void DrawItem(void);
+void DrawUIItem(void);
 void SetItem(vec3 pos, vec3 rot, ITEMTYPE type, bool bReflectGirl = true, bool bReflectMouse = true, bool bColi = false);			// アイテム設置
 void CollisionItem(vec3 pos,float fRange);			// 当たり判定
 void EnableItemPut(void);							// アイテム提出フラグを切り替え

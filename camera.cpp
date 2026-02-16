@@ -585,6 +585,54 @@ void SetCamera(void)
 }
 
 //=========================================================================================
+// カメラ設置
+//=========================================================================================
+void SetUICamera(vec3 viewTopLeft, vec2 size)
+{
+	LPDIRECT3DDEVICE9	pDevice = GetDevice();		// デバイスへのポインタ
+	D3DVIEWPORT9 viewport;
+		viewport.X = viewTopLeft.x;
+		viewport.Y = viewTopLeft.y;
+		viewport.Width = size.x;
+		viewport.Height = size.y;
+		viewport.MinZ = 0.0f;
+		viewport.MaxZ = 1.0f;
+	D3DXMATRIX mtxProjection,mtxView;
+	vec3 vecU = vec3(0.0f, 1.0f, 0.0f),posV = UICAMERA_POSV,posR = UICAMERA_POSR;
+	float fViewRadian = 45.0f, fViewMin = 1000.0f, fViewMax = 10.0f;
+
+	//**************************************************************
+	// ビューポートの設定
+	pDevice->SetViewport(&viewport);
+
+	//**************************************************************
+	// プロジェクションマトリックスの初期化
+	D3DXMatrixIdentity(&mtxProjection);
+
+	// プロジェクションマトリックスを作成
+	D3DXMatrixPerspectiveFovLH(&mtxProjection,
+		D3DXToRadian(fViewRadian),						// 視野角
+		(float)viewport.Width / (float)viewport.Height,	// アスペクト比
+		fViewMin,										// 最短描画距離
+		fViewMax);										// 最大描画距離
+
+	// プロジェクションマトリックスを設定
+	pDevice->SetTransform(D3DTS_PROJECTION, &mtxProjection);
+
+	//**************************************************************
+	// ビューマトリックスの初期化
+	D3DXMatrixIdentity(&mtxView);
+
+	// ビューマトリックスの作成
+	D3DXMatrixLookAtLH(&mtxView, &posV, &posR, &vecU);
+
+	// ビューマトリックスの設定
+	pDevice->SetTransform(D3DTS_VIEW, &mtxView);
+	
+	EndDevice();// デバイス取得終了
+}
+
+//=========================================================================================
 // カメラの情報を取得
 //=========================================================================================
 P_CAMERA GetCamera(void)

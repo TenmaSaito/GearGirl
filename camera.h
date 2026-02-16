@@ -2,7 +2,7 @@
 //
 //			プレイヤーカメラ処理 [camera.h]
 //			Author : ENDO HIDETO
-// 
+//
 //==================================================================================================================================
 #ifndef _CAMERA_H_
 #define _CAMERA_H_
@@ -34,6 +34,9 @@
 #define CAMERA_PLAYER_FRONT		(50.0f)					// 注視点をプレイヤーより少し先にする
 #define CAMERA_PLFR_DEADZONE	(0.01f)					// これ以上速度があればカメラを動かす
 #define SETCAMERAPOS_COUNTER	(30)					// カメラ切り替え時このフレーム以内に元の位置に戻る
+#define MAX_CAMERA_UI			(64)					// インターフェース用のカメラ最大数
+#define UICAMERA_POSV			vec3(0.0f,50.0f,-50.0f)	// インターフェース用カメラの座標
+#define UICAMERA_POSR			vec3(0.0f,0.0f,0.0f)
 
 //**************************************************************
 // カメラ操作
@@ -61,6 +64,7 @@ typedef enum
 	CAMERATYPE_PLAYER_ONE = 0,			// 少女に追従カメラ
 	CAMERATYPE_PLAYER_TWO,				// ネズミに追従カメラ
 	CAMERATYPE_2D,						// 2Dポリゴン描画用設定
+	CAMERATYPE_3DUI,					// UIに3Dモデルを表示したいときのカメラ
 	MAX_CAMERA
 }CameraType;
 
@@ -103,6 +107,7 @@ void InitCamera(void);
 void UninitCamera(void);
 void UpdateCamera(void);
 void SetCamera(void);													// カメラを設置（mainのDrawの最初にする）
+void SetUICamera(vec3 viewTopLeft, vec2 size);							// UI用などで画面上にモデルを描画したい場合
 // void ReleaseCamera(int nIdx);											// カメラを開放
 P_CAMERA GetCamera(void);												// カメラ除法配列の先頭アドレスを取得
 void GetCameraPos(int nCamNum, vec3* pPosV, vec3* pPosR);				// カメラの位置情報を取得
