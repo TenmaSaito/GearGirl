@@ -25,7 +25,7 @@ TEXTURE_FILENAME = data/TEXTURE/road_mid.jpg		# [6]合流地点の道
 #------------------------------------------------------------------------------
 # モデル数
 #------------------------------------------------------------------------------
-NUM_MODEL = 23	#24
+NUM_MODEL = 27	#28
 
 #------------------------------------------------------------------------------
 # モデルファイル名
@@ -53,6 +53,10 @@ MODEL_FILENAME = data/MODEL/Item/GearLarge.x			# [19]ギア大
 MODEL_FILENAME = data/MODEL/Item/GearSmall.x			# [20]ギア小
 MODEL_FILENAME = data/MODEL/Item/GearLargeDificit.x			# [21]はずれギア
 MODEL_FILENAME = data/MODEL/Item/Shaft.x			# [22]シャフト
+MODEL_FILENAME = data/MODEL/Building/blockfence.x			# [23]塀
+MODEL_FILENAME = data/MODEL/Building/ironfence.x			# [24]鉄柵
+MODEL_FILENAME = data/MODEL/Building/grave001.x			# [25]丸墓
+MODEL_FILENAME = data/MODEL/Building/grave002.x			# [26]三角墓
 
 #------------------------------------------------------------------------------
 # カメラ情報
@@ -389,13 +393,58 @@ END_FIELDSET
 #END_MODELSET
 #------------------------------------------------------------------------------
 
+#------------------------------------------------------------------------------
+# 教会周り
 MODELSET
 	TYPE = 1	# [1]教会
-	POS = 1900 100 600
+	POS = 1900 100 460
 	ROT = 0 90 0
 	SHADOW = 0
 END_MODELSET
 
+#MODELSET
+#	TYPE = 23	# [1]塀
+#	POS = 2070 100 460
+#	ROT = 0 0 0
+#	SHADOW = 0
+#END_MODELSET
+
+#MODELSET
+#	TYPE = 23	# [1]塀
+#	POS = 1900 100 650
+#	ROT = 0 90 0
+#	SHADOW = 0
+#END_MODELSET
+
+#MODELSET
+#	TYPE = 23	# [1]塀
+#	POS = 1900 100 290
+#	ROT = 0 90 0
+#	SHADOW = 0
+#END_MODELSET
+
+#MODELSET
+#	TYPE = 24	# [1]鉄柵
+#	POS = 1775 100 530
+#	ROT = 0 90 0
+#	SHADOW = 0
+#END_MODELSET
+
+#MODELSET
+#	TYPE = 25	# [1]丸墓
+#	POS = 1900 100 600
+#	ROT = 0 90 0
+#	SHADOW = 0
+#END_MODELSET
+
+#MODELSET
+#	TYPE = 26	# [1]三角墓
+#	POS = 1900 100 600
+#	ROT = 0 90 0
+#	SHADOW = 0
+#END_MODELSET
+
+#------------------------------------------------------------------------------
 
 MODELSET
 	TYPE = 2	# [2]時計台
