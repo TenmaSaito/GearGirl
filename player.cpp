@@ -349,7 +349,7 @@ void UpdatePlayer(void)
 	PrintDebugProc("\nPlayerデバッグ表示切り替え : [F1]\n");
 
 	// デバッグ表示
-	if (g_Functionkey == 0)
+	if (g_Functionkey != 0)
 	{
 		PrintDebugProc("\nPlayer切り替え : [Q] : [%d]\n", g_ActivePlayer);
 		PrintDebugProc("操作対象 : 0 → 少女\n                1 → ネズミ\n");
