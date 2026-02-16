@@ -343,6 +343,9 @@ void DrawGame(void)
 	/*** 2Dポリゴンの描画 ***/
 	Draw2DPolygon();
 
+	/*** UIアイテム描画 ***/
+	DrawUIItem();
+
 	//ポーズ状態がONの時
 	if (g_bPause == true)
 	{
