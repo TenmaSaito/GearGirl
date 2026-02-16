@@ -25,7 +25,7 @@ TEXTURE_FILENAME = data/TEXTURE/road_mid.jpg		# [6]合流地点の道
 #------------------------------------------------------------------------------
 # モデル数
 #------------------------------------------------------------------------------
-NUM_MODEL = 27	#28
+NUM_MODEL = 28
 
 #------------------------------------------------------------------------------
 # モデルファイル名
@@ -48,15 +48,16 @@ MODEL_FILENAME = data/MODEL/Building//Box.x				# [14]仮
 MODEL_FILENAME = data/MODEL/Building//shop.x			# [15]便利屋(仮)
 MODEL_FILENAME = data/MODEL/Building/Building_0.x		# [16]家_0
 MODEL_FILENAME = data/MODEL/Building/Building_1.x		# [17]家_1
-MODEL_FILENAME = data/MODEL/Gimmick/whole.x			# [18]ネズミの通路
+MODEL_FILENAME = data/MODEL/Gimmick/whole.x				# [18]ネズミの通路
 MODEL_FILENAME = data/MODEL/Item/GearLarge.x			# [19]ギア大
 MODEL_FILENAME = data/MODEL/Item/GearSmall.x			# [20]ギア小
-MODEL_FILENAME = data/MODEL/Item/GearLargeDificit.x			# [21]はずれギア
-MODEL_FILENAME = data/MODEL/Item/Shaft.x			# [22]シャフト
-MODEL_FILENAME = data/MODEL/Building/blockfence.x			# [23]塀
-MODEL_FILENAME = data/MODEL/Building/ironfence.x			# [24]鉄柵
+MODEL_FILENAME = data/MODEL/Item/GearLargeDificit.x		# [21]はずれギア
+MODEL_FILENAME = data/MODEL/Item/Shaft.x				# [22]シャフト
+MODEL_FILENAME = data/MODEL/Building/blockfence.x		# [23]塀
+MODEL_FILENAME = data/MODEL/Building/ironfence.x		# [24]鉄柵
 MODEL_FILENAME = data/MODEL/Building/grave001.x			# [25]丸墓
 MODEL_FILENAME = data/MODEL/Building/grave002.x			# [26]三角墓
+MODEL_FILENAME = data/MODEL/Building/StationGlass.x		# [27]駅の後ろ
 
 #------------------------------------------------------------------------------
 # カメラ情報
@@ -563,6 +564,13 @@ MODELSET
 	TYPE = 3	# [3]駅
 	POS = 1000 100 -1000
 	ROT = 0 -90 0
+	SHADOW = 0
+END_MODELSET
+
+MODELSET
+	TYPE = 27	# [27]駅の後ろ
+	POS = 573 100 -1000
+	ROT = 0 270 0
 	SHADOW = 0
 END_MODELSET
 
