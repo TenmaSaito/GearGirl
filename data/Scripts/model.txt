@@ -205,13 +205,7 @@ FIELDSET
 	SIZE = 150 100		# ëÂÇ´Ç≥(Çw/Çy)
 END_FIELDSET
 
-FIELDSET
-	TEXTYPE = 5			# ÉeÉNÉXÉ`ÉÉÇÃéÌóﬁ
-	POS = 1765 100.1 600	# à íu
-	ROT = 0 90 0		# å¸Ç´
-	BLOCK = 1 2		# ï™äÑêî(Çw/Çy)
-	SIZE = 80 100		# ëÂÇ´Ç≥(Çw/Çy)
-END_FIELDSET
+
 
 FIELDSET
 	TEXTYPE = 5			# ÉeÉNÉXÉ`ÉÉÇÃéÌóﬁ
@@ -397,52 +391,59 @@ END_FIELDSET
 # ã≥âÔé¸ÇË
 MODELSET
 	TYPE = 1	# [1]ã≥âÔ
-	POS = 1900 100 460
+	POS = 1900 100 475
 	ROT = 0 90 0
 	SHADOW = 0
 END_MODELSET
 
-#MODELSET
-#	TYPE = 23	# [1]ïª
-#	POS = 2070 100 460
-#	ROT = 0 0 0
-#	SHADOW = 0
-#END_MODELSET
+MODELSET
+	TYPE = 23	# [1]ïª
+	POS = 2068 100 480
+	ROT = 0 90 0
+	SHADOW = 0
+END_MODELSET
 
-#MODELSET
-#	TYPE = 23	# [1]ïª
-#	POS = 1900 100 650
-#	ROT = 0 90 0
-#	SHADOW = 0
-#END_MODELSET
+MODELSET
+	TYPE = 23	# [1]ïª
+	POS = 1900 100 650
+	ROT = 0 0 0
+	SHADOW = 0
+END_MODELSET
 
-#MODELSET
-#	TYPE = 23	# [1]ïª
-#	POS = 1900 100 290
-#	ROT = 0 90 0
-#	SHADOW = 0
-#END_MODELSET
+MODELSET
+	TYPE = 23	# [1]ïª
+	POS = 1900 100 290
+	ROT = 0 0 0
+	SHADOW = 0
+END_MODELSET
 
-#MODELSET
-#	TYPE = 24	# [1]ìSçÚ
-#	POS = 1775 100 530
-#	ROT = 0 90 0
-#	SHADOW = 0
-#END_MODELSET
+MODELSET
+	TYPE = 24	# [1]ìSçÚ
+	POS = 1725 100 575
+	ROT = 0 90 0
+	SHADOW = 0
+END_MODELSET
 
-#MODELSET
-#	TYPE = 25	# [1]ä€ïÊ
-#	POS = 1900 100 600
-#	ROT = 0 90 0
-#	SHADOW = 0
-#END_MODELSET
+MODELSET
+	TYPE = 24	# [1]ìSçÚ
+	POS = 1725 100 370
+	ROT = 0 90 0
+	SHADOW = 0
+END_MODELSET
 
-#MODELSET
-#	TYPE = 26	# [1]éOäpïÊ
-#	POS = 1900 100 600
-#	ROT = 0 90 0
-#	SHADOW = 0
-#END_MODELSET
+MODELSET
+	TYPE = 25	# [1]ä€ïÊ
+	POS = 1900 100 600
+	ROT = 0 90 0
+	SHADOW = 0
+END_MODELSET
+
+MODELSET
+	TYPE = 26	# [1]éOäpïÊ
+	POS = 1900 100 600
+	ROT = 0 90 0
+	SHADOW = 0
+END_MODELSET
 
 #------------------------------------------------------------------------------
 
@@ -1704,79 +1705,6 @@ MODELSET
 END_MODELSET
 #---------------------------------------
 
-#---ã≥âÔãﬂÇ≠ÇÃâ∆------------------------------------
-MODELSET
-	TYPE = 16	# [16]â∆0
-	POS = 1770 100 250
-	ROT = 0 0 0
-	SHADOW = 0
-END_MODELSET
-
-MODELSET
-	TYPE = 16	# [16]â∆0
-	POS = 1735 100 334
-	ROT = 0 90 0
-	SHADOW = 0
-END_MODELSET
-
-MODELSET
-	TYPE = 17	# [17]â∆1
-	POS = 1735 100 425
-	ROT = 0 90 0
-	SHADOW = 0
-END_MODELSET
-
-MODELSET
-	TYPE = 16	# [16]â∆0
-	POS = 1805 100 334
-	ROT = 0 -90 0
-	SHADOW = 0
-END_MODELSET
-
-
-MODELSET
-	TYPE = 16	# [16]â∆0
-	POS = 2025 100 250
-	ROT = 0 0 0
-	SHADOW = 0
-END_MODELSET
-
-MODELSET
-	TYPE = 16	# [16]â∆0
-	POS = 2060 100 334
-	ROT = 0 -90 0
-	SHADOW = 0
-END_MODELSET
-
-MODELSET
-	TYPE = 17	# [17]â∆1
-	POS = 2060 100 422
-	ROT = 0 -90 0
-	SHADOW = 0
-END_MODELSET
-
-MODELSET
-	TYPE = 16	# [16]â∆0
-	POS = 1990 100 334
-	ROT = 0 90 0
-	SHADOW = 0
-END_MODELSET
-
-
-MODELSET
-	TYPE = 16	# [16]â∆0
-	POS = 1820 100 429
-	ROT = 0 180 0
-	SHADOW = 0
-END_MODELSET
-
-MODELSET
-	TYPE = 16	# [16]â∆0
-	POS = 1975 100 429
-	ROT = 0 180 0
-	SHADOW = 0
-END_MODELSET
-#---------------------------------------
 
 #---â∆1------------------------------------X600Z310ÇÃïœìÆ
 MODELSET
