@@ -185,7 +185,7 @@ FIELDSET
 	POS = 1900 100.1 -550	# à íu
 	ROT = 0 0 0			# å¸Ç´
 	BLOCK = 1 25		# ï™äÑêî(Çw/Çy)
-	SIZE = 80 80		# ëÂÇ´Ç≥(Çw/Çy)
+	SIZE = 80 55		# ëÂÇ´Ç≥(Çw/Çy)
 END_FIELDSET
 
 FIELDSET
@@ -439,8 +439,57 @@ MODELSET
 END_MODELSET
 
 MODELSET
+	TYPE = 25	# [1]ä€ïÊ
+	POS = 2035 100 560
+	ROT = 0 90 0
+	SHADOW = 0
+END_MODELSET
+
+MODELSET
+	TYPE = 25	# [1]ä€ïÊ
+	POS = 2030 100 390
+	ROT = 0 90 0
+	SHADOW = 0
+END_MODELSET
+
+MODELSET
+	TYPE = 25	# [1]ä€ïÊ
+	POS = 1875 100 330
+	ROT = 0 90 0
+	SHADOW = 0
+END_MODELSET
+
+MODELSET
 	TYPE = 26	# [1]éOäpïÊ
-	POS = 1900 100 600
+	POS = 1980 100 620
+	ROT = 0 90 0
+	SHADOW = 0
+END_MODELSET
+
+MODELSET
+	TYPE = 26	# [1]éOäpïÊ
+	POS = 1945 100 360
+	ROT = 0 90 0
+	SHADOW = 0
+END_MODELSET
+
+MODELSET
+	TYPE = 26	# [1]éOäpïÊ
+	POS = 2015 100 325
+	ROT = 0 90 0
+	SHADOW = 0
+END_MODELSET
+
+MODELSET
+	TYPE = 26	# [1]éOäpïÊ
+	POS = 2050 100 470
+	ROT = 0 90 0
+	SHADOW = 0
+END_MODELSET
+
+MODELSET
+	TYPE = 26	# [1]éOäpïÊ
+	POS = 1850 100 625
 	ROT = 0 90 0
 	SHADOW = 0
 END_MODELSET
@@ -1116,12 +1165,6 @@ END_MODELSET
 #---------------------------------------
 
 #---äXìî12------------------------------------
-MODELSET
-	TYPE = 12	# [12]äXìî
-	POS = 1670 100 455
-	ROT = 0 0 0
-	SHADOW = 0
-END_MODELSET
 
 MODELSET
 	TYPE = 12	# [12]äXìî
@@ -1181,19 +1224,6 @@ END_MODELSET
 #---------------------------------------
 
 #---äXìî13------------------------------------
-MODELSET
-	TYPE = 12	# [12]äXìî
-	POS = 1740 100 635
-	ROT = 0 90 0
-	SHADOW = 0
-END_MODELSET
-
-MODELSET
-	TYPE = 12	# [12]äXìî
-	POS = 1740 100 565
-	ROT = 0 90 0
-	SHADOW = 0
-END_MODELSET
 
 MODELSET
 	TYPE = 12	# [12]äXìî
@@ -1246,12 +1276,6 @@ END_MODELSET
 #---------------------------------------
 
 #---äXìî14------------------------------------
-MODELSET
-	TYPE = 12	# [12]äXìî
-	POS = 1865 100 300
-	ROT = 0 0 0
-	SHADOW = 0
-END_MODELSET
 
 MODELSET
 	TYPE = 12	# [12]äXìî
@@ -1320,12 +1344,6 @@ END_MODELSET
 #---------------------------------------
 
 #---äXìî16------------------------------------
-MODELSET
-	TYPE = 12	# [12]äXìî
-	POS = 1935 100 300
-	ROT = 0 0 0
-	SHADOW = 0
-END_MODELSET
 
 MODELSET
 	TYPE = 12	# [12]äXìî
