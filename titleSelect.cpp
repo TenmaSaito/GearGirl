@@ -12,6 +12,7 @@
 #include "2Dpolygon.h"
 #include "mathUtil.h"
 #include "fade.h"
+#include "sound.h"
 
 using namespace MyMathUtil;
 
@@ -58,9 +59,9 @@ void ToQuitGame(void);
 const char* c_apFilenameTitle[MAX_TITLE] =
 {
 	"data\\TEXTURE\\TitleTapToStart.png",
-	"data\\TEXTURE\\TitleStart.png",
-	"data\\TEXTURE\\TitleOption.png",
-	"data\\TEXTURE\\TitleEnd.png",
+	"data\\TEXTURE\\Title_Start.png",
+	"data\\TEXTURE\\Title_Settings.png",
+	"data\\TEXTURE\\Title_Quit.png",
 	"data\\TEXTURE\\Title1Player.png",
 	"data\\TEXTURE\\Title2Player.png",
 };
@@ -279,74 +280,80 @@ void CreateSelectBuffer(LPDIRECT3DDEVICE9 pDevice, TSelect *pOut, TITLE_MENU typ
 //==================================================================================
 void ChangePhase(void)
 {
-	if (GetKeyboardTrigger(DIK_RETURN))
+	if (GetFade() == FADE_NONE)
 	{
-		if (g_nPhaseSelect < PHASE_NUM - 1)
+		if (GetKeyboardTrigger(DIK_RETURN))
 		{
-			if (g_nPhaseSelect == 1)
+			PlaySound(SOUND_LABEL_SE_T_ENTER);
+
+			if (g_nPhaseSelect < PHASE_NUM - 1)
 			{
-				switch (g_nSelect)
+				if (g_nPhaseSelect == 1)
 				{
-					// ゲーム開始
-				case TITLE_MENU_START:
+					switch (g_nSelect)
+					{
+						// ゲーム開始
+					case TITLE_MENU_START:
+						ToNextPhase();
+						break;
+
+						// 設定
+					case TITLE_MENU_OPTION:
+						ToSetting();
+						break;
+
+						// 退出
+					case TITLE_MENU_OUTGAME:
+						ToQuitGame();
+						break;
+
+					default:
+						break;
+					}
+				}
+				else
+				{
 					ToNextPhase();
-					break;
-
-					// 設定
-				case TITLE_MENU_OPTION:
-					ToSetting();
-					break;
-
-					// 退出
-				case TITLE_MENU_OUTGAME:
-					ToQuitGame();
-					break;
-
-				default:
-					break;
 				}
 			}
 			else
 			{
-				ToNextPhase();
-			}
-		}
-		else
-		{
-			if (g_nSelect == TITLE_MENU_ONEPLAY)
-			{
-				g_nPlayerNum = 1;
-			}
-			else if(g_nSelect == TITLE_MENU_TWOPLAY)
-			{
-				g_nPlayerNum = 2;
-			}
+				if (g_nSelect == TITLE_MENU_ONEPLAY)
+				{
+					g_nPlayerNum = 1;
+				}
+				else if (g_nSelect == TITLE_MENU_TWOPLAY)
+				{
+					g_nPlayerNum = 2;
+				}
 
-			if (GetFade() == FADE_NONE)
-			{
 				SetFade(MODE_GAME);
+				FadeSound(SOUND_LABEL_BGM_GAME);
 			}
 		}
-	}
-	else if (GetKeyboardTrigger(DIK_BACK) && g_nPhaseSelect > 0)
-	{
-		for (int nCntSelect = g_aPhaseSelect[g_nPhaseSelect][0]; nCntSelect < g_aPhaseSelect[g_nPhaseSelect][1]; nCntSelect++)
+		else if (GetDualInput(JOYKEY_B, DUAL_JOYPAD | DUAL_RELEASE | DUAL_OR,
+			DIK_BACK, DUAL_KEYBOARD | DUAL_TRIGGER) && g_nPhaseSelect > 0)
 		{
-			g_aSelect[nCntSelect].bSelect = false;
-			g_aSelect[nCntSelect].bCanSelect = false;
-			g_aSelect[g_nSelect].col = D3DXCOLOR(1, 1, 1, g_aSelect[g_nSelect].col.a);
+			PlaySound(SOUND_LABEL_SE_T_CANCEL);
+
+			for (int nCntSelect = g_aPhaseSelect[g_nPhaseSelect][0]; nCntSelect < g_aPhaseSelect[g_nPhaseSelect][1]; nCntSelect++)
+			{
+				g_aSelect[nCntSelect].bSelect = false;
+				g_aSelect[nCntSelect].bCanSelect = false;
+				g_aSelect[g_nSelect].col = D3DXCOLOR(1, 1, 1, g_aSelect[g_nSelect].col.a);
+			}
+
+			g_nPhaseSelect--;
+
+			for (int nCntSelect = g_aPhaseSelect[g_nPhaseSelect][0]; nCntSelect < g_aPhaseSelect[g_nPhaseSelect][1]; nCntSelect++)
+			{
+				g_aSelect[nCntSelect].bShow = true;
+				g_aSelect[nCntSelect].bSelect = false;
+				g_aSelect[nCntSelect].bCanSelect = true;
+			}
+
+			g_nSelect = g_aPhaseSelect[g_nPhaseSelect][0];
 		}
-
-		g_nPhaseSelect--;
-
-		for (int nCntSelect = g_aPhaseSelect[g_nPhaseSelect][0]; nCntSelect < g_aPhaseSelect[g_nPhaseSelect][1]; nCntSelect++)
-		{
-			g_aSelect[nCntSelect].bShow = true;
-			g_aSelect[nCntSelect].bSelect = false;
-			g_aSelect[nCntSelect].bCanSelect = true;
-		}
-
-		g_nSelect = g_aPhaseSelect[g_nPhaseSelect][0];
 	}
 }
 
@@ -395,6 +402,9 @@ void ToQuitGame(void)
 //==================================================================================
 void ChangeSelect(void)
 {
+	// 開始前なら無視
+	if (g_nPhaseSelect == 0) return;
+
 	if (GetKeyboardRepeat(DIK_W))
 	{
 		g_aSelect[g_nSelect].bSelect = false;
@@ -408,6 +418,8 @@ void ChangeSelect(void)
 
 		g_aSelect[g_nSelect].bSelect = true;
 		g_aSelect[g_nSelect].col = D3DXCOLOR(0, 1, 0, g_aSelect[g_nSelect].col.a);
+
+		PlaySound(SOUND_LABEL_SE_T_SELECT);
 	}
 	else if (GetKeyboardRepeat(DIK_S))
 	{
@@ -422,6 +434,8 @@ void ChangeSelect(void)
 
 		g_aSelect[g_nSelect].bSelect = true;
 		g_aSelect[g_nSelect].col = D3DXCOLOR(0, 1, 0, g_aSelect[g_nSelect].col.a);
+
+		PlaySound(SOUND_LABEL_SE_T_SELECT);
 	}
 }
 

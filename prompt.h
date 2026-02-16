@@ -44,4 +44,5 @@ int DetectionPrompt(D3DXVECTOR3 pos, float fLength);
 void SetEnablePrompt(bool bDisp, int nIdxPrompt);
 D3DXVECTOR3 GetPromptPos(int nIdxPrompt);
 LPPROMPT GetPrompt(void);
+bool IsDispPrompt(int nIdxPrompt);
 #endif

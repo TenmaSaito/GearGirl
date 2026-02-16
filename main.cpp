@@ -401,7 +401,7 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	InitMode();
 
 	/*** タイトルBGMをフェードイン ***/
-	//FadeSound(SOUND_LABEL_BGM_TITLE);
+	FadeSound(SOUND_LABEL_BGM_TITLE);
 
 #endif // MODE_ON
 

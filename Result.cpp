@@ -13,6 +13,7 @@
 #include "badend.h"
 #include "normalend.h"
 #include "happyend.h"
+#include "sound.h"
 
 //**********************************************************************************
 //*** É}ÉNÉçíËã` ***
@@ -80,6 +81,7 @@ void UpdateResult(void)
 		if (GetFade() == FADE_NONE)
 		{
 			SetFade(MODE_TITLE);
+			FadeSound(SOUND_LABEL_BGM_TITLE);
 		}
 	}
 
