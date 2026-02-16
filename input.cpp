@@ -216,11 +216,11 @@ void UpdateJoypad(void)
 		if (XInputGetState(nCntPad, &joykeyState) == ERROR_SUCCESS)
 		{
 			// ジョイパッドのリリース情報を保存
-			g_Joypad[nCntPad].joykeyStateRelease->Gamepad.wButtons = g_Joypad[nCntPad].joykeyState.Gamepad.wButtons & (joykeyState.Gamepad.wButtons ^ joykeyState.Gamepad.wButtons);
+			g_Joypad[nCntPad].joykeyStateRelease->Gamepad.wButtons = g_Joypad[nCntPad].joykeyState.Gamepad.wButtons & (g_Joypad[nCntPad].joykeyState.Gamepad.wButtons ^ joykeyState.Gamepad.wButtons);
 
 			// ジョイパッドのトリガー情報を保存
 			g_Joypad[nCntPad].joykeyStateTrigger.Gamepad.wButtons = (g_Joypad[nCntPad].joykeyState.Gamepad.wButtons ^ joykeyState.Gamepad.wButtons) & joykeyState.Gamepad.wButtons;
-
+			
 			// ジョイパッドの情報を保存
 			g_Joypad[nCntPad].joykeyState = joykeyState;
 

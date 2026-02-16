@@ -57,8 +57,13 @@ WAVEFORMATEX g_wfxSource[SOUND_LABEL_MAX] = {};
 // サウンドの情報(sound.hのLABELに追加したらここにも追加する！)
 SOUNDINFO g_aSoundInfo[SOUND_LABEL_MAX] =
 {
-	{"data/BGM/BGM_TITLE.wav", -1, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},		// タイトル画面のBGM
-	{"data/BGM/BGM_TITLE.wav", -1, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},		// 歩行音
+	{"data/SOUND/BGM/BGM_TITLE.wav", -1, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},		// タイトル画面のBGM
+	{"data/SOUND/BGM/BGM_TITLE.wav", -1, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},		// ゲーム画面のBGM
+	{"data/SOUND/BGM/BGM_TITLE.wav", -1, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},		// リザルト画面のBGM
+	{"data/SOUND/SE/SE_GETPARTS.wav", 0, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},		// パーツ取得音
+	{"data/SOUND/SE/SE_GETPARTS.wav", 0, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},		// タイトル画面での選択音
+	{"data/SOUND/SE/SE_GETPARTS.wav", 0, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},		// タイトル画面での決定音
+	{"data/SOUND/SE/SE_GETPARTS.wav", 0, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},		// タイトル画面での取消音
 };
 
 //=============================================================================

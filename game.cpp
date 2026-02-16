@@ -31,6 +31,7 @@
 #include "UImenu.h"
 #include "gimmick.h"
 #include "judgeEnd.h"
+#include "sound.h"
 
 //**********************************************************************************
 //*** É}ÉNÉçíËã` ***
@@ -271,6 +272,7 @@ void UpdateGame(void)
 		if (GetFade() == FADE_NONE)
 		{
 			SetFade(MODE_RESULT);
+			FadeSound(SOUND_LABEL_BGM_RESULT);
 		}
 	}
 }

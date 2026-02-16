@@ -8,6 +8,7 @@
 //*** インクルードファイル ***
 //**********************************************************************************
 #include "mathUtil.h"
+#include "input.h"
 #include "Texture.h"
 
 //**********************************************************************************
@@ -1774,4 +1775,98 @@ void MyMathUtil::RemovePass(_In_ LPD3DXEFFECT pEffect,
 	{ // シェーダーの利用終了
 		pEffect->End();
 	}
+}
+
+//==================================================================================
+// --- DualInput ---
+//==================================================================================
+bool MyMathUtil::GetDualInput(int nKey, UINT nFlag, int nKey2, UINT nFlag2)
+{
+	using namespace MyMathUtil;
+	bool aInput[2] = {};
+
+	if (nFlag & DUAL_KEYBOARD)
+	{ // キーボード入力
+		if (nFlag & DUAL_PRESS)
+		{ // プレス
+			aInput[0] = GetKeyboardPress(nKey);
+		}
+		else if (nFlag & DUAL_TRIGGER)
+		{ // トリガー
+			aInput[0] = GetKeyboardTrigger(nKey);
+		}
+		else if (nFlag & DUAL_RELEASE)
+		{ // リリース
+			aInput[0] = GetKeyboardRelease(nKey);
+		}
+		else if (nFlag & DUAL_REPEAT)
+		{ // リピート
+			aInput[0] = GetKeyboardRepeat(nKey);
+		}
+	}
+	else if(nFlag & DUAL_JOYPAD)
+	{ // ジョイパッド入力
+		if (nFlag & DUAL_PRESS)
+		{ // プレス
+			aInput[0] = GetJoypadPress((nFlag >> DUAL_DUALID) & 0x01, (JOYKEY)nKey);
+		}
+		else if (nFlag & DUAL_TRIGGER)
+		{ // トリガー
+			aInput[0] = GetJoypadTrigger((nFlag >> DUAL_DUALID) & 0x01, (JOYKEY)nKey);
+		}
+		else if (nFlag & DUAL_RELEASE)
+		{ // リリース
+			aInput[0] = GetJoypadRelease((nFlag >> DUAL_DUALID) & 0x01, (JOYKEY)nKey);
+		}
+		else if (nFlag & DUAL_REPEAT)
+		{ // リピート
+			aInput[0] = GetJoypadRepeat((nFlag >> DUAL_DUALID) & 0x01, (JOYKEY)nKey);
+		}
+	}
+
+	if (nKey2 == -1) return aInput[0];
+
+	if (nFlag2 & DUAL_KEYBOARD)
+	{ // キーボード入力
+		if (nFlag2 & DUAL_PRESS)
+		{ // プレス
+			aInput[1] = GetKeyboardPress(nKey2);
+		}
+		else if (nFlag2 & DUAL_TRIGGER)
+		{ // トリガー
+			aInput[1] = GetKeyboardTrigger(nKey2);
+		}
+		else if (nFlag2 & DUAL_RELEASE)
+		{ // リリース
+			aInput[1] = GetKeyboardRelease(nKey2);
+		}
+		else if (nFlag2 & DUAL_REPEAT)
+		{ // リピート
+			aInput[1] = GetKeyboardRepeat(nKey2);
+		}
+	}
+	else if (nFlag2 & DUAL_JOYPAD)
+	{ // ジョイパッド入力
+		if (nFlag2 & DUAL_PRESS)
+		{ // プレス
+			aInput[1] = GetJoypadPress((nFlag2 >> DUAL_DUALID) & 0x01, (JOYKEY)nKey2);
+		}
+		else if (nFlag2 & DUAL_TRIGGER)
+		{ // トリガー
+			aInput[1] = GetJoypadTrigger((nFlag2 >> DUAL_DUALID) & 0x01, (JOYKEY)nKey2);
+		}
+		else if (nFlag2 & DUAL_RELEASE)
+		{ // リリース
+			aInput[1] = GetJoypadRelease((nFlag2 >> DUAL_DUALID) & 0x01, (JOYKEY)nKey2);
+		}
+		else if (nFlag2 & DUAL_REPEAT)
+		{ // リピート
+			aInput[1] = GetJoypadRepeat((nFlag2 >> DUAL_DUALID) & 0x01, (JOYKEY)nKey2);
+		}
+	}
+
+	if (nFlag & DUAL_AND) return aInput[0] & aInput[1];
+	if (nFlag & DUAL_OR) return aInput[0] | aInput[1];
+
+	return false;
 }

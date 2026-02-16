@@ -10,6 +10,7 @@
 #include "title.h"
 #include "input.h"
 #include "fade.h"
+#include "sound.h"
 #include "titleSelect.h"
 
 //**********************************************************************************
