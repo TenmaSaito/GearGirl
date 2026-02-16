@@ -7,10 +7,11 @@
 //**********************************************************************************
 //*** インクルードファイル ***
 //**********************************************************************************
-#include"main.h"
-#include"player.h"
-#include"timer.h"
-#include"fade.h"
+#include "main.h"
+#include "player.h"
+#include "timer.h"
+#include "fade.h"
+#include "Result.h"
 
 //*************************************************************************************************
 //*** マクロ定義 ***
@@ -309,7 +310,8 @@ void UpdateTimer(void)
         if (g_nTimer <= 0 && g_bTimeover == false)
         {
             g_bTimeover = true;
-            // SetFade(MODE_GAMEOVER);
+            SetEndingType(ENDTYPE_BAD);
+            SetFade(MODE_RESULT);
         }
     }
 }

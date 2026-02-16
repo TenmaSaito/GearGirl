@@ -161,7 +161,7 @@ void UpdateTitleSelect(void)
 				if (pSelect->s >= 1.0f)
 				{
 					pSelect->s = 1.0f;
-					g_aSelect[g_nSelect].col = D3DXCOLOR(0, 1, 0, g_aSelect[g_nSelect].col.a);
+					g_aSelect[g_nSelect].col = D3DXCOLOR(1, 1, 1, g_aSelect[g_nSelect].col.a);
 				}
 			}
 		}
@@ -340,7 +340,7 @@ void ChangePhase(void)
 			{
 				g_aSelect[nCntSelect].bSelect = false;
 				g_aSelect[nCntSelect].bCanSelect = false;
-				g_aSelect[g_nSelect].col = D3DXCOLOR(1, 1, 1, g_aSelect[g_nSelect].col.a);
+				g_aSelect[g_nSelect].col = D3DXCOLOR(0.5f, 0.5f, 0.5f, g_aSelect[g_nSelect].col.a);
 			}
 
 			g_nPhaseSelect--;
@@ -366,7 +366,7 @@ void ToNextPhase(void)
 	{
 		g_aSelect[nCntSelect].bSelect = false;
 		g_aSelect[nCntSelect].bCanSelect = false;
-		g_aSelect[g_nSelect].col = D3DXCOLOR(1, 1, 1, g_aSelect[g_nSelect].col.a);
+		g_aSelect[nCntSelect].col = D3DXCOLOR(0.5f, 0.5f, 0.5f, g_aSelect[g_nSelect].col.a);
 	}
 
 	g_nPhaseSelect++;
@@ -376,6 +376,7 @@ void ToNextPhase(void)
 		g_aSelect[nCntSelect].bShow = true;
 		g_aSelect[nCntSelect].bSelect = false;
 		g_aSelect[nCntSelect].bCanSelect = true;
+		g_aSelect[nCntSelect].col = D3DXCOLOR(0.5f, 0.5f, 0.5f, g_aSelect[g_nSelect].col.a);
 	}
 
 	g_nSelect = g_aPhaseSelect[g_nPhaseSelect][0];
@@ -408,7 +409,7 @@ void ChangeSelect(void)
 	if (GetKeyboardRepeat(DIK_W))
 	{
 		g_aSelect[g_nSelect].bSelect = false;
-		g_aSelect[g_nSelect].col = D3DXCOLOR(1, 1, 1, g_aSelect[g_nSelect].col.a);
+		g_aSelect[g_nSelect].col = D3DXCOLOR(0.5f, 0.5f, 0.5f, g_aSelect[g_nSelect].col.a);
 
 		g_nSelect--;
 		if (g_aPhaseSelect[g_nPhaseSelect][0] > g_nSelect)
@@ -417,14 +418,14 @@ void ChangeSelect(void)
 		}
 
 		g_aSelect[g_nSelect].bSelect = true;
-		g_aSelect[g_nSelect].col = D3DXCOLOR(0, 1, 0, g_aSelect[g_nSelect].col.a);
+		g_aSelect[g_nSelect].col = D3DXCOLOR(1, 1, 1, g_aSelect[g_nSelect].col.a);
 
 		PlaySound(SOUND_LABEL_SE_T_SELECT);
 	}
 	else if (GetKeyboardRepeat(DIK_S))
 	{
 		g_aSelect[g_nSelect].bSelect = false;
-		g_aSelect[g_nSelect].col = D3DXCOLOR(1, 1, 1, g_aSelect[g_nSelect].col.a);
+		g_aSelect[g_nSelect].col = D3DXCOLOR(0.5f, 0.5f, 0.5f, g_aSelect[g_nSelect].col.a);
 
 		g_nSelect++;
 		if (g_aPhaseSelect[g_nPhaseSelect][1] <= g_nSelect)
@@ -433,7 +434,7 @@ void ChangeSelect(void)
 		}
 
 		g_aSelect[g_nSelect].bSelect = true;
-		g_aSelect[g_nSelect].col = D3DXCOLOR(0, 1, 0, g_aSelect[g_nSelect].col.a);
+		g_aSelect[g_nSelect].col = D3DXCOLOR(1, 1, 1, g_aSelect[g_nSelect].col.a);
 
 		PlaySound(SOUND_LABEL_SE_T_SELECT);
 	}

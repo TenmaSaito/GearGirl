@@ -27,5 +27,5 @@ void UpdateJudgeEnd(void);
 void DrawJudgeEnd(void);
 #endif
 
-void JudgmentEnding(ITEMTYPE *pIn, UINT size);
+int JudgmentEnding(ITEMTYPE *pIn, UINT size);
 #endif

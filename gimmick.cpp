@@ -240,7 +240,7 @@ void DrawGimmick(void)
 //==================================================================================
 void SetGimmick(D3DXVECTOR3 pos, D3DXVECTOR3 rot, GIMMICKTYPE type)
 {
-	if (FAILED(CheckIndex(type, GIMMICKTYPE_MAX)))
+	if (FAILED(CheckIndex(GIMMICKTYPE_MAX, type)))
 	{ // インデックス確認
 		OutputDebugString(TEXT("ちょっと。ギミックの種類にそんなものないわよ。"));
 		return;
@@ -256,7 +256,7 @@ void SetGimmick(D3DXVECTOR3 pos, D3DXVECTOR3 rot, GIMMICKTYPE type)
 //==================================================================================
 void ClearGimmick(GIMMICKTYPE type)
 {
-	if (FAILED(CheckIndex(type, GIMMICKTYPE_MAX)))
+	if (FAILED(CheckIndex(GIMMICKTYPE_MAX, type)))
 	{ // インデックス確認
 		OutputDebugString(TEXT("ちょっと。ギミックの種類にそんなものないってば。"));
 		return;
@@ -271,7 +271,7 @@ void ClearGimmick(GIMMICKTYPE type)
 //==================================================================================
 bool IsClearGimmick(GIMMICKTYPE type)
 {
-	if (FAILED(CheckIndex(type, GIMMICKTYPE_MAX)))
+	if (FAILED(CheckIndex(GIMMICKTYPE_MAX, type)))
 	{ // インデックス確認
 		OutputDebugString(TEXT("ちょっと。ギミックの種類にそんなものないってば。"));
 		return false;

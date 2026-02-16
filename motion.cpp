@@ -79,6 +79,12 @@ bool LoadMotion(_In_ const char* pMotionFileName, int* pOutIdx)
 {
 	LPMOTIONSCRIPT_INFO pMotionInfo = &g_aMotionInfo[0];
 
+	if (pMotionFileName == NULL)
+	{
+		OutputDebugString(TEXT("モーションファイル名が指定されていませんよ！"));
+		return false;
+	}
+
 	if (pOutIdx)
 	{ // エラー番号を格納
 		*pOutIdx = ERROR_MOTION;

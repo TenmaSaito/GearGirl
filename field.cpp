@@ -192,7 +192,6 @@ void DrawField(void)
 	/*** デバイスの取得 ***/
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 	D3DXMATRIX mtxRot, mtxTrans;		// 計算用マトリックス
-	DWORD typeDef;						// カリングタイプ保存用
 
 	/*** 頂点バッファをデータストリームに設定 ***/
 	pDevice->SetStreamSource(0, g_pVtxBuffField, 0, sizeof(VERTEX_3D));

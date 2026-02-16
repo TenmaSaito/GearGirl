@@ -25,6 +25,8 @@
 //**********************************************************************************
 //*** グローバル変数 ***
 //**********************************************************************************
+int g_nScoreJudge;
+
 #if FALSE
 //==================================================================================
 // --- 初期化 ---
@@ -61,13 +63,16 @@ void DrawJudgeEnd(void)
 //==================================================================================
 // --- エンディング判定 ---
 //==================================================================================
-void JudgmentEnding(ITEMTYPE *pIn, UINT size)
+int JudgmentEnding(ITEMTYPE *pIn, UINT size)
 {
 	ENDTYPE result = ENDTYPE_BAD;		// エンディングタイプ
 	ITEMTYPE aTypeTrue[ITEMTYPE_MAX];	// アイテムの種類
 	UINT nCntTrue = 0;					// 正しいアイテムの数
 	ITEMTYPE aTypeFalse[ITEMTYPE_MAX];	// アイテムの種類
 	UINT nCntFalse = 0;					// 間違ったアイテムの数
+
+	// 現在のスコアをリセット
+	g_nScoreJudge = 0;
 
 	// 値保存
 	for (UINT nCntItem = 0; nCntItem < size; nCntItem++)
@@ -76,6 +81,7 @@ void JudgmentEnding(ITEMTYPE *pIn, UINT size)
 		{
 			aTypeTrue[nCntTrue] = pIn[nCntItem];
 			nCntTrue++;
+			g_nScoreJudge++;
 		}
 		else
 		{
@@ -89,7 +95,7 @@ void JudgmentEnding(ITEMTYPE *pIn, UINT size)
 	{
 		result = ENDTYPE_BAD;
 		SetEndingType(result);
-		return;
+		return g_nScoreJudge;
 	}
 
 	bool aSuffer[DOPPEL_LINE];
@@ -108,7 +114,7 @@ void JudgmentEnding(ITEMTYPE *pIn, UINT size)
 				{
 					result = ENDTYPE_BAD;
 					SetEndingType(result);
-					return;
+					return g_nScoreJudge;
 				}
 			}
 		}
@@ -119,16 +125,18 @@ void JudgmentEnding(ITEMTYPE *pIn, UINT size)
 	{
 		result = ENDTYPE_HAPPY;
 		SetEndingType(result);
-		return;
+		return g_nScoreJudge;
 	}
 	else
 	{
 		result = ENDTYPE_NORMAL;
 		SetEndingType(result);
-		return;
+		return g_nScoreJudge;
 	}
 
 	// 例外
 	result = ENDTYPE_BAD;
 	SetEndingType(result);
+
+	return g_nScoreJudge;
 }

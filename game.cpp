@@ -282,6 +282,12 @@ void UpdateGame(void)
 //==================================================================================
 void DrawGame(void)
 {
+	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	D3DVIEWPORT9 viewport;
+
+	// 現在のビューポートを取得
+	pDevice->GetViewport(&viewport);
+
 	// カメラの数分だけ描画
 	for (int nCntDraw = 0; nCntDraw < GetCameraNum(); nCntDraw++)
 	{		
@@ -318,6 +324,9 @@ void DrawGame(void)
 		/*** フォグをクリア ***/
 		CleanFog();
 	}
+
+	// ビューポートを設定
+	pDevice->SetViewport(&viewport);
 
 	// VERTEX_2D ============================================
 	/*** Aの描画 ***/
