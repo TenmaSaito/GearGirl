@@ -703,9 +703,14 @@ bool LoadModel(void)
 								CheckPath(pMat[nCntMat].pTextureFilename);
 
 								 //テクスチャを読み込む
-								D3DXCreateTextureFromFile(pDevice,
+								HRESULT hr =  D3DXCreateTextureFromFile(pDevice,
 									pMat[nCntMat].pTextureFilename,
 									&g_Model[nCntModel].apTexture[nCntMat]);
+
+								if (nCntModel == 31)
+								{
+									int n = 0;
+								}
 							}
 						}
 
