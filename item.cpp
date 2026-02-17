@@ -42,6 +42,7 @@ bool			g_bPutOut = false;								// アイテムを提出するときtrue
 Item			g_aItem[MAX_ITEM];								// アイテム情報
 ItemQuota		g_aItemQuota[ITEMTYPE_MAX];						// 所持アイテムを表示する枠のインデックス
 ItemQuota		g_aPutQuota[NUM_PUTOUTITEM];					// 提出アイテムを表示する枠のインデックス
+
 ItemQuota		g_aPutOutUI[PUTOUTUI_MAX];						// 提出時　背景の暗転、決定やとりけしのUI等
 ITEMTYPE		g_aPutOut[NUM_PUTOUTITEM];						// 提出したアイテム
 ItemInfo		g_aItemInfo[ITEMTYPE_MAX] =
@@ -104,18 +105,7 @@ void InitItem(void)
 		pItem->bUse = false;
 		pItem->nIdxQuota = -1;
 	}
-	// 表示用のその他のUIを取得
-	for (int nCntUI = 0; nCntUI < PUTOUTUI_MAX; nCntUI++, pUI++)
-	{
-		pUI->pos = vec3_ZERO;
-		pUI->col = colX_ZERO;
-		pUI->size = vec2_ZERO;
-		pUI->nType = nUITex[nCntUI];
-		pUI->nIdxBox = Set2DPolygon(pUI->pos, vec3_ZERO, pUI->size, pUI->nType, pUI->col);
-		pUI->bUse = false;
-	}
-
-	// 表示用の枠を取得
+	// 所持アイテムの枠を取得
 	for (int nCntQuota = 0; nCntQuota < ITEMTYPE_MAX; nCntQuota++, pItemQuota++)
 	{
 		pItemQuota->pos = vec3(SCREEN_WIDTH / ITEMTYPE_MAX * (nCntQuota + 0.5f), SCREEN_HEIGHT * 0.9f, 0.0f);
@@ -126,7 +116,18 @@ void InitItem(void)
 		pItemQuota->bUse = false;
 	}
 
-	// 提出時用の枠を取得
+	// その他のUIを取得
+	for (int nCntUI = 0; nCntUI < PUTOUTUI_MAX; nCntUI++, pUI++)
+	{
+		pUI->pos = vec3_ZERO;
+		pUI->col = colX_ZERO;
+		pUI->size = vec2_ZERO;
+		pUI->nType = nUITex[nCntUI];
+		pUI->nIdxBox = Set2DPolygon(pUI->pos, vec3_ZERO, pUI->size, pUI->nType, pUI->col);
+		pUI->bUse = false;
+	}
+
+	// 提出用の枠を取得
 	for (int nCntQuota = 0; nCntQuota < NUM_PUTOUTITEM; nCntQuota++, pPutQuota++)
 	{
 		pPutQuota->pos = vec3_ZERO;
@@ -314,15 +315,19 @@ void DrawUIItem(void)
 {
 	if (g_bPutOut)
 	{
-		 OnUIitemEnable(&g_aPutOutUI[0], PUTOUTUI_MAX);
+		 OnUIitemEnable(&g_aPutQuota[0], NUM_PUTOUTITEM);
+		 OnUIitemEnable(&g_aItemQuota[0], ITEMTYPE_MAX);
 	}
 	else if (GetEnableUImenu())
 	{
-		OnUIitemEnable(&g_aItemQuota[0], NUM_PUTOUTITEM);
+		OnUIitemEnable(&g_aItemQuota[0], ITEMTYPE_MAX);
 	}
 	
 }
 
+//=========================================================================================
+// UI表示用 描画の簡略化のための関数わけ
+//=========================================================================================
 void OnUIitemEnable(P_ITEMQUOTA pQuota, int nMAX)
 {
 	D3DXMATRIX			mtxView, mtxRot, mtxTrans, mtxWorld;	// マトリックス計算用
@@ -438,25 +443,31 @@ void PutOut(void)
 	for (int nCntQuota = 0; nCntQuota < ITEMTYPE_MAX; nCntQuota++, pItemQuota++)
 	{
 		// 位置を更新
-		SetPosition2DPolygon(pItemQuota->nIdxBox, vec3(SCREEN_WIDTH / ITEMTYPE_MAX * (nCntQuota + 0.5f), SCREEN_HEIGHT * 0.5f, 0.0f));
+		pItemQuota->pos = vec3(SCREEN_WIDTH / ITEMTYPE_MAX * (nCntQuota + 0.5f), SCREEN_HEIGHT * 0.5f, 0.0f);
+		SetPosition2DPolygon(pItemQuota->nIdxBox, pItemQuota->pos);
 
-		if (pItemQuota->bUse)
-		{// アイテムが登録されている
-			if (pItemQuota->nIdxBox == g_nSelectPut)
-			{// 選択中なら
-				// 枠内のアイテムを動かす
-				SetColor2DPolygon(pItemQuota->nIdxBox, colX(1.0f, 0.8f, 0.8f, 0.5f));// 枠を明るく	
-				SetSize2DPolygon(pItemQuota->nIdxBox, vec2(SCREEN_WIDTH * 0.06f, SCREEN_WIDTH * 0.06f));	// 少し拡大
-			}
-			else
-			{// 選択外なら
-				SetColor2DPolygon(pItemQuota->nIdxBox, colX(0.8f, 0.8f, 0.8f, 0.5f));// 枠を明るく			
-				SetSize2DPolygon(pItemQuota->nIdxBox, vec2(SCREEN_WIDTH * 0.05f, SCREEN_WIDTH * 0.05f));	// 元の大きさ
+		if (pItemQuota->nIdxBox == g_nSelectPut)
+		{// 選択中なら
+			if (pItemQuota->bUse)
+			{// アイテムが登録されている
+				pItemQuota->size = vec2(SCREEN_WIDTH * 0.06f, SCREEN_WIDTH * 0.06f);
+				SetSize2DPolygon(pItemQuota->nIdxBox, pItemQuota->size);				// 少し拡大
+				SetColor2DPolygon(pItemQuota->nIdxBox, colX(1.0f, 0.8f, 0.8f, 0.5f));	// 枠を赤	
 			}
 		}
 		else
-		{// されてない
-			SetColor2DPolygon(pItemQuota->nIdxBox, colX(0.3f, 0.3f, 0.3f, 0.3f));// 枠を薄暗く
+		{// 選択されていない
+			pItemQuota->size = vec2(SCREEN_WIDTH * 0.05f, SCREEN_WIDTH * 0.05f);
+			SetSize2DPolygon(pItemQuota->nIdxBox, pItemQuota->size);				// 元の大きさ
+			
+			if (pItemQuota->bUse)
+			{//	アイテムあり
+				SetColor2DPolygon(pItemQuota->nIdxBox, colX(0.8f, 0.8f, 0.8f, 0.5f));	// 枠を明るく			
+			}
+			else
+			{
+				SetColor2DPolygon(pItemQuota->nIdxBox, colX(0.3f, 0.3f, 0.3f, 0.3f));	// 枠を薄暗く
+			}
 		}
 	}
 	// アイテムを選ぶ
@@ -493,7 +504,8 @@ void SelectItem(void)
 	for (int nCntQuota = 0; nCntQuota < NUM_PUTOUTITEM; nCntQuota++, pPutQuota++)
 	{
 		// 位置を更新
-		SetPosition2DPolygon(pPutQuota->nIdxBox, vec3(SCREEN_WIDTH / NUM_PUTOUTITEM * (nCntQuota + 0.5f), SCREEN_HEIGHT * 0.4f, 0.0f));
+		pPutQuota->pos = vec3(SCREEN_WIDTH / NUM_PUTOUTITEM * (nCntQuota + 0.5f), SCREEN_HEIGHT * 0.4f, 0.0f);
+		SetPosition2DPolygon(pPutQuota->nIdxBox, pPutQuota->pos);
 
 		if (pPutQuota->bUse)
 		{// アイテムが選ばれた枠
