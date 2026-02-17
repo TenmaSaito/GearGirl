@@ -42,6 +42,7 @@ typedef enum
 {
 	ARMTYPE_NORMAL = 0,	// 通常の腕
 	ARMTYPE_CATAPULT,	// カタパルトの腕
+	ARMTYPE_CUT,		// 倒木などを切る腕
 	ARMTYPE_MAX
 }ArmType;
 
@@ -51,7 +52,8 @@ typedef enum
 {
 	PLAYERSTATE_NEUTRAL = 0,	// 待機状態
 	PLAYERSTATE_MOVE,			// 歩き状態
-	PLAYERSTATE_ATTACK,			// 攻撃状態
+	PLAYERSTATE_THROWWAITING,	// 投げ待機状態
+	PLAYERSTATE_CUTTING,		// カッティング状態
 	PLAYERSTATE_JUMP,			// ジャンプ状態
 	PLAYERSTATE_LAND,			// 着地状態
 	PLAYERSTATE_MAX
@@ -73,8 +75,6 @@ typedef struct
 	D3DXMATRIX mtxWorld;		// ワールドマトリックス
 	D3DXVECTOR3 vtxMin;			// プレイヤーの最小値
 	D3DXVECTOR3 vtxMax;			// プレイヤーの最大値
-	D3DXVECTOR3 VecMove;		// プレイヤーの移動方向のベクトル
-	D3DXVECTOR3 VectoPos;		// 境界線ベクトル - 移動ベクトル
 	bool bDisp;					// プレイヤーの描画可否
 	bool bJump;					// ジャンプ中かどうか
 	int nIdxCamera;				// 使用するカメラのインデックス

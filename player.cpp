@@ -216,11 +216,11 @@ void UpdatePlayer(void)
 		if (nCntPlayer == PLAYERTYPE_GIRL)
 		{
 			UpdateArm();
-		
+
 			// カタパルトを起動した後の処理
-			//ShotMouse();
+			ShotMouse();
 		}
-		else if (nCntPlayer == PLAYERTYPE_MOUSE)
+		else if (nCntPlayer == PLAYERTYPE_MOUSE && GetNumPlayer() == 1 && g_bShotMouse == false)
 		{
 			// 少女にネズミが追従する処理
 			MouseKeepUp();
@@ -318,15 +318,15 @@ void UpdatePlayer(void)
 	}
 
 	// 装備を切り替える(アーム)
-	if (GetJoypadTrigger(0, JOYKEY_RB) == true || GetKeyboardTrigger(DIK_9) == true)
-	{
-		g_nUseArm++;	// 種類を進める
+	//if (GetJoypadTrigger(0, JOYKEY_RB) == true || GetKeyboardTrigger(DIK_9) == true)
+	//{
+	//	g_nUseArm++;	// 種類を進める
 
-		if (g_nUseArm == ARMTYPE_MAX)
-		{// アームの最大種類数まで行ったら、最初に戻す
-			g_nUseArm = ARMTYPE_NORMAL;
-		}
-	}
+	//	if (g_nUseArm == ARMTYPE_MAX)
+	//	{// アームの最大種類数まで行ったら、最初に戻す
+	//		g_nUseArm = ARMTYPE_NORMAL;
+	//	}
+	//}
 
 	// ***************************************************************************
 	// デバッグ処理
@@ -673,8 +673,15 @@ void ActionPlayer(PlayerType nPlayer, Player* pPlayer)
 				// CATAPULT
 			case ARMTYPE_CATAPULT:
 				SetMotionType(MOTIONTYPE_ACTION, true, 10, nPlayer);
-				g_nMotionCounter = 8;
+				g_nMotionCounter = 10;
 				g_bShotMouse = true;
+				break;
+
+				// CUT
+			case ARMTYPE_CUT:
+				// 仮モーション再生
+				SetMotionType(MOTIONTYPE_ACTION, true, 10, nPlayer);
+				g_nMotionCounter = 8;
 				break;
 
 			default:
@@ -1583,18 +1590,42 @@ void ShotMouse(void)
 {
 	if (g_bShotMouse)
 	{
+		// プレイヤー情報を取得
+		Player* pMouse = GetPlayer() + 1;
+		Player* pPlayer = GetPlayer();
+
+		// カメラの情報を取得
+		Camera* pCamera = GetCamera();
+
+		pPlayer->rot.y = pCamera->rot.y + D3DX_PI;
+		pMouse->rot.y = pCamera->rot.y + D3DX_PI;
+
 		g_nMotionCounter--;
 		if (g_nMotionCounter < 0)
 		{
 			static float fRadiation = 0;
 			fRadiation += 0.1f;
 
-			Player* pMouse = GetPlayer() + 1;
+			//pMouse->move.x = 2.0f;
 
-			pMouse->move.x = 3.0f;
-			pMouse->move.y = sinf(fRadiation) * 0.5f;
+			// 注視点までのベクトルをだす
+			D3DXVECTOR3 vec = pCamera->posR - pCamera->posV;
 
-			if (g_nMotionCounter < -30)
+			// 出したベクトルを正規化
+			D3DXVec3Normalize(&vec, &vec);
+
+			// ネズミを操作対象に
+			g_ActivePlayer = 1;
+
+			// ネズミを飛ばす
+			pMouse->move.x += vec.x * 1.0f;
+			pMouse->move.z += vec.z * 1.0f;
+			if (g_nMotionCounter == -1)
+			{// Y軸移動は1Fのみ
+				pMouse->move.y = 5.0f;
+			}
+
+			if (g_nMotionCounter < -50)
 			{
 				g_bShotMouse = false;
 				g_nMotionCounter = 0;
