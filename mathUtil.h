@@ -21,17 +21,18 @@
 //**********************************************************************************
 //*** マクロ定義 ***
 //**********************************************************************************
-#define RECT_NULL				(RECT{0, 0, 0, 0})				// RECT初期化
-#define INT_VECTOR3_NULL		(INT_VECTOR3{ 0, 0, 0 })		// INT_VECTOR3初期化
-#define INT_VECTOR2_NULL		(INT_VECTOR2{ 0, 0 })			// INT_VECTOR2初期化
+#define RECT_NULL				(RECT{0, 0, 0, 0})					// RECT初期化
+#define INT_VECTOR3_NULL		(MyMathUtil::INT_VECTOR3{ 0, 0, 0 })	// INT_VECTOR3初期化
+#define INT_VECTOR2_NULL		(MyMathUtil::INT_VECTOR2{ 0, 0 })		// INT_VECTOR2初期化
 #define D3DCOLOR_NULL			(D3DCOLOR_RGBA(255, 255, 255, 255)) // D3DCOLOR_NULL
-#define INT_INFINITY			(0x7FFFFFFF)					// int型の最大(signed intの最大値)
-#define VECNULL					D3DXVECTOR3(0.0f,0.0f,0.0f)		// 省略版vectorNull
-#define VEC_X(x)				D3DXVECTOR3(x, 0.0f, 0.0f)		// Xのみ変更
-#define VEC_Y(y)				D3DXVECTOR3(0.0f, y, 0.0f)		// Yのみ変更
-#define VEC_Z(z)				D3DXVECTOR3(0.0f, 0.0f, z)		// Zのみ変更
+#define INT_INFINITY			(0x7FFFFFFF)						// int型の最大(signed intの最大値)
+#define VECNULL					D3DXVECTOR3(0.0f,0.0f,0.0f)			// 省略版vectorNull
+#define VEC_X(x)				D3DXVECTOR3(x, 0.0f, 0.0f)			// Xのみ変更
+#define VEC_Y(y)				D3DXVECTOR3(0.0f, y, 0.0f)			// Yのみ変更
+#define VEC_Z(z)				D3DXVECTOR3(0.0f, 0.0f, z)			// Zのみ変更
 #define InitRot(x, y, z)		RepairedRot(D3DXVECTOR3(x, y, z))	// 修正済み角度
-#define DEF_COL					D3DXCOLOR_NULL					// デフォルトカラー
+#define DEF_COL					D3DXCOLOR_NULL						// デフォルトカラー
+#define foreach(type, var, lpArray)		for(type &var : lpArray)	// foreach構文
 
 //----------------------------------------------------------------------------------
 /*** フラグ関連 ***/

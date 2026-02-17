@@ -10,6 +10,7 @@
 #include "gimmick.h"
 #include "motion.h"
 #include "modeldata.h"
+#include "prompt.h"
 #include "mathUtil.h"
 
 using namespace MyMathUtil;

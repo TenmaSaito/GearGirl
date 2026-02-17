@@ -227,12 +227,22 @@ void DrawUImenu(void)
 
 	if (pMenu->bUse == true)
 	{
+		/*** アルファテストを有効にする ***/
+		pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);		// アルファテストを有効
+		pDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);	// 基準値よりも大きい場合にZバッファに書き込み
+		pDevice->SetRenderState(D3DRS_ALPHAREF, 60);				// 基準値
+
 		DrawPolygonTextureFromIndex(pDevice,
 			pMenu->vtxSafe.pVtxBuff,
 			pMenu->nIdxTexture,
 			sizeof(VERTEX_2D),
 			FVF_VERTEX_2D,
 			1);
+
+		/*** アルファテストを無効にする ***/
+		pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);		// アルファテストを無効化
+		pDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);	// 無条件にZバッファに書き込み
+		pDevice->SetRenderState(D3DRS_ALPHAREF, 0);					// 基準値
 	}
 
 	// デバイスの終了
