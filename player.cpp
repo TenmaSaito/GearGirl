@@ -70,7 +70,6 @@ float g_sinrot = 0;					// sinカーブを用いるとき用の変数
 int g_nNumPlayer = 1;				// プレイヤーのアクティブ人数
 int g_ActivePlayer = 0;				// 操作しているプレイヤータイプ
 int g_Functionkey = 0;
-int g_Land = 0;
 int g_nUseArm = 0;
 bool g_aMovePlayer[PLAYERTYPE_MAX];	// プレイヤーが動いているか
 int	g_nMotionCounter = 0;			// モーションカウンター
@@ -165,12 +164,10 @@ void InitPlayer(void)
 	g_nNumPlayer = GetPlayerNum();		// プレイ人数
 	g_ActivePlayer = 0;		// 現在の操作対象
 	g_Functionkey = 0;		// デバッグ表示の切り替え用
-	g_Land = 0;				// 着地モーションが再生された回数
 	g_nUseArm = 0;			// 現在使用しているアームのインデックス
 	g_armPlayer = ARMTYPE_NORMAL;	// 通常アーム
 	g_aMovePlayer[0] = false;
 	g_aMovePlayer[1] = false;
-
 
 	// デバイスの破棄
 	EndDevice();
@@ -226,8 +223,11 @@ void UpdatePlayer(void)
 			MouseKeepUp();
 		}
 
-
-		UpdateMotion((PlayerType)nCntPlayer);
+		if (pPlayer->state != PLAYERSTATE_THROWWAITING)
+		{
+			// モーションの更新
+			UpdateMotion((PlayerType)nCntPlayer);
+		}
 
 		if ((pPlayer->motionType != MOTIONTYPE_ACTION
 			&& pPlayer->motionType != MOTIONTYPE_JUMP
@@ -316,17 +316,6 @@ void UpdatePlayer(void)
 			}
 		}
 	}
-
-	// 装備を切り替える(アーム)
-	//if (GetJoypadTrigger(0, JOYKEY_RB) == true || GetKeyboardTrigger(DIK_9) == true)
-	//{
-	//	g_nUseArm++;	// 種類を進める
-
-	//	if (g_nUseArm == ARMTYPE_MAX)
-	//	{// アームの最大種類数まで行ったら、最初に戻す
-	//		g_nUseArm = ARMTYPE_NORMAL;
-	//	}
-	//}
 
 	// ***************************************************************************
 	// デバッグ処理
@@ -1060,7 +1049,6 @@ void JumpPlayer(PlayerType nPlayer)
 				//PlaySound(SOUND_LABEL_JUMP);
 				pPlayer->state = PLAYERSTATE_JUMP;
 				SetMotionType(MOTIONTYPE_JUMP, true, 10, nPlayer);
-				//g_Land++;
 
 				pPlayer->move.y = JUMP_FORCE;
 				pPlayer->bJump = true;
@@ -1073,7 +1061,6 @@ void JumpPlayer(PlayerType nPlayer)
 				//PlaySound(SOUND_LABEL_JUMP);
 				pPlayer->state = PLAYERSTATE_JUMP;
 				SetMotionType(MOTIONTYPE_JUMP, true, 10, nPlayer);
-				//g_Land++;
 
 				pPlayer->move.y = JUMP_FORCE;
 				pPlayer->bJump = true;
@@ -1597,16 +1584,16 @@ void ShotMouse(void)
 		// カメラの情報を取得
 		Camera* pCamera = GetCamera();
 
+		// プレイヤーの投げる向きをカメラとそろえる
 		pPlayer->rot.y = pCamera->rot.y + D3DX_PI;
 		pMouse->rot.y = pCamera->rot.y + D3DX_PI;
 
 		g_nMotionCounter--;
+
 		if (g_nMotionCounter < 0)
 		{
-			static float fRadiation = 0;
-			fRadiation += 0.1f;
-
-			//pMouse->move.x = 2.0f;
+			// ネズミ投げ待機状態にする
+			pPlayer->state = PLAYERSTATE_THROWWAITING;
 
 			// 注視点までのベクトルをだす
 			D3DXVECTOR3 vec = pCamera->posR - pCamera->posV;
@@ -1614,15 +1601,20 @@ void ShotMouse(void)
 			// 出したベクトルを正規化
 			D3DXVec3Normalize(&vec, &vec);
 
-			// ネズミを操作対象に
-			g_ActivePlayer = 1;
+			if (GetKeyboardTrigger(DIK_RETURN) == true)
+			{
+				pPlayer->state = PLAYERSTATE_NEUTRAL;
 
-			// ネズミを飛ばす
-			pMouse->move.x += vec.x * 1.0f;
-			pMouse->move.z += vec.z * 1.0f;
-			if (g_nMotionCounter == -1)
-			{// Y軸移動は1Fのみ
-				pMouse->move.y = 5.0f;
+				// ネズミを操作対象に
+				g_ActivePlayer = 1;
+
+				// ネズミを飛ばす
+				pMouse->move.x += vec.x * 1.0f;
+				pMouse->move.z += vec.z * 1.0f;
+				if (g_nMotionCounter == -1)
+				{// Y軸移動は1Fのみ
+					pMouse->move.y = 5.0f;
+				}
 			}
 
 			if (g_nMotionCounter < -50)
