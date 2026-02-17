@@ -113,7 +113,6 @@ void InitPlayer(void)
 		}
 	}
 
-
 	// 少女のパーツ、モーションを読み込む
 	LoadMotion("data\\Scripts\\geargirl.txt", &aIdxMotion[PLAYERTYPE_GIRL]);			// モーションスクリプトを読み込む
 	LPPARTS_INFO pPartsInfoGirl = GetPartsInfo(aIdxMotion[PLAYERTYPE_GIRL]);	// パーツ情報のアドレスを取得
@@ -279,13 +278,13 @@ void UpdatePlayer(void)
 				&& pPlayer->motionType != MOTIONTYPE_LANDING
 				&& pPlayer->motionTypeBlend != MOTIONTYPE_LANDING)
 			{// 着地モーション
-				SetMotionType(MOTIONTYPE_LANDING, true, 10, (PlayerType)nCntPlayer);
+				SetMotionType(MOTIONTYPE_LANDING, true, 15, (PlayerType)nCntPlayer);
 				pPlayer->bUseLandMotion = true;
 				//g_Land++;
 			}
 
 			pPlayer->bJump = false;
-			pPlayer->state = PLAYERSTATE_NEUTRAL;
+			//pPlayer->state = PLAYERSTATE_NEUTRAL;
 		}
 
 		// カメラを有効化させる
@@ -306,14 +305,18 @@ void UpdatePlayer(void)
 	{// シングルプレイ時
 		if (GetJoypadTrigger(0, JOYKEY_LB) == true || GetKeyboardTrigger(DIK_Q) == true)
 		{
-			if (g_ActivePlayer == 1)
-			{// ネズミ→少女
-				g_ActivePlayer = 0;
+			if (g_aPlayer[PLAYERTYPE_GIRL].state != PLAYERSTATE_THROWWAITING && g_bShotMouse == false)
+			{
+				if (g_ActivePlayer == 1)
+				{// ネズミ→少女
+					g_ActivePlayer = 0;
+				}
+				else
+				{// 少女→ネズミ
+					g_ActivePlayer = 1;
+				}
 			}
-			else
-			{// 少女→ネズミ
-				g_ActivePlayer = 1;
-			}
+
 		}
 	}
 
@@ -661,9 +664,13 @@ void ActionPlayer(PlayerType nPlayer, Player* pPlayer)
 
 				// CATAPULT
 			case ARMTYPE_CATAPULT:
-				SetMotionType(MOTIONTYPE_ACTION, true, 10, nPlayer);
-				g_nMotionCounter = 10;
-				g_bShotMouse = true;
+				if (pPlayer->state != PLAYERSTATE_THROWWAITING)
+				{
+					SetMotionType(MOTIONTYPE_ACTION, true, 10, nPlayer);
+					g_nMotionCounter = 10;
+					g_bShotMouse = true;
+				}
+
 				break;
 
 				// CUT
@@ -704,6 +711,9 @@ void MovePlayer(PlayerType nPlayer)
 		{//Aキーが押される	
 			CheckMotionMove(nPlayer, pPlayer);
 
+			// プレイヤーの状態を移動状態に
+			pPlayer->state = PLAYERSTATE_MOVE;
+
 			if (GetKeyboardPress(DIK_W) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
 			{// WとA(左上)の入力
 				pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.25f) * PLAYER_MOVE;
@@ -741,6 +751,9 @@ void MovePlayer(PlayerType nPlayer)
 		else if (GetKeyboardPress(DIK_D) == true || GetJoypadPress(nPlayer, JOYKEY_RIGHT) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_RIGHT))
 		{//Dキーが押される
 			CheckMotionMove(nPlayer, pPlayer);
+
+			// プレイヤーの状態を移動状態に
+			pPlayer->state = PLAYERSTATE_MOVE;
 
 			if (GetKeyboardPress(DIK_W) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
 			{// WとD(右上)の入力
@@ -780,6 +793,9 @@ void MovePlayer(PlayerType nPlayer)
 		{//Wキーが押される
 			CheckMotionMove(nPlayer, pPlayer);
 
+			// プレイヤーの状態を移動状態に
+			pPlayer->state = PLAYERSTATE_MOVE;
+
 			pPlayer->move.z += cosf(Camerarot.y) * PLAYER_MOVE;
 			pPlayer->move.x += sinf(Camerarot.y) * PLAYER_MOVE;
 
@@ -792,6 +808,9 @@ void MovePlayer(PlayerType nPlayer)
 		else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
 		{//Sキーが押される
 			CheckMotionMove(nPlayer, pPlayer);
+
+			// プレイヤーの状態を移動状態に
+			pPlayer->state = PLAYERSTATE_MOVE;
 
 			pPlayer->move.z += cosf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
 			pPlayer->move.x += sinf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
@@ -1032,8 +1051,8 @@ void JumpPlayer(PlayerType nPlayer)
 		if ((GetKeyboardTrigger(DIK_SPACE) == true || GetJoypadTrigger(nPlayer, JOYKEY_A)) && pPlayer->bJump == false)
 		{
 			//PlaySound(SOUND_LABEL_JUMP);
-			//pPlayer->state = PLAYERSTATE_JUMP;
-			SetMotionType(MOTIONTYPE_JUMP, true, 10, nPlayer);
+			pPlayer->state = PLAYERSTATE_JUMP;
+			SetMotionType(MOTIONTYPE_JUMP, true, 20, nPlayer);
 
 			pPlayer->move.y = JUMP_FORCE;
 			pPlayer->bJump = true;
@@ -1584,16 +1603,37 @@ void ShotMouse(void)
 		// カメラの情報を取得
 		Camera* pCamera = GetCamera();
 
-		// プレイヤーの投げる向きをカメラとそろえる
-		pPlayer->rot.y = pCamera->rot.y + D3DX_PI;
-		pMouse->rot.y = pCamera->rot.y + D3DX_PI;
+		if (pPlayer->state == PLAYERSTATE_THROWWAITING)
+		{// プレイヤーの投げる向きをカメラとそろえる
+			pPlayer->rot.y = pCamera->rot.y + D3DX_PI;
+			pMouse->rot.y = pCamera->rot.y + D3DX_PI;
 
-		g_nMotionCounter--;
+			// 手にくっつける
+			D3DXVec3TransformCoord(&pMouse->pos, &pPlayer->PartsInfo.aParts[16].pos, &pPlayer->PartsInfo.aParts[16].mtxWorld);
+		}
+
+		if (pPlayer->state != PLAYERSTATE_THROWWAITING)
+		{
+			g_nMotionCounter--;
+		}
 
 		if (g_nMotionCounter < 0)
 		{
-			// ネズミ投げ待機状態にする
-			pPlayer->state = PLAYERSTATE_THROWWAITING;
+			if (g_nMotionCounter == -5)
+			{
+				// ネズミ投げ待機状態にする
+				pPlayer->state = PLAYERSTATE_THROWWAITING;
+				pCamera->rot.y = pPlayer->rot.y - D3DX_PI;
+
+				if (pCamera->rot.y > D3DX_PI)
+				{
+					pCamera->rot.y -= D3DX_PI * 2.0f;
+				}
+				else if (pCamera->rot.y < -D3DX_PI)
+				{
+					pCamera->rot.y += D3DX_PI * 2.0f;
+				}
+			}
 
 			// 注視点までのベクトルをだす
 			D3DXVECTOR3 vec = pCamera->posR - pCamera->posV;
@@ -1607,17 +1647,20 @@ void ShotMouse(void)
 
 				// ネズミを操作対象に
 				g_ActivePlayer = 1;
+			}
 
+			if (pPlayer->state == PLAYERSTATE_NEUTRAL)
+			{
 				// ネズミを飛ばす
 				pMouse->move.x += vec.x * 1.0f;
 				pMouse->move.z += vec.z * 1.0f;
-				if (g_nMotionCounter == -1)
+				if (g_nMotionCounter == -10)
 				{// Y軸移動は1Fのみ
-					pMouse->move.y = 5.0f;
+					pMouse->move.y = 5.5f;
 				}
 			}
 
-			if (g_nMotionCounter < -50)
+			if (g_nMotionCounter < -67)
 			{
 				g_bShotMouse = false;
 				g_nMotionCounter = 0;
