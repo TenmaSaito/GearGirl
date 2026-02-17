@@ -25,7 +25,7 @@ TEXTURE_FILENAME = data/TEXTURE/road_mid.jpg		# [6]合流地点の道
 #------------------------------------------------------------------------------
 # モデル数
 #------------------------------------------------------------------------------
-NUM_MODEL = 28
+NUM_MODEL = 34
 
 #------------------------------------------------------------------------------
 # モデルファイル名
@@ -58,6 +58,12 @@ MODEL_FILENAME = data/MODEL/Building/ironfence.x		# [24]鉄柵
 MODEL_FILENAME = data/MODEL/Building/grave001.x			# [25]丸墓
 MODEL_FILENAME = data/MODEL/Building/grave002.x			# [26]三角墓
 MODEL_FILENAME = data/MODEL/Building/StationGlass.x		# [27]駅の後ろ
+MODEL_FILENAME = data/MODEL/Gimmick/BronzeStatue99.x	# [28]銅像
+MODEL_FILENAME = data/MODEL/Item/valve.x				# [29]バルブ
+MODEL_FILENAME = data/MODEL/Building/Piano99.x			# [30]ピアノ
+MODEL_FILENAME = data/MODEL/Building/FallenTree98.x		# [31]倒木
+MODEL_FILENAME = data/MODEL/Gimmick/BigButton98.x		# [32](人間)
+MODEL_FILENAME = data/MODEL/Gimmick/SmallButton98.x		# [33](ねずみ)
 
 #------------------------------------------------------------------------------
 # カメラ情報
@@ -3818,6 +3824,68 @@ ITEMSET
 END_ITEMSET
 
 #---------------------------------------
+MODELSET
+	TYPE = 28	# [28]銅像
+	POS = 1100 100 110
+	ROT = 0 90 0
+	SHADOW = 0
+END_MODELSET
+
+MODELSET
+	TYPE = 29	# [29]バルブ
+	POS = 1060 100 40
+	ROT = 0 30 30
+	SHADOW = 0
+END_MODELSET
+
+MODELSET
+	TYPE = 30	# [30]ピアノ
+	POS = 920 100 30
+	ROT = 0 270 0
+	SHADOW = 0
+END_MODELSET
+
+MODELSET
+	TYPE = 31	# [31]倒木
+	POS = 2310 100 -1520
+	ROT = 0 90 0
+	SHADOW = 0
+END_MODELSET
+
+MODELSET
+	TYPE = 31	# [31]倒木
+	POS = 2310 100 -580
+	ROT = 0 90 0
+	SHADOW = 0
+END_MODELSET
+
+MODELSET
+	TYPE = 31	# [31]倒木
+	POS = 2310 100 110
+	ROT = 0 90 0
+	SHADOW = 0
+END_MODELSET
+
+MODELSET
+	TYPE = 31	# [31]倒木
+	POS = 2310 100 800
+	ROT = 0 90 0
+	SHADOW = 0
+END_MODELSET
+
+MODELSET
+	TYPE = 32	# [32]ボタン(人間)
+	POS = -50 100 0
+	ROT = 0 0 0
+	SHADOW = 0
+END_MODELSET
+
+MODELSET
+	TYPE = 33	# [33]ボタン(ねずみ)
+	POS = -100 100 0
+	ROT = 0 0 0
+	SHADOW = 0
+END_MODELSET
 
 #------------------------------------------------------------------------------
 # ビルボード配置情報
