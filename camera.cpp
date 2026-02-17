@@ -576,7 +576,6 @@ void SetCamera(void)
 				pDevice->SetRenderState(D3DRS_FOGEND,*(DWORD *)(&pCam->fEnd));
 			}
 
-			EndDevice();// デバイス取得終了
 			g_readyCamera = (CameraType)nCntCamera;	// セットしたカメラの番号を保存
 			return;
 		}
@@ -590,6 +589,7 @@ void SetCamera(void)
 void SetUICamera(vec3 viewTopLeft, vec2 size)
 {
 	LPDIRECT3DDEVICE9	pDevice = GetDevice();		// デバイスへのポインタ
+	D3DXMATRIX mtxProjection,mtxView;
 	D3DVIEWPORT9 viewport;
 		viewport.X = viewTopLeft.x;
 		viewport.Y = viewTopLeft.y;
@@ -597,9 +597,14 @@ void SetUICamera(vec3 viewTopLeft, vec2 size)
 		viewport.Height = size.y;
 		viewport.MinZ = 0.0f;
 		viewport.MaxZ = 1.0f;
-	D3DXMATRIX mtxProjection,mtxView;
-	vec3 vecU = vec3(0.0f, 1.0f, 0.0f),posV = UICAMERA_POSV,posR = UICAMERA_POSR;
-	float fViewRadian = 45.0f, fViewMin = 1000.0f, fViewMax = 10.0f;
+
+	vec3 vecU = vec3(0.0f, 1.0f, 0.0f),
+		posV = UICAMERA_POSV,
+		posR = UICAMERA_POSR;
+
+	float fViewRadian = 45.0f,
+		fViewMin = 10.0f,
+		fViewMax = 1000.0f;
 
 	//**************************************************************
 	// ビューポートの設定
@@ -628,7 +633,13 @@ void SetUICamera(vec3 viewTopLeft, vec2 size)
 
 	// ビューマトリックスの設定
 	pDevice->SetTransform(D3DTS_VIEW, &mtxView);
-	
+
+	//**************************************************************
+	// 画面クリア(バックバッファとZバッファのクリア)
+	pDevice->Clear(0, NULL,
+		(D3DCLEAR_ZBUFFER),
+		D3DCOLOR_RGBA(0, 0, 0, 0), 1.0f, 0);
+
 	EndDevice();// デバイス取得終了
 }
 

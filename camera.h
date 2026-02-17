@@ -38,6 +38,8 @@
 #define UICAMERA_POSV			vec3(0.0f,50.0f,-50.0f)	// インターフェース用カメラの座標
 #define UICAMERA_POSR			vec3(0.0f,0.0f,0.0f)
 
+#define SetUiCameraCenter(A,size)		SetUICamera(vec3(A.x - (size.x * 0.5f),A.y - (size.y * 0.5f),A.z),size)
+
 //**************************************************************
 // カメラ操作
 #define CAM_2POPRAT		DIK_LCONTROL			// ２Pのカメラを操作

@@ -61,7 +61,7 @@ MODEL_FILENAME = data/MODEL/Building/StationGlass.x		# [27]駅の後ろ
 MODEL_FILENAME = data/MODEL/Gimmick/BronzeStatue99.x	# [28]銅像
 MODEL_FILENAME = data/MODEL/Item/valve.x				# [29]バルブ
 MODEL_FILENAME = data/MODEL/Building/Piano99.x			# [30]ピアノ
-MODEL_FILENAME = data/MODEL/Building/FallenTree98.x		# [31]倒木
+MODEL_FILENAME = data/MODEL/Building/FallenTree99.x		# [31]倒木
 MODEL_FILENAME = data/MODEL/Gimmick/BigButton98.x		# [32](人間)
 MODEL_FILENAME = data/MODEL/Gimmick/SmallButton98.x		# [33](ねずみ)
 
@@ -3841,7 +3841,7 @@ END_MODELSET
 MODELSET
 	TYPE = 30	# [30]ピアノ
 	POS = 920 100 30
-	ROT = 0 270 0
+	ROT = 0 225 0
 	SHADOW = 0
 END_MODELSET
 
@@ -3875,15 +3875,15 @@ END_MODELSET
 
 MODELSET
 	TYPE = 32	# [32]ボタン(人間)
-	POS = -50 100 0
-	ROT = 0 0 0
+	POS = 900 100 140
+	ROT = 0 90 0
 	SHADOW = 0
 END_MODELSET
 
 MODELSET
 	TYPE = 33	# [33]ボタン(ねずみ)
-	POS = -100 100 0
-	ROT = 0 0 0
+	POS = 900 100 160
+	ROT = 0 90 0
 	SHADOW = 0
 END_MODELSET
 

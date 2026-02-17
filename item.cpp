@@ -58,12 +58,16 @@ ItemInfo		g_aItemInfo[ITEMTYPE_MAX] =
 	{"data\\MODEL\\Item\\GearLarge.x",-1},		 // [8] 少しい曲がった軸
 	{"data\\MODEL\\Item\\GearLarge.x",-1},		 // [9] ゆがんだぜんまい
 };
+
+vec3 g_rot = vec3_ZERO;
+
 //**************************************************************
 // プロトタイプ宣言
 void UpdateMapItem(void);			// マップ上のアイテムを更新
 void UpdatePouchItem(void);			// 取得済みのアイテムを更新
 void PutOut(void);					// 提出できるアイテムを表示
 void SelectItem(void);				// 提出アイテムの選択
+void OnUIitemEnable(P_ITEMQUOTA pQuota, int nMAX);	// 描画の簡略化のための関数わけ
 P_ITEM GetItem(void);				// 先頭アドレス取得
 
 //=========================================================================================
@@ -159,6 +163,8 @@ void UpdateItem(void)
 
 	if (GetKeyboardTrigger(DIK_F3))
 		EnableItemPut();
+
+	g_rot += vec3(0.01f, 0.01f, 0.0f);
 }
 
 //=========================================================================================
@@ -224,7 +230,7 @@ void UpdatePouchItem(void)
 		{
 			// UI表示中、色をつける
 			for (int nCntQuota = 0; nCntQuota < ITEMTYPE_MAX; nCntQuota++, pItemQuota++)
-				SetColor2DPolygon(pItemQuota->nIdxBox, colX_WHITE);
+				SetColor2DPolygon(pItemQuota->nIdxBox, colX(1.0f,1.0f,1.0f,0.3f));
 		}
 		else
 		{
@@ -306,68 +312,82 @@ void DrawItem(void)
 //=========================================================================================
 void DrawUIItem(void)
 {
+	if (g_bPutOut)
+	{
+		 OnUIitemEnable(&g_aPutOutUI[0], PUTOUTUI_MAX);
+	}
+	else if (GetEnableUImenu())
+	{
+		OnUIitemEnable(&g_aItemQuota[0], NUM_PUTOUTITEM);
+	}
+	
+}
+
+void OnUIitemEnable(P_ITEMQUOTA pQuota, int nMAX)
+{
 	D3DXMATRIX			mtxView, mtxRot, mtxTrans, mtxWorld;	// マトリックス計算用
 	PMODELDATA			pModel;						// モデルデータへのポインタ
 	LPDIRECT3DDEVICE9	pDevice = GetDevice();		// デバイスへのポインタ
 	D3DMATERIAL9		matDef;						// 現在のマテリアル保存用
 	D3DXMATERIAL*		pMat;						// マテリアルデータへのポインタ
 	vec3				pos = vec3_ZERO, rot = vec3_ZERO;
-	P_ITEMQUOTA			pItemQuota = &g_aItemQuota[0];
 
-	if (g_bPutOut || GetEnableUImenu())
+	SetEnableZFunction(pDevice, true);
+
+	for (int nCntQuota = 0; nCntQuota < nMAX; nCntQuota++, pQuota++)
 	{
-		for (int nCntQuota = 0; nCntQuota < ITEMTYPE_MAX; nCntQuota++, pItemQuota++)
-		{
-			if (pItemQuota->bUse)
+		if (pQuota->bUse)
+		{			
+			// カメラ設置
+			SetUiCameraCenter(pQuota->pos, vec2(100.0f, 100.0f));
+
+			//------------------------------
+			// モデル設置	
+			// インデックスからモデルデータを取得
+			pModel = GetModelData(g_aItemInfo[pQuota->nType].nNumGet);
+
+			//**************************************************************
+			// ワールドマトリックスの初期化
+			D3DXMatrixIdentity(&mtxWorld);
+
+			// 向きを反映
+			D3DXMatrixRotationYawPitchRoll(&mtxRot, g_rot.y, g_rot.x, g_rot.z);
+			D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxRot);
+
+			// 位置を反映
+			D3DXMatrixTranslation(&mtxTrans, pos.x, pos.y, pos.z);
+			D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTrans);
+
+			// ワールドマトリックスの設定
+			pDevice->SetTransform(D3DTS_WORLD, &mtxWorld);
+
+			//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+			// 現在のマテリアルを取得
+			pDevice->GetMaterial(&matDef);
+			
+			// マテリアルデータへのポインタを取得
+			pMat = (D3DXMATERIAL*)pModel->pBuffMat->GetBufferPointer();
+
+			for (int nCntMat = 0; nCntMat < (int)pModel->dwNumMat; nCntMat++)
 			{
-				// カメラ設置
-				SetUICamera(pItemQuota->pos, vec2(100.0f, 100.0f));
+				// マテリアルの設定
+				pDevice->SetMaterial(&pMat[nCntMat].MatD3D);
 
-				//------------------------------
-				// モデル設置	
-				// インデックスからモデルデータを取得
-				pModel = GetModelData(g_aItemInfo[pItemQuota->nType].nNumGet);
+				// テクスチャの設定
+				pDevice->SetTexture(0, pModel->apTexture[nCntMat]);
 
-				//**************************************************************
-				// ワールドマトリックスの初期化
-				D3DXMatrixIdentity(&mtxWorld);
-
-				// 向きを反映
-				D3DXMatrixRotationYawPitchRoll(&mtxRot, rot.y, rot.x, rot.z);
-				D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxRot);
-
-				// 位置を反映
-				D3DXMatrixTranslation(&mtxTrans, pos.x, pos.y, pos.z);
-				D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTrans);
-
-				// ワールドマトリックスの設定
-				pDevice->SetTransform(D3DTS_WORLD, &mtxWorld);
-
-				//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-				// 現在のマテリアルを取得
-				pDevice->GetMaterial(&matDef);
-
-				// マテリアルデータへのポインタを取得
-				pMat = (D3DXMATERIAL*)pModel->pBuffMat->GetBufferPointer();
-
-				for (int nCntMat = 0; nCntMat < (int)pModel->dwNumMat; nCntMat++)
-				{
-					// マテリアルの設定
-					pDevice->SetMaterial(&pMat[nCntMat].MatD3D);
-
-					// テクスチャの設定
-					pDevice->SetTexture(0, pModel->apTexture[nCntMat]);
-
-					// モデル(パーツ)の描画
-					pModel->pMesh->DrawSubset(nCntMat);
-				}
-
-				// 保存していたマテリアルに戻す
-				pDevice->SetMaterial(&matDef);
-				//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+				// モデル(パーツ)の描画
+				pModel->pMesh->DrawSubset(nCntMat);
 			}
+
+			// 保存していたマテリアルに戻す
+			pDevice->SetMaterial(&matDef);
+			//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 		}
 	}
+
+	// SetEnableZFunction(pDevice, true);
+	EndDevice();
 }
 
 //=========================================================================================
