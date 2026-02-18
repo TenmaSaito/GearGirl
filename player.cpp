@@ -9,6 +9,7 @@
 #include "main.h"
 #include "camera.h"
 #include "debugproc.h"
+#include "effect.h"
 #include "game.h"
 #include "input.h"
 #include "item.h"
@@ -31,6 +32,7 @@ using namespace MyMathUtil;
 #define MAX_ZMOVE2		(990)		// Z軸移動可能領域2
 #define MAX_XMOVE1		(315)		// X軸移動可能領域1
 #define MAX_XMOVE2		(2290)		// X軸移動可能領域2
+#define RHAND_OFFSET	D3DXVECTOR3(0.0f, 0.0f, 0.0f)		// 右手からのオフセット
 
 // =================================================
 // 平面投影の構造体
@@ -228,6 +230,9 @@ void UpdatePlayer(void)
 			UpdateMotion((PlayerType)nCntPlayer);
 		}
 
+		// エフェクトの描画
+		SetEffect(pPlayer->pos, DEF_COL, VECNULL, 10.0f, 10.0f, 1.0f, 5, false);
+
 		if ((pPlayer->motionType != MOTIONTYPE_ACTION
 			&& pPlayer->motionType != MOTIONTYPE_JUMP
 			&& pPlayer->motionType != MOTIONTYPE_LANDING
@@ -305,8 +310,8 @@ void UpdatePlayer(void)
 	{// シングルプレイ時
 		if (GetJoypadTrigger(0, JOYKEY_LB) == true || GetKeyboardTrigger(DIK_Q) == true)
 		{
-			if (g_aPlayer[PLAYERTYPE_GIRL].state != PLAYERSTATE_THROWWAITING && g_bShotMouse == false)
-			{
+			/*if (g_aPlayer[PLAYERTYPE_GIRL].state != PLAYERSTATE_THROWWAITING && g_bShotMouse == false)
+			{*/
 				if (g_ActivePlayer == 1)
 				{// ネズミ→少女
 					g_ActivePlayer = 0;
@@ -315,7 +320,7 @@ void UpdatePlayer(void)
 				{// 少女→ネズミ
 					g_ActivePlayer = 1;
 				}
-			}
+			//}
 
 		}
 	}
@@ -384,6 +389,12 @@ void DrawPlayer(void)
 			pPlayer->pos.x, pPlayer->pos.y, pPlayer->pos.z);
 		D3DXMatrixMultiply(&pPlayer->mtxWorld, &pPlayer->mtxWorld, &mtxTrans);	// かけ合わせる
 
+		if (nCntPlayer == PLAYERTYPE_MOUSE && g_aPlayer[PLAYERTYPE_GIRL].state == PLAYERSTATE_THROWWAITING)
+		{
+
+			D3DXMatrixMultiply(&pPlayer->mtxWorld, &g_aPlayer[PLAYERTYPE_GIRL].PartsInfo.aParts[19].mtxWorld , &mtxTrans);	// かけ合わせる
+		}
+
 		// 現在のマテリアルを取得(保存)
 		pDevice->GetMaterial(&matDef);
 
@@ -414,6 +425,12 @@ void DrawPlayer(void)
 		// Zテストを有効に
 		SetEnableZFunction(pDevice, true);
 
+		if (nCntPlayer == PLAYERTYPE_MOUSE && g_aPlayer[PLAYERTYPE_GIRL].state == PLAYERSTATE_THROWWAITING)
+		{
+			// Zテストを有効に
+			SetEnableZFunction(pDevice, false);
+		}
+
 		// プレイヤーのワールドマトリックスの設定
 		pDevice->SetTransform(D3DTS_WORLD, &pPlayer->mtxWorld);
 
@@ -438,6 +455,9 @@ void DrawPlayer(void)
 		// 保存していたマテリアルを戻す
 		pDevice->SetMaterial(&matDef);
 	}
+
+	// Zテストを有効に
+	SetEnableZFunction(pDevice, true);
 
 	// デバイスの破棄
 	EndDevice();
@@ -1594,6 +1614,8 @@ void ChangeArmType(ArmType Type)
 // =================================================
 void ShotMouse(void)
 {
+	D3DXVECTOR3 offset = RHAND_OFFSET;
+
 	if (g_bShotMouse)
 	{
 		// プレイヤー情報を取得
@@ -1609,7 +1631,7 @@ void ShotMouse(void)
 			pMouse->rot.y = pCamera->rot.y + D3DX_PI;
 
 			// 手にくっつける
-			D3DXVec3TransformCoord(&pMouse->pos, &pPlayer->PartsInfo.aParts[16].pos, &pPlayer->PartsInfo.aParts[16].mtxWorld);
+			//D3DXVec3TransformCoord(&pMouse->pos, &offset, &pPlayer->PartsInfo.aParts[19].mtxWorld);
 		}
 
 		if (pPlayer->state != PLAYERSTATE_THROWWAITING)

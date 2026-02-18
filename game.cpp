@@ -7,31 +7,32 @@
 //**********************************************************************************
 //*** インクルードファイル ***
 //**********************************************************************************
-#include "game.h"
-#include "input.h"
 #include "camera.h"
+#include "debugproc.h"
+#include "effect.h"
 #include "fade.h"
+#include "field.h"
+#include "game.h"
+#include "gimmick.h"
+#include "judgeEnd.h"
+#include "input.h"
+#include "item.h"
+#include "light.h"
+#include "mesh.h"
 #include "model.h"
 #include "modeldata.h"
-#include "Texture.h"
-#include "3Dmodel.h"
-#include "2Dpolygon.h"
-#include "field.h"
+#include "motion.h"
 #include "player.h"
 #include "pause.h"
-#include "light.h"
-#include "thread.h"
-#include "motion.h"
-#include "mesh.h"
-#include "item.h"
-#include "debugproc.h"
 #include "prompt.h"
+#include "sound.h"
+#include "Texture.h"
+#include "thread.h"
 #include "timer.h"
 #include "UIarm.h"
 #include "UImenu.h"
-#include "gimmick.h"
-#include "judgeEnd.h"
-#include "sound.h"
+#include "2Dpolygon.h"
+#include "3Dmodel.h"
 
 //**********************************************************************************
 //*** マクロ定義 ***
@@ -113,6 +114,9 @@ void InitGame(void)
 	/*** ギミックの初期化 ***/
 	InitGimmick();
 
+	/*** エフェクトの初期化 ***/
+	InitEffect();
+
 	/***ギミックの設置 ***/
 	SetGimmick(D3DXVECTOR3(1100.0f, 0.0f, 300.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), GIMMICKTYPE_DUCT);
 
@@ -183,6 +187,9 @@ void UninitGame(void)
 
 	/*** ギミックの終了 ***/
 	UninitGimmick();
+
+	/*** エフェクトの終了 ***/
+	UninitEffect();
 }
 
 //==================================================================================
@@ -249,6 +256,9 @@ void UpdateGame(void)
 
 		/*** ギミックの更新 ***/
 		UpdateGimmick();
+
+		/*** エフェクトの更新 ***/
+		UpdateEffect();
 
 		if (g_nCounterGame % 60 == 0)
 		{
@@ -320,6 +330,9 @@ void DrawGame(void)
 
 		/*** ギミックの描画 ***/
 		DrawGimmick();
+
+		/*** エフェクトの描画 ***/
+		DrawEffect();
 
 		/*** フォグをクリア ***/
 		CleanFog();
