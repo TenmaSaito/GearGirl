@@ -17,6 +17,7 @@
 #include "UImenu.h"
 #include "judgeEnd.h"
 #include "camera.h"
+#include "fade.h"
 
 using  namespace MyMathUtil;
 
@@ -47,16 +48,16 @@ ItemQuota		g_aPutOutUI[PUTOUTUI_MAX];						// 提出時　背景の暗転、決定やとりけし
 ITEMTYPE		g_aPutOut[NUM_PUTOUTITEM];						// 提出したアイテム
 ItemInfo		g_aItemInfo[ITEMTYPE_MAX] =
 {
-	{"data\\MODEL\\Item\\GearLarge.x",-1},		 // [0] 新品ののねじ
+	{"data\\MODEL\\Item\\Screw.x",-1},			 // [0] 新品ののねじ
 	{"data\\MODEL\\Item\\GearSmall.x",-1},		 // [1] 磨かれた小さな歯車
 	{"data\\MODEL\\Item\\GearLarge.x",-1},		 // [2] 綺麗な大きい歯車
 	{"data\\MODEL\\Item\\Shaft.x",-1},			 // [3] まっすぐな軸
 	{"data\\MODEL\\Item\\GearLarge.x",-1},		 // [4] 丁寧に直されたぜんまい
 
-	{"data\\MODEL\\Item\\GearLarge.x",-1},		 // [5] 古いねじ
-	{"data\\MODEL\\Item\\GearLarge.x",-1},		 // [6] 錆びた小さい歯車
+	{"data\\MODEL\\Item\\old_screw.x",-1},		 // [5] 古いねじ
+	{"data\\MODEL\\Item\\GearSmallDificit.x",-1},// [6] 錆びた小さい歯車
 	{"data\\MODEL\\Item\\GearLargeDificit.x",-1},// [7] 欠けた大きい歯車
-	{"data\\MODEL\\Item\\GearLarge.x",-1},		 // [8] 少しい曲がった軸
+	{"data\\MODEL\\Item\\ShaftCurv.x",-1},		 // [8] 少しい曲がった軸
 	{"data\\MODEL\\Item\\GearLarge.x",-1},		 // [9] ゆがんだぜんまい
 };
 
@@ -141,6 +142,23 @@ void InitItem(void)
 
 	// 設置
 	g_nSetItemNum = 0;	// 配置数を初期化
+
+	vec3 pos = vec3(450.0f, 120.0f, -600.0f);
+
+	for (int nCnt = 0; nCnt < ITEMTYPE_MAX; nCnt++)
+	{
+		if (nCnt == (int)ITEMTYPE_SCREW_FALSE)
+		{
+			pos.x = 350.0f;
+			pos.z = -600.0f;
+		}
+
+		SetItem(pos, vec3_ZERO, (ITEMTYPE)nCnt, true, true, true);
+		pos.z += 50.0f;
+
+	}
+
+
 }
 
 //=========================================================================================
@@ -540,6 +558,7 @@ void SelectItem(void)
 		else
 		{// アイテム以外（決定ボタン）を選択していたら
 			JudgmentEnding(&g_aPutOut[0],5);
+			SetFade(MODE_RESULT);
 		}
 	}
 }
