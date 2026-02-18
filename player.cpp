@@ -103,6 +103,7 @@ void InitPlayer(void)
 		g_aPlayer[nCntPlayer].nKey = 0;
 		g_aPlayer[nCntPlayer].state = PLAYERSTATE_NEUTRAL;
 		g_aPlayer[nCntPlayer].motionType = MOTIONTYPE_NEUTRAL;
+		g_aPlayer[nCntPlayer].motionTypeBlend = MOTIONTYPE_NEUTRAL;
 		g_aPlayer[nCntPlayer].bFinishMotion = true;
 
 		if (nCntPlayer == PLAYERTYPE_GIRL)
@@ -231,7 +232,7 @@ void UpdatePlayer(void)
 		}
 
 		// エフェクトの描画
-		SetEffect(g_aPlayer[PLAYERTYPE_MOUSE].pos, DEF_COL, VECNULL, 10.0f, 10.0f, 1.0f, 1, false);
+		//SetEffect(g_aPlayer[PLAYERTYPE_MOUSE].pos, DEF_COL, VECNULL, 10.0f, 10.0f, 1.0f, 1, false);
 
 		if ((pPlayer->motionType != MOTIONTYPE_ACTION
 			&& pPlayer->motionType != MOTIONTYPE_JUMP
