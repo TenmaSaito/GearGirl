@@ -91,6 +91,8 @@ void InitUIarm(void)
 	//-------------------------------------
 	// 頂点バッファをアンロック
 	g_pVtxBuffUIarm->Unlock();
+
+	EndDevice();
 }
 
 //=========================================================
@@ -184,4 +186,6 @@ void DrawUIarm(void)
 	pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP,	// プリミティブの種類
 							0,					// 描画する最初の頂点インデックス
 							2);					// プリミティブ(ポリゴン)数
+
+	EndDevice();
 }

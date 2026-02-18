@@ -1705,6 +1705,8 @@ void MyMathUtil::SetUpPixelFog(_In_ D3DXCOLOR Col,
 	pDevice->SetRenderState(D3DRS_FOGTABLEMODE, D3DFOG_LINEAR);
 	pDevice->SetRenderState(D3DRS_FOGSTART, (DWORD)(&fStart));
 	pDevice->SetRenderState(D3DRS_FOGEND, (DWORD)(&fEnd));
+
+	EndDevice();
 }
 
 //==================================================================================
@@ -1716,6 +1718,9 @@ void MyMathUtil::CleanUpPixelFog(void)
 
 	// Enable fog blending.
 	pDevice->SetRenderState(D3DRS_FOGENABLE, FALSE);
+
+	EndDevice();
+
 }
 
 //==================================================================================

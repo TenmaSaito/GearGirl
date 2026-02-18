@@ -168,6 +168,8 @@ void InitTimer(bool bRanking)
     {
         g_nTimer = TIMER_LIMIT_FRAME;
     }
+
+    EndDevice();
 }
 
 //===========================================================

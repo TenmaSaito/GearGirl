@@ -109,6 +109,8 @@ void InitEffect(void)
 
 	// 頂点バッファをアンロックする
 	g_pVtxBuffEffect->Unlock();
+
+	EndDevice();
 }
 
 //================================================================================================================
@@ -162,6 +164,8 @@ void UpdateEffect(void)
 			pVtx[1].pos = D3DXVECTOR3(g_aEffect[nCntEffect].Width * 0.5f, g_aEffect[nCntEffect].Height * 0.5f, 0.0f);
 			pVtx[2].pos = D3DXVECTOR3(-g_aEffect[nCntEffect].Width * 0.5f, -g_aEffect[nCntEffect].Height, 0.0f);
 			pVtx[3].pos = D3DXVECTOR3(g_aEffect[nCntEffect].Width * 0.5f, -g_aEffect[nCntEffect].Height * 0.5f, 0.0f);
+
+			g_aEffect[nCntEffect].nLife -= 1;
 
 			 //寿命のカウントダウン
 			if (g_aEffect[nCntEffect].nLife < 0)
@@ -258,6 +262,7 @@ void DrawEffect(void)
 	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, true);
 	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
 
+	EndDevice();
 }
 
 //================================================================================================================

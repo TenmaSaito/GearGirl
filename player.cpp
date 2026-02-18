@@ -231,7 +231,7 @@ void UpdatePlayer(void)
 		}
 
 		// エフェクトの描画
-		SetEffect(pPlayer->pos, DEF_COL, VECNULL, 10.0f, 10.0f, 1.0f, 5, false);
+		SetEffect(g_aPlayer[PLAYERTYPE_MOUSE].pos, DEF_COL, VECNULL, 10.0f, 10.0f, 1.0f, 1, false);
 
 		if ((pPlayer->motionType != MOTIONTYPE_ACTION
 			&& pPlayer->motionType != MOTIONTYPE_JUMP
@@ -292,9 +292,6 @@ void UpdatePlayer(void)
 			//pPlayer->state = PLAYERSTATE_NEUTRAL;
 		}
 
-		// カメラを有効化させる
-		//CameraEnable(pPlayer->nIdxCamera);
-
 		// モデルとの当たり判定
 		CollisionModel(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move);
 
@@ -310,8 +307,8 @@ void UpdatePlayer(void)
 	{// シングルプレイ時
 		if (GetJoypadTrigger(0, JOYKEY_LB) == true || GetKeyboardTrigger(DIK_Q) == true)
 		{
-			/*if (g_aPlayer[PLAYERTYPE_GIRL].state != PLAYERSTATE_THROWWAITING && g_bShotMouse == false)
-			{*/
+			if (g_aPlayer[PLAYERTYPE_GIRL].state != PLAYERSTATE_THROWWAITING && g_bShotMouse == false)
+			{
 				if (g_ActivePlayer == 1)
 				{// ネズミ→少女
 					g_ActivePlayer = 0;
@@ -320,7 +317,7 @@ void UpdatePlayer(void)
 				{// 少女→ネズミ
 					g_ActivePlayer = 1;
 				}
-			//}
+			}
 
 		}
 	}
@@ -379,20 +376,28 @@ void DrawPlayer(void)
 		// プレイヤーのワールドマトリックスの初期化
 		D3DXMatrixIdentity(&pPlayer->mtxWorld);
 
+		D3DXVECTOR3 posTrans = pPlayer->pos;
+		D3DXVECTOR3 rotTrans = pPlayer->rot;
+
+		if (nCntPlayer == PLAYERTYPE_MOUSE && g_aPlayer[PLAYERTYPE_GIRL].state == PLAYERSTATE_THROWWAITING)
+		{// オール0
+			posTrans = VECNULL;
+			rotTrans = VECNULL;
+		}
+
 		// プレイヤーの向きを反映
 		D3DXMatrixRotationYawPitchRoll(&mtxRot,
-			pPlayer->rot.y, pPlayer->rot.x, pPlayer->rot.z);
+			rotTrans.y, rotTrans.x, rotTrans.z);
 		D3DXMatrixMultiply(&pPlayer->mtxWorld, &pPlayer->mtxWorld, &mtxRot);	// かけ合わせる
 
 		// プレイヤーの位置を反映
 		D3DXMatrixTranslation(&mtxTrans,
-			pPlayer->pos.x, pPlayer->pos.y, pPlayer->pos.z);
+			posTrans.x, posTrans.y, posTrans.z);
 		D3DXMatrixMultiply(&pPlayer->mtxWorld, &pPlayer->mtxWorld, &mtxTrans);	// かけ合わせる
 
 		if (nCntPlayer == PLAYERTYPE_MOUSE && g_aPlayer[PLAYERTYPE_GIRL].state == PLAYERSTATE_THROWWAITING)
-		{
-
-			D3DXMatrixMultiply(&pPlayer->mtxWorld, &g_aPlayer[PLAYERTYPE_GIRL].PartsInfo.aParts[19].mtxWorld , &mtxTrans);	// かけ合わせる
+		{// 右手にくっつける
+			D3DXMatrixMultiply(&pPlayer->mtxWorld, &pPlayer->mtxWorld, &g_aPlayer[PLAYERTYPE_GIRL].PartsInfo.aParts[19].mtxWorld);	// かけ合わせる
 		}
 
 		// 現在のマテリアルを取得(保存)

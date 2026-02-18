@@ -97,6 +97,8 @@ void InitBillboard(void)
 
 	// 頂点バッファをアンロックする
 	g_pVtxBuffBillboard->Unlock();
+
+	EndDevice();
 }
 
 //================================================================================================================
@@ -211,6 +213,8 @@ void DrawBillboard(void)
 	// Zテストを有効にする
 	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
 	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+
+	EndDevice();
 }
 
 //================================================================================================================

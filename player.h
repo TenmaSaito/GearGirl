@@ -13,7 +13,6 @@
 // =================================================
 // マクロ定義
 #define	MAX_PART		(6)		// パーツの最大数
-
 #define	MAX_PLAYER		(2)				// プレイヤーの最大数
 #define PLAYER_POSDEF	D3DXVECTOR3(1400.0f, 0.0f, -1000.0f) // プレイヤーの初期位置
 #define	PLAYER_MOVE		(0.5f)			// プレイヤーの移動速度
