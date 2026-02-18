@@ -56,6 +56,12 @@
 #define RELEASE(p)			{ if ((p) != NULL) {(p)->Release(); (p) = nullptr; } }			// メモリ確保ポインタのRelease用マクロ
 #define D3DX_2PI			(D3DX_PI * 2.0f)				// 角度の一周分
 #define D3DX_HALFPI			(D3DX_PI * 0.5f)				// 角度の1/4周分
+#ifndef STRUCT
+#define STRUCT(...)				typedef struct __VA_ARGS__			// STRUCT宣言
+#endif
+#ifndef ENUM
+#define ENUM(...)				typedef enum __VA_ARGS__			// ENUM宣言
+#endif
 //#define _PATHCHECK_NO_WARNINGS								// 相対パスの確認
 
 //**********************************************************************************

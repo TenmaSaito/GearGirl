@@ -110,6 +110,9 @@ void InitTitleSelect(void)
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 	TSelect *pSelect = &g_aSelect[0];
 
+	// 初期化
+	ZeroMemory(&g_aSelect[0], sizeof(g_aSelect));
+
 	// フェーズリセット
 	g_nPhaseSelect = MENU_ORIGIN;
 

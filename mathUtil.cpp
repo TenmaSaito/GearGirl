@@ -50,6 +50,23 @@ bool MyMathUtil::CollisionBoxZ(D3DXVECTOR4 rect, D3DXVECTOR3 pos)
 }
 
 //================================================
+// --- 二点の半径判定 ---
+//================================================
+bool MyMathUtil::IsDetection(D3DXVECTOR3 p1, D3DXVECTOR3 p2, float fRadius)
+{
+	D3DXVECTOR3 posLength = p1 - p2;
+	float fLength = D3DXVec3Length(&posLength);		// プレイヤーとギミックの距離を求める
+
+	if (fLength < fRadius)
+	{ // 距離が検知半径と接触した場合
+		return true;
+	}
+
+	// 検知失敗
+	return false;
+}
+
+//================================================
 // --- 列挙型の範囲確認処理 ---
 //================================================
 HRESULT MyMathUtil::CheckIndex(int TargetIndexMax, int Index, int TargetIndexMin)
@@ -1594,7 +1611,7 @@ D3DXMATRIX *MyMathUtil::CalcWorldMatrixFromParent(_Inout_ D3DXMATRIX *pMtxWorld,
 }
 
 //==================================================================================
-// ---シャドウマトリックスの作成処理 ---
+// --- シャドウマトリックスの作成処理 ---
 //==================================================================================
 D3DXMATRIX *MyMathUtil::CreateShadowMatrix(_In_ LPDIRECT3DDEVICE9 pDevice,
 	_In_ const D3DXMATRIX *pMtxWorld,
@@ -1780,9 +1797,8 @@ void MyMathUtil::RemovePass(_In_ LPD3DXEFFECT pEffect,
 //==================================================================================
 // --- DualInput ---
 //==================================================================================
-bool MyMathUtil::GetDualInput(int nKey, UINT nFlag, int nKey2, UINT nFlag2)
+bool MyMathUtil::GetDualInput(int nKey, DWORD nFlag, int nKey2, DWORD nFlag2)
 {
-	using namespace MyMathUtil;
 	bool aInput[2] = {};
 
 	if (nFlag & DUAL_KEYBOARD)

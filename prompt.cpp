@@ -160,7 +160,7 @@ void DrawPrompt(void)
 		}
 	}
 
-	/*** Zテストを無効にする ***/
+	/*** Zテストを有効にする ***/
 	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
 	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 
@@ -252,6 +252,37 @@ int DetectionPrompt(D3DXVECTOR3 pos, float fLength)
 	}
 
 	return nNearDetection;
+}
+
+//==================================================================================
+// --- 検知判定 ---
+//==================================================================================
+bool DetectionPromptFromIdx(int nIdxPrompt, D3DXVECTOR3 pos, float fLength)
+{
+	LPPROMPT pPrompt = &g_aPrompt[nIdxPrompt];		// プロンプトポインタ
+	int nNearDetection = -1;				// 検知したプロンプト
+	float fDetectionLength = 1000000.0f;	// プロンプトとの距離
+
+	if (pPrompt->bUse == true && pPrompt->bAuto == true)
+	{ // 使用されていて、検知判定オンなら
+		// 二点間の差分を求める
+		D3DXVECTOR3 length = pos - pPrompt->pos;
+
+		// ベクトルの長さを取得
+		float fLengthPrompt = D3DXVec3Length(&length);
+		if (fLengthPrompt <= fLength)
+		{ // 検知範囲内なら描画開始
+			pPrompt->bDisp = true;
+			return true;
+		}
+		else
+		{ // 検知範囲外なら描画停止
+			pPrompt->bDisp = false;
+			return false;
+		}
+	}
+
+	return false;
 }
 
 //==================================================================================

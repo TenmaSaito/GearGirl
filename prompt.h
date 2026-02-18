@@ -20,7 +20,7 @@
 //**********************************************************************************
 //*** プロンプト構造体 ***
 //**********************************************************************************
-typedef struct
+STRUCT()
 {
 	D3DXVECTOR3 pos;		// 位置
 	D3DXVECTOR2 size;		// サイズ
@@ -29,7 +29,7 @@ typedef struct
 	bool bUse;				// 使用状況
 	bool bDisp;				// 描画するか
 	bool bAuto;				// 検知判定を使用するか
-} Prompt, * LPPROMPT;
+} Prompt, *LPPROMPT;
 
 //**********************************************************************************
 //*** プロトタイプ宣言 ***
@@ -41,6 +41,7 @@ void DrawPrompt(void);
 
 int SetPrompt(D3DXVECTOR3 pos, D3DXVECTOR2 size, int nIdxTexture, bool bAuto);
 int DetectionPrompt(D3DXVECTOR3 pos, float fLength);
+bool DetectionPromptFromIdx(int nIdxPrompt, D3DXVECTOR3 pos, float fLength);
 void SetEnablePrompt(bool bDisp, int nIdxPrompt);
 D3DXVECTOR3 GetPromptPos(int nIdxPrompt);
 LPPROMPT GetPrompt(void);

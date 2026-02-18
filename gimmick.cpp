@@ -11,13 +11,26 @@
 #include "motion.h"
 #include "modeldata.h"
 #include "prompt.h"
+#include "player.h"
 #include "mathUtil.h"
+#include "Texture.h"
 
 using namespace MyMathUtil;
 
 //**********************************************************************************
 //*** マクロ定義 ***
 //**********************************************************************************
+
+//**********************************************************************************
+//*** ギミッククリア可能なプレイヤータイプ ***
+//**********************************************************************************
+typedef enum
+{
+	COULD_PLAYER_GIRL = 0,
+	COULD_PLAYER_MOUSE,
+	COULD_PLAYER_ALL,
+	COULD_PLAYER_MAX
+} COULD_PLAYER;
 
 //**********************************************************************************
 //*** ギミック構造体 ***
@@ -28,7 +41,10 @@ typedef struct
 	D3DXVECTOR3 rot;						// ギミック全体の向き
 	D3DXMATRIX mtxWorld;					// ワールドマトリックス
 	PARTS_INFO parts;						// ギミックパーツ
+	COULD_PLAYER could;						// クリア可能なプレイヤータイプ
+	float fRadius;							// 検知半径
 	int nCounter;							// 汎用カウンター
+	int nIdxPrompt;							// プロンプトのインデックス
 	bool bUse;								// 使用状況
 
 	MOTION_INFO aMotion[MOTIONTYPE_MAX];	// クリア時モーション
@@ -52,6 +68,12 @@ typedef struct
 	MOTIONTYPE motionType;					// モーションタイプ
 	bool bClear;							// クリアしたか
 }Gimmick, *LPGIMMICK;
+
+//**********************************************************************************
+//*** プロトタイプ宣言 ***
+//**********************************************************************************
+void CaseMulti(LPGIMMICK pGimmick);
+void CaseSolo(LPGIMMICK pGimmick);
 
 //**********************************************************************************
 //*** グローバル変数 ***
@@ -88,6 +110,11 @@ void InitGimmick(void)
 				}
 
 				g_aGimmick[nCntMotion].bUse = true;
+
+				int Tex;
+				LoadTexture("data/TEXTURE/TestPrompt.png", &Tex);
+				g_aGimmick[nCntMotion].nIdxPrompt = SetPrompt(g_aGimmick[nCntMotion].pos, D3DXVECTOR2(15.0f, 8.0f), Tex, false);
+				SetEnablePrompt(true, g_aGimmick[nCntMotion].nIdxPrompt);
 			}
 		}
 	}
@@ -112,6 +139,15 @@ void UpdateGimmick(void)
 	for (int nCntGimmick = 0; nCntGimmick < GIMMICKTYPE_MAX; nCntGimmick++, pGimmick++)
 	{
 		if (pGimmick->bUse == false) continue;
+
+		if (GetNumPlayer() == 1)
+		{ // ソロプレイ時
+			CaseSolo(pGimmick);
+		}
+		else
+		{ // マルチプレイ時
+			CaseMulti(pGimmick);
+		}
 
 		pGimmick->nCounter++;		// カウンター増加
 	}
@@ -280,6 +316,61 @@ bool IsClearGimmick(GIMMICKTYPE type)
 
 	// クリア状態を取得
 	return g_aGimmick[type].bClear;
+}
+
+//==================================================================================
+// --- マルチプレイ時判定 ---
+//==================================================================================
+void CaseMulti(LPGIMMICK pGimmick)
+{
+	Player *pPlayer = GetPlayer();
+	bool bDetection = false;
+
+	if (IsDetection(pGimmick->pos, pPlayer[PLAYERTYPE_GIRL].pos, pGimmick->fRadius)
+		&& (pGimmick->could == COULD_PLAYER_GIRL || pGimmick->could == COULD_PLAYER_ALL))
+	{ // 少女の判定
+		bDetection = true;
+	}
+
+	if (IsDetection(pGimmick->pos, pPlayer[PLAYERTYPE_MOUSE].pos, pGimmick->fRadius)
+		&& (pGimmick->could == COULD_PLAYER_MOUSE || pGimmick->could == COULD_PLAYER_ALL))
+	{ // ネズミの判定
+		bDetection = true;
+	}
+
+	if (bDetection == true)
+	{ // どちらかが半径に入った場合
+		SetEnablePrompt(true, pGimmick->nIdxPrompt);
+	}
+	else
+	{
+		SetEnablePrompt(false, pGimmick->nIdxPrompt);
+	}
+}
+
+//==================================================================================
+// --- ソロプレイ時判定 ---
+//==================================================================================
+void CaseSolo(LPGIMMICK pGimmick)
+{
+	Player *pPlayer = GetPlayer();
+	PlayerType type = (PlayerType)GetActivePlayer();
+	bool bDetection = false;
+
+	if (IsDetection(pGimmick->pos, pPlayer[type].pos, pGimmick->fRadius)
+		&& (pGimmick->could == type || pGimmick->could == COULD_PLAYER_ALL))
+	{ // 操作中プレイヤーの判定
+		bDetection = true;
+	}
+
+	if (bDetection == true)
+	{ // 半径に入った場合
+		SetEnablePrompt(true, pGimmick->nIdxPrompt);
+	}
+	else
+	{
+		SetEnablePrompt(false, pGimmick->nIdxPrompt);
+	}
 }
 
 //==================================================================================

@@ -33,10 +33,16 @@
 #define InitRot(x, y, z)		RepairedRot(D3DXVECTOR3(x, y, z))	// 修正済み角度
 #define DEF_COL					D3DXCOLOR_NULL						// デフォルトカラー
 #define foreach(type, var, lpArray)		for(type &var : lpArray)	// foreach構文
+#ifndef STRUCT
+#define STRUCT(...)				typedef struct __VA_ARGS__			// STRUCT宣言
+#endif
+#ifndef ENUM
+#define ENUM(...)				typedef enum __VA_ARGS__			// ENUM宣言
+#endif
 
 //----------------------------------------------------------------------------------
 /*** フラグ関連 ***/
-#define END_SHADER				(0xffffffff)						// シェーダーの終了コード
+#define END_SHADER				(-1)						// シェーダーの終了コード
 //----------------------------------------------------------------------------------
 
 namespace MyMathUtil
@@ -44,7 +50,7 @@ namespace MyMathUtil
 	//**********************************************************************************
 	//*** int型Vector3構造体 ***
 	//**********************************************************************************
-	typedef struct
+	STRUCT()
 	{
 		int x;		// x
 		int y;		// y
@@ -54,7 +60,7 @@ namespace MyMathUtil
 	//**********************************************************************************
 	//*** int型Vector2構造体 ***
 	//**********************************************************************************
-	typedef struct
+	STRUCT()
 	{
 		int x;		// x
 		int y;		// y
@@ -63,7 +69,7 @@ namespace MyMathUtil
 	//**********************************************************************************
 	//*** DualInputのフラグ列挙 ***
 	//**********************************************************************************
-	typedef enum
+	ENUM()
 	{
 		DUAL_KEYBOARD	= 0x00000001,			// Keyboard入力
 		DUAL_JOYPAD		= 0x00000002,			// ジョイパッド入力
@@ -86,13 +92,14 @@ namespace MyMathUtil
 	
 	//----------------------------------------------------------------------------------
 	/*** Input関連 ***/
-	bool GetDualInput(int nKey, UINT nFlag1, int nKey2 = -1, UINT nFlag2 = -1);
+	bool GetDualInput(int nKey, DWORD nFlag1, int nKey2 = -1, DWORD nFlag2 = -1);
 	//----------------------------------------------------------------------------------
 
 	//----------------------------------------------------------------------------------
 	/*** 当たり判定、角度関連 ***/
 	bool CollisionBox(RECT rect, D3DXVECTOR3 pos);
 	bool CollisionBoxZ(D3DXVECTOR4 rect, D3DXVECTOR3 pos);
+	bool IsDetection(D3DXVECTOR3 p1, D3DXVECTOR3 p2, float fRadius);
 	void RepairFloat(float* fRepairTarget, int nCnt = 3);
 	float RepairRot(float fRot);
 	void RepairRot(float* pOut, const float* fAngle);

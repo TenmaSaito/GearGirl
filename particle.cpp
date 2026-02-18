@@ -16,7 +16,8 @@
 //*************************************************************************************************
 //*** マクロ定義 ***
 //*************************************************************************************************
-#define MAX_PARTICLE (128) // パーティクルの最大数
+#define MAX_PARTICLE	(128)	// パーティクルの最大数
+#define SPD_MAX			(300)	// エフェクトの最大速度
 
 //*************************************************************************************************
 //*** パーティクル構造体 ***
@@ -24,18 +25,14 @@
 typedef struct
 {
 	D3DXVECTOR3 pos;			// 現在位置
+	D3DXVECTOR3 vecMin, vecMax;	// ベクトルの範囲
 	D3DXCOLOR col;				// 色
-	float fRadius;				// 出現ゲートサイズ（半径）
+	int nRadius;				// 出現ゲートサイズ（半径）
 	int nLife;					// 残り寿命（フレーム数）
-	int nSpeedMax, nSpeedMin;	// 速度の最大値最小値
 	int nCntEffect;				// 一フレームに発生するエフェクトの数
 	bool bUse;					// 使用中フラグ
+	bool bGravity;				// エフェクトの自由落下の有無
 } Particle;
-
-typedef D3DXVECTOR3 位置, 向き, ベクトル;
-typedef D3DXCOLOR 色;
-#define 無 NULL
-#define 初期化 ZeroMemory
 
 //*************************************************************************************************
 //*** グローバル変数 ***
@@ -47,7 +44,7 @@ Particle g_aParticle[MAX_PARTICLE];					 // パーティクル配列
 //================================================================================================================
 void InitParticle(void)
 {
-	初期化(&g_aParticle[0], sizeof(g_aParticle));
+	ZeroMemory(&g_aParticle[0], sizeof(g_aParticle));
 
 	foreach(Particle, var, g_aParticle)
 	{
@@ -85,16 +82,25 @@ void UpdateParticle(void)
 
 		for (int nCntEffect = 0; nCntEffect < pParticle->nCntEffect; nCntEffect++)
 		{
-			pos.x = pParticle->pos.x + ((float)(rand() % 100 - 50) * 0.1f);
-			pos.y = pParticle->pos.y + ((float)(rand() % 100 - 50) * 0.1f);
+			pos.x = pParticle->pos.x + ((float)(rand() % (pParticle->nRadius * 200) - pParticle->nRadius * 100) * 0.01f);
+			pos.y = pParticle->pos.y + ((float)(rand() % (pParticle->nRadius * 200) - pParticle->nRadius * 100) * 0.01f);
+			pos.z = pParticle->pos.z + ((float)(rand() % (pParticle->nRadius * 200) - pParticle->nRadius * 100) * 0.01f);
+			
+			D3DXVECTOR3 vecMx = pParticle->vecMax * 100.0f;
+			D3DXVECTOR3 vecMn = pParticle->vecMin * 100.0f;
 
-			move.z = (float)((rand() % 50) * 0.5f) + 0.1f;
-			fRadius = (float)(rand() % 50 - 25) + 0.1f;
-			fSpeed = (float)(rand() % pParticle->nSpeedMax - pParticle->nSpeedMin) + 0.1f;
+			move.x = (float)(rand() % (int)vecMx.x - (int)vecMn.x);
+			move.y = (float)(rand() % (int)vecMx.y - (int)vecMn.y);
+			move.z = (float)(rand() % (int)vecMx.z - (int)vecMn.z);
+
+			move *= 0.01f;
+
+			fRadius = (float)(rand() % (pParticle->nRadius * 2) - 25) + 0.1f;
+			fSpeed = (float)(rand() % SPD_MAX) * 0.01f + 0.1f;
 			col = pParticle->col;
 			nLife = rand() % 100;
 
-			SetEffect(pos, col, move, fRadius, fRadius, fSpeed, nLife);
+			SetEffect(pos, col, move, fRadius, fRadius, fSpeed, nLife, pParticle->bGravity);
 		}
 
 		pParticle->nLife--;
@@ -108,18 +114,24 @@ void UpdateParticle(void)
 //================================================================================================================
 // --- パーティクルの設定処理 ---
 //================================================================================================================
-void SetParticle(位置 pos, 色 col, float fRadius, int nLife, int nFrameEffect, int nSpeedMax, int nSpeedMin, bool bUseGravity)
+void SetParticle(D3DXVECTOR3 pos, D3DXCOLOR col, D3DXVECTOR3 vecMin, D3DXVECTOR3 vecMax, int nRadius, int nLife, int nFrameEffect, bool bUseGravity)
 {
-	for (int nCntParticle = 0; nCntParticle < MAX_PARTICLE; nCntParticle++)
+	Particle *pParticle = &g_aParticle[0];
+
+	for (int nCntParticle = 0; nCntParticle < MAX_PARTICLE; nCntParticle++, pParticle++)
 	{
-		if (!g_aParticle[nCntParticle].bUse)
+		if (pParticle->bUse)
 		{
 			// パーティクルの初期値設定
-			g_aParticle[nCntParticle].pos = pos;
-			g_aParticle[nCntParticle].col = col;
-			g_aParticle[nCntParticle].fRadius = fRadius;
-			g_aParticle[nCntParticle].nLife = nLife;
-			g_aParticle[nCntParticle].bUse = true;
+			pParticle->pos = pos;
+			pParticle->vecMax = vecMax;
+			pParticle->vecMin = vecMin;
+			pParticle->col = col;
+			pParticle->nRadius = nRadius;
+			pParticle->nLife = nLife;
+			pParticle->nCntEffect = nFrameEffect;
+			pParticle->bUse = true;
+			pParticle->bGravity = bUseGravity;
 			break;
 		}
 	}

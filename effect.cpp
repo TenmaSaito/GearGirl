@@ -26,6 +26,7 @@ typedef struct
 	D3DXCOLOR col;		// 色
 	int nLife;			// 寿命
 	bool bUse;			// 使用しているかどうか
+	bool bGravity;		// 重力適用の有無
 	float Width;		// 横
 	float Height;		// 縦
 
@@ -151,6 +152,11 @@ void UpdateEffect(void)
 			g_aEffect[nCntEffect].pos.y += g_aEffect[nCntEffect].vec.y;
 			g_aEffect[nCntEffect].pos.z += g_aEffect[nCntEffect].vec.z;
 
+			if (g_aEffect[nCntEffect].bGravity)
+			{
+				g_aEffect[nCntEffect].pos.y += GRAVITY;
+			}
+			
 			// 頂点座標の設定
 			pVtx[0].pos = D3DXVECTOR3(-g_aEffect[nCntEffect].Width * 0.5f, g_aEffect[nCntEffect].Height * 0.5f, 0.0f);
 			pVtx[1].pos = D3DXVECTOR3(g_aEffect[nCntEffect].Width * 0.5f, g_aEffect[nCntEffect].Height * 0.5f, 0.0f);
@@ -257,7 +263,7 @@ void DrawEffect(void)
 //================================================================================================================
 // --- エフェクトの設定処理 ---
 //================================================================================================================
-void SetEffect(D3DXVECTOR3 pos, D3DXCOLOR col, D3DXVECTOR3 vec, float Width,float Height,float speed,int nLife)
+void SetEffect(D3DXVECTOR3 pos, D3DXCOLOR col, D3DXVECTOR3 vec, float Width, float Height, float speed, int nLife, bool bUseGravity)
 {
 	int nCntEffect;
 	VERTEX_3D* pVtx;
@@ -280,6 +286,7 @@ void SetEffect(D3DXVECTOR3 pos, D3DXCOLOR col, D3DXVECTOR3 vec, float Width,floa
 			g_aEffect[nCntEffect].Height = Height;
 			g_aEffect[nCntEffect].vec = vecNor * speed;
 			g_aEffect[nCntEffect].bUse = true;	// 使用している状態にする
+			g_aEffect[nCntEffect].bGravity = bUseGravity;
 
 			g_aEffect[nCntEffect].pos = pos;
 
@@ -291,8 +298,10 @@ void SetEffect(D3DXVECTOR3 pos, D3DXCOLOR col, D3DXVECTOR3 vec, float Width,floa
 
 			break;	// ここでfor文を抜ける
 		}
+
 		pVtx += 4;	// 頂点データ
 	}
+
 	// 頂点バッファをアンロックする
 	g_pVtxBuffEffect->Unlock();
 }

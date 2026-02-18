@@ -310,7 +310,7 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 
 	d3dpp.BackBufferWidth = SCREEN_WIDTH;		// ゲームの画面サイズ(横)
 	d3dpp.BackBufferHeight = SCREEN_HEIGHT;		// ゲームの画面サイズ(高さ)
-	d3dpp.BackBufferFormat = D3DFMT_UNKNOWN;	// バックバッファの形式
+	d3dpp.BackBufferFormat = d3ddm.Format;		// バックバッファの形式
 	d3dpp.BackBufferCount = 1;					// バックバッファの数
 	d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;	// ダブルバッファの切り替え(映像信号と同期)
 	d3dpp.EnableAutoDepthStencil = TRUE;		// デプスバッファとステンシルバッファを作成
@@ -385,12 +385,12 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 		return E_FAIL;
 	}
 
-	//// マウスの初期化処理
-	//if (FAILED(InitMouse(hWnd)))
-	//{
-	//	MessageBox(hWnd, "InitMouseに失敗しました。", "Error (2)", MB_ICONERROR);
-	//	return E_FAIL;
-	//}
+	// マウスの初期化処理
+	if (FAILED(InitMouse(hWnd)))
+	{
+		MessageBox(hWnd, "InitMouseに失敗しました。", "Error (2)", MB_ICONERROR);
+		return E_FAIL;
+	}
 
 	// デバッグフォント作成
 	InitDebugProc();
@@ -452,6 +452,7 @@ void Update(void)
 	static int nID[3] = {};
 
 	PrintDebugProc("FPS : %d\n", g_nCountFPS);
+	PrintDebugProc("LockCount : %d\n", g_mdDirect3DDevice.nCountEnterSection);
 
 	//キーボードの更新処理(これより上に書くな)
 	UpdateKeyboard();
