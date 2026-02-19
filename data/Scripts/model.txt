@@ -61,7 +61,7 @@ MODEL_FILENAME = data/MODEL/Building/StationGlass.x		# [27]âwÇÃå„ÇÎ
 MODEL_FILENAME = data/MODEL/Gimmick/BronzeStatue99.x	# [28]ì∫ëú
 MODEL_FILENAME = data/MODEL/Item/valve.x				# [29]ÉoÉãÉu
 MODEL_FILENAME = data/MODEL/Building/Piano99.x			# [30]ÉsÉAÉm
-MODEL_FILENAME = data/MODEL/Building/FallenTree99.x		# [31]ì|ñÿ
+MODEL_FILENAME = data/MODEL/Building/FallenTree.x		# [31]ì|ñÿ
 MODEL_FILENAME = data/MODEL/Gimmick/BigButton98.x		# [32](êlä‘)
 MODEL_FILENAME = data/MODEL/Gimmick/SmallButton98.x		# [33](ÇÀÇ∏Ç›)
 
@@ -3847,28 +3847,7 @@ END_MODELSET
 
 MODELSET
 	TYPE = 31	# [31]ì|ñÿ
-	POS = 2310 100 -1520
-	ROT = 0 90 0
-	SHADOW = 0
-END_MODELSET
-
-MODELSET
-	TYPE = 31	# [31]ì|ñÿ
-	POS = 2310 100 -580
-	ROT = 0 90 0
-	SHADOW = 0
-END_MODELSET
-
-MODELSET
-	TYPE = 31	# [31]ì|ñÿ
-	POS = 2310 100 110
-	ROT = 0 90 0
-	SHADOW = 0
-END_MODELSET
-
-MODELSET
-	TYPE = 31	# [31]ì|ñÿ
-	POS = 2310 100 800
+	POS = 1720 100 475
 	ROT = 0 90 0
 	SHADOW = 0
 END_MODELSET
