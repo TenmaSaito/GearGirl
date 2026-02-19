@@ -577,9 +577,10 @@ void SetCamera(void)
 			}
 
 			g_readyCamera = (CameraType)nCntCamera;	// セットしたカメラの番号を保存
-			return;
+			break;
 		}
 	}
+
 	EndDevice();// デバイス取得終了
 }
 

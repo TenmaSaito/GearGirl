@@ -612,3 +612,8 @@ void ToggleFullscreen(HWND hWnd)
 
 	g_isFullscreen = !g_isFullscreen;
 }
+
+int GetEnterCriticalSectionCount(void)
+{
+	return g_mdDirect3DDevice.nCountEnterSection;
+}

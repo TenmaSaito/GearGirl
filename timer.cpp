@@ -17,9 +17,9 @@
 //*** マクロ定義 ***
 //*************************************************************************************************
 #define NUM_PLACE   (5)          // 5枚
-#define Timer_POSX  (520.0f)
+#define Timer_POSX  (540.0f)
 #define Timer_POSY  (25.0f)
-#define Timer_SIZEX (60.0f)
+#define Timer_SIZEX (50.0f)
 #define Timer_SIZEY (60.0f)
 
 // コロンのサイズ
@@ -66,8 +66,6 @@ void InitTimer(bool bRanking)
         D3DPOOL_MANAGED,
         &g_pVtxBuffTimer,
         NULL);
-
-    EndDevice();
 
     g_bTimeover = false;
     g_bRanking = bRanking;

@@ -104,6 +104,7 @@ LPDIRECT3DDEVICE9 GetDevice(void);
 void EndDevice(void);
 HWND GetHandleWindow(void);
 bool GetIsMainThread(void);
+int GetEnterCriticalSectionCount(void);
 
 //**********************************************************************************
 //*** デバイス構造体 ***

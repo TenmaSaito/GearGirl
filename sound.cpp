@@ -60,7 +60,7 @@ SOUNDINFO g_aSoundInfo[SOUND_LABEL_MAX] =
 	{"data/SOUND/BGM/BGM_TITLE.wav", -1, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},		// タイトル画面のBGM
 	{"data/SOUND/BGM/BGM_TITLE.wav", -1, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},		// ゲーム画面のBGM
 	{"data/SOUND/BGM/BGM_TITLE.wav", -1, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},		// リザルト画面のBGM
-	{"data/SOUND/SE/SE_GETPARTS.wav", 0, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},		// パーツ取得音
+	{"data/SOUND/SE/SE_GETPARTS_MONO.wav", 0, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},		// パーツ取得音
 	{"data/SOUND/SE/SE_GETPARTS.wav", 0, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},		// タイトル画面での選択音
 	{"data/SOUND/SE/SE_GETPARTS.wav", 0, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},		// タイトル画面での決定音
 	{"data/SOUND/SE/SE_GETPARTS.wav", 0, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},		// タイトル画面での取消音
@@ -355,7 +355,6 @@ void UpdateSound(void)
 {
 	Camera *pCamera = GetCamera();
 	X3DAUDIO_CONE ListenerCone = {};
-	
 #ifdef _3DAUDIO
 	/*** 3Dオーディオ(立体音響の設定！) ***/
 	for (int nCntSound = 0; nCntSound < SOUND_LABEL_MAX; nCntSound++)
@@ -363,7 +362,7 @@ void UpdateSound(void)
 		if (g_aSoundInfo[nCntSound].b3D == true)
 		{
 			/*** 変数宣言 ***/
-			FLOAT32 matrix[16] = {};		// 8(or 16)にすると立体に聞こえる！
+			FLOAT32 matrix[8] = {};			// 8(or 16)にすると立体に聞こえる！
 			D3DXVECTOR3 vecFront;			// カメラの視点位置からの方向ベクトル
 			D3DXVECTOR3 vecFrontEmitter;	// 音源からの方向ベクトル
 
@@ -399,25 +398,25 @@ void UpdateSound(void)
 
 			/*** 聞き手の位置、方向、上方向ベクトルを設定 ***/
 			g_Listener.OrientFront = vecFront;
-			g_Listener.OrientTop = pCamera->vecU;
+			g_Listener.OrientTop = D3DXVECTOR3(0, 1, 0);
 			g_Listener.Position = pCamera->posV;
-			g_Listener.Velocity = SOUND_SPD;
+			g_Listener.Velocity = D3DXVECTOR3(1, 1, 1);
 			g_Listener.pCone = &ListenerCone;
 
 			/*** 発信源の位置、方向、上方向ベクトルを設定 ***/
 			g_aEmitter[nCntSound].OrientFront = vecFrontEmitter;
 			g_aEmitter[nCntSound].OrientTop = g_aSoundInfo[nCntSound].posUEmitter;
 			g_aEmitter[nCntSound].Position = g_aSoundInfo[nCntSound].posEmitter;
-			g_aEmitter[nCntSound].Velocity = SOUND_SPD;
+			g_aEmitter[nCntSound].Velocity = D3DXVECTOR3(1, 1, 1);
 
 			/*** 音量計算に使用する初期値を設定 ***/
 			g_DSPSettings.SrcChannelCount = 1;				// Srcはモノラルの為、1に設定
-			g_DSPSettings.DstChannelCount = 16;				// Dstは立体に近づけるため、16に設定
+			g_DSPSettings.DstChannelCount = 8;				// Dstは立体に近づけるため、16に設定
 			g_DSPSettings.pMatrixCoefficients = &matrix[0];	// マトリックス用配列のアドレスを渡す
 
 			/*** 音量計算！DSPSettingsが計算結果 ***/
 			X3DAudioCalculate(g_X3DInstance, &g_Listener, &g_aEmitter[nCntSound],
-				X3DAUDIO_CALCULATE_MATRIX | X3DAUDIO_CALCULATE_DELAY | X3DAUDIO_CALCULATE_DOPPLER | X3DAUDIO_CALCULATE_LPF_DIRECT | X3DAUDIO_CALCULATE_REVERB,
+				X3DAUDIO_CALCULATE_MATRIX | X3DAUDIO_CALCULATE_DOPPLER | X3DAUDIO_CALCULATE_LPF_DIRECT | X3DAUDIO_CALCULATE_REVERB,
 				&g_DSPSettings);
 
 			/*** 音量に計算結果を反映 ***/
@@ -425,7 +424,7 @@ void UpdateSound(void)
 										   第2引数 : 音源のチャンネル数(モノラルの為1)
 										   第3引数 : 聞き手のチャンネル数(マトリックスの配列の数と同期)
 										   第4引数 : 計算結果のDSPSettingsのマトリックスへのポインタ) **/
-			g_apSourceVoice[nCntSound]->SetOutputMatrix(g_pMasteringVoice, 1, 16, g_DSPSettings.pMatrixCoefficients);
+			g_apSourceVoice[nCntSound]->SetOutputMatrix(g_pMasteringVoice, 1, 2, g_DSPSettings.pMatrixCoefficients);
 
 			/** ドップラー効果の反映...?(よくわかってない) **/
 			g_apSourceVoice[nCntSound]->SetFrequencyRatio(g_DSPSettings.DopplerFactor);

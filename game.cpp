@@ -18,6 +18,7 @@
 #include "input.h"
 #include "item.h"
 #include "light.h"
+#include "mathUtil.h"
 #include "mesh.h"
 #include "model.h"
 #include "modeldata.h"
@@ -34,9 +35,20 @@
 #include "2Dpolygon.h"
 #include "3Dmodel.h"
 
+using namespace MyMathUtil;
+
 //**********************************************************************************
 //*** マクロ定義 ***
 //**********************************************************************************
+
+//**********************************************************************************
+//*** エンディング移行管理構造体 ***
+//**********************************************************************************
+STRUCT()
+{
+	bool bAlreadyEnd;	// エンディングへの移行状態
+	int nCountWait;		// エンディングへの移行待機時間
+}ObserveEnding;
 
 //**********************************************************************************
 //*** プロトタイプ宣言 ***
@@ -49,6 +61,7 @@ int g_nIdx3DModel;		// 設置した3Dモデルのインデックス
 int g_nIdxCamera;		// 設置したカメラのインデックス
 int g_nCounterGame = 0;	// ゲームのカウンター
 bool g_bPause = false;	//ポーズ状態のON/OFF
+ObserveEnding g_obEnding;			// エンディングへの移行状態
 
 //==================================================================================
 // --- 初期化 ---
@@ -125,6 +138,7 @@ void InitGame(void)
 	LoadTexture("data/TEXTURE/TestPrompt.png", &Tex);
 	nIdxPrompt = SetPrompt(D3DXVECTOR3(1463, 116, -455), D3DXVECTOR2(10.0f, 5.0f), Tex, true);
 	SetEnablePrompt(true, nIdxPrompt);
+	//Play3DSound(SOUND_LABEL_SE_GETPARTS, VECNULL, VECNULL, VECNULL);
 }
 
 //==================================================================================
@@ -198,9 +212,10 @@ void UninitGame(void)
 void UpdateGame(void)
 {
 	//ポーズ状態のON/OFFを切り替え
-	if (GetKeyboardTrigger(DIK_P) == true
-		|| GetJoypadTrigger(0, JOYKEY_BACK) == true
-		|| GetJoypadTrigger(1, JOYKEY_BACK) == true)
+	if ((GetKeyboardTrigger(DIK_P) == true
+		|| GetDualInput(JOYKEY_BACK, DUAL_JOYPAD | DUAL_OR | DUAL_TRIGGER,
+			JOYKEY_BACK, DUAL_JOYPAD | DUAL_DUAL | DUAL_TRIGGER))
+		&& g_obEnding.bAlreadyEnd == false)
 	{
 		g_bPause = g_bPause ? false : true;
 	}
@@ -275,11 +290,12 @@ void UpdateGame(void)
 
 	PrintDebugProc("NumPlayer %d  ActivePlayer %d  CameraNum %d", GetNumPlayer(), GetActivePlayer(), GetCameraNum());
 
-	// モード変更
-	if (GetKeyboardTrigger(DIK_BACK)
-		|| GetJoypadTrigger(0, JOYKEY_START))
+	// リザルト画面移行処理
+	if (g_obEnding.bAlreadyEnd == true)
 	{
-		if (GetFade() == FADE_NONE)
+		g_obEnding.nCountWait--;
+		if (g_obEnding.nCountWait <= 0
+			&& GetFade() == FADE_NONE)
 		{
 			SetFade(MODE_RESULT);
 			FadeSound(SOUND_LABEL_BGM_RESULT);
@@ -293,8 +309,8 @@ void UpdateGame(void)
 void DrawGame(void)
 {
 	/*** デバイスの取得 ***/
-	AUTODEVICE9 pAuto;							// デバイス自動解放システム
-	LPDIRECT3DDEVICE9 pDevice = pAuto.pDevice;	// 自動解放システムを介してデバイスを取得
+	AUTODEVICE9 Auto;							// デバイス自動解放システム
+	LPDIRECT3DDEVICE9 pDevice = Auto.pDevice;	// 自動解放システムを介してデバイスを取得
 	D3DVIEWPORT9 viewport;
 
 	// 現在のビューポートを取得
@@ -351,7 +367,7 @@ void DrawGame(void)
 
 	/*** UIアームの描画 ***/
 	DrawUIarm();
-
+	
 	/*** UIメニュー描画 ***/
 	DrawUImenu();
 
@@ -370,9 +386,20 @@ void DrawGame(void)
 }
 
 //==================================================================================
-// ポーズの設定
+// --- ポーズの設定 ---
 //==================================================================================
 void SetEnablePause(bool bPouse)
 {
 	g_bPause = bPouse;
+}
+
+//==================================================================================
+// --- 描画 ---
+//==================================================================================
+void SetGameEnding(int nCountWait)
+{
+	if (g_obEnding.bAlreadyEnd == true) return;
+
+	g_obEnding.bAlreadyEnd = true;		// エンディング移行開始
+	g_obEnding.nCountWait = nCountWait;	// エンディング移行待機時間
 }

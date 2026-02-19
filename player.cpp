@@ -1155,11 +1155,6 @@ void SetMotionType(MOTIONTYPE motionTypeNext, bool bBlend, int nFrameBlend, Play
 
 	if (bBlend == false)
 	{
-		if (motionTypeNext == MOTIONTYPE_LANDING)
-		{
-			OutputDebugString("...");
-		}
-
 		/*** 各変数を初期化し、次のモーションを設定 ***/
 		pPlayer->nCounterMotion = pPlayer->nCounterMotionBlend;
 		pPlayer->nKey = pPlayer->nKeyBlend;
@@ -1257,6 +1252,9 @@ void UpdateMotion(PlayerType Type)
 	/*** 全パーツの更新！ ***/
 	for (int nCntModel = 0; nCntModel < pPlayer->PartsInfo.nNumParts; nCntModel++)
 	{
+		if ((pPlayer->nKey + 1) == pPlayer->aMotionInfo[pPlayer->motionType].nNumKey
+			&& pPlayer->aMotionInfo[pPlayer->motionType].bLoop == false) continue;
+
 		int nNext = (pPlayer->nKey + 1) % pPlayer->aMotionInfo[pPlayer->motionType].nNumKey;
 
 		// 次のキーの値		
@@ -1455,7 +1453,6 @@ void UpdateMotion(PlayerType Type)
 		{ // ブレンドカウンターがブレンドフレーム数を超えた場合	
 			pPlayer->bFinishMotion = true;
 			SetMotionType(pPlayer->motionTypeBlend, false, 20, Type);
-			//g_Land++;
 		}
 	}
 }
