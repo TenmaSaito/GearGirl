@@ -14,9 +14,11 @@ NUM_MODEL = 17
 #------------------------------------------------------------------------------
 # モデルファイル名
 #------------------------------------------------------------------------------
-MODEL_FILENAME = data/MODEL/character/00_body.x			# [0]腹
+MODEL_FILENAME = data/MODEL/character/corset.x			# [0]コルセット
+######MODEL_FILENAME = data/MODEL/character/00_body.x			# [0]腹
 MODEL_FILENAME = data/MODEL/character/01_body.x			# [1]胸
-MODEL_FILENAME = data/MODEL/character/02_body.x			# [2]尻
+MODEL_FILENAME = data/MODEL/character/dress.x			# [2]スカート
+######MODEL_FILENAME = data/MODEL/character/02_body.x			# [2]尻
 MODEL_FILENAME = data/MODEL/character/03_neck.x			# [3]首
 MODEL_FILENAME = data/MODEL/character/04_head.x			# [4]顔
 MODEL_FILENAME = data/MODEL/character/05_upperArm_L.x	# [5]二の腕L
