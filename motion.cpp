@@ -81,7 +81,7 @@ bool LoadMotion(_In_ const char* pMotionFileName, int* pOutIdx)
 
 	if (pMotionFileName == NULL)
 	{
-		OutputDebugString(TEXT("モーションファイル名が指定されていませんよ！"));
+		OutputDebugString(TEXT("モーションファイル名が指定されていませんよ！\n"));
 		return false;
 	}
 
@@ -270,18 +270,6 @@ bool LoadFileFromMotionScript(const char* pMotionFileName)
 		memset(aStr, NULL, sizeof(aStr));					// 文字列を初期化
 		(void)fgets(aStr, sizeof(aStr), pFile);				// メモ帳から一列取得
 
-		if (feof(pFile) != 0)
-		{
-			MyMathUtil::GenerateMessageBox(MB_ICONERROR,
-				"Error (2)",
-				"END_SCRIPT無しに読み込みが異常終了しました。");
-
-			/*** 読み込み終了 ***/
-			fclose(pFile);
-
-			return false;				// もし取得後EOFの場合、読み込み終了
-		}
-
 		/*** コメント消去処理 ***/
 		if (DeleteComments(&aStr[0]))
 		{ // 取得後、最初の文字が#(コメントアウト宣言)だった場合、読み込まない
@@ -289,6 +277,17 @@ bool LoadFileFromMotionScript(const char* pMotionFileName)
 			if (strstr(aStr, "END_SCRIPT") != NULL)
 			{ // 読み込み終了の合図
 				break;
+			}
+			else if (feof(pFile) != 0)
+			{
+				MyMathUtil::GenerateMessageBox(MB_ICONERROR,
+					"Error (2)",
+					"END_SCRIPT無しに読み込みが異常終了しました。");
+
+				/*** 読み込み終了 ***/
+				fclose(pFile);
+
+				return false;				// もし取得後EOFの場合、読み込み終了
 			}
 			else if (strstr(aStr, READ_MODELNUM) != NULL)
 			{

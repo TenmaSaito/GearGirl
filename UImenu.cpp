@@ -221,8 +221,9 @@ void UpdateUImenu(void)
 //==================================================================================
 void DrawUImenu(void)
 {
-	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	/*** デバイスの取得 ***/
+	AUTODEVICE9 pAuto;							// デバイス自動解放システム
+	LPDIRECT3DDEVICE9 pDevice = pAuto.pDevice;	// 自動解放システムを介してデバイスを取得
 	LPUIMENU pMenu = &g_menu;
 
 	if (pMenu->bUse == true)
@@ -244,9 +245,6 @@ void DrawUImenu(void)
 		pDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);	// 無条件にZバッファに書き込み
 		pDevice->SetRenderState(D3DRS_ALPHAREF, 0);					// 基準値
 	}
-
-	// デバイスの終了
-	EndDevice();
 }
 
 //==================================================================================
@@ -274,8 +272,9 @@ bool GetEnableUImenu(void)
 //==================================================================================
 void CreateSafeVtx(SAFE_VERTEX *pSafeVtx, bool bErrorOutput)
 {
-	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	/*** デバイスの取得 ***/
+	AUTODEVICE9 Auto;							// デバイス自動解放システム
+	LPDIRECT3DDEVICE9 pDevice = Auto.pDevice;	// 自動解放システムを介してデバイスを取得
 	HRESULT hr;
 
 	// 頂点バッファの作成
@@ -286,22 +285,19 @@ void CreateSafeVtx(SAFE_VERTEX *pSafeVtx, bool bErrorOutput)
 		&pSafeVtx->pVtxBuff,
 		NULL);
 
+	Auto.~AUTODEVICE9();
+
 	pSafeVtx->hr = hr;
 
 	if (FAILED(hr))
 	{
 		pSafeVtx->bSafe = false;
-		if (bErrorOutput) OutputDebugString(TEXT("Failed CreateVertexBuffer"));
+		if (bErrorOutput) OutputDebugString(TEXT("Failed CreateVertexBuffer\n"));
 
-		// デバイスの取得終了
-		EndDevice();
 		return;
 	}
 
 	pSafeVtx->bSafe = true;
-
-	// デバイスの取得終了
-	EndDevice();
 }
 
 //==================================================================================

@@ -41,7 +41,8 @@ void InitTexture(void)
 HRESULT LoadTexture(_In_ const char *pTexFileName, int *pOutIdx)
 {
 	/*** デバイスの取得 ***/
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	AUTODEVICE9 pAuto;							// デバイス自動解放システム
+	LPDIRECT3DDEVICE9 pDevice = pAuto.pDevice;	// 自動解放システムを介してデバイスを取得
 	HRESULT hr;
 	LPTEXTURE_INFO pTexInfo = &g_aTexInfo[0];
 
@@ -59,8 +60,6 @@ HRESULT LoadTexture(_In_ const char *pTexFileName, int *pOutIdx)
 			{ // テクスチャ番号を格納
 				*pOutIdx = nCntTexture;
 			}
-
-			EndDevice();
 
 			return S_OK;
 		}
@@ -91,8 +90,6 @@ HRESULT LoadTexture(_In_ const char *pTexFileName, int *pOutIdx)
 					"テクスチャ読み込みに失敗。\n対象パス:%s",
 					pTexFileName);
 
-				EndDevice();
-
 				return hr;
 			}
 
@@ -111,14 +108,10 @@ HRESULT LoadTexture(_In_ const char *pTexFileName, int *pOutIdx)
 				*pOutIdx = nCntTexture;
 			}
 
-			EndDevice();
-
 			/*** 成功 ***/
 			return S_OK;
 		}
 	}
-
-	EndDevice();
 
 	/*** 上限オーバー ***/
 	return E_FAIL;

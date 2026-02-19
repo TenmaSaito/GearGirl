@@ -105,5 +105,36 @@ void EndDevice(void);
 HWND GetHandleWindow(void);
 bool GetIsMainThread(void);
 
+//**********************************************************************************
+//*** デバイス構造体 ***
+//**********************************************************************************
+STRUCT(AUTODEVICE9)
+{
+private:
+	bool bGetDevice;
+public:
+	// Direct3Dデバイス
+	LPDIRECT3DDEVICE9 pDevice;
+
+	// コンストラクタ
+	AUTODEVICE9() : pDevice(GetDevice()), bGetDevice(false)
+	{ // 自動変数作成時、自動でデバイスの取得を行う
+		if (pDevice != nullptr)
+		{ // 取得成功時
+			bGetDevice = true;
+		}
+	}
+
+	// デストラクタ
+	~AUTODEVICE9() noexcept
+	{ // 自動変数の破棄時に、デバイスの解放を行う
+		if (bGetDevice == true)
+		{ // 取得に成功
+			EndDevice();
+			bGetDevice = false;
+		}
+	}
+} AUTODEVICE9;
+
 #endif
 

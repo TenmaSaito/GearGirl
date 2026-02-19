@@ -31,12 +31,11 @@ BILLBOARD g_aBillboard[MAX_BILLBOARD];
 //================================================================================================================
 void InitBillboard(void)
 {
-	LPDIRECT3DDEVICE9 pDevice;	// デバイスへのポインタ
-
 	int nCntBillboard;
 
-	// デバイスの取得
-	pDevice = GetDevice();
+	/*** デバイスの取得 ***/
+	AUTODEVICE9 Auto;							// デバイス自動解放システム
+	LPDIRECT3DDEVICE9 pDevice = Auto.pDevice;	// 自動解放システムを介してデバイスを取得
 
 	// テクスチャの読み込み
 	D3DXCreateTextureFromFile(pDevice, "data\\TEXTURE\\000.png", &g_apTexture[0]);	// テクスチャ1
@@ -60,6 +59,8 @@ void InitBillboard(void)
 		D3DPOOL_MANAGED,
 		&g_pVtxBuffBillboard,
 		NULL);
+
+	Auto.~AUTODEVICE9();
 
 	VERTEX_3D* pVtx;	// 頂点情報へのポインタ
 
@@ -97,8 +98,6 @@ void InitBillboard(void)
 
 	// 頂点バッファをアンロックする
 	g_pVtxBuffBillboard->Unlock();
-
-	EndDevice();
 }
 
 //================================================================================================================
@@ -117,13 +116,6 @@ void UninitBillboard(void)
 			g_apTexture[nCntTexture] = NULL;
 		}
 	}
-
-	//// テクスチャの破棄
-	//if (g_pTextureBillboard != NULL)
-	//{
-	//	g_pTextureBillboard->Release();
-	//	g_pTextureBillboard = NULL;
-	//}
 
 	// バッファの破棄
 	if (g_pVtxBuffBillboard != NULL)
@@ -146,10 +138,9 @@ void UpdateBillboard(void)
 //================================================================================================================
 void DrawBillboard(void)
 {
-	LPDIRECT3DDEVICE9 pDevice;	// デバイスへのポインタ
-
-	// デバイスの取得
-	pDevice = GetDevice();
+	/*** デバイスの取得 ***/
+	AUTODEVICE9 Auto;							// デバイス自動解放システム
+	LPDIRECT3DDEVICE9 pDevice = Auto.pDevice;	// 自動解放システムを介してデバイスを取得
 
 	// 計算用マトリックス
 	D3DXMATRIX mtxRot, mtxTrans;
@@ -213,8 +204,6 @@ void DrawBillboard(void)
 	// Zテストを有効にする
 	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
 	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
-
-	EndDevice();
 }
 
 //================================================================================================================

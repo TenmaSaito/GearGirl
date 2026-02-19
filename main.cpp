@@ -502,11 +502,11 @@ void Draw(void)
 		DrawDebugProc();
 
 		// 描画終了
-		g_pD3DDevice->EndScene();
+		pDevice->EndScene();
 	}
 
 	// バックバッファとフロントバッファの入れ替え
-	hr = g_pD3DDevice->Present(NULL, NULL, NULL, NULL);
+	hr = pDevice->Present(NULL, NULL, NULL, NULL);
 	EndDevice();
 
 #ifdef _DEBUG

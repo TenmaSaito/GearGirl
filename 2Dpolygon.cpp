@@ -72,7 +72,8 @@ void Update2DPolygon(void)
 void Draw2DPolygon(void)
 {
 	/*** デバイスの取得 ***/
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	AUTODEVICE9 Auto;							// デバイス自動解放システム
+	LPDIRECT3DDEVICE9 pDevice = Auto.pDevice;	// 自動解放システムを介してデバイスを取得
 	LP2DPOLYGON p2DPoly = &g_a2DPolygon[0];
 
 	for (int nCntPoly = 0; nCntPoly < MAX_POLYGON; nCntPoly++, p2DPoly++)
@@ -94,8 +95,6 @@ void Draw2DPolygon(void)
 				2);											// 描画するプリミティブの数
 		}
 	}
-
-	EndDevice();
 }
 
 //================================================================================================================
@@ -104,7 +103,8 @@ void Draw2DPolygon(void)
 int Set2DPolygon(D3DXVECTOR3 pos, D3DXVECTOR3 rot, D3DXVECTOR2 size, int nIdTexture, D3DXCOLOR col)
 {
 	/*** デバイスの取得 ***/
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	AUTODEVICE9 Auto;							// デバイス自動解放システム
+	LPDIRECT3DDEVICE9 pDevice = Auto.pDevice;	// 自動解放システムを介してデバイスを取得
 	LP2DPOLYGON p2DPoly = &g_a2DPolygon[0];
 	VERTEX_2D *pVtx;					// 頂点情報へのポインタ
 
@@ -130,6 +130,8 @@ int Set2DPolygon(D3DXVECTOR3 pos, D3DXVECTOR3 rot, D3DXVECTOR2 size, int nIdText
 					NULL);
 			}
 
+			Auto.~AUTODEVICE9();
+
 			/*** 頂点バッファの設定 ***/
 			p2DPoly->pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
@@ -148,14 +150,10 @@ int Set2DPolygon(D3DXVECTOR3 pos, D3DXVECTOR3 rot, D3DXVECTOR2 size, int nIdText
 			/*** 頂点バッファの設定を終了 ***/
 			p2DPoly->pVtxBuff->Unlock();
 
-			EndDevice();
-
 			return nCntPoly;
 		}
 	}
 	
-	EndDevice();
-
 	return -1;
 }
 

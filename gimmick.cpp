@@ -7,12 +7,13 @@
 //**********************************************************************************
 //*** インクルードファイル ***
 //**********************************************************************************
+#include "effect.h"
 #include "gimmick.h"
 #include "motion.h"
 #include "modeldata.h"
+#include "mathUtil.h"
 #include "prompt.h"
 #include "player.h"
-#include "mathUtil.h"
 #include "Texture.h"
 
 using namespace MyMathUtil;
@@ -42,12 +43,13 @@ typedef struct
 	D3DXMATRIX mtxWorld;					// ワールドマトリックス
 	PARTS_INFO parts;						// ギミックパーツ
 	COULD_PLAYER could;						// クリア可能なプレイヤータイプ
+	GIMMICKTYPE myType;						// 自身のギミックの種類
 	float fRadius;							// 検知半径
 	int nCounter;							// 汎用カウンター
 	int nIdxPrompt;							// プロンプトのインデックス
 	bool bUse;								// 使用状況
 
-	MOTION_INFO aMotion[MOTIONTYPE_MAX];	// クリア時モーション
+	MOTION_INFO aMotionInfo[MOTIONTYPE_MAX];// クリア時モーション
 	int nNumMotion;							// 現在のモーションの総数
 	bool bLoop;								// ループするかどうか
 	int nNumKey;							// 現在のモーションのキーの総数
@@ -70,18 +72,35 @@ typedef struct
 }Gimmick, *LPGIMMICK;
 
 //**********************************************************************************
+//*** ギミッククリア構造体 ***
+//**********************************************************************************
+STRUCT()
+{
+	const char *pFileName;		// ファイル名
+	COULD_PLAYER could;			// クリア可能なプレイヤータイプ
+	D3DXVECTOR3 posDefault;		// デフォルト位置
+	D3DXVECTOR3 rotDefault;		// デフォルト角度
+	float fRadius;				// 当たり判定の半径
+}GIMMICK_DATA;
+
+//**********************************************************************************
 //*** プロトタイプ宣言 ***
 //**********************************************************************************
 void CaseMulti(LPGIMMICK pGimmick);
 void CaseSolo(LPGIMMICK pGimmick);
+void SetMotionType(MOTIONTYPE, bool bBlend, int nFrameBlend, GIMMICKTYPE);
+void UpdateMotion(GIMMICKTYPE);
 
 //**********************************************************************************
 //*** グローバル変数 ***
 //**********************************************************************************
 Gimmick g_aGimmick[GIMMICKTYPE_MAX];		// ギミック情報
-const char *g_apMotionPath[GIMMICKTYPE_MAX] =
+GIMMICK_DATA g_aGimmickData[GIMMICKTYPE_MAX] =
 {
-	"data/Scripts/Gimmick.txt",
+	{"data/Scripts/station_g.txt", COULD_PLAYER_ALL, D3DXVECTOR3(573, 100, -900), D3DXVECTOR3(0, D3DX_PI + D3DX_HALFPI, 0), 200.0f },
+	{},
+	{},
+	{},
 };
 
 //==================================================================================
@@ -97,16 +116,32 @@ void InitGimmick(void)
 	{
 		int nIdxMotion = -1;
 
+		// ギミックの種類を保存
+		g_aGimmick[nCntMotion].myType = (GIMMICKTYPE)nCntMotion;
+
 		// モーションを読み込み
-		if (LoadMotion(g_apMotionPath[nCntMotion], &nIdxMotion) == true)
+		if (LoadMotion(g_aGimmickData[nCntMotion].pFileName, &nIdxMotion) == true)
 		{
+			LPPARTS_INFO pPartsInfo = GetPartsInfo(nIdxMotion);	// パーツ情報のアドレスを取得
+			if (pPartsInfo != nullptr)
+			{ // NULLCHECK
+				g_aGimmick[nCntMotion].parts = *pPartsInfo;		// アドレスの中身のみをコピー
+
+				for (int nCntParts = 0; nCntParts < g_aGimmick[nCntMotion].parts.nNumParts; nCntParts++)
+				{
+					PARTS* pParts = &g_aGimmick[nCntMotion].parts.aParts[nCntParts];
+					pParts->posLocal = pParts->pos;
+					pParts->rotLocal = pParts->rot;
+				}
+			}
+
 			LPMOTIONSCRIPT_INFO pScrInfo = nullptr;
 			pScrInfo = GetMotionScriptInfo(nIdxMotion);
 			if (pScrInfo != nullptr)
 			{ // NULLCHECK
 				for (int nCntRead = 0; nCntRead < pScrInfo->nNumMotion; nCntRead++)
 				{ // モーション数分保存
-					g_aGimmick[nCntMotion].aMotion[nCntRead] = pScrInfo->aMotionInfo[nCntRead];
+					g_aGimmick[nCntMotion].aMotionInfo[nCntRead] = pScrInfo->aMotionInfo[nCntRead];
 				}
 
 				g_aGimmick[nCntMotion].bUse = true;
@@ -115,6 +150,11 @@ void InitGimmick(void)
 				LoadTexture("data/TEXTURE/TestPrompt.png", &Tex);
 				g_aGimmick[nCntMotion].nIdxPrompt = SetPrompt(g_aGimmick[nCntMotion].pos, D3DXVECTOR2(15.0f, 8.0f), Tex, false);
 				SetEnablePrompt(true, g_aGimmick[nCntMotion].nIdxPrompt);
+
+				g_aGimmick[nCntMotion].could = g_aGimmickData[nCntMotion].could;
+				g_aGimmick[nCntMotion].pos = g_aGimmickData[nCntMotion].posDefault;
+				g_aGimmick[nCntMotion].rot = g_aGimmickData[nCntMotion].rotDefault;
+				g_aGimmick[nCntMotion].fRadius = g_aGimmickData[nCntMotion].fRadius;
 			}
 		}
 	}
@@ -148,6 +188,8 @@ void UpdateGimmick(void)
 		{ // マルチプレイ時
 			CaseMulti(pGimmick);
 		}
+
+		UpdateMotion(pGimmick->myType);
 
 		pGimmick->nCounter++;		// カウンター増加
 	}
@@ -279,7 +321,7 @@ void SetGimmick(D3DXVECTOR3 pos, D3DXVECTOR3 rot, GIMMICKTYPE type)
 {
 	if (FAILED(CheckIndex(GIMMICKTYPE_MAX, type)))
 	{ // インデックス確認
-		OutputDebugString(TEXT("ちょっと。ギミックの種類にそんなものないわよ。"));
+		OutputDebugString(TEXT("ちょっと。ギミックの種類にそんなものないわよ。\n"));
 		return;
 	}
 
@@ -295,7 +337,7 @@ void ClearGimmick(GIMMICKTYPE type)
 {
 	if (FAILED(CheckIndex(GIMMICKTYPE_MAX, type)))
 	{ // インデックス確認
-		OutputDebugString(TEXT("ちょっと。ギミックの種類にそんなものないってば。"));
+		OutputDebugString(TEXT("ちょっと。ギミックの種類にそんなものないってば。\n"));
 		return;
 	}
 
@@ -310,7 +352,7 @@ bool IsClearGimmick(GIMMICKTYPE type)
 {
 	if (FAILED(CheckIndex(GIMMICKTYPE_MAX, type)))
 	{ // インデックス確認
-		OutputDebugString(TEXT("ちょっと。ギミックの種類にそんなものないってば。"));
+		OutputDebugString(TEXT("ちょっと。ギミックの種類にそんなものないってば。\n"));
 		return false;
 	}
 
@@ -326,13 +368,13 @@ void CaseMulti(LPGIMMICK pGimmick)
 	Player *pPlayer = GetPlayer();
 	bool bDetection = false;
 
-	if (IsDetection(pGimmick->pos, pPlayer[PLAYERTYPE_GIRL].pos, pGimmick->fRadius)
+	if (IsDetection(pGimmick->pos, pGimmick[PLAYERTYPE_GIRL].pos, pGimmick->fRadius)
 		&& (pGimmick->could == COULD_PLAYER_GIRL || pGimmick->could == COULD_PLAYER_ALL))
 	{ // 少女の判定
 		bDetection = true;
 	}
 
-	if (IsDetection(pGimmick->pos, pPlayer[PLAYERTYPE_MOUSE].pos, pGimmick->fRadius)
+	if (IsDetection(pGimmick->pos, pGimmick[PLAYERTYPE_MOUSE].pos, pGimmick->fRadius)
 		&& (pGimmick->could == COULD_PLAYER_MOUSE || pGimmick->could == COULD_PLAYER_ALL))
 	{ // ネズミの判定
 		bDetection = true;
@@ -353,13 +395,16 @@ void CaseMulti(LPGIMMICK pGimmick)
 //==================================================================================
 void CaseSolo(LPGIMMICK pGimmick)
 {
-	Player *pPlayer = GetPlayer();
+	Player * pPlayer = GetPlayer();
 	PlayerType type = (PlayerType)GetActivePlayer();
 	bool bDetection = false;
 
-	if (IsDetection(pGimmick->pos, pPlayer[type].pos, pGimmick->fRadius)
+	if (IsDetection(pGimmick->pos, pGimmick[type].pos, pGimmick->fRadius)
 		&& (pGimmick->could == type || pGimmick->could == COULD_PLAYER_ALL))
 	{ // 操作中プレイヤーの判定
+		if (pGimmick->motionType == MOTIONTYPE_ACTION) return;
+		SetMotionType(MOTIONTYPE_ACTION, false, 0, pGimmick->myType);
+
 		bDetection = true;
 	}
 
@@ -376,207 +421,497 @@ void CaseSolo(LPGIMMICK pGimmick)
 //==================================================================================
 // --- 当たり判定 ---
 //==================================================================================
-bool CollisionGimmick(D3DXVECTOR3* pPos, D3DXVECTOR3* pPosOld, D3DXVECTOR3* pMove, float fHeight)
+bool CollisionGimmick(D3DXVECTOR3* pPos, D3DXVECTOR3* pPosOld, D3DXVECTOR3* pMove)
 {
-	//LPGIMMICK pGimmick = &g_aGimmick[0];
-	//bool bLand = false;
+	// 当たっているかどうかをbool型で返す
+	bool bLand = false;
 
-	//for (int nCntGimmick = 0; nCntGimmick < GIMMICKTYPE_MAX; nCntGimmick++, pGimmick++)
-	//{
-	//	if (pGimmick->bUse == false) continue;
+	Player* pGimmick = GetPlayer();
 
-	//	for (int nCntModel = 0; nCntModel < pGimmick->parts.nNumParts; nCntModel++)
-	//	{
-	//		LPMODELDATA lpModelData = nullptr;
-	//		lpModelData = GetModelData(pGimmick->parts.aParts[nCntModel].nIdxModel);
-	//		if (lpModelData == nullptr) continue;
+	for (int nCntModel = 0; nCntModel < GIMMICKTYPE_MAX; nCntModel++)
+	{
+		if (g_aGimmick[nCntModel].bUse == true)
+		{
+			Gimmick* pObject = &g_aGimmick[nCntModel];
 
-	//		D3DXVECTOR3 posColl = D3DXVECTOR3(pGimmick->parts.aParts[nCntModel].pos._41,
-	//			pGimmick->parts.aParts[nCntModel].mtxWorld._42,
-	//			pGimmick->parts.aParts[nCntModel].mtxWorld._43);
+			for (int nCntParts = 0; nCntParts < pObject->parts.nNumParts; nCntParts++)
+			{
+				LPMODELDATA pObjInfo = GetModelData(pObject->parts.aParts[nCntParts].nIdxModel);
+#if 1
+				D3DXVECTOR3 posVtx[4] = {};		// オブジェクトの四辺の頂点
+				D3DXVECTOR3 vecMove = D3DXVECTOR3_NULL;		// 移動ベクトル
+				D3DXVECTOR3 vecLine = D3DXVECTOR3_NULL;		// 境界線ベクトル
+				D3DXVECTOR3 vecLineA[4] = {};	// 境界線ベクトル
+				D3DXVECTOR3 vecToPos = D3DXVECTOR3_NULL;	// 位置と境界線のはじめを結んだベクトル
+				D3DXVECTOR3 vecToPosA[4] = {};	// 位置と境界線のはじめを結んだベクトル
+				D3DXVECTOR3 vecToPosOld = D3DXVECTOR3_NULL;	// 過去位置と境界線のはじめを結んだベクトル 
+				D3DXVECTOR3 vecLineNor = D3DXVECTOR3_NULL;	// 正規化した境界線ベクトル
+				float fVecPos = 0.0f;
+				float fVecPosA[4] = {};
+				float fVecPosOld = 0.0f;
+				float fPosToMove = 0.0f;					// vecToPosとの外積
+				float fLineToMove = 0.0f;					// vecLineとの外積
+				float fRate = 0.0f;							// 面積比率
+				float fVecPosToNor = 0.0f;					// 逆法線との外積
 
-	//		if (pPos->y + fHeight >= posColl.y + lpModelData->mtxMin.y
-	//			&& pPos->y <= posColl.y + lpModelData->mtxMax.y)
-	//		{
-	//			D3DXVECTOR3 posVtx[4] = {};		// オブジェクトの四辺の頂点
-	//			D3DXVECTOR3 vecMove = D3DXVECTOR3_NULL;		// 移動ベクトル
-	//			D3DXVECTOR3 vecLine = D3DXVECTOR3_NULL;		// 境界線ベクトル
-	//			D3DXVECTOR3 vecLineA[4] = {};	// 境界線ベクトル
-	//			D3DXVECTOR3 vecToPos = D3DXVECTOR3_NULL;	// 位置と境界線のはじめを結んだベクトル
-	//			D3DXVECTOR3 vecToPosA[4] = {};	// 位置と境界線のはじめを結んだベクトル
-	//			D3DXVECTOR3 vecToPosOld = D3DXVECTOR3_NULL;	// 過去位置と境界線のはじめを結んだベクトル 
-	//			D3DXVECTOR3 vecLineNor = D3DXVECTOR3_NULL;	// 正規化した境界線ベクトル
-	//			float fVecPos = 0.0f;
-	//			float fVecPosA[4] = {};
-	//			float fVecPosOld = 0.0f;
-	//			float fPosToMove = 0.0f;					// vecToPosとの外積
-	//			float fLineToMove = 0.0f;					// vecLineとの外積
-	//			float fRate = 0.0f;							// 面積比率
-	//			float fVecPosToNor = 0.0f;					// 逆法線との外積
-	//			D3DXVECTOR3 Length;
-	//			float fLength = 0.0f;
-	//			float fAngle = 0.0f;
-	//			bool bCollision[4] = {};
+				if (pPos->y >= pObject->pos.y + pObjInfo->mtxMin.y - 10.0f
+					&& pPos->y <= pObject->pos.y + pObjInfo->mtxMax.y)
+				{
+					D3DXVECTOR3 Length;
+					float fLength = 0.0f;
+					float fAngle = 0.0f;
+					bool bCollision[4] = {};
 
-	//			posVtx[0].x = pObject->pos.x + pObjInfo->mtxMin.x;
-	//			posVtx[0].y = pObject->pos.y;
-	//			posVtx[0].z = pObject->pos.z + pObjInfo->mtxMin.z;
+					posVtx[0].x = pObjInfo->mtxMin.x;
+					posVtx[0].y = 0;
+					posVtx[0].z = pObjInfo->mtxMin.z;
 
-	//			Length = posVtx[0] - pObject->pos;
+					D3DXVec3TransformCoord(&posVtx[0], &posVtx[0], &pObject->parts.aParts[nCntParts].mtxWorld);
 
-	//			fLength = D3DXVec3Length(&Length);
-	//			fAngle = GetPosToPos(posVtx[0], pObject->pos);
+					if(nCntParts == 1)
+					SetEffect(posVtx[0], D3DXCOLOR_NULL, VECNULL, 5, 5, 0, 3);
 
-	//			posVtx[0].x = pObject->pos.x + (sinf(fAngle + pObject->rot.y) * fLength);
-	//			posVtx[0].y = pObject->pos.y + pObjInfo->mtxMax.y;
-	//			posVtx[0].z = pObject->pos.z + (cosf(fAngle + pObject->rot.y) * fLength);
+					posVtx[1].x = pObjInfo->mtxMax.x;
+					posVtx[1].y = 0;
+					posVtx[1].z = pObjInfo->mtxMin.z;
 
-	//			posVtx[1].x = pObject->pos.x + pObjInfo->mtxMax.x;
-	//			posVtx[1].y = pObject->pos.y;
-	//			posVtx[1].z = pObject->pos.z + pObjInfo->mtxMin.z;
+					D3DXVec3TransformCoord(&posVtx[1], &posVtx[1], &pObject->parts.aParts[nCntParts].mtxWorld);
 
-	//			Length = posVtx[1] - pObject->pos;
+					if (nCntParts == 1)
+					SetEffect(posVtx[1], D3DXCOLOR_NULL, VECNULL, 5, 5, 0, 3);
 
-	//			fLength = D3DXVec3Length(&Length);
-	//			fAngle = GetPosToPos(posVtx[1], pObject->pos);
+					posVtx[2].x = pObjInfo->mtxMax.x;
+					posVtx[2].y = 0;
+					posVtx[2].z = pObjInfo->mtxMax.z;
 
-	//			posVtx[1].x = pObject->pos.x + (sinf(fAngle + pObject->rot.y) * fLength);
-	//			posVtx[1].y = pObject->pos.y;
-	//			posVtx[1].z = pObject->pos.z + (cosf(fAngle + pObject->rot.y) * fLength);
+					D3DXVec3TransformCoord(&posVtx[2], &posVtx[2], &pObject->parts.aParts[nCntParts].mtxWorld);
 
-	//			posVtx[2].x = pObject->pos.x + pObjInfo->mtxMax.x;
-	//			posVtx[2].y = pObject->pos.y;
-	//			posVtx[2].z = pObject->pos.z + pObjInfo->mtxMax.z;
+					if (nCntParts == 1)
+					SetEffect(posVtx[2], D3DXCOLOR_NULL, VECNULL, 5, 5, 0, 3);
 
-	//			Length = posVtx[2] - pObject->pos;
+					posVtx[3].x = pObjInfo->mtxMin.x;
+					posVtx[3].y = 0;
+					posVtx[3].z = pObjInfo->mtxMax.z;
 
-	//			fLength = D3DXVec3Length(&Length);
-	//			fAngle = GetPosToPos(posVtx[2], pObject->pos);
+					D3DXVec3TransformCoord(&posVtx[3], &posVtx[3], &pObject->parts.aParts[nCntParts].mtxWorld);
 
-	//			posVtx[2].x = pObject->pos.x + (sinf(fAngle + pObject->rot.y) * fLength);
-	//			posVtx[2].y = pObject->pos.y;
-	//			posVtx[2].z = pObject->pos.z + (cosf(fAngle + pObject->rot.y) * fLength);
+					if (nCntParts == 1)
+					SetEffect(posVtx[3], D3DXCOLOR_NULL, VECNULL, 5, 5, 0, 3);
 
-	//			posVtx[3].x = pObject->pos.x + pObjInfo->mtxMin.x;
-	//			posVtx[3].y = pPos->y;
-	//			posVtx[3].z = pObject->pos.z + pObjInfo->mtxMax.z;
+					/*** 移動ベクトルの取得 ***/
+					vecMove = *pPos - *pPosOld;
 
-	//			Length = posVtx[3] - pObject->pos;
+					for (int nCntCollision = 0; nCntCollision < 4; nCntCollision++)
+					{
+						D3DXVECTOR3 vecNor = D3DXVECTOR3_NULL;		// 壁の逆法線ベクトル
+						D3DXVECTOR3 vecCutLine = D3DXVECTOR3_NULL;	// 交点からの境界線ベクトル
 
-	//			fLength = D3DXVec3Length(&Length);
-	//			fAngle = GetPosToPos(posVtx[3], pObject->pos);
+						vecLine = posVtx[(nCntCollision + 1) % 4] - posVtx[nCntCollision];
 
-	//			posVtx[3].x = pObject->pos.x + (sinf(fAngle + pObject->rot.y) * fLength);
-	//			posVtx[3].y = pObject->pos.y;
-	//			posVtx[3].z = pObject->pos.z + (cosf(fAngle + pObject->rot.y) * fLength);
+						RepairFloat(&vecLine.x);
+						RepairFloat(&vecLine.z);
 
-	//			/*** 移動ベクトルの取得 ***/
-	//			vecMove = *pPos - *pPosOld;
+						/*** 現在位置との関係を外積を使い求める ***/
+						vecToPos = *pPos - posVtx[nCntCollision];
 
-	//			for (int nCntCollision = 0; nCntCollision < 4; nCntCollision++)
-	//			{
-	//				D3DXVECTOR3 vecNor = D3DXVECTOR3_NULL;		// 壁の逆法線ベクトル
-	//				D3DXVECTOR3 vecCutLine = D3DXVECTOR3_NULL;	// 交点からの境界線ベクトル
+						fVecPos = (vecLine.z * vecToPos.x) - (vecLine.x * vecToPos.z);
 
-	//				vecLine = posVtx[(nCntCollision + 1) % 4] - posVtx[nCntCollision];
+						RepairFloat(&fVecPos);
 
-	//				RepairFloat(&vecLine.x);
-	//				RepairFloat(&vecLine.z);
+						/*** 過去位置との関係を外積を使い求める ***/
+						vecToPosOld = *pPosOld - posVtx[nCntCollision];
 
-	//				/*** 現在位置との関係を外積を使い求める ***/
-	//				vecToPos = *pPos - posVtx[nCntCollision];
+						fVecPosOld = (vecLine.z * vecToPosOld.x) - (vecLine.x * vecToPosOld.z);
 
-	//				fVecPos = (vecLine.z * vecToPos.x) - (vecLine.x * vecToPos.z);
+						RepairFloat(&fVecPosOld);
 
-	//				RepairFloat(&fVecPos);
+						/*** 強制位置の判定 ***/
 
-	//				/*** 過去位置との関係を外積を使い求める ***/
-	//				vecToPosOld = *pPosOld - posVtx[nCntCollision];
+						/** 現在位置との外積 **/
+						fPosToMove = (vecToPos.z * vecMove.x) - (vecToPos.x * vecMove.z);
 
-	//				fVecPosOld = (vecLine.z * vecToPosOld.x) - (vecLine.x * vecToPosOld.z);
+						/** 最大値との外積 **/
+						fLineToMove = (vecLine.z * vecMove.x) - (vecLine.x * vecMove.z);
 
-	//				RepairFloat(&fVecPosOld);
+						/** 面積比率の計算 **/
+						fRate = fPosToMove / fLineToMove;
 
-	//				/*** 強制位置の判定 ***/
+						vecNor.x = vecLine.z;
+						vecNor.z = -vecLine.x;
 
-	//				/** 現在位置との外積 **/
-	//				fPosToMove = (vecToPos.z * vecMove.x) - (vecToPos.x * vecMove.z);
+						D3DXVec3Normalize(&vecNor, &vecNor);
 
-	//				/** 最大値との外積 **/
-	//				fLineToMove = (vecLine.z * vecMove.x) - (vecLine.x * vecMove.z);
+						fVecPosToNor = (vecNor.z * vecMove.x) - (vecNor.x * vecMove.z);
 
-	//				/** 面積比率の計算 **/
-	//				fRate = fPosToMove / fLineToMove;
+						D3DXVECTOR3 vecF;
+						vecCutLine = vecLine;
 
-	//				vecNor.x = vecLine.z;
-	//				vecNor.z = -vecLine.x;
+						if (fVecPosToNor == 0)
+						{
+							fVecPosToNor = fabsf(fVecPosToNor);
+							D3DXVec3Normalize(&vecCutLine, &vecCutLine);
 
-	//				D3DXVec3Normalize(&vecNor, &vecNor);
+							vecF = vecCutLine * fVecPosToNor;
+						}
+						else if (fVecPosToNor > 0)
+						{
+							fVecPosToNor = fabsf(fVecPosToNor);
+							D3DXVec3Normalize(&vecCutLine, &vecCutLine);
 
-	//				fVecPosToNor = (vecNor.z * vecMove.x) - (vecNor.x * vecMove.z);
+							vecF = -vecCutLine * fVecPosToNor;
+						}
+						else if (fVecPosToNor < 0)
+						{
+							fVecPosToNor = fabsf(fVecPosToNor);
+							D3DXVec3Normalize(&vecCutLine, &vecCutLine);
 
-	//				D3DXVECTOR3 vecF;
-	//				vecCutLine = vecLine;
+							vecF = vecCutLine * fVecPosToNor;
+						}
 
-	//				if (fVecPosToNor == 0)
-	//				{
-	//					fVecPosToNor = fabsf(fVecPosToNor);
-	//					D3DXVec3Normalize(&vecCutLine, &vecCutLine);
+						/*** プレイヤーの壁のめり込み判定 ***/
+						if (fVecPos <= 0 && fVecPosOld >= 0)
+						{
+							/*** もしも比率が範囲内であれば,衝突 ***/
+							if (fRate >= 0.0f && fRate <= 1.0f)
+							{
+								pPos->x = posVtx[nCntCollision].x + (vecLine.x * fRate) + vecF.x;
+								pPos->z = posVtx[nCntCollision].z + (vecLine.z * fRate) + vecF.z;
+							}
+						}
 
-	//					vecF = vecCutLine * fVecPosToNor;
-	//				}
-	//				else if (fVecPosToNor > 0)
-	//				{
-	//					fVecPosToNor = fabsf(fVecPosToNor);
-	//					D3DXVec3Normalize(&vecCutLine, &vecCutLine);
+						if (fVecPos < 0 && fVecPosOld < 0)
+						{
+							bCollision[nCntCollision] = true;
+						}
+					}
 
-	//					vecF = -vecCutLine * fVecPosToNor;
-	//				}
-	//				else if (fVecPosToNor < 0)
-	//				{
-	//					fVecPosToNor = fabsf(fVecPosToNor);
-	//					D3DXVec3Normalize(&vecCutLine, &vecCutLine);
+					if (bCollision[0] == true
+						&& bCollision[1] == true
+						&& bCollision[2] == true
+						&& bCollision[3] == true)
+					{
+						pPos->y = pObject->pos.y + pObjInfo->mtxMax.y;
+						bLand = true;
+						pMove->y = 0.0f;
+					}
+				}
+			}
+#endif
+		}
+	}
 
-	//					vecF = vecCutLine * fVecPosToNor;
-	//				}
+	return bLand;
+}
 
-	//				/*** プレイヤーの壁のめり込み判定 ***/
-	//				if (fVecPos <= 0 && fVecPosOld >= 0)
-	//				{
-	//					/*** もしも比率が範囲内であれば,衝突 ***/
-	//					if (fRate >= 0.0f && fRate <= 1.0f)
-	//					{
-	//						pPos->x = posVtx[nCntCollision].x + (vecLine.x * fRate) + vecF.x;
-	//						pPos->z = posVtx[nCntCollision].z + (vecLine.z * fRate) + vecF.z;
+//================================================================================================================
+// --- モーションの変更！ ---
+//================================================================================================================
+void SetMotionType(MOTIONTYPE motionTypeNext, bool bBlend, int nFrameBlend, GIMMICKTYPE Type)
+{
+	LPGIMMICK pGimmick = &g_aGimmick[Type];	// プレイヤー情報へのアドレス	
 
-	//						//pMove->x = pMove->x * 0.95f;
-	//						//pMove->z = pMove->z * 0.95f;
-	//					}
-	//				}
+	if (motionTypeNext < 0 || motionTypeNext >= MOTIONTYPE_MAX)
+	{ // モーションインデックスの上下限確認
+		return;
+	}
 
-	//				if (fVecPos < 0 && fVecPosOld < 0)
-	//				{
-	//					bCollision[nCntCollision] = true;
-	//				}
-	//			}
+	// ブレンドモーションをするかどうか
+	pGimmick->bBlendMotion = bBlend;
 
-	//			if (bCollision[0] == true
-	//				&& bCollision[1] == true
-	//				&& bCollision[2] == true
-	//				&& bCollision[3] == true)
-	//			{
-	//				pPos->y = pObject->pos.y + pObjInfo->mtxMax.y;
-	//				bLand = true;
-	//				pMove->y = 0.0f;
+	if (bBlend == false)
+	{
+		/*** 各変数を初期化し、次のモーションを設定 ***/
+		pGimmick->nCounterMotion = pGimmick->nCounterMotionBlend;
+		pGimmick->nKey = pGimmick->nKeyBlend;
+		pGimmick->motionType = motionTypeNext;
+		pGimmick->bLoop = pGimmick->aMotionInfo[motionTypeNext].bLoop;
+		pGimmick->nNumKey = pGimmick->aMotionInfo[motionTypeNext].nNumKey;
+		pGimmick->bFinishMotion = false;
 
-	//				if (pColl != NULL)
-	//				{
-	//					*pColl = true;
-	//				}
-	//			}
-	//		}
-	//	}
-	//}
+		/*** 現在のモーションのキー情報へのポインタ ***/
+		KEY_INFO* pInfo = &pGimmick->aMotionInfo[pGimmick->motionType].aKeyInfo[pGimmick->nKey];
 
-	return false;
+		/*** 全パーツの初期設定！ ***/
+		for (int nCntModel = 0; nCntModel < pGimmick->parts.nNumParts; nCntModel++)
+		{
+			int nNext = (pGimmick->nKey + 1) % pGimmick->aMotionInfo[pGimmick->motionType].nNumKey;
+
+			// 次のキーの値			
+			float fRateKey = (float)pGimmick->nCounterMotion / (float)pInfo->nFrame;			// モーションカウンター / 再生フレーム数	
+
+			D3DXVECTOR3 diffPos = {};	// 位置の差分
+			D3DXVECTOR3 UpdatePos = {};	// 更新する位置
+			D3DXVECTOR3 diffRot = {};	// 角度の差分
+			D3DXVECTOR3 UpdateRot = {};	// 更新する角度
+			KEY* pKey = &pInfo->aKey[nCntModel];	// 現在のキー
+			PARTS* pModel = &pGimmick->parts.aParts[nCntModel];
+			KEY* pKeyNext = &pGimmick->aMotionInfo[pGimmick->motionType].aKeyInfo[nNext].aKey[nCntModel];		// 次のキー			
+
+			/** キー情報から位置と向きを算出！ **/
+			// === POS ===			
+			// --- X ---		
+			diffPos.x = pKeyNext->pos.x - pKey->pos.x;
+			UpdatePos.x = pKey->pos.x + diffPos.x * fRateKey;
+
+			// --- Y ---		
+			diffPos.y = pKeyNext->pos.y - pKey->pos.y;
+			UpdatePos.y = pKey->pos.y + diffPos.y * fRateKey;
+
+			// --- Z ---			
+			diffPos.z = pKeyNext->pos.z - pKey->pos.z;
+			UpdatePos.z = pKey->pos.z + diffPos.z * fRateKey;
+
+			// === ROT ===			
+			// --- X ---			
+			diffRot.x = pKeyNext->rot.x - pKey->rot.x;
+			RepairRot(&diffRot.x, &diffRot.x);
+
+			UpdateRot.x = pKey->rot.x + diffRot.x * fRateKey;
+			RepairRot(&UpdateRot.x, &UpdateRot.x);
+
+			// --- Y ---			
+			diffRot.y = pKeyNext->rot.y - pKey->rot.y;
+			RepairRot(&diffRot.y, &diffRot.y);
+
+			UpdateRot.y = pKey->rot.y + diffRot.y * fRateKey;
+			RepairRot(&UpdateRot.y, &UpdateRot.y);
+
+			// --- Z ---			
+			diffRot.z = pKeyNext->rot.z - pKey->rot.z;
+			RepairRot(&diffRot.z, &diffRot.z);
+
+			UpdateRot.z = pKey->rot.z + diffRot.z * fRateKey;
+			RepairRot(&UpdateRot.z, &UpdateRot.z);
+
+			/** 位置、向きを更新！ **/
+			pModel->pos = pModel->posLocal + UpdatePos;
+			pModel->rot = pModel->rotLocal + UpdateRot;
+		}
+	}
+	else
+	{
+		/*** 各変数を初期化し、ブレンドモーションを設定 ***/
+		pGimmick->bFinishMotion = false;
+		pGimmick->motionTypeBlend = motionTypeNext;
+		pGimmick->nCounterBlend = 0;
+		pGimmick->nCounterMotionBlend = 0;
+		pGimmick->nFrameBlend = nFrameBlend;
+		pGimmick->nNumKeyBlend = pGimmick->aMotionInfo[motionTypeNext].nNumKey;
+		pGimmick->nKeyBlend = 0;
+	}
+}
+
+//================================================================================================================
+// --- モーションアップデート！ ---
+//================================================================================================================
+void UpdateMotion(GIMMICKTYPE type)
+{
+	Gimmick* pGimmick = &g_aGimmick[type];	// プレイヤー情報へのアドレス	
+
+	/*** 現在のモーションのキー情報へのポインタ ***/
+	KEY_INFO* pInfo = &pGimmick->aMotionInfo[pGimmick->motionType].aKeyInfo[pGimmick->nKey];
+	KEY_INFO* pInfoBlend = &pGimmick->aMotionInfo[pGimmick->motionTypeBlend].aKeyInfo[pGimmick->nKeyBlend];
+
+	/*** 全パーツの更新！ ***/
+	for (int nCntModel = 0; nCntModel < pGimmick->parts.nNumParts; nCntModel++)
+	{
+		if ((pGimmick->nKey + 1) == pGimmick->aMotionInfo[pGimmick->motionType].nNumKey
+			&& pGimmick->aMotionInfo[pGimmick->motionType].bLoop == false) continue;
+		int nNext = (pGimmick->nKey + 1) % pGimmick->aMotionInfo[pGimmick->motionType].nNumKey;
+
+		// 次のキーの値		
+		float fRateKey = (float)pGimmick->nCounterMotion / (float)pInfo->nFrame;		// モーションカウンター / 再生フレーム数
+		D3DXVECTOR3 diffPos = {};	// 位置の差分
+		D3DXVECTOR3 UpdatePos = {};	// 更新する位置	
+		D3DXVECTOR3 diffRot = {};	// 角度の差分		
+		D3DXVECTOR3 UpdateRot = {};	// 更新する角度		
+		KEY* pKey = &pInfo->aKey[nCntModel];	// 現在のキー		
+		KEY* pKeyNext = &pGimmick->aMotionInfo[pGimmick->motionType].aKeyInfo[nNext].aKey[nCntModel];		// 次のキー		
+		PARTS* pModel = &pGimmick->parts.aParts[nCntModel];
+
+		if (pGimmick->bBlendMotion == true)
+		{ // モーションブレンドあり	
+			D3DXVECTOR3 diffKeyPosCurrent = {};	// 現在のモーションの位置の差分			
+			D3DXVECTOR3 diffKeyRotCurrent = {};	// 現在のモーションの角度の差分		
+			D3DXVECTOR3 diffKeyPosBlend = {};	// ブレンドモーションの位置の差分			
+			D3DXVECTOR3 diffKeyRotBlend = {};	// ブレンドモーションの角度の差分	
+			D3DXVECTOR3 diffPosBlend = {};		// 最終差分		
+			D3DXVECTOR3 diffRotBlend = {};		// 最終差分			
+			int nNextBlend = (pGimmick->nKeyBlend + 1) % pGimmick->aMotionInfo[pGimmick->motionTypeBlend].nNumKey;			// 次のキーの値		
+			KEY* pKeyBlend = &pInfoBlend->aKey[nCntModel];																// 現在のキー	
+			KEY* pKeyNextBlend = &pGimmick->aMotionInfo[pGimmick->motionTypeBlend].aKeyInfo[nNextBlend].aKey[nCntModel];	// 次のキー
+			float fRateKeyBlend = (float)pGimmick->nCounterMotionBlend / (float)pInfoBlend->nFrame;						// モーションカウンター / 再生フレーム数
+			float fRateBlend = (float)pGimmick->nCounterBlend / (float)pGimmick->nFrameBlend;							// ブレンドの相対量		
+
+			// --- X ---			
+			/* 現在のモーション */
+			diffPos.x = pKeyNext->pos.x - pKey->pos.x;
+			diffKeyPosCurrent.x = pKey->pos.x + diffPos.x * fRateKey;
+
+			/* ブレンドモーション */
+			diffPos.x = pKeyNextBlend->pos.x - pKeyBlend->pos.x;
+			diffKeyPosBlend.x = pKeyBlend->pos.x + diffPos.x * fRateKeyBlend;
+
+			/* 求める差分 */
+			diffPosBlend.x = diffKeyPosBlend.x - diffKeyPosCurrent.x;
+			UpdatePos.x = diffKeyPosCurrent.x + (diffPosBlend.x * fRateBlend);
+
+			// --- Y ---		
+			/* 現在のモーション */
+			diffPos.y = pKeyNext->pos.y - pKey->pos.y;
+			diffKeyPosCurrent.y = pKey->pos.y + diffPos.y * fRateKey;
+
+			/* ブレンドモーション */
+			diffPos.y = pKeyNextBlend->pos.y - pKeyBlend->pos.y;
+			diffKeyPosBlend.y = pKeyBlend->pos.y + diffPos.y * fRateKeyBlend;
+
+			/* 求める差分 */
+			diffPosBlend.y = diffKeyPosBlend.y - diffKeyPosCurrent.y;
+			UpdatePos.y = diffKeyPosCurrent.y + (diffPosBlend.y * fRateBlend);
+
+			// --- Z ---			
+			/* 現在のモーション */
+			diffPos.z = pKeyNext->pos.z - pKey->pos.z;
+			diffKeyPosCurrent.z = pKey->pos.z + diffPos.z * fRateKey;
+
+			/* ブレンドモーション */
+			diffPos.z = pKeyNextBlend->pos.z - pKeyBlend->pos.z;
+			diffKeyPosBlend.z = pKeyBlend->pos.z + diffPos.z * fRateKeyBlend;
+
+			/* 求める差分 */
+			diffPosBlend.z = diffKeyPosBlend.z - diffKeyPosCurrent.z;
+			UpdatePos.z = diffKeyPosCurrent.z + (diffPosBlend.z * fRateBlend);
+
+			// === ROT ===			
+			// --- X ---			
+			/* 現在のモーション */
+			diffRot.x = pKeyNext->rot.x - pKey->rot.x;
+			RepairRot(&diffRot.x, &diffRot.x);
+			diffKeyRotCurrent.x = pKey->rot.x + diffRot.x * fRateKey;
+			RepairRot(&diffKeyRotCurrent.x, &diffKeyRotCurrent.x);
+
+			/* ブレンドモーション */
+			diffRot.x = pKeyNextBlend->rot.x - pKeyBlend->rot.x;
+			RepairRot(&diffRot.x, &diffRot.x);
+			diffKeyRotBlend.x = pKeyBlend->rot.x + diffRot.x * fRateKeyBlend;
+			RepairRot(&diffKeyRotBlend.x, &diffKeyRotBlend.x);
+
+			/* 求める差分 */
+			diffRotBlend.x = diffKeyRotBlend.x - diffKeyRotCurrent.x;
+			UpdateRot.x = diffKeyRotCurrent.x + (diffRotBlend.x * fRateBlend);
+
+			// --- Y ---			
+			diffRot.y = pKeyNext->rot.y - pKey->rot.y;
+			RepairRot(&diffRot.y, &diffRot.y);
+			diffKeyRotCurrent.y = pKey->rot.y + diffRot.y * fRateKey;
+			RepairRot(&diffKeyRotCurrent.y, &diffKeyRotCurrent.y);
+
+			/* ブレンドモーション */
+			diffRot.y = pKeyNextBlend->rot.y - pKeyBlend->rot.y;
+			RepairRot(&diffRot.y, &diffRot.y);
+			diffKeyRotBlend.y = pKeyBlend->rot.y + diffRot.y * fRateKeyBlend;
+			RepairRot(&diffKeyRotBlend.y, &diffKeyRotBlend.y);
+
+			/* 求める差分 */
+			diffRotBlend.y = diffKeyRotBlend.y - diffKeyRotCurrent.y;
+			UpdateRot.y = diffKeyRotCurrent.y + (diffRotBlend.y * fRateBlend);
+
+			// --- Z ---			
+			diffRot.z = pKeyNext->rot.z - pKey->rot.z;
+			RepairRot(&diffRot.z, &diffRot.z);
+			diffKeyRotCurrent.z = pKey->rot.z + diffRot.z * fRateKey;
+			RepairRot(&diffKeyRotCurrent.z, &diffKeyRotCurrent.z);
+
+			/* ブレンドモーション */
+			diffRot.z = pKeyNextBlend->rot.z - pKeyBlend->rot.z;
+			RepairRot(&diffRot.z, &diffRot.z);
+			diffKeyRotBlend.z = pKeyBlend->rot.z + diffRot.z * fRateKeyBlend;
+			RepairRot(&diffKeyRotBlend.z, &diffKeyRotBlend.z);
+
+			/* 求める差分 */
+			diffRotBlend.z = diffKeyRotBlend.z - diffKeyRotCurrent.z;
+			UpdateRot.z = diffKeyRotCurrent.z + (diffRotBlend.z * fRateBlend);
+		}
+		else
+		{ // ブレンド無し	
+		  /** キー情報から位置と向きを算出！ **/
+		  // === POS ===			
+		  // --- X ---			
+			diffPos.x = pKeyNext->pos.x - pKey->pos.x;
+			UpdatePos.x = pKey->pos.x + diffPos.x * fRateKey;
+
+			// --- Y ---		
+			diffPos.y = pKeyNext->pos.y - pKey->pos.y;
+			UpdatePos.y = pKey->pos.y + diffPos.y * fRateKey;
+
+			// --- Z ---			
+			diffPos.z = pKeyNext->pos.z - pKey->pos.z;
+			UpdatePos.z = pKey->pos.z + diffPos.z * fRateKey;
+
+			// === ROT ===			
+			// --- X ---		
+			diffRot.x = pKeyNext->rot.x - pKey->rot.x;
+			RepairRot(&diffRot.x, &diffRot.x);
+			UpdateRot.x = pKey->rot.x + diffRot.x * fRateKey;
+			RepairRot(&UpdateRot.x, &UpdateRot.x);
+
+			// --- Y ---		
+			diffRot.y = pKeyNext->rot.y - pKey->rot.y;
+			RepairRot(&diffRot.y, &diffRot.y);
+			UpdateRot.y = pKey->rot.y + diffRot.y * fRateKey;
+			RepairRot(&UpdateRot.y, &UpdateRot.y);
+
+			// --- Z ---			
+			diffRot.z = pKeyNext->rot.z - pKey->rot.z;
+			RepairRot(&diffRot.z, &diffRot.z);
+			UpdateRot.z = pKey->rot.z + diffRot.z * fRateKey;
+			RepairRot(&UpdateRot.z, &UpdateRot.z);
+		}
+
+		/** 位置、向きを更新！ **/
+		pModel->pos = pModel->posLocal + UpdatePos;
+		pModel->rot = pModel->rotLocal + UpdateRot;
+	}
+
+	if (pGimmick->bBlendMotion == false)
+	{// ブレンドなし
+		pGimmick->nCounterMotion++;
+
+		if (pGimmick->nCounterMotion >= pInfo->nFrame && pGimmick->bFinishMotion == false)
+		{ // モーションカウンターが現在のキー情報のフレーム数を超えた場合
+			if (pGimmick->motionType < 0 || pGimmick->motionType >= MOTIONTYPE_MAX)
+			{ // モーションインデックスの上下限確認		
+				return;
+			}
+
+			/** キーを一つ進める **/
+			pGimmick->nKey = ((pGimmick->nKey + 1) % pGimmick->aMotionInfo[pGimmick->motionType].nNumKey);
+
+			if (pGimmick->nKey == pGimmick->aMotionInfo[pGimmick->motionType].nNumKey - 1 && pGimmick->bLoop == false)
+			{
+				pGimmick->bFinishMotion = true;
+			}
+
+			pGimmick->nCounterMotion = 0;
+		}
+	}
+	else
+	{// ブレンドあり
+		pGimmick->nCounterMotionBlend++;
+
+		if (pGimmick->nCounterMotionBlend >= pInfoBlend->nFrame)
+		{ // モーションカウンターがブレンドモーションの現在のキーのフレーム数を超えた場合	
+			/** ブレンドモーションのキーを一つ進める **/
+			pGimmick->nKeyBlend = ((pGimmick->nKeyBlend + 1) % pGimmick->aMotionInfo[pGimmick->motionTypeBlend].nNumKey);
+			pGimmick->nCounterMotionBlend = 0;
+		}
+
+		pGimmick->nCounterBlend++;
+
+		if (pGimmick->nCounterBlend >= pGimmick->nFrameBlend)
+		{ // ブレンドカウンターがブレンドフレーム数を超えた場合	
+			pGimmick->bFinishMotion = true;
+			SetMotionType(pGimmick->motionTypeBlend, false, 20, type);
+		}
+	}
 }

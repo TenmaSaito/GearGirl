@@ -30,7 +30,9 @@ int g_nDirectionPlayer;								// プレイ方法　// 0:1人 * 1:2人
 //=========================================================
 void InitUIarm(void)
 {
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();		// デバイスへのポインタの取得
+	/*** デバイスの取得 ***/
+	AUTODEVICE9 Auto;							// デバイス自動解放システム
+	LPDIRECT3DDEVICE9 pDevice = Auto.pDevice;	// 自動解放システムを介してデバイスを取得
 	VERTEX_2D* pVtx;								// 頂点情報へのポインタ
 
 	//-------------------------------------
@@ -91,8 +93,6 @@ void InitUIarm(void)
 	//-------------------------------------
 	// 頂点バッファをアンロック
 	g_pVtxBuffUIarm->Unlock();
-
-	EndDevice();
 }
 
 //=========================================================
@@ -166,7 +166,9 @@ void UpdateUIarm(void)
 //=========================================================
 void DrawUIarm(void)
 {
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();			// デバイスへのポインタ・取得
+	/*** デバイスの取得 ***/
+	AUTODEVICE9 Auto;							// デバイス自動解放システム
+	LPDIRECT3DDEVICE9 pDevice = Auto.pDevice;	// 自動解放システムを介してデバイスを取得
 
 	//-------------------------------------
 	// 頂点バッファをデータストリームに設定
@@ -186,6 +188,4 @@ void DrawUIarm(void)
 	pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP,	// プリミティブの種類
 							0,					// 描画する最初の頂点インデックス
 							2);					// プリミティブ(ポリゴン)数
-
-	EndDevice();
 }

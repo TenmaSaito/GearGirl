@@ -15,7 +15,7 @@
 //**********************************************************************************
 #define ENDLINE_NORMAL		(3)		// 3個以上完璧でノーマルエンド
 #define ENDLINE_HAPPY		(5)		// 全て完璧でスーパーハッピーエンド
-#define CONTRAINDICATION_LINE	(3)		// 不具合のあるパーツを一定数渡すと則ゲームオーバーになるライン
+#define CONTRAINDICATION_LINE	(3)	// 不具合のあるパーツを一定数渡すと則ゲームオーバーになるライン
 #define DOPPEL_LINE			(2)		// 同じ種類のパーツが一定回数渡されるとゲームオーバー
 
 //**********************************************************************************
@@ -66,6 +66,7 @@ void DrawJudgeEnd(void)
 int JudgmentEnding(ITEMTYPE *pIn, UINT size)
 {
 	ENDTYPE result = ENDTYPE_BAD;		// エンディングタイプ
+	ITEMTYPE aType[ITEMTYPE_MAX];		// 総合のアイテム種類
 	ITEMTYPE aTypeTrue[ITEMTYPE_MAX];	// アイテムの種類
 	UINT nCntTrue = 0;					// 正しいアイテムの数
 	ITEMTYPE aTypeFalse[ITEMTYPE_MAX];	// アイテムの種類
@@ -88,6 +89,8 @@ int JudgmentEnding(ITEMTYPE *pIn, UINT size)
 			aTypeFalse[nCntFalse] = pIn[nCntItem];
 			nCntFalse++;
 		}
+
+		aType[nCntItem] = pIn[nCntItem];
 	}
 
 	// バッドエンド判定[1]
@@ -98,17 +101,17 @@ int JudgmentEnding(ITEMTYPE *pIn, UINT size)
 		return g_nScoreJudge;
 	}
 
-	bool aSuffer[DOPPEL_LINE];
 	int nCountTrue = 0;
 
 	// バッドエンド判定[2]
-	for (UINT nCntItem = 0; nCntItem < nCntTrue; nCntItem++)
+	for (UINT nCntItem = 0; nCntItem < size; nCntItem++)
 	{
-		for (UINT nCntItemFalse = 0; nCntItemFalse < nCntFalse; nCntItemFalse++)
+		for (UINT nCntItemCover = nCntItem; nCntItemCover < size; nCntItemCover++)
 		{
-			if (aTypeTrue[nCntItem] == aTypeFalse[nCntItemFalse] - 5)
+			if (nCntItem == nCntItemCover) continue;
+
+			if (aType[nCntItem] == aType[nCntItemCover])
 			{
-				aSuffer[nCountTrue] = true;
 				nCountTrue++;
 				if (nCountTrue >= DOPPEL_LINE)
 				{
@@ -121,7 +124,7 @@ int JudgmentEnding(ITEMTYPE *pIn, UINT size)
 	}
 
 	// ノーマル,ハッピーエンド判定
-	if (nCntTrue >= ENDLINE_HAPPY)
+	if (nCntTrue >= ENDLINE_HAPPY && nCountTrue == 0)
 	{
 		result = ENDTYPE_HAPPY;
 		SetEndingType(result);

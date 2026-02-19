@@ -98,8 +98,6 @@ void InitCamera(void)
 	SetCameraOption();
 
 	FogEnable(CAMERATYPE_PLAYER_TWO, true, colX_ZERO, 0.5f, 3000.0f);
-
-	EndDevice();
 }
 
 //=========================================================================================

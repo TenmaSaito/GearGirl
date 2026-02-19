@@ -50,8 +50,9 @@ int  g_nColonTimer = 0;        // 点滅用カウンタ
 //===========================================================
 void InitTimer(bool bRanking)
 {
-    LPDIRECT3DDEVICE9 pDevice;
-    pDevice = GetDevice();
+    /*** デバイスの取得 ***/
+    AUTODEVICE9 Auto;							// デバイス自動解放システム
+    LPDIRECT3DDEVICE9 pDevice = Auto.pDevice;	// 自動解放システムを介してデバイスを取得
 
     // 数字テクスチャ
     D3DXCreateTextureFromFile(pDevice, "DATA\\TEXTURE\\number003.png", &g_pTextureTimer);
@@ -168,8 +169,6 @@ void InitTimer(bool bRanking)
     {
         g_nTimer = TIMER_LIMIT_FRAME;
     }
-
-    EndDevice();
 }
 
 //===========================================================
@@ -323,9 +322,9 @@ void UpdateTimer(void)
 //===========================================================
 void DrawTimer(void)
 {
-    LPDIRECT3DDEVICE9 pDevice;
-    pDevice = GetDevice();
-
+    /*** デバイスの取得 ***/
+    AUTODEVICE9 Auto;							// デバイス自動解放システム
+    LPDIRECT3DDEVICE9 pDevice = Auto.pDevice;	// 自動解放システムを介してデバイスを取得
     pDevice->SetStreamSource(0, g_pVtxBuffTimer, 0, sizeof(VERTEX_2D));
     pDevice->SetFVF(FVF_VERTEX_2D);
 
@@ -343,8 +342,6 @@ void DrawTimer(void)
 
         pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, nCntNumber * 4, 2);
     }
-
-     EndDevice();
 }
 
 

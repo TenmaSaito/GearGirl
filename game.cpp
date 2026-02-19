@@ -118,7 +118,7 @@ void InitGame(void)
 	InitEffect();
 
 	/***ギミックの設置 ***/
-	SetGimmick(D3DXVECTOR3(1100.0f, 0.0f, 300.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), GIMMICKTYPE_DUCT);
+	//SetGimmick(D3DXVECTOR3(0, 0, 0), D3DXVECTOR3(0.0f, 0.0f, 0.0f), GIMMICKTYPE_DUCT);
 
 	g_nCounterGame = 0;
 	int nIdxPrompt, Tex;
@@ -292,7 +292,9 @@ void UpdateGame(void)
 //==================================================================================
 void DrawGame(void)
 {
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	/*** デバイスの取得 ***/
+	AUTODEVICE9 pAuto;							// デバイス自動解放システム
+	LPDIRECT3DDEVICE9 pDevice = pAuto.pDevice;	// 自動解放システムを介してデバイスを取得
 	D3DVIEWPORT9 viewport;
 
 	// 現在のビューポートを取得
@@ -365,8 +367,6 @@ void DrawGame(void)
 		/*** ポーズの描画 ***/
 		DrawPause();
 	}
-
-	EndDevice();
 }
 
 //==================================================================================

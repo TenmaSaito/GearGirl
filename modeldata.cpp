@@ -44,7 +44,8 @@ void InitModelData(void)
 HRESULT LoadModelData(_In_ const char* pXFileName, int *pOutnIdx)
 {
 	/*** デバイスの取得 ***/
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	AUTODEVICE9 pAuto;				// デバイス自動解放システム
+	LPDIRECT3DDEVICE9 pDevice = pAuto.pDevice;	// 自動解放システムを介してデバイスを取得
 	LPMODELDATA pModelData = &g_aModelData[0];
 	D3DXMATERIAL* pMat = NULL;		// マテリアルへのポインタ
 	HRESULT hr = E_FAIL;			// 読み込み成功判定
@@ -66,8 +67,6 @@ HRESULT LoadModelData(_In_ const char* pXFileName, int *pOutnIdx)
 			{ // 読みこみモデルの値を格納
 				*pOutnIdx = nCntXmodel;
 			}
-
-			EndDevice();
 
 			return S_OK;
 		}
@@ -104,8 +103,6 @@ HRESULT LoadModelData(_In_ const char* pXFileName, int *pOutnIdx)
 					"ERROR!",
 					"Xファイルの読み込みに失敗しました!\n対象パス : %s",
 					pXFileName);
-
-				EndDevice();
 
 				return hr;
 			}
@@ -195,14 +192,10 @@ HRESULT LoadModelData(_In_ const char* pXFileName, int *pOutnIdx)
 			ZeroMemory(&pModelData->aXFileName[0], sizeof(char) * MAX_PATH);
 			strcpy(&pModelData->aXFileName[0], pXFileName);
 
-			EndDevice();
-
 			/*** 成功 ***/
 			return S_OK;
 		}
 	}
-
-	EndDevice();
 
 	/*** 上限オーバー ***/
 	return E_FAIL;

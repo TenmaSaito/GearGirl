@@ -58,7 +58,8 @@ Field g_aField[MAX_FIELD];
 void InitField(void)
 {
 	/*** デバイスの取得 ***/
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	AUTODEVICE9 pAuto;							// デバイス自動解放システム
+	LPDIRECT3DDEVICE9 pDevice = pAuto.pDevice;	// 自動解放システムを介してデバイスを取得
 	VERTEX_3D *pVtx;					// 頂点情報へのポインタ
 
 	/*** 各変数の初期化 ***/
@@ -130,8 +131,6 @@ void InitField(void)
 
 	/*** 頂点バッファの設定を終了 ***/
 	g_pVtxBuffField->Unlock();
-
-	EndDevice();
 }
 
 //================================================================================================================
@@ -159,38 +158,17 @@ void UninitField(void)
 //================================================================================================================
 void UpdateField(void)
 {
-	VERTEX_3D* pVtx;					// 頂点情報へのポインタ
-
-	/*** 頂点バッファの設定 ***/
-	g_pVtxBuffField->Lock(0, 0, (void**)&pVtx, 0);
-
-	for (int nCntField = 0; nCntField < MAX_FIELD; nCntField++)
-	{
-		// 使われていれば
-		if (g_aField[nCntField].bUse == true)
-		{
-			//g_aField[nCntField].nCounterAnim++;
-
-			///*** テクスチャ座標の設定 ***/
-			//pVtx[0].tex = D3DXVECTOR2(0.0f + (g_aField[nCntField].move.x * g_aField[nCntField].nCounterAnim), 0.0f + (g_aField[nCntField].move.z * g_aField[nCntField].nCounterAnim));
-			//pVtx[1].tex = D3DXVECTOR2((1.0f * g_aField[nCntField].nXBlock) + (g_aField[nCntField].move.x * g_aField[nCntField].nCounterAnim), 0.0f + (g_aField[nCntField].move.z * g_aField[nCntField].nCounterAnim));
-			//pVtx[2].tex = D3DXVECTOR2(0.0f + (g_aField[nCntField].move.x * g_aField[nCntField].nCounterAnim), (1.0f * g_aField[nCntField].nZBlock) + (g_aField[nCntField].move.z * g_aField[nCntField].nCounterAnim));
-			//pVtx[3].tex = D3DXVECTOR2((1.0f * g_aField[nCntField].nXBlock) + (g_aField[nCntField].move.x * g_aField[nCntField].nCounterAnim), (1.0f * g_aField[nCntField].nZBlock) + (g_aField[nCntField].move.z * g_aField[nCntField].nCounterAnim));
-		}
-
-		pVtx += 4;
-	}
-
-	/*** 頂点バッファの設定を終了 ***/
-	g_pVtxBuffField->Unlock();
+	
 }
+
 //================================================================================================================
 // --- 床の描画処理 ---
 //================================================================================================================
 void DrawField(void)
 {
 	/*** デバイスの取得 ***/
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	AUTODEVICE9 pAuto;							// デバイス自動解放システム
+	LPDIRECT3DDEVICE9 pDevice = pAuto.pDevice;	// 自動解放システムを介してデバイスを取得
 	D3DXMATRIX mtxRot, mtxTrans;		// 計算用マトリックス
 
 	/*** 頂点バッファをデータストリームに設定 ***/
@@ -235,8 +213,6 @@ void DrawField(void)
 				2);											// 描画するプリミティブの数
 		}
 	}
-
-	EndDevice();
 }
 
 //================================================================================================================

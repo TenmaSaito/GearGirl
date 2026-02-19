@@ -24,8 +24,13 @@
 //=================================================================================================
 // --- スレッド作成 ---
 //=================================================================================================
-_Check_return_ bool Thread::CreateThread(_In_ ThreadData* tData, _In_ _beginthreadex_proc_type ThreadProc, _In_ bool bOnDest, _Outptr_opt_ Thread** lpThread)
+_Check_return_ bool Thread::CreateThread(_In_ ThreadData* tData, _In_ _beginthreadex_proc_type ThreadProc, _In_ bool bOnDest, _Out_opt_ LPTHREAD *lpThread)
 {
+	if (lpThread != NULL)
+	{ // スレッドへのダブルポインタがNULLでは無ければ
+		*lpThread = NULL;	// NULLを格納
+	}
+
 	// スレッド生成済みの場合、生成失敗
 	if (hThread != NULL) return false;
 
@@ -191,6 +196,18 @@ unsigned WINAPI DefThreadProc(LPVOID lpParam)
 	// メインスレッドが実行されている間、ループ
 	while (1)
 	{
+		// スレッドループ終了指示が来たら終了
+		if (tData->bExit == true)
+		{
+			break;
+		}
+
+		// メインスレッド終了時、スレッド解放
+		if (GetIsMainThread() == false)
+		{
+			break;
+		}
+
 		// 再生中でなければ処理をしない
 		if (tData->bPlay != true) continue;
 
@@ -237,18 +254,6 @@ unsigned WINAPI DefThreadProc(LPVOID lpParam)
 			tData->nSleepTime -= dwExecLastTimeSleep - dwCurrentTimeSleep;
 
 			dwExecLastTimeSleep = dwCurrentTimeSleep;		// 処理開始時刻[現在時刻]を保存
-		}
-
-		// スレッドループ終了指示が来たら終了
-		if (tData->bExit == true)
-		{
-			break;
-		}
-
-		// メインスレッド終了時、スレッド解放
-		if (GetIsMainThread() == false)
-		{
-			break;
 		}
 	}
 

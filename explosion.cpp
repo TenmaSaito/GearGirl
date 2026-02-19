@@ -54,7 +54,8 @@ int g_nTextureAnimCount;							// アニメーション数
 void InitExplosion(void)
 {
 	/*** デバイスの取得 ***/
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	AUTODEVICE9 Auto;							// デバイス自動解放システム
+	LPDIRECT3DDEVICE9 pDevice = Auto.pDevice;	// 自動解放システムを介してデバイスを取得
 	VERTEX_3D *pVtx;					// 頂点情報へのポインタ
 
 	/*** 各変数の初期化 ***/
@@ -79,6 +80,8 @@ void InitExplosion(void)
 								D3DPOOL_MANAGED,
 								&g_pVtxBuffExplosion,
 								NULL);
+
+	Auto.~AUTODEVICE9();
 
 	/*** 頂点バッファの設定 ***/
 	g_pVtxBuffExplosion->Lock(0, 0, (void**)&pVtx, 0);
@@ -106,8 +109,6 @@ void InitExplosion(void)
 
 	/*** 頂点バッファの設定を終了 ***/
 	g_pVtxBuffExplosion->Unlock();
-
-	EndDevice();
 }
 
 //================================================================================================================
@@ -180,7 +181,8 @@ void UpdateExplosion(void)
 void DrawExplosion(void)
 {
 	/*** デバイスの取得 ***/
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	AUTODEVICE9 pAuto;							// デバイス自動解放システム
+	LPDIRECT3DDEVICE9 pDevice = pAuto.pDevice;	// 自動解放システムを介してデバイスを取得
 	D3DXMATRIX mtxTrans;		// 計算用マトリックス
 	D3DXMATRIX mtxView;			// ビューマトリックスの取得用
 
@@ -227,8 +229,6 @@ void DrawExplosion(void)
 				2);											// 描画するプリミティブの数
 		}
 	}
-
-	EndDevice();
 }
 
 //================================================================================================================

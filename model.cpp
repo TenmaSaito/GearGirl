@@ -921,43 +921,156 @@ bool CollisionModel(D3DXVECTOR3* pPos, D3DXVECTOR3* pPosOld, D3DXVECTOR3* pMove)
 
 	Player* pPlayer = GetPlayer();
 
-	for (int nCntModel = 0; nCntModel < g_nNumModel; nCntModel++)
+	for (int nCntModel = 0; nCntModel < MAX_MODEL; nCntModel++)
 	{
 		if (g_ModelInfo[nCntModel].bUse == true)
 		{
-			/*** オブジェクトにめり込んでるか判定 ***/
-			if (pPos->x >= g_ModelInfo[nCntModel].pos.x + g_Model[g_ModelInfo[nCntModel].nType].vtxMin.x && pPos->x <= g_ModelInfo[nCntModel].pos.x + g_Model[g_ModelInfo[nCntModel].nType].vtxMax.x
-				&& pPos->y <= g_ModelInfo[nCntModel].pos.y + g_Model[g_ModelInfo[nCntModel].nType].vtxMax.y && pPos->y >= g_ModelInfo[nCntModel].pos.y + g_Model[g_ModelInfo[nCntModel].nType].vtxMin.y
-				&& pPos->z >= g_ModelInfo[nCntModel].pos.z + g_Model[g_ModelInfo[nCntModel].nType].vtxMin.z && pPos->z <= g_ModelInfo[nCntModel].pos.z + g_Model[g_ModelInfo[nCntModel].nType].vtxMax.z)
+			Model* pObjInfo = &g_Model[g_ModelInfo[nCntModel].nType];
+			ModelInfo* pObject = &g_ModelInfo[nCntModel];
+
+			D3DXVECTOR3 posVtx[4] = {};		// オブジェクトの四辺の頂点
+			D3DXVECTOR3 vecMove = D3DXVECTOR3_NULL;		// 移動ベクトル
+			D3DXVECTOR3 vecLine = D3DXVECTOR3_NULL;		// 境界線ベクトル
+			D3DXVECTOR3 vecLineA[4] = {};	// 境界線ベクトル
+			D3DXVECTOR3 vecToPos = D3DXVECTOR3_NULL;	// 位置と境界線のはじめを結んだベクトル
+			D3DXVECTOR3 vecToPosA[4] = {};	// 位置と境界線のはじめを結んだベクトル
+			D3DXVECTOR3 vecToPosOld = D3DXVECTOR3_NULL;	// 過去位置と境界線のはじめを結んだベクトル 
+			D3DXVECTOR3 vecLineNor = D3DXVECTOR3_NULL;	// 正規化した境界線ベクトル
+			float fVecPos = 0.0f;
+			float fVecPosA[4] = {};
+			float fVecPosOld = 0.0f;
+			float fPosToMove = 0.0f;					// vecToPosとの外積
+			float fLineToMove = 0.0f;					// vecLineとの外積
+			float fRate = 0.0f;							// 面積比率
+			float fVecPosToNor = 0.0f;					// 逆法線との外積
+
+			if (pPos->y >= pObject->pos.y + pObjInfo->vtxMin.y - 10.0f
+				&& pPos->y <= pObject->pos.y + pObjInfo->vtxMax.y)
 			{
-				if (pPosOld->x <= g_ModelInfo[nCntModel].pos.x + g_Model[g_ModelInfo[nCntModel].nType].vtxMin.x)
-				{/** 過去の位置が、モデルのXの最小値よりも小さい位置にいた場合 **/
-					pPos->x = g_ModelInfo[nCntModel].pos.x + g_Model[g_ModelInfo[nCntModel].nType].vtxMin.x;
-				}
-				else if (pPosOld->x >= g_ModelInfo[nCntModel].pos.x + g_Model[g_ModelInfo[nCntModel].nType].vtxMax.x)
-				{/** 過去の位置が、モデルのXの最大値よりも大さい位置にいた場合 **/
-					pPos->x = g_ModelInfo[nCntModel].pos.x + g_Model[g_ModelInfo[nCntModel].nType].vtxMax.x;
+				D3DXVECTOR3 Length;
+				float fLength = 0.0f;
+				float fAngle = 0.0f;
+				bool bCollision[4] = {};
+
+				posVtx[0].x = pObjInfo->vtxMin.x;
+				posVtx[0].y = 0;
+				posVtx[0].z = pObjInfo->vtxMin.z;
+
+				D3DXVec3TransformCoord(&posVtx[0], &posVtx[0], &pObject->mtxWorld);
+
+				posVtx[1].x = pObjInfo->vtxMax.x;
+				posVtx[1].y = 0;
+				posVtx[1].z = pObjInfo->vtxMin.z;
+
+				D3DXVec3TransformCoord(&posVtx[1], &posVtx[1], &pObject->mtxWorld);
+
+				posVtx[2].x = pObjInfo->vtxMax.x;
+				posVtx[2].y = 0;
+				posVtx[2].z = pObjInfo->vtxMax.z;
+
+				D3DXVec3TransformCoord(&posVtx[2], &posVtx[2], &pObject->mtxWorld);
+
+				posVtx[3].x = pObjInfo->vtxMin.x;
+				posVtx[3].y = 0;
+				posVtx[3].z = pObjInfo->vtxMax.z;
+
+				D3DXVec3TransformCoord(&posVtx[3], &posVtx[3], &pObject->mtxWorld);
+
+				/*** 移動ベクトルの取得 ***/
+				vecMove = *pPos - *pPosOld;
+
+				for (int nCntCollision = 0; nCntCollision < 4; nCntCollision++)
+				{
+					D3DXVECTOR3 vecNor = D3DXVECTOR3_NULL;		// 壁の逆法線ベクトル
+					D3DXVECTOR3 vecCutLine = D3DXVECTOR3_NULL;	// 交点からの境界線ベクトル
+
+					vecLine = posVtx[(nCntCollision + 1) % 4] - posVtx[nCntCollision];
+
+					RepairFloat(&vecLine.x);
+					RepairFloat(&vecLine.z);
+
+					/*** 現在位置との関係を外積を使い求める ***/
+					vecToPos = *pPos - posVtx[nCntCollision];
+
+					fVecPos = (vecLine.z * vecToPos.x) - (vecLine.x * vecToPos.z);
+
+					RepairFloat(&fVecPos);
+
+					/*** 過去位置との関係を外積を使い求める ***/
+					vecToPosOld = *pPosOld - posVtx[nCntCollision];
+
+					fVecPosOld = (vecLine.z * vecToPosOld.x) - (vecLine.x * vecToPosOld.z);
+
+					RepairFloat(&fVecPosOld);
+
+					/*** 強制位置の判定 ***/
+
+					/** 現在位置との外積 **/
+					fPosToMove = (vecToPos.z * vecMove.x) - (vecToPos.x * vecMove.z);
+
+					/** 最大値との外積 **/
+					fLineToMove = (vecLine.z * vecMove.x) - (vecLine.x * vecMove.z);
+
+					/** 面積比率の計算 **/
+					fRate = fPosToMove / fLineToMove;
+
+					vecNor.x = vecLine.z;
+					vecNor.z = -vecLine.x;
+
+					D3DXVec3Normalize(&vecNor, &vecNor);
+
+					fVecPosToNor = (vecNor.z * vecMove.x) - (vecNor.x * vecMove.z);
+
+					D3DXVECTOR3 vecF;
+					vecCutLine = vecLine;
+
+					if (fVecPosToNor == 0)
+					{
+						fVecPosToNor = fabsf(fVecPosToNor);
+						D3DXVec3Normalize(&vecCutLine, &vecCutLine);
+
+						vecF = vecCutLine * fVecPosToNor;
+					}
+					else if (fVecPosToNor > 0)
+					{
+						fVecPosToNor = fabsf(fVecPosToNor);
+						D3DXVec3Normalize(&vecCutLine, &vecCutLine);
+
+						vecF = -vecCutLine * fVecPosToNor;
+					}
+					else if (fVecPosToNor < 0)
+					{
+						fVecPosToNor = fabsf(fVecPosToNor);
+						D3DXVec3Normalize(&vecCutLine, &vecCutLine);
+
+						vecF = vecCutLine * fVecPosToNor;
+					}
+
+					/*** プレイヤーの壁のめり込み判定 ***/
+					if (fVecPos <= 0 && fVecPosOld >= 0)
+					{
+						/*** もしも比率が範囲内であれば,衝突 ***/
+						if (fRate >= 0.0f && fRate <= 1.0f)
+						{
+							pPos->x = posVtx[nCntCollision].x + (vecLine.x * fRate) + vecF.x;
+							pPos->z = posVtx[nCntCollision].z + (vecLine.z * fRate) + vecF.z;
+						}
+					}
+
+					if (fVecPos < 0 && fVecPosOld < 0)
+					{
+						bCollision[nCntCollision] = true;
+					}
 				}
 
-				if (pPosOld->y < g_ModelInfo[nCntModel].pos.y + g_Model[g_ModelInfo[nCntModel].nType].vtxMin.y)
-				{/** 過去の位置が、モデルのYの最小値よりも小さい位置にいた場合 **/
-					pPos->y = g_ModelInfo[nCntModel].pos.y + g_Model[g_ModelInfo[nCntModel].nType].vtxMin.y;
-				}
-				else if (pPosOld->y >= g_ModelInfo[nCntModel].pos.y + g_Model[g_ModelInfo[nCntModel].nType].vtxMax.y)
-				{/** 過去の位置が、モデルのYの最大値よりも大さい位置にいた場合 **/
-					pPos->y = g_ModelInfo[nCntModel].pos.y + g_Model[g_ModelInfo[nCntModel].nType].vtxMax.y;
+				if (bCollision[0] == true
+					&& bCollision[1] == true
+					&& bCollision[2] == true
+					&& bCollision[3] == true)
+				{
+					pPos->y = pObject->pos.y + pObjInfo->vtxMax.y;
 					bLand = true;
 					pMove->y = 0.0f;
-					pPlayer->bJump = false;
-				}
-
-				if (pPosOld->z <= g_ModelInfo[nCntModel].pos.z + g_Model[g_ModelInfo[nCntModel].nType].vtxMin.z)
-				{/** 過去の位置が、モデルのZの最小値よりも小さい位置にいた場合 **/
-					pPos->z = g_ModelInfo[nCntModel].pos.z + g_Model[g_ModelInfo[nCntModel].nType].vtxMin.z;
-				}
-				else if (pPosOld->z >= g_ModelInfo[nCntModel].pos.z + g_Model[g_ModelInfo[nCntModel].nType].vtxMax.z)
-				{/** 過去の位置が、モデルのZの最大値よりも大さい位置にいた場合 **/
-					pPos->z = g_ModelInfo[nCntModel].pos.z + g_Model[g_ModelInfo[nCntModel].nType].vtxMax.z;
 				}
 			}
 		}

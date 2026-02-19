@@ -30,8 +30,9 @@ LPDIRECT3DVERTEXBUFFER9 g_pVtxBuffPrompt;	// 頂点バッファ
 //==================================================================================
 void InitPrompt(void)
 {
-	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	/*** デバイスの取得 ***/
+	AUTODEVICE9 Auto;							// デバイス自動解放システム
+	LPDIRECT3DDEVICE9 pDevice = Auto.pDevice;	// 自動解放システムを介してデバイスを取得
 
 	// 変数の初期化
 	ZeroMemory(&g_aPrompt[0], sizeof(g_aPrompt));
@@ -43,6 +44,8 @@ void InitPrompt(void)
 		D3DPOOL_MANAGED,
 		&g_pVtxBuffPrompt,
 		NULL);
+
+	Auto.~AUTODEVICE9();
 
 	VERTEX_3D* pVtx = nullptr;				// 頂点バッファへのポインタ
 
@@ -70,9 +73,6 @@ void InitPrompt(void)
 
 	// 頂点バッファのアンロック
 	g_pVtxBuffPrompt->Unlock();
-
-	// デバイスの取得終了
-	EndDevice();
 }
 
 //==================================================================================
@@ -99,8 +99,9 @@ void UpdatePrompt(void)
 //==================================================================================
 void DrawPrompt(void)
 {
-	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	/*** デバイスの取得 ***/
+	AUTODEVICE9 Auto;							// デバイス自動解放システム
+	LPDIRECT3DDEVICE9 pDevice = Auto.pDevice;	// 自動解放システムを介してデバイスを取得
 	LPPROMPT pPrompt = &g_aPrompt[0];		// プロンプトポインタ
 	D3DXMATRIX mtxTrans;					// 計算用マトリックス
 	D3DXMATRIX mtxView;						// ビューマトリックスの取得用
@@ -166,9 +167,6 @@ void DrawPrompt(void)
 
 	/*** ライティングをオン ***/
 	pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
-
-	// デバイスの取得終了
-	EndDevice();
 }
 
 //==================================================================================

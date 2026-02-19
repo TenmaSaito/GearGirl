@@ -94,8 +94,9 @@ void UpdateMode(void)
 //==================================================================================
 void DrawMode(void)
 {
-	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	/*** デバイスの取得 ***/
+	AUTODEVICE9 Auto;							// デバイス自動解放システム
+	LPDIRECT3DDEVICE9 pDevice = Auto.pDevice;	// 自動解放システムを介してデバイスを取得
 	D3DVIEWPORT9 viewportDef;		// デフォルトビューポート
 
 	// ビューポートの保存
@@ -122,8 +123,6 @@ void DrawMode(void)
 
 	// ビューポートの設定
 	pDevice->SetViewport(&viewportDef);
-
-	EndDevice();
 }
 
 //==================================================================================

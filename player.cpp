@@ -11,6 +11,7 @@
 #include "debugproc.h"
 #include "effect.h"
 #include "game.h"
+#include "gimmick.h"
 #include "input.h"
 #include "item.h"
 #include "model.h"
@@ -294,10 +295,31 @@ void UpdatePlayer(void)
 		}
 
 		// モデルとの当たり判定
-		CollisionModel(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move);
+		if (CollisionModel(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move))
+		{
+			if (pPlayer->bJump == true
+				&& pPlayer->motionType != MOTIONTYPE_LANDING
+				&& pPlayer->motionTypeBlend != MOTIONTYPE_LANDING)
+			{// 着地モーション
+				SetMotionType(MOTIONTYPE_LANDING, true, 15, (PlayerType)nCntPlayer);
+				pPlayer->bUseLandMotion = true;
+				//g_Land++;
+			}
+
+			pPlayer->bJump = false;
+		}
 
 		// アイテムとの当たり判定
 		CollisionItem(pPlayer->pos, PLAYER_RANGE);
+
+		// ギミックとの当たり判定
+		CollisionGimmick(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move);
+
+		// デバッグ表示
+		if (g_Functionkey != 0)
+		{
+			PrintDebugProc("\nPlayer座標 : [%~3f]\n", pPlayer->pos.x, pPlayer->pos.y, pPlayer->pos.z);
+		}
 	}
 
 	// プロンプトを描画
@@ -346,6 +368,8 @@ void UpdatePlayer(void)
 	// デバッグ表示
 	if (g_Functionkey != 0)
 	{
+		PrintDebugProc("\nPlayer座標 : [%~3f]\n", pPlayer->pos.x, pPlayer->pos.y, pPlayer->pos.z);
+
 		PrintDebugProc("\nPlayer切り替え : [Q] : [%d]\n", g_ActivePlayer);
 		PrintDebugProc("操作対象 : 0 → 少女\n                1 → ネズミ\n");
 		PrintDebugProc("アームの切り替え [9] : ArmType [%d]\n", g_nUseArm);

@@ -57,8 +57,9 @@ void Update3DModel(void)
 //=================================================================================================
 void Draw3DModel(void)
 {
-	// デバイスの取得開始
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	/*** デバイスの取得 ***/
+	AUTODEVICE9 Auto;							// デバイス自動解放システム
+	LPDIRECT3DDEVICE9 pDevice = Auto.pDevice;	// 自動解放システムを介してデバイスを取得
 	LP3DMODEL p3DModel = &g_aModel[0];	// 3Dモデルへのポインタ
 	D3DXMATRIX mtxRot, mtxTrans;		// 計算用マトリックス
 	D3DMATERIAL9 matDef;				// 現在のマテリアル保存用
@@ -118,9 +119,6 @@ void Draw3DModel(void)
 			}
 		}
 	}
-
-	// デバイスの取得終了
-	EndDevice();
 }
 
 //=================================================================================================
