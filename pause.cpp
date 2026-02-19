@@ -10,6 +10,7 @@
 #include "game.h"
 #include "pause.h"
 #include "time.h"
+#include "sound.h"
 
 //==========================================================================================
 // ****** ポーズの選択肢を変更するとき ******
@@ -182,7 +183,7 @@ void UpdatePause(void)
 	{
 		nPauseData--;
 
-		if (nPauseData < PAUSE_MENU_RESTART)	// 0より小さくしない
+		if (nPauseData < PAUSE_MENU_CLOSE)	// 0より小さくしない
 		{
 			nPauseData = PAUSE_MENU_MAX - 1;
 		}
@@ -197,7 +198,7 @@ void UpdatePause(void)
 
 		if (nPauseData >= PAUSE_MENU_MAX)	// 総数より大きくしない
 		{
-			nPauseData = PAUSE_MENU_RESTART;
+			nPauseData = PAUSE_MENU_CLOSE;
 		}
 	}
 
@@ -229,12 +230,14 @@ void UpdatePause(void)
 		switch (nPauseData)
 		{
 		case PAUSE_MENU_RESTART:
-			SetFade(MODE_GAME);
 			break;
 		case PAUSE_MENU_RETITLE:
-			SetFade(MODE_TITLE);
+			FadeSound(SOUND_LABEL_BGM_GAME);
+			SetFade(MODE_GAME);
 			break;
 		case PAUSE_MENU_CLOSE:
+			FadeSound(SOUND_LABEL_BGM_TITLE);
+			SetFade(MODE_TITLE);
 			break;
 		}
 		
