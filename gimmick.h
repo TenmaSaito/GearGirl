@@ -11,6 +11,7 @@
 //*** インクルードファイル ***
 //**********************************************************************************
 #include "main.h"
+#include "player.h"
 
 //**********************************************************************************
 //*** マクロ定義 ***
@@ -21,8 +22,8 @@
 //**********************************************************************************
 ENUM()
 {
-	GIMMICKTYPE_DUCT = 0,		// ダクト
-	GIMMICKTYPE_VALVE,			// バルブ
+	GIMMICKTYPE_BIGBUTTON = 0,	// でかボタン
+	GIMMICKTYPE_SMALLBUTTON,	// ちびボタン
 	GIMMICKTYPE_FALLENTREE,		// 倒木
 	GIMMICKTYPE_CLOSEDDOOR,		// 閉まっている扉
 	GIMMICKTYPE_MAX
@@ -39,5 +40,5 @@ void DrawGimmick(void);
 void SetGimmick(D3DXVECTOR3 pos, D3DXVECTOR3 rot, GIMMICKTYPE type);
 void ClearGimmick(GIMMICKTYPE type);
 bool IsClearGimmick(GIMMICKTYPE type);
-bool CollisionGimmick(D3DXVECTOR3 *pPos, D3DXVECTOR3 *pPosOld, D3DXVECTOR3 *pMove);
+bool CollisionGimmick(D3DXVECTOR3 *pPos, D3DXVECTOR3 *pPosOld, D3DXVECTOR3 *pMove, Player *pPlayer);
 #endif	// !_GIMMICK_H_

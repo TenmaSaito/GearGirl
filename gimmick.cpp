@@ -13,7 +13,6 @@
 #include "modeldata.h"
 #include "mathUtil.h"
 #include "prompt.h"
-#include "player.h"
 #include "Texture.h"
 
 using namespace MyMathUtil;
@@ -69,14 +68,14 @@ typedef struct
 
 	MOTIONTYPE motionType;					// モーションタイプ
 	bool bClear;							// クリアしたか
-}Gimmick, *LPGIMMICK;
+}Gimmick, * LPGIMMICK;
 
 //**********************************************************************************
 //*** ギミッククリア構造体 ***
 //**********************************************************************************
 STRUCT()
 {
-	const char *pFileName;		// ファイル名
+	const char* pFileName;		// ファイル名
 	COULD_PLAYER could;			// クリア可能なプレイヤータイプ
 	D3DXVECTOR3 posDefault;		// デフォルト位置
 	D3DXVECTOR3 rotDefault;		// デフォルト角度
@@ -97,9 +96,9 @@ void UpdateMotion(GIMMICKTYPE);
 Gimmick g_aGimmick[GIMMICKTYPE_MAX];		// ギミック情報
 GIMMICK_DATA g_aGimmickData[GIMMICKTYPE_MAX] =
 {
+	{"data/Scripts/bigbutton_g.txt", COULD_PLAYER_GIRL, D3DXVECTOR3(535, 100, -630), D3DXVECTOR3(0, 0, 0), 0.0f},
+	{"data/Scripts/smallbutton_g.txt", COULD_PLAYER_MOUSE, D3DXVECTOR3(565, 100, -630), D3DXVECTOR3(0, 0, 0), 0.0f},
 	{"data/Scripts/station_g.txt", COULD_PLAYER_ALL, D3DXVECTOR3(573, 100, -900), D3DXVECTOR3(0, D3DX_PI + D3DX_HALFPI, 0), 200.0f },
-	{},
-	{},
 	{},
 };
 
@@ -205,19 +204,19 @@ void DrawGimmick(void)
 	LPGIMMICK pGimmick = &g_aGimmick[0];
 	D3DXMATRIX mtxRot, mtxTrans;	// 計算用マトリックス
 	D3DMATERIAL9 matDef;			// 現在のマテリアル保存用
-	D3DXMATERIAL *pMat;				// マテリアルデータへのポインタ
+	D3DXMATERIAL* pMat;				// マテリアルデータへのポインタ
 
 	for (int nCntGimmick = 0; nCntGimmick < GIMMICKTYPE_MAX; nCntGimmick++, pGimmick++)
 	{
 		if (pGimmick->bUse == false) continue;
-		
+
 		// プレイヤーのワールドマトリックスの初期化
 		D3DXMatrixIdentity(&pGimmick->mtxWorld);
 
 		// プレイヤーの向きを反映
 		D3DXMatrixRotationYawPitchRoll(&mtxRot,
-			pGimmick->rot.y, 
-			pGimmick->rot.x, 
+			pGimmick->rot.y,
+			pGimmick->rot.x,
 			pGimmick->rot.z);
 
 		D3DXMatrixMultiply(&pGimmick->mtxWorld, &pGimmick->mtxWorld, &mtxRot);	// かけ合わせる
@@ -365,7 +364,7 @@ bool IsClearGimmick(GIMMICKTYPE type)
 //==================================================================================
 void CaseMulti(LPGIMMICK pGimmick)
 {
-	Player *pPlayer = GetPlayer();
+	Player* pPlayer = GetPlayer();
 	bool bDetection = false;
 
 	if (IsDetection(pGimmick->pos, pGimmick[PLAYERTYPE_GIRL].pos, pGimmick->fRadius)
@@ -395,7 +394,7 @@ void CaseMulti(LPGIMMICK pGimmick)
 //==================================================================================
 void CaseSolo(LPGIMMICK pGimmick)
 {
-	Player * pPlayer = GetPlayer();
+	Player* pPlayer = GetPlayer();
 	PlayerType type = (PlayerType)GetActivePlayer();
 	bool bDetection = false;
 
@@ -421,12 +420,10 @@ void CaseSolo(LPGIMMICK pGimmick)
 //==================================================================================
 // --- 当たり判定 ---
 //==================================================================================
-bool CollisionGimmick(D3DXVECTOR3* pPos, D3DXVECTOR3* pPosOld, D3DXVECTOR3* pMove)
+bool CollisionGimmick(D3DXVECTOR3* pPos, D3DXVECTOR3* pPosOld, D3DXVECTOR3* pMove, Player *pPlayer)
 {
 	// 当たっているかどうかをbool型で返す
 	bool bLand = false;
-
-	Player* pGimmick = GetPlayer();
 
 	for (int nCntModel = 0; nCntModel < GIMMICKTYPE_MAX; nCntModel++)
 	{
@@ -468,8 +465,8 @@ bool CollisionGimmick(D3DXVECTOR3* pPos, D3DXVECTOR3* pPosOld, D3DXVECTOR3* pMov
 
 					D3DXVec3TransformCoord(&posVtx[0], &posVtx[0], &pObject->parts.aParts[nCntParts].mtxWorld);
 
-					if(nCntParts == 1)
-					SetEffect(posVtx[0], D3DXCOLOR_NULL, VECNULL, 5, 5, 0, 3);
+					if (nCntParts == 1)
+						SetEffect(posVtx[0], D3DXCOLOR_NULL, VECNULL, 5, 5, 0, 3);
 
 					posVtx[1].x = pObjInfo->mtxMax.x;
 					posVtx[1].y = 0;
@@ -478,7 +475,7 @@ bool CollisionGimmick(D3DXVECTOR3* pPos, D3DXVECTOR3* pPosOld, D3DXVECTOR3* pMov
 					D3DXVec3TransformCoord(&posVtx[1], &posVtx[1], &pObject->parts.aParts[nCntParts].mtxWorld);
 
 					if (nCntParts == 1)
-					SetEffect(posVtx[1], D3DXCOLOR_NULL, VECNULL, 5, 5, 0, 3);
+						SetEffect(posVtx[1], D3DXCOLOR_NULL, VECNULL, 5, 5, 0, 3);
 
 					posVtx[2].x = pObjInfo->mtxMax.x;
 					posVtx[2].y = 0;
@@ -487,7 +484,7 @@ bool CollisionGimmick(D3DXVECTOR3* pPos, D3DXVECTOR3* pPosOld, D3DXVECTOR3* pMov
 					D3DXVec3TransformCoord(&posVtx[2], &posVtx[2], &pObject->parts.aParts[nCntParts].mtxWorld);
 
 					if (nCntParts == 1)
-					SetEffect(posVtx[2], D3DXCOLOR_NULL, VECNULL, 5, 5, 0, 3);
+						SetEffect(posVtx[2], D3DXCOLOR_NULL, VECNULL, 5, 5, 0, 3);
 
 					posVtx[3].x = pObjInfo->mtxMin.x;
 					posVtx[3].y = 0;
@@ -496,7 +493,7 @@ bool CollisionGimmick(D3DXVECTOR3* pPos, D3DXVECTOR3* pPosOld, D3DXVECTOR3* pMov
 					D3DXVec3TransformCoord(&posVtx[3], &posVtx[3], &pObject->parts.aParts[nCntParts].mtxWorld);
 
 					if (nCntParts == 1)
-					SetEffect(posVtx[3], D3DXCOLOR_NULL, VECNULL, 5, 5, 0, 3);
+						SetEffect(posVtx[3], D3DXCOLOR_NULL, VECNULL, 5, 5, 0, 3);
 
 					/*** 移動ベクトルの取得 ***/
 					vecMove = *pPos - *pPosOld;
@@ -574,8 +571,11 @@ bool CollisionGimmick(D3DXVECTOR3* pPos, D3DXVECTOR3* pPosOld, D3DXVECTOR3* pMov
 							/*** もしも比率が範囲内であれば,衝突 ***/
 							if (fRate >= 0.0f && fRate <= 1.0f)
 							{
-								pPos->x = posVtx[nCntCollision].x + (vecLine.x * fRate) + vecF.x;
-								pPos->z = posVtx[nCntCollision].z + (vecLine.z * fRate) + vecF.z;
+								if (g_aGimmick[nCntModel].myType != GIMMICKTYPE_BIGBUTTON && g_aGimmick[nCntModel].myType != GIMMICKTYPE_SMALLBUTTON)
+								{// ボタン以外には側面の当たり判定をつける
+									pPos->x = posVtx[nCntCollision].x + (vecLine.x * fRate) + vecF.x;
+									pPos->z = posVtx[nCntCollision].z + (vecLine.z * fRate) + vecF.z;
+								}
 							}
 						}
 
@@ -589,10 +589,22 @@ bool CollisionGimmick(D3DXVECTOR3* pPos, D3DXVECTOR3* pPosOld, D3DXVECTOR3* pMov
 						&& bCollision[1] == true
 						&& bCollision[2] == true
 						&& bCollision[3] == true)
-					{
+					{// 上の当たり判定
 						pPos->y = pObject->pos.y + pObjInfo->mtxMax.y;
 						bLand = true;
 						pMove->y = 0.0f;
+						pPlayer->bJump = false;
+						
+						if (g_aGimmick[nCntModel].bClear == false && g_aGimmick[nCntModel].myType == GIMMICKTYPE_BIGBUTTON && GetActivePlayer() == PLAYERTYPE_GIRL)
+						{// でかボタンを押す
+							SetMotionType(MOTIONTYPE_ACTION, false, 0, GIMMICKTYPE_BIGBUTTON);
+							ClearGimmick(GIMMICKTYPE_BIGBUTTON);
+						}
+						else if (g_aGimmick[nCntModel].bClear == false && g_aGimmick[nCntModel].myType == GIMMICKTYPE_SMALLBUTTON && GetActivePlayer() == PLAYERTYPE_MOUSE)
+						{// ちびボタンを押す
+							SetMotionType(MOTIONTYPE_ACTION, false, 0, GIMMICKTYPE_SMALLBUTTON);
+							ClearGimmick(GIMMICKTYPE_SMALLBUTTON);
+						}
 					}
 				}
 			}

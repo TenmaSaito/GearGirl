@@ -164,6 +164,7 @@ void InitPlayer(void)
 	}
 
 	// === グローバル変数の初期化 === // 
+
 	g_nNumPlayer = GetPlayerNum();		// プレイ人数
 	g_ActivePlayer = 0;		// 現在の操作対象
 	g_Functionkey = 0;		// デバッグ表示の切り替え用
@@ -172,6 +173,9 @@ void InitPlayer(void)
 	g_aMovePlayer[0] = false;
 	g_aMovePlayer[1] = false;
 
+#ifdef _DEBUG
+	g_nNumPlayer = 1;
+#endif
 	// デバイスの破棄
 	EndDevice();
 }
@@ -313,7 +317,7 @@ void UpdatePlayer(void)
 		CollisionItem(pPlayer->pos, PLAYER_RANGE);
 
 		// ギミックとの当たり判定
-		CollisionGimmick(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move);
+		CollisionGimmick(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move, &g_aPlayer[nCntPlayer]);
 
 		// デバッグ表示
 		if (g_Functionkey != 0)
@@ -1658,7 +1662,7 @@ void ShotMouse(void)
 			pMouse->rot.y = pCamera->rot.y + D3DX_PI;
 
 			// 手にくっつける
-			//D3DXVec3TransformCoord(&pMouse->pos, &offset, &pPlayer->PartsInfo.aParts[19].mtxWorld);
+			D3DXVec3TransformCoord(&pMouse->pos, &offset, &pPlayer->PartsInfo.aParts[19].mtxWorld);
 		}
 
 		if (pPlayer->state != PLAYERSTATE_THROWWAITING)
@@ -1701,6 +1705,8 @@ void ShotMouse(void)
 			if (pPlayer->state == PLAYERSTATE_NEUTRAL)
 			{
 				// ネズミを飛ばす
+				//D3DXVec3TransformCoord(&pMouse->pos, &pMouse->pos, &pPlayer->PartsInfo.aParts[19].mtxWorld);
+
 				pMouse->move.x += vec.x * 1.0f;
 				pMouse->move.z += vec.z * 1.0f;
 				if (g_nMotionCounter == -10)
