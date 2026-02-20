@@ -172,7 +172,9 @@
     <ClCompile Include="mathUtil.cpp" />
     <ClCompile Include="normalend.cpp" />
     <ClCompile Include="particle.cpp" />
+    <ClCompile Include="param.cpp" />
     <ClCompile Include="sound.cpp" />
+    <ClCompile Include="tCamera.cpp" />
     <ClCompile Include="titleSelect.cpp" />
     <ClCompile Include="UImenu.cpp" />
     <ClCompile Include="mesh.cpp" />
@@ -217,7 +219,9 @@
     <ClInclude Include="mathUtil.h" />
     <ClInclude Include="normalend.h" />
     <ClInclude Include="particle.h" />
+    <ClInclude Include="param.h" />
     <ClInclude Include="sound.h" />
+    <ClInclude Include="tCamera.h" />
     <ClInclude Include="titleSelect.h" />
     <ClInclude Include="UImenu.h" />
     <ClInclude Include="mesh.h" />

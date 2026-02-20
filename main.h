@@ -62,6 +62,10 @@
 #ifndef ENUM
 #define ENUM(...)				typedef enum __VA_ARGS__			// ENUM宣言
 #endif
+#ifndef PARENT
+#define PARENT(...)				: public __VA_ARGS__				// 継承宣言
+#endif
+
 //#define _PATHCHECK_NO_WARNINGS								// 相対パスの確認
 
 //**********************************************************************************

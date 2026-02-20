@@ -11,6 +11,9 @@
 #include "player.h"
 #include "Texture.h"
 #include "mathUtil.h"
+#include "param.h"
+
+using namespace CParam;
 
 //**********************************************************************************
 //*** マクロ定義 ***
@@ -38,7 +41,7 @@ void InitPrompt(void)
 	ZeroMemory(&g_aPrompt[0], sizeof(g_aPrompt));
 
 	// 頂点バッファの作成
-	pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * 4 * MAX_PROMPT,
+	pDevice->CreateVertexBuffer(CParamEx::VTX3DSIZE * MAX_PROMPT,
 		D3DUSAGE_WRITEONLY,
 		FVF_VERTEX_3D,
 		D3DPOOL_MANAGED,

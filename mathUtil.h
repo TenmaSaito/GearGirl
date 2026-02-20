@@ -39,6 +39,9 @@
 #ifndef ENUM
 #define ENUM(...)				typedef enum __VA_ARGS__			// ENUMéŒ¾
 #endif
+#ifndef PARENT
+#define PARENT(...)				: public __VA_ARGS__				// Œp³éŒ¾
+#endif
 
 //----------------------------------------------------------------------------------
 /*** ƒtƒ‰ƒOŠÖ˜A ***/

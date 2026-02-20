@@ -54,6 +54,8 @@ X3DAUDIO_EMITTER g_aEmitter[SOUND_LABEL_MAX];				// エミッター
 XAUDIO2_BUFFER g_aSubmixBuffer[SOUND_LABEL_MAX] = {};
 WAVEFORMATEX g_wfxSource[SOUND_LABEL_MAX] = {};
 
+SoundChecker g_aChecker[SOUND_LABEL_MAX];					// サウンドチェッカー
+
 // サウンドの情報(sound.hのLABELに追加したらここにも追加する！)
 SOUNDINFO g_aSoundInfo[SOUND_LABEL_MAX] =
 {
@@ -67,7 +69,7 @@ SOUNDINFO g_aSoundInfo[SOUND_LABEL_MAX] =
 };
 
 //=============================================================================
-// 初期化処理
+// --- 初期化処理 ---
 //=============================================================================
 HRESULT InitSound(HWND hWnd)
 {
@@ -206,7 +208,7 @@ HRESULT InitSound(HWND hWnd)
 		}
 	
 		// ソースボイスの生成
-		hr = g_pXAudio2->CreateSourceVoice(&g_apSourceVoice[nCntSound], &(wfx.Format));
+		hr = g_pXAudio2->CreateSourceVoice(&g_apSourceVoice[nCntSound], &(wfx.Format), 0, XAUDIO2_DEFAULT_FREQ_RATIO, &g_aChecker[nCntSound]);
 		if(FAILED(hr))
 		{
 			MessageBox(hWnd, "ソースボイスの生成に失敗！", "警告！", MB_ICONWARNING);
@@ -309,7 +311,7 @@ HRESULT InitSound(HWND hWnd)
 }
 
 //=============================================================================
-// 終了処理
+// --- 終了処理 ---
 //=============================================================================
 void UninitSound(void)
 {
@@ -349,7 +351,7 @@ void UninitSound(void)
 }
 
 //=============================================================================
-// 更新処理
+// --- 更新処理 ---
 //=============================================================================
 void UpdateSound(void)
 {
@@ -505,7 +507,7 @@ void UpdateSound(void)
 }
 
 //=============================================================================
-// セグメント再生(再生中なら停止)
+// --- セグメント再生(再生中なら停止) ---
 //=============================================================================
 HRESULT PlaySound(SOUND_LABEL label)
 {
@@ -556,7 +558,7 @@ HRESULT PlaySound(SOUND_LABEL label)
 }
 
 //=============================================================================
-// セグメント取得
+// --- セグメント取得 ---
 //=============================================================================
 bool GetSound(SOUND_LABEL label)
 {
@@ -580,7 +582,7 @@ bool GetSound(SOUND_LABEL label)
 }
 
 //=============================================================================
-// セグメント再生(再生中なら停止)
+// --- セグメント再生(再生中なら停止) ---
 //=============================================================================
 void Play3DSound(SOUND_LABEL label, D3DXVECTOR3 pos, D3DXVECTOR3 rot, D3DXVECTOR3 posU)
 {
@@ -624,15 +626,17 @@ void Play3DSound(SOUND_LABEL label, D3DXVECTOR3 pos, D3DXVECTOR3 rot, D3DXVECTOR
 		g_PlaySound = label;
 	}
 
+#ifdef _3DAUDIO
 	/*** 立体音響モードを設定 ***/
 	g_aSoundInfo[label].posEmitter = pos;
 	g_aSoundInfo[label].rotEmitter = rot;
 	g_aSoundInfo[label].posUEmitter = posU;
 	g_aSoundInfo[label].b3D = true;
+#endif
 }
 
 //=============================================================================
-// セグメント停止(ラベル指定)
+// --- セグメント停止(ラベル指定) ---
 //=============================================================================
 void StopSound(SOUND_LABEL label)
 {
@@ -650,11 +654,13 @@ void StopSound(SOUND_LABEL label)
 
 		// 再生状況をfalseに
 		g_aPlayAudio[label] = false;
+
+		g_aChecker[label].StopSound();
 	}
 }
 
 //=============================================================================
-// セグメント停止(全て)
+// --- セグメント停止(全て) ---
 //=============================================================================
 void StopSound(void)
 {
@@ -667,12 +673,14 @@ void StopSound(void)
 			g_apSourceVoice[nCntSound]->Stop(0);
 			// 再生状況をfalseに
 			g_aPlayAudio[nCntSound] = false;
+
+			g_aChecker[nCntSound].StopSound();
 		}
 	}
 }
 
 //=============================================================================
-// チャンクのチェック
+// --- チャンクのチェック ---
 //=============================================================================
 HRESULT CheckChunk(HANDLE hFile, DWORD format, DWORD *pChunkSize, DWORD *pChunkDataPosition)
 {
@@ -740,7 +748,7 @@ HRESULT CheckChunk(HANDLE hFile, DWORD format, DWORD *pChunkSize, DWORD *pChunkD
 }
 
 //=============================================================================
-// チャンクデータの読み込み
+// --- チャンクデータの読み込み ---
 //=============================================================================
 HRESULT ReadChunkData(HANDLE hFile, void *pBuffer, DWORD dwBuffersize, DWORD dwBufferoffset)
 {
@@ -760,7 +768,7 @@ HRESULT ReadChunkData(HANDLE hFile, void *pBuffer, DWORD dwBuffersize, DWORD dwB
 }
 
 //=============================================================================
-// 音量の設定
+// --- 音量の設定 ---
 //=============================================================================
 void SetVolume(float volume, SETSOUND sound)
 {
@@ -788,7 +796,7 @@ void SetVolume(float volume, SETSOUND sound)
 }
 
 //=============================================================================
-// 音量の取得
+// --- 音量の取得 ---
 //=============================================================================
 float GetVolume(SETSOUND sound)
 {
@@ -803,7 +811,7 @@ float GetVolume(SETSOUND sound)
 }
 
 //=============================================================================
-// 音楽のフェード処理
+// --- 音楽のフェード処理 ---
 //=============================================================================
 void FadeSound(SOUND_LABEL label)
 {
@@ -813,9 +821,17 @@ void FadeSound(SOUND_LABEL label)
 }
 
 //=============================================================================
-// 現在再生中のBGMの取得
+// --- 現在再生中のBGMの取得 ---
 //=============================================================================
 SOUND_LABEL GetPlaySound(void)
 {
 	return g_PlaySound;
+}
+
+//=============================================================================
+// --- 現在再生中のBGMの取得 ---
+//=============================================================================
+bool IsPlayingSound(SOUND_LABEL label)
+{
+	return g_aChecker[label].GetPlayingSound();
 }
