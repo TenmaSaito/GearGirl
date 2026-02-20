@@ -14,6 +14,7 @@
 #include "thread.h"
 #include "fade.h"
 #include "sound.h"
+#include "param.h"
 
 // MODE
 #include "mode.h"
@@ -23,8 +24,6 @@
 //**********************************************************************************
 #define CLASS_NAME		"WindowClass"				// ウィンドウクラスの名前
 #define WINDOW_NAME		"GearGirl"					// キャプションに表示される名前
-#define SCREEN_WIDTH		(1280)					// ウィンドウの幅
-#define SCREEN_HEIGHT		(720)					// ウィンドウの高さ
 #define MODE_ON										// モード切り替え
 
 //**********************************************************************************
@@ -62,7 +61,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hInstancePrev, LPSTR lpCmdLine
 #endif // _DEBUG
 	HWND hWnd = NULL;							// ウィンドウハンドル
 	MSG msg = {};								// メッセージを格納する変数
-	RECT rect = { 0,0,SCREEN_WIDTH,SCREEN_HEIGHT };
+	RECT rect = { 0,0,CParam::CParamInt::SCWIDTH,CParam::CParamInt::SCHEIGHT };
 	WNDCLASSEX wcex = {};
 
 	// ウィンドウ作成
@@ -150,7 +149,7 @@ void MessageLoop(LPMSG lpMsg)
 				dwFrameCount = 0;						// フレームカウントをクリア
 			}
 
-			if ((dwCurrentTime - dwExecLastTime) >= (1000 / 60))
+			if ((dwCurrentTime - dwExecLastTime) >= (1000 / CParam::CParamInt::FPS))
 			{//60分の1秒経過
 
 				dwExecLastTime = dwCurrentTime;			//処理開始時刻[現在時刻]を保存
@@ -427,7 +426,7 @@ void Uninit(void)
 	UninitJoypad();
 
 	// マウスの終了処理
-	//UninitMouse();
+	UninitMouse();
 
 	// デバッグフォント削除
 	UninitDebugProc();
@@ -461,7 +460,7 @@ void Update(void)
 	UpdateJoypad();
 
 	// マウスの更新処理
-	//UpdateMouse();
+	UpdateMouse();
 
 	// デバッグ表示更新
 	UpdateDebugProc();

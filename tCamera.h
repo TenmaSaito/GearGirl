@@ -1,16 +1,17 @@
 //==================================================================================
 //
-// DirectXのタイトル用のヘッダーファイル [title.h]
+// DirectXのタイトルのカメラ用のヘッダーファイル [tCamera.h]
 // Author : TENMA
 //
 //==================================================================================
-#ifndef _TITLE_H_
-#define _TITLE_H_
+#ifndef _TCAMERA_H_
+#define _TCAMERA_H_
 
 //**********************************************************************************
 //*** インクルードファイル ***
 //**********************************************************************************
 #include "main.h"
+#include "param.h"
 
 //**********************************************************************************
 //*** マクロ定義 ***
@@ -19,9 +20,12 @@
 //**********************************************************************************
 //*** プロトタイプ宣言 ***
 //**********************************************************************************
-void InitTitle(void);
-void UninitTitle(void);
-void UpdateTitle(void);
-void DrawTitle(void);
+void InitTCamera(void);
+void UninitTCamera(void);
+void UpdateTCamera(void);
+void SetTCamera(void);
 
+void AddTCamera(D3DXVECTOR3 posR, D3DXVECTOR3 rot, float fLength, D3DVIEWPORT9 vp = CParam::CParamEx::DEF_VP);
+void SetTCamera(void);
 #endif
+
