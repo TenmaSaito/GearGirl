@@ -97,8 +97,8 @@ void InitGame(void)
 	/*** モデルの初期化 ***/
 	InitModel();
 
-	/*** プレイヤーの初期化 ***/
-	InitPlayer();
+	/*** モデルのスクリプト読み込み ***/
+	LoadModel();
 
 	/*** アイテムの初期化 ***/
 	InitItem();
@@ -106,8 +106,8 @@ void InitGame(void)
 	/*** ライトの初期化 ***/
 	InitLight();
 
-	/*** モデルのスクリプト読み込み ***/
-	LoadModel();
+	/*** プレイヤーの初期化 ***/
+	InitPlayer();
 
 	/*** ポーズの初期化 ***/
 	InitPause();

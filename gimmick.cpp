@@ -593,7 +593,6 @@ bool CollisionGimmick(D3DXVECTOR3* pPos, D3DXVECTOR3* pPosOld, D3DXVECTOR3* pMov
 						pPos->y = pObject->pos.y + pObjInfo->mtxMax.y;
 						bLand = true;
 						pMove->y = 0.0f;
-						pPlayer->bJump = false;
 						
 						if (g_aGimmick[nCntModel].bClear == false && g_aGimmick[nCntModel].myType == GIMMICKTYPE_BIGBUTTON && GetActivePlayer() == PLAYERTYPE_GIRL)
 						{// ‚Å‚©ƒ{ƒ^ƒ“‚ð‰Ÿ‚·

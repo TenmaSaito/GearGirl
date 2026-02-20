@@ -199,9 +199,9 @@ void SetModel(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nNumIdx, int nUseShadow)
 				g_ModelInfo[nCntModel].bUseShadow = false;
 			}
 
-			// âeÇê›íË
-			//g_ModelInfo[nCntModel].nShadow = SetShadow();
-
+#ifdef _DEBUG
+			MyMathUtil::CalcWorldMatrix(&g_ModelInfo[nCntModel].mtxWorld, g_ModelInfo[nCntModel].pos, g_ModelInfo[nCntModel].rot);
+#endif
 			break;
 		}
 	}
