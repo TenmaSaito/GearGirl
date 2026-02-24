@@ -61,7 +61,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hInstancePrev, LPSTR lpCmdLine
 #endif // _DEBUG
 	HWND hWnd = NULL;							// ウィンドウハンドル
 	MSG msg = {};								// メッセージを格納する変数
-	RECT rect = { 0,0,CParam::CParamInt::SCWIDTH,CParam::CParamInt::SCHEIGHT };
+	RECT rect = { 0,0,Constants::CParamInt::SCWIDTH,Constants::CParamInt::SCHEIGHT };
 	WNDCLASSEX wcex = {};
 
 	// ウィンドウ作成
@@ -74,6 +74,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hInstancePrev, LPSTR lpCmdLine
 
 	g_hWnd = hWnd;
 	g_bMainThread = true;
+
+	MyMathUtil::SetRand();
 
 	// 初期化処理
 	if (FAILED(Init(hInstance, hWnd, TRUE)))
@@ -149,7 +151,7 @@ void MessageLoop(LPMSG lpMsg)
 				dwFrameCount = 0;						// フレームカウントをクリア
 			}
 
-			if ((dwCurrentTime - dwExecLastTime) >= (1000 / CParam::CParamInt::FPS))
+			if ((dwCurrentTime - dwExecLastTime) >= (1000 / Constants::CParamInt::FPS))
 			{//60分の1秒経過
 
 				dwExecLastTime = dwCurrentTime;			//処理開始時刻[現在時刻]を保存

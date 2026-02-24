@@ -66,6 +66,10 @@
 #define PARENT(...)				: public __VA_ARGS__				// 継承宣言
 #endif
 
+#define STRING2(x) #x
+#define STRING(x) STRING2(x)
+#define SetWarning( x ) __pragma( message (__FILE__ "(" STRING(__LINE__) "):warning:" x ) )
+
 //#define _PATHCHECK_NO_WARNINGS								// 相対パスの確認
 
 //**********************************************************************************

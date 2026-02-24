@@ -18,6 +18,23 @@
 //**********************************************************************************
 
 //**********************************************************************************
+//*** TCam構造体 ***
+//**********************************************************************************
+STRUCT(TCamera)
+{
+	D3DVIEWPORT9 vp;				// ビューポート
+	D3DXMATRIX mtxProj, mtxView;	// 各マトリックス
+	D3DXVECTOR3 posV, posR, vecU;	// 視点、注視点、上方向ベクトル
+	D3DXVECTOR3 rot;				// 角度
+	float fLength;					// 視点間距離
+	float fAngle;					// 視野角
+	float fN, fF;					// 最近、最遠描画距離
+	int nIdx;						// 自身のインデックス
+}TCamera;
+
+typedef TCamera* PTCAMERA, *LPTCAMERA;
+
+//**********************************************************************************
 //*** プロトタイプ宣言 ***
 //**********************************************************************************
 void InitTCamera(void);
@@ -25,7 +42,8 @@ void UninitTCamera(void);
 void UpdateTCamera(void);
 void SetTCamera(void);
 
-void AddTCamera(D3DXVECTOR3 posR, D3DXVECTOR3 rot, float fLength, D3DVIEWPORT9 vp = CParam::CParamEx::DEF_VP);
+void AddTCamera(D3DXVECTOR3 posR, D3DXVECTOR3 rot, float fLength, D3DVIEWPORT9 vp = Constants::CParamEx::DEF_VP);
 void SetTCamera(void);
+LPTCAMERA GetTCamera(int nIdx = 0);
 #endif
 

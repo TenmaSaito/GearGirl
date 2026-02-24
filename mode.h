@@ -21,9 +21,10 @@
 //**********************************************************************************
 typedef enum
 {
-	MODE_TITLE = 0,			// タイトル画面
-	MODE_GAME,				// ゲーム画面
-	MODE_RESULT,			// エンディング画面
+	MODE_TEAMLOGO = 0,	// チームロゴ表示
+	MODE_TITLE,			// タイトル画面
+	MODE_GAME,			// ゲーム画面
+	MODE_RESULT,		// エンディング画面
 	MODE_MAX
 }MODE;
 

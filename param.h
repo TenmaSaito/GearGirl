@@ -15,7 +15,7 @@
 //**********************************************************************************
 //*** ÉfÅ[É^äiî[ç\ë¢ëÃåQ ***
 //**********************************************************************************
-namespace CParam 
+namespace Constants 
 {
 	// intå^
 	STRUCT(CParamInt)
@@ -32,6 +32,12 @@ namespace CParam
 		static const float HALFPI;				// 1/4â~
 		static const float DOUBLEPI;			// â~
 	} CParamFloat;
+
+	// charå^
+	STRUCT(CParamString)
+	{
+		static const char *DEFAULT_ERROR;		// í èÌÉGÉâÅ[ï∂
+	} CParamString;
 
 	// vectorå^
 	STRUCT(CParamVector)
@@ -50,6 +56,9 @@ namespace CParam
 		static const D3DXCOLOR RED;				// ê‘
 		static const D3DXCOLOR BLUE;			// ê¬
 		static const D3DXCOLOR GREEN;			// óŒ
+		static const D3DXCOLOR CYAN;			// ãÛ
+		static const D3DXCOLOR MAGENTA;			// É}É[ÉìÉ^
+		static const D3DXCOLOR YELLOW;			// â©êF
 		static const D3DXCOLOR INV_WHITE;		// ìßñæîí
 		static const D3DXCOLOR INV_NONE;		// ñ≥êF
 	} CParamColor;

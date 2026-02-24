@@ -1,6 +1,6 @@
 //=============================================================================
 //
-// DirectXの共通値のヘッダーファイル [param.h]
+// DirectXの共通値のソースファイル [param.cpp]
 // Author : TENMA SAITO
 //
 //=============================================================================
@@ -9,7 +9,7 @@
 //*****************************************************************************
 #include "param.h"
 
-using namespace CParam;
+using namespace Constants;
 
 //*****************************************************************************
 //*** 共通変数の設定 ***
@@ -76,11 +76,27 @@ const D3DXCOLOR CParamColor::BLUE = D3DXCOLOR(0, 0, 1, 1);
 // 緑
 const D3DXCOLOR CParamColor::GREEN = D3DXCOLOR(0, 1, 0, 1);
 
+// 空
+const D3DXCOLOR CParamColor::CYAN = D3DXCOLOR(0, 1, 1, 1);
+
+// マゼンタ
+const D3DXCOLOR CParamColor::MAGENTA = D3DXCOLOR(1, 1, 0, 1);
+
+// 黄色
+const D3DXCOLOR CParamColor::YELLOW = D3DXCOLOR(1, 0, 1, 1);
+
 // 透明白
 const D3DXCOLOR CParamColor::INV_WHITE = D3DXCOLOR(1, 1, 1, 0);
 
 // 無色
 const D3DXCOLOR CParamColor::INV_NONE = D3DXCOLOR(0, 0, 0, 0);
+
+//=============================================================================
+// --- CParamString ---
+//=============================================================================
+
+// デフォルトのエラー文
+const char *CParamString::DEFAULT_ERROR = "エラーが発生しました。";
 
 //=============================================================================
 // --- CParamEx ---
@@ -90,7 +106,13 @@ const D3DXCOLOR CParamColor::INV_NONE = D3DXCOLOR(0, 0, 0, 0);
 const D3DVIEWPORT9 CParamEx::DEF_VP = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 1 };
 
 // Matrix初期値
-const D3DXMATRIX CParamEx::MTX_IDENTITY = D3DXMATRIX(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+const D3DXMATRIX CParamEx::MTX_IDENTITY = D3DXMATRIX
+(
+	1, 0, 0, 0,
+	0, 1, 0, 0, 
+	0, 0, 1, 0,
+	0, 0, 0, 1
+);
 
 // 1ポリゴンのサイズ(VERTEX_2D)
 const size_t CParamEx::VTX2DSIZE = sizeof(VERTEX_2D) * 4;

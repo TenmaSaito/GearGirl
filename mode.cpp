@@ -8,6 +8,7 @@
 //*** インクルードファイル ***
 //*************************************************************************************************
 #include "mode.h"
+#include "teamLogo.h"
 #include "Title.h"
 #include "game.h"
 #include "Result.h"
@@ -23,7 +24,7 @@
 //**********************************************************************************
 //*** グローバル変数 ***
 //**********************************************************************************
-MODE g_mode = MODE_GAME;								// 現在の画面
+MODE g_mode = MODE_TITLE;								// 現在の画面
 
 //==================================================================================
 // --- タイトル関連cppファイルの初期化 ---
@@ -33,6 +34,11 @@ void InitMode(void)
 	// 指定の画面(モード)の初期化処理
 	switch (g_mode)
 	{
+		// チームロゴ表示画面
+	case MODE_TEAMLOGO:
+		InitTeamLogo();
+		break;
+
 		// タイトル画面
 	case MODE_TITLE:
 		InitTitle();
@@ -55,6 +61,9 @@ void InitMode(void)
 //==================================================================================
 void UninitMode(void)
 {
+	// チームロゴ表示画面の終了処理
+	UninitTeamLogo();
+
 	// タイトル画面の終了処理
 	UninitTitle();
 
@@ -72,6 +81,11 @@ void UpdateMode(void)
 {
 	switch (g_mode)
 	{
+		// チームロゴ表示画面
+	case MODE_TEAMLOGO:
+		UpdateTeamLogo();
+		break;
+
 		// タイトル画面
 	case MODE_TITLE:
 		UpdateTitle();
@@ -105,6 +119,11 @@ void DrawMode(void)
 	/*** 現在の画面(モード)の描画処理 ***/
 	switch (g_mode)
 	{
+		// チームロゴ表示画面
+	case MODE_TEAMLOGO:
+		DrawTeamLogo();
+		break;
+
 		// タイトル画面
 	case MODE_TITLE:
 		DrawTitle();
@@ -133,6 +152,11 @@ void SetMode(MODE mode)
 	// 現在の画面(モード)の終了
 	switch (g_mode)
 	{
+		// チームロゴ表示画面
+	case MODE_TEAMLOGO:
+		UninitTeamLogo();
+		break;
+
 		// タイトル画面
 	case MODE_TITLE:
 		UninitTitle();
@@ -152,6 +176,11 @@ void SetMode(MODE mode)
 	// 指定の画面(モード)の初期化処理
 	switch (mode)
 	{
+		// チームロゴ表示画面
+	case MODE_TEAMLOGO:
+		InitTeamLogo();
+		break;
+
 		// タイトル画面
 	case MODE_TITLE:
 		InitTitle();

@@ -96,7 +96,7 @@ void InitPlayer(void)
 	{
 		g_aPlayer[nCntPlayer].posOri = PLAYER_POSDEF;
 		g_aPlayer[nCntPlayer].pos = PLAYER_POSDEF;
-		g_aPlayer[nCntPlayer].posOld = PLAYER_POSDEF;
+		g_aPlayer[nCntPlayer].posOld = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_aPlayer[nCntPlayer].rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_aPlayer[nCntPlayer].bDisp = true;
 		g_aPlayer[nCntPlayer].bJump = false;
@@ -175,8 +175,6 @@ void InitPlayer(void)
 
 #ifdef _DEBUG
 	g_nNumPlayer = 1;
-	MyMathUtil::CalcWorldMatrix(&g_aPlayer[PLAYERTYPE_GIRL].mtxWorld, g_aPlayer[PLAYERTYPE_GIRL].pos, g_aPlayer[PLAYERTYPE_GIRL].rot);
-	MyMathUtil::CalcWorldMatrix(&g_aPlayer[PLAYERTYPE_MOUSE].mtxWorld, g_aPlayer[PLAYERTYPE_MOUSE].pos, g_aPlayer[PLAYERTYPE_MOUSE].rot);
 #endif
 	// デバイスの破棄
 	EndDevice();
@@ -319,25 +317,13 @@ void UpdatePlayer(void)
 		CollisionItem(pPlayer->pos, PLAYER_RANGE);
 
 		// ギミックとの当たり判定
-		if (CollisionGimmick(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move, &g_aPlayer[nCntPlayer]) == true)
-		{
-			if (pPlayer->bJump == true
-				&& pPlayer->motionType != MOTIONTYPE_LANDING
-				&& pPlayer->motionTypeBlend != MOTIONTYPE_LANDING)
-			{// 着地モーション
-				SetMotionType(MOTIONTYPE_LANDING, true, 15, (PlayerType)nCntPlayer);
-				pPlayer->bUseLandMotion = true;
-				//g_Land++;
-			}
-
-			pPlayer->bJump = false;
-		}
+		CollisionGimmick(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move, &g_aPlayer[nCntPlayer]);
 
 		// デバッグ表示
-		if (g_Functionkey != 0)
-		{
+		//if (g_Functionkey != 0)
+	//	{
 			PrintDebugProc("\nPlayer座標 : [%~3f]\n", pPlayer->pos.x, pPlayer->pos.y, pPlayer->pos.z);
-		}
+	//	}
 	}
 
 	// プロンプトを描画
@@ -1676,7 +1662,7 @@ void ShotMouse(void)
 			pMouse->rot.y = pCamera->rot.y + D3DX_PI;
 
 			// 手にくっつける
-			//D3DXVec3TransformCoord(&pMouse->pos, &offset, &pPlayer->PartsInfo.aParts[19].mtxWorld);
+			D3DXVec3TransformCoord(&pMouse->pos, &offset, &pPlayer->PartsInfo.aParts[19].mtxWorld);
 		}
 
 		if (pPlayer->state != PLAYERSTATE_THROWWAITING)
@@ -1719,7 +1705,7 @@ void ShotMouse(void)
 			if (pPlayer->state == PLAYERSTATE_NEUTRAL)
 			{
 				// ネズミを飛ばす
-				D3DXVec3TransformCoord(&pMouse->pos, &pMouse->pos, &pPlayer->PartsInfo.aParts[19].mtxWorld);
+				//D3DXVec3TransformCoord(&pMouse->pos, &pMouse->pos, &pPlayer->PartsInfo.aParts[19].mtxWorld);
 
 				pMouse->move.x += vec.x * 1.0f;
 				pMouse->move.z += vec.z * 1.0f;

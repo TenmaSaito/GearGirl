@@ -1,9 +1,9 @@
-//================================================================================================================
+//==================================================================================
 //
 // DirectXの計算関連ヘッダファイル [mathUtil.h]
 // Author : TENMA
 //
-//================================================================================================================
+//==================================================================================
 #ifndef _MATHUTIL_H_
 #define _MATHUTIL_H_
 
@@ -11,11 +11,17 @@
 //*** インクルードファイル ***
 //**********************************************************************************
 #include "main.h"
+#include "param.h"
+#include <time.h>
+
+using namespace Constants;
 
 // modeldata.hが存在する場合
 #if __has_include("modeldata.h")
 #include "modeldata.h"
 #define MODELDATA_INCLUDED
+#else
+SetWarning("modeldata.hがインクルードされていません。modeldata関連関数は無効化されます。")
 #endif
 
 //**********************************************************************************
@@ -48,11 +54,25 @@
 #define END_SHADER				(-1)						// シェーダーの終了コード
 //----------------------------------------------------------------------------------
 
+//----------------------------------------------------------------------------------
+// 型宣言
+//----------------------------------------------------------------------------------
+using V2 = D3DXVECTOR2;
+using V3 = D3DXVECTOR3;
+using COL = D3DXCOLOR;
+using IDX_TEX = int;
+using SHADER_PATH = char[MAX_PATH];
+using TECHNIQUE_NAME = const char*;
+using float3 = float[3];
+using float2 = float[2];
+using float4 = float[4];
+using float4x4 = D3DXMATRIX;
+
 namespace MyMathUtil
 {
-	//**********************************************************************************
+	//******************************************************************************
 	//*** int型Vector3構造体 ***
-	//**********************************************************************************
+	//******************************************************************************
 	STRUCT()
 	{
 		int x;		// x
@@ -60,18 +80,18 @@ namespace MyMathUtil
 		int z;		// z
 	}INT_VECTOR3;
 
-	//**********************************************************************************
+	//******************************************************************************
 	//*** int型Vector2構造体 ***
-	//**********************************************************************************
+	//******************************************************************************
 	STRUCT()
 	{
 		int x;		// x
 		int y;		// y
 	}INT_VECTOR2;
 
-	//**********************************************************************************
+	//******************************************************************************
 	//*** DualInputのフラグ列挙 ***
-	//**********************************************************************************
+	//******************************************************************************
 	ENUM()
 	{
 		DUAL_KEYBOARD	= 0x00000001,			// Keyboard入力
@@ -89,22 +109,27 @@ namespace MyMathUtil
 
 #define DUAL_DUALID		3						// DUALをずらす距離
 
-	//**********************************************************************************
+	//******************************************************************************
 	//*** プロトタイプ宣言 ***
-	//**********************************************************************************
+	//******************************************************************************
 	
-	//----------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------
 	/*** Input関連 ***/
 	bool GetDualInput(int nKey, DWORD nFlag1, int nKey2 = -1, DWORD nFlag2 = -1);
-	//----------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------
 
-	//----------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------
 	/*** 当たり判定、角度関連 ***/
 	bool CollisionBox(RECT rect, D3DXVECTOR3 pos);
 	bool CollisionBoxZ(D3DXVECTOR4 rect, D3DXVECTOR3 pos);
 	bool IsDetection(D3DXVECTOR3 p1, D3DXVECTOR3 p2, float fRadius);
 	void RepairFloat(float* fRepairTarget, int nCnt = 3);
-	float RepairRot(float fRot);
+	__forceinline float RepairRot(float fRot)
+	{
+		return (fRot > D3DX_PI) ? fRot -= D3DX_PI * 2.0f :
+			((fRot <= -D3DX_PI) ? fRot += D3DX_PI * 2.0f :
+				fRot);
+	}
 	void RepairRot(float* pOut, const float* fAngle);
 	void RepairRot(D3DXVECTOR3* pOut, const D3DXVECTOR3* pIn);
 	float InverseRot(float fRot);
@@ -112,9 +137,9 @@ namespace MyMathUtil
 	D3DXVECTOR3 RepairedRot(const D3DXVECTOR3 pIn);
 	D3DXVECTOR3 DegreeToRadian(D3DXVECTOR3 degree);
 	D3DXVECTOR3 RadianToDegree(D3DXVECTOR3 radian);
-	//----------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------
 
-	//----------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------
 	/*** D3DXVECTOR3の位置関連 ***/
 	D3DXVECTOR3 GetPTPLerp(D3DXVECTOR3 Start, D3DXVECTOR3 End, float s);
 	void HomingPosToPos(D3DXVECTOR3 posTarget, D3DXVECTOR3* posMover, float fSpeed);
@@ -122,20 +147,20 @@ namespace MyMathUtil
 	D3DXVECTOR3 GetPosBetweenPos(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2);
 	float GetPTPLength(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2);
 	float GetPTPLength3D(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2);
-	//----------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------
 
-	//----------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------
 	/*** D3DXCOLOR関連 ***/
 	D3DXCOLOR GetColLerp(D3DXCOLOR Start, D3DXCOLOR End, float s);
-	//----------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------
 	
-	//----------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------
 	/*** ランダムな値取得関連 ***/
 	D3DXVECTOR3 GetRandomVector3(int mx, int my, int mz);
 	D3DXCOLOR GetRandomColor(bool bUseAlphaRand);
-	//----------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------
 
-	//----------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------
 	/*** 頂点情報関連 ***/
 	void RollPolygon(VERTEX_2D* pVtx, D3DXVECTOR3 pos, float fWidth, float fHeight, float fRot, int nSpeed);
 	void SetFullScreenPolygon(VERTEX_2D* pVtx);
@@ -168,15 +193,15 @@ namespace MyMathUtil
 
 	void SetPolygonNormal(VERTEX_3D* pVtx, D3DXVECTOR3 nor);
 	void SetPolygonRHW(VERTEX_2D* pVtx);
-	//----------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------
 
-	//----------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------
 	/*** 変換関連 ***/
 	D3DXVECTOR3 INTToFloat(INT_VECTOR3 nVector3);
 	D3DXVECTOR2 INTToFloat(INT_VECTOR2 nVector2);
-	//----------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------
 
-	//----------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------
 	/*** 描画関連 ***/
 	void DrawPolygon(_In_ LPDIRECT3DDEVICE9 pDevice,
 		_In_ LPDIRECT3DVERTEXBUFFER9 pVtxBuff,
@@ -261,26 +286,165 @@ namespace MyMathUtil
 		_In_ float fEnd);
 
 	void CleanUpPixelFog(void);
-	//----------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------
 
-	//----------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------
 	/*** シェーダー関連 ***/
-	void SetSheder(_In_ LPD3DXEFFECT pEffect,
-		_In_ const char *TechniqueName,
-		_In_ UINT Pass);
+	_Check_return_ HRESULT LoadSheder(
+		_In_ LPDIRECT3DDEVICE9 pDevice,
+		_In_ SHADER_PATH pathName,
+		_Out_ LPD3DXEFFECT* ppEffect
+	);
 
-	void RemovePass(_In_ LPD3DXEFFECT pEffect,
-		_In_ UINT NextPass = END_SHADER);
-	//----------------------------------------------------------------------------------
+	void SetSheder(
+		_In_ LPD3DXEFFECT pEffect,
+		_In_ TECHNIQUE_NAME TechniqueName,
+		_In_ UINT Pass
+	);
 
-	//----------------------------------------------------------------------------------
+	void RemovePass(
+		_In_ LPD3DXEFFECT pEffect,
+		_In_ UINT NextPass = END_SHADER
+	);
+	//------------------------------------------------------------------------------
+
+	//------------------------------------------------------------------------------
+	/*** 単純計算関連 ***/
+	// --- int --- //
+	// 最大値
+	__forceinline int Max(int x, int y)
+	{
+		return (x >= y) ? x : y;
+	}
+
+	// 最小値
+	__forceinline int Min(int x, int y)
+	{
+		return (x >= y) ? y : x;
+	}
+
+	// クランプ
+	__forceinline int Clamp(int x, int clampMin, int clampMax)
+	{
+		return (x > clampMax) ? clampMax 
+			: ((x < clampMin) ? clampMin 
+				: x);
+	}
+
+	// 二乗
+	__forceinline int Square(int x)
+	{
+		return x * x;
+	}
+
+	// 線形補間
+	__forceinline int Lerp(int start, int end, float s)
+	{
+		return start + ((end - start) * s);
+	}
+
+	// 上下判定
+	__forceinline int Step(int y, int x)
+	{
+		return (x >= y) ? 1 : 0;
+	}
+
+	// 絶対値変換済み上下判定
+	__forceinline int StepAbs(int y, int x)
+	{
+		return (x >= abs(y)) ? 1.0f : 0.0f;
+	}
+
+	// 符号を返す
+	__forceinline int Sign(int x)
+	{
+		return (x > 0) ? 1
+			: ((x < 0) ? -1
+				: 0);
+	}
+
+	// --- float --- //
+	// 最大値
+	__forceinline float Max(float x, float y)
+	{
+		return (x >= y) ? x : y;
+	}
+
+	// 最小値
+	__forceinline float Min(float x, float y)
+	{
+		return (x >= y) ? y : x;
+	}
+
+	// クランプ
+	__forceinline float Clamp(float x, float clampMin, float clampMax)
+	{
+		return (x > clampMax) ? clampMax
+			: ((x < clampMin) ? clampMin
+				: x);
+	}
+
+	// 二乗
+	__forceinline float Square(float x)
+	{
+		return x * x;
+	}
+
+	// 線形補間
+	__forceinline float Lerp(float start, float end, float s)
+	{
+		return start + ((end - start) * s);
+	}
+
+	// 上下判定
+	__forceinline float Step(float y, float x)
+	{
+		return (x >= y) ? 1.0f : 0.0f;
+	}
+
+	// 絶対値変換済み上下判定
+	__forceinline float StepAbs(float y, float x)
+	{
+		return (x >= fabsf(y)) ? 1.0f : 0.0f;
+	}
+
+	// 符号を返す
+	__forceinline float Sign(float x)
+	{
+		return (x > 0.0f) ? 1.0f 
+			: ((x < 0.0f) ? -1.0f 
+				: 0.0f);
+	}
+
+	// --- VECTOR3 --- //
+	// 円の弧の座標
+	__forceinline D3DXVECTOR3 Arc(float radius, float radian, D3DXVECTOR3 offset = CParamVector::V3NULL)
+	{
+		return D3DXVECTOR3(offset.x + cosf(RepairRot(radian)) * radius,
+			offset.y + sinf(RepairRot(radian)) * radius,
+			offset.z + 0.0f);
+	}
+
+	// --- MATRIX --- //
+	// 掛け算
+	__forceinline D3DXMATRIX Multiply(D3DXMATRIX mtx1, D3DXMATRIX mtx2)
+	{
+		return mtx1 * mtx2;
+	}
+	//------------------------------------------------------------------------------
+
+	//------------------------------------------------------------------------------
 	/*** システム関連 ***/
 	HRESULT CheckIndex(int TargetIndexMax, int Index, int TargetIndexMin = NULL);
 	bool CheckPath(_In_ const char* pFileName);
 	char *UniteChar(char* pOut, const char* fmt, ...);
 	int GenerateMessageBox(_In_ UINT nType, _In_ const char* pCaption, _In_ const char* fmt, ...);
 	char *GetErrorMessage(_In_ HRESULT hr, char *pOut, size_t size, bool bPopupMessageBox);
-	//----------------------------------------------------------------------------------
+	__forceinline void SetRand(void)
+	{
+		srand((unsigned int)time(0));
+	}
+	//------------------------------------------------------------------------------
 }
 
 #endif

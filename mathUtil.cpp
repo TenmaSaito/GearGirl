@@ -10,6 +10,9 @@
 #include "mathUtil.h"
 #include "input.h"
 #include "Texture.h"
+#include "param.h"
+
+using namespace Constants;
 
 //**********************************************************************************
 //*** グローバル変数 ***
@@ -114,29 +117,29 @@ float MyMathUtil::GetPosToPos(D3DXVECTOR3 posTarget, D3DXVECTOR3 posMover)
 	return fAngle;
 }
 
-//==================================================================
-// --- 角度を修正する処理 ---
-//==================================================================
-float MyMathUtil::RepairRot(float fRot)
-{
-	if (fRot <= -D3DX_PI || fRot > D3DX_PI)
-	{
-		if (fRot > D3DX_PI)
-		{
-			fRot -= D3DX_PI * 2.0f;
-		}
-		else if (fRot <= -D3DX_PI)
-		{
-			fRot += D3DX_PI * 2.0f;
-		}
-
-		return fRot;
-	}
-	else
-	{
-		return fRot;
-	}
-}
+////==================================================================
+//// --- 角度を修正する処理 ---
+////==================================================================
+//float MyMathUtil::RepairRot(float fRot)
+//{
+//	if (fRot <= -D3DX_PI || fRot > D3DX_PI)
+//	{
+//		if (fRot > D3DX_PI)
+//		{
+//			fRot -= D3DX_PI * 2.0f;
+//		}
+//		else if (fRot <= -D3DX_PI)
+//		{
+//			fRot += D3DX_PI * 2.0f;
+//		}
+//
+//		return fRot;
+//	}
+//	else
+//	{
+//		return fRot;
+//	}
+//}
 
 //==================================================================
 // --- 角度を修正する処理(ポインタ処理) ---
@@ -1532,7 +1535,7 @@ D3DXMATRIX *MyMathUtil::CalcWorldMatrix(_Inout_ D3DXMATRIX *pMtxWorld,
 	D3DXMATRIX mtxRot, mtxTrans;		// 計算用マトリックス
 
 	/*** ワールドマトリックスの初期化 ***/
-	D3DXMatrixIdentity(pMtxWorld);
+	*pMtxWorld = CParamEx::MTX_IDENTITY;
 
 	/*** 向きを反映 (※ 位置を反映する前に必ず行うこと！) ***/
 	D3DXMatrixRotationYawPitchRoll(&mtxRot,
@@ -1762,11 +1765,63 @@ char *MyMathUtil::GetErrorMessage(_In_ HRESULT hr, char *pOut, size_t size, bool
 }
 
 //==================================================================================
+// --- シェーダーの読み込み ---
+//==================================================================================
+_Check_return_ HRESULT MyMathUtil::LoadSheder
+(
+	_In_ LPDIRECT3DDEVICE9 pDevice,
+	_In_ SHADER_PATH pathName,
+	_Out_ LPD3DXEFFECT* ppEffect
+)
+{
+	// エラー文用バッファ
+	LPD3DXBUFFER bufError = nullptr;
+	HRESULT hr = S_OK;
+
+	// エフェクトファイルの読み込み
+	hr = D3DXCreateEffectFromFile(pDevice,
+		pathName,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		ppEffect,
+		&bufError);
+
+	// 失敗時
+	if (FAILED(hr))
+	{
+		if (bufError == nullptr)
+		{ // エラー文取得失敗時
+			MyMathUtil::GenerateMessageBox(MB_ICONERROR,
+				"EffectError",
+				"エフェクトファイルの読み込みに失敗しました...この子みたいです...\n対象パス : %s",
+				pathName);
+		}
+		else
+		{ // エラー文取得成功時
+			MyMathUtil::GenerateMessageBox(MB_ICONERROR,
+				"EffectError",
+				"%s\n対象パス %s",
+				(LPSTR)bufError->GetBufferPointer(),
+				pathName);
+
+			RELEASE(bufError);
+		}
+	}
+
+	return hr;
+}
+
+//==================================================================================
 // --- シェーダーの開始 ---
 //==================================================================================
-void MyMathUtil::SetSheder(_In_ LPD3DXEFFECT pEffect,
-	_In_ const char *TechniqueName,
-	_In_ UINT Pass)
+void MyMathUtil::SetSheder
+(
+	_In_ LPD3DXEFFECT pEffect,
+	_In_ TECHNIQUE_NAME TechniqueName,
+	_In_ UINT Pass
+)
 {
 	// テクニックの設定
 	pEffect->SetTechnique(TechniqueName);
@@ -1783,8 +1838,11 @@ void MyMathUtil::SetSheder(_In_ LPD3DXEFFECT pEffect,
 //==================================================================================
 // --- パスの終了 ---
 //==================================================================================
-void MyMathUtil::RemovePass(_In_ LPD3DXEFFECT pEffect,
-	_In_ UINT NextPass)
+void MyMathUtil::RemovePass
+(
+	_In_ LPD3DXEFFECT pEffect,
+	_In_ UINT NextPass
+)
 {
 	// パスの終了
 	pEffect->EndPass();
@@ -1802,7 +1860,13 @@ void MyMathUtil::RemovePass(_In_ LPD3DXEFFECT pEffect,
 //==================================================================================
 // --- DualInput ---
 //==================================================================================
-bool MyMathUtil::GetDualInput(int nKey, DWORD nFlag, int nKey2, DWORD nFlag2)
+bool MyMathUtil::GetDualInput
+(
+	int nKey,
+	DWORD nFlag, 
+	int nKey2,
+	DWORD nFlag2
+)
 {
 	bool aInput[2] = {};
 

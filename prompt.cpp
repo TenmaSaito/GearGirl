@@ -13,7 +13,7 @@
 #include "mathUtil.h"
 #include "param.h"
 
-using namespace CParam;
+using namespace Constants;
 
 //**********************************************************************************
 //*** É}ÉNÉçíËã` ***

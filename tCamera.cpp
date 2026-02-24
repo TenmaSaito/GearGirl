@@ -18,29 +18,11 @@ using namespace MyMathUtil;
 #define MAX_TCAMERA				(1)			// カメラの最大数
 #define DEFAULT_ANGLE			(45.0f)		// 視野角
 #define DEFAULT_NEAR			(1.0f)		// 最近描画距離
-#define DEFAULT_FAR				(1000.0f)	// 最遠描画距離
-
-//**********************************************************************************
-//*** TCam構造体 ***
-//**********************************************************************************
-STRUCT(TCamera)
-{
-	D3DVIEWPORT9 vp;				// ビューポート
-	D3DXMATRIX mtxProj, mtxView;	// 各マトリックス
-	D3DXVECTOR3 posV, posR, vecU;	// 視点、注視点、上方向ベクトル
-	D3DXVECTOR3 rot;				// 角度
-	float fLength;					// 視点間距離
-	float fAngle;					// 視野角
-	float fN, fF;					// 最近、最遠描画距離
-	int nIdx;						// 自身のインデックス
-}TCamera;
-
-typedef TCamera *PTCAMERA, *LPTCAMERA;
+#define DEFAULT_FAR				(5000.0f)	// 最遠描画距離
 
 //**********************************************************************************
 //*** プロトタイプ宣言 ***
 //**********************************************************************************
-LPTCAMERA GetTCam(int nIdx = 0);
 
 //**********************************************************************************
 //*** グローバル変数 ***
@@ -80,13 +62,13 @@ void SetTCamera(void)
 	// デバイスの取得
 	AUTODEVICE9 Auto;		// デバイスの自動解放用変数
 	LPDIRECT3DDEVICE9 pDevice = Auto.pDevice;		// デバイスのコピー
-	LPTCAMERA pTCam = GetTCam();
+	LPTCAMERA pTCam = GetTCamera();
 
 	// ビューポート指定
 	pDevice->SetViewport(&pTCam->vp);
 
 	// プロジェクションマトリックスの初期化
-	pTCam->mtxProj = CParam::CParamEx::MTX_IDENTITY;
+	pTCam->mtxProj = Constants::CParamEx::MTX_IDENTITY;
 
 	// プロジェクションマトリックスを作成
 	D3DXMatrixPerspectiveFovLH(&pTCam->mtxProj,
@@ -110,10 +92,11 @@ void SetTCamera(void)
 //==================================================================================
 void AddTCamera(D3DXVECTOR3 posR, D3DXVECTOR3 rot, float fLength, D3DVIEWPORT9 vp)
 {
-	LPTCAMERA pTCam = GetTCam();
+	LPTCAMERA pTCam = GetTCamera();
 
 	// 情報を保存
 	pTCam->posR = posR;				// 注視点
+	pTCam->vecU = D3DXVECTOR3(0, 1, 0); // 上方向ベクトル
 	pTCam->rot = rot;				// 角度
 	pTCam->fLength = fLength;		// 視点間距離
 	pTCam->fAngle = DEFAULT_ANGLE;	// 視野角
@@ -125,15 +108,15 @@ void AddTCamera(D3DXVECTOR3 posR, D3DXVECTOR3 rot, float fLength, D3DVIEWPORT9 v
 	pTCam->vp = vp;
 
 	// 各情報から視点の位置を逆算
-	pTCam->posV.x = pTCam->posR.x - cosf(D3DX_PI - pTCam->rot.y) * pTCam->fLength;
+	pTCam->posV.x = pTCam->posR.x - cosf(pTCam->rot.y) * pTCam->fLength;
 	pTCam->posV.y = pTCam->posR.y;
-	pTCam->posV.z = pTCam->posR.z - sinf(D3DX_PI - pTCam->rot.y) * pTCam->fLength;
+	pTCam->posV.z = pTCam->posR.z - sinf(pTCam->rot.y) * pTCam->fLength;
 }
 
 //==================================================================================
 // --- 取得 ---
 //==================================================================================
-LPTCAMERA GetTCam(int nIdx)
+LPTCAMERA GetTCamera(int nIdx)
 {
 	return &g_aTCam[nIdx];
 }
