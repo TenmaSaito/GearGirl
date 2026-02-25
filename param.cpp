@@ -45,17 +45,20 @@ const float CParamFloat::DOUBLEPI = D3DX_PI * 2.0f;
 // --- CParamVector ---
 //=============================================================================
 
-// VECTOR2NULL
+// VECTOR2 NULL
 const D3DXVECTOR2 CParamVector::V2NULL = D3DXVECTOR2(0, 0);
 
-// VECTOR3NULL
+// VECTOR3 NULL
 const D3DXVECTOR3 CParamVector::V3NULL = D3DXVECTOR3(0, 0, 0);
 
-// VECTOR4NULL
-const D3DXVECTOR4 CParamVector::V4NULL = D3DXVECTOR4(0, 0, 0, 0);
+// VECTOR3 1
+const D3DXVECTOR3 CParamVector::V3ONE = D3DXVECTOR3(1, 1, 1);
 
-// ウィンドウの中心
+// VECTOR3 WINMID
 const D3DXVECTOR3 CParamVector::WINMID = D3DXVECTOR3(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, 0);
+
+// VECTOR4 NULL
+const D3DXVECTOR4 CParamVector::V4NULL = D3DXVECTOR4(0, 0, 0, 0);
 
 //=============================================================================
 // --- CParamColor ---

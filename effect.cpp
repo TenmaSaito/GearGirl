@@ -156,7 +156,7 @@ void UpdateEffect(void)
 
 			if (g_aEffect[nCntEffect].bGravity)
 			{
-				g_aEffect[nCntEffect].pos.y += GRAVITY;
+				g_aEffect[nCntEffect].vec.y += GRAVITY;
 			}
 			
 			// í∏ì_ç¿ïWÇÃê›íË

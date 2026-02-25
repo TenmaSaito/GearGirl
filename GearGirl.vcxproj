@@ -197,6 +197,7 @@
     <ClCompile Include="title.cpp" />
     <ClCompile Include="modeldata.cpp" />
     <ClCompile Include="UIarm.cpp" />
+    <ClCompile Include="wall.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h" />
@@ -242,6 +243,7 @@
     <ClInclude Include="title.h" />
     <ClInclude Include="modeldata.h" />
     <ClInclude Include="UIarm.h" />
+    <ClInclude Include="wall.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

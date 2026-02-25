@@ -444,6 +444,9 @@ namespace MyMathUtil
 	{
 		srand((unsigned int)time(0));
 	}
+
+	bool PushDataForStack(void *pData, size_t size, UINT ID);
+	bool PopDataFromStack(void* pData, size_t size, UINT ID);
 	//------------------------------------------------------------------------------
 }
 

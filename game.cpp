@@ -24,6 +24,7 @@
 #include "modeldata.h"
 #include "motion.h"
 #include "player.h"
+#include "particle.h"
 #include "pause.h"
 #include "prompt.h"
 #include "sound.h"
@@ -130,6 +131,9 @@ void InitGame(void)
 	/*** エフェクトの初期化 ***/
 	InitEffect();
 
+	/*** パーティクルの初期化 ***/
+	InitParticle();
+
 	/***ギミックの設置 ***/
 	//SetGimmick(D3DXVECTOR3(0, 0, 0), D3DXVECTOR3(0.0f, 0.0f, 0.0f), GIMMICKTYPE_DUCT);
 
@@ -139,6 +143,8 @@ void InitGame(void)
 	nIdxPrompt = SetPrompt(D3DXVECTOR3(1463, 116, -455), D3DXVECTOR2(10.0f, 5.0f), Tex, true);
 	SetEnablePrompt(true, nIdxPrompt);
 	//Play3DSound(SOUND_LABEL_SE_GETPARTS, VECNULL, VECNULL, VECNULL);
+
+	SetParticle(D3DXVECTOR3(1463, 116, -455), CParamColor::RED, -CParamVector::V3ONE * 0.5f, CParamVector::V3ONE, 5, 10.0f, 1000, 10, true);
 }
 
 //==================================================================================
@@ -204,6 +210,9 @@ void UninitGame(void)
 
 	/*** エフェクトの終了 ***/
 	UninitEffect();
+
+	/*** パーティクルの終了 ***/
+	UninitParticle();
 }
 
 //==================================================================================
@@ -271,6 +280,9 @@ void UpdateGame(void)
 
 		/*** ギミックの更新 ***/
 		UpdateGimmick();
+
+		/*** パーティクルの更新 ***/
+		UpdateParticle();
 
 		/*** エフェクトの更新 ***/
 		UpdateEffect();

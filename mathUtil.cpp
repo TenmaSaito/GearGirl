@@ -14,9 +14,20 @@
 
 using namespace Constants;
 
+STRUCT(StackData)
+{
+	void *pData;
+	UINT ID;
+	bool bStack;
+} StackData;
+
+typedef StackData *LPSTACKDATA, *PSTACKDATA;
+
 //**********************************************************************************
 //*** グローバル変数 ***
 //**********************************************************************************
+LPSTACKDATA g_pStackData;	// スタックデータ
+UINT g_nNumStackData = 0;	// スタックデータ数
 
 //================================================
 // --- 対象の位置の範囲確認処理 ---
@@ -1954,4 +1965,62 @@ bool MyMathUtil::GetDualInput
 	if (nFlag & DUAL_OR) return aInput[0] | aInput[1];
 
 	return false;
+}
+
+//==================================================================================
+// --- DualInput ---
+//==================================================================================
+bool PushDataForStack(void* pData, size_t size, UINT ID)
+{
+	LPSTACKDATA pStackData = (LPSTACKDATA)realloc(g_pStackData, sizeof(StackData) * (g_nNumStackData + 1));
+	if (pStackData != NULL)
+	{
+		g_pStackData->pData = malloc(size);
+		if (g_pStackData->pData != NULL)
+		{
+			memcpy(g_pStackData[g_nNumStackData].pData, pData, size);
+			g_pStackData[g_nNumStackData].ID = ID;
+			g_pStackData[g_nNumStackData].bStack = true;
+			g_nNumStackData++;
+			return true;
+		}
+		else
+		{
+			pStackData = (LPSTACKDATA)realloc(g_pStackData, sizeof(StackData) * g_nNumStackData);
+			if (pStackData == NULL)
+			{
+				free(g_pStackData);
+				g_nNumStackData = 0;
+			}
+
+			return false;
+		}
+	}
+	else
+	{
+		free(g_pStackData);
+		g_nNumStackData = 0;
+		return false;
+	}
+}
+
+//==================================================================================
+// --- DualInput ---
+//==================================================================================
+bool PopDataFromStack(void *pData, size_t size, UINT ID)
+{
+	if (g_nNumStackData == 0) return false;
+
+	for (int nCntCheck = 0; nCntCheck < g_nNumStackData; nCntCheck++)
+	{
+		if (g_pStackData[nCntCheck].ID == ID)
+		{
+			if (pData != NULL)
+			{
+				memcpy(pData, g_pStackData[nCntCheck].pData, size);
+			}
+
+			free(g_pStackData[nCntCheck].pData);
+		}
+	}
 }

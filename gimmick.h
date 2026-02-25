@@ -26,6 +26,7 @@ ENUM()
 	GIMMICKTYPE_SMALLBUTTON,	// ちびボタン
 	GIMMICKTYPE_FALLENTREE,		// 倒木
 	GIMMICKTYPE_CLOSEDDOOR,		// 閉まっている扉
+	GIMMICKTYPE_TUNNEL,			// トンネル
 	GIMMICKTYPE_MAX
 }GIMMICKTYPE;
 
@@ -40,5 +41,10 @@ void DrawGimmick(void);
 void SetGimmick(D3DXVECTOR3 pos, D3DXVECTOR3 rot, GIMMICKTYPE type);
 void ClearGimmick(GIMMICKTYPE type);
 bool IsClearGimmick(GIMMICKTYPE type);
-bool CollisionGimmick(D3DXVECTOR3 *pPos, D3DXVECTOR3 *pPosOld, D3DXVECTOR3 *pMove, Player *pPlayer);
+bool CollisionGimmick(D3DXVECTOR3 *pPos, 
+	D3DXVECTOR3 *pPosOld, 
+	D3DXVECTOR3 *pMove, 
+	Player *pPlayer,
+	float fRadius,
+	float fHeight);
 #endif	// !_GIMMICK_H_

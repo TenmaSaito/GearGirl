@@ -22,7 +22,7 @@
 #include "texture.h"
 #include "item.h"
 
-using  namespace MyMathUtil;
+using namespace MyMathUtil;
 
 // =================================================
 // マクロ定義
@@ -108,10 +108,8 @@ void UpdateModel(void)
 // =================================================
 void DrawModel(void)
 {
-	LPDIRECT3DDEVICE9 pDevice;		// デバイスへのポインタ
-
-	// デバイスの取得
-	pDevice = GetDevice();
+	AUTODEVICE9 Auto;								// デバイスの自動取得
+	LPDIRECT3DDEVICE9 pDevice = Auto.pDevice;		// デバイスへのポインタ
 
 	D3DXMATRIX mtxRot, mtxTrans;	// 計算用マトリックス
 	D3DMATERIAL9 matDef;			// 現在のマテリアル保存用
@@ -126,19 +124,6 @@ void DrawModel(void)
 	{
 		if (g_ModelInfo[nCntModel].bUse == true)
 		{
-			// ワールドマトリックスの初期化
-			D3DXMatrixIdentity(&g_ModelInfo[nCntModel].mtxWorld);
-
-			// 向きを反映
-			D3DXMatrixRotationYawPitchRoll(&mtxRot,
-				g_ModelInfo[nCntModel].rot.y, g_ModelInfo[nCntModel].rot.x, g_ModelInfo[nCntModel].rot.z);
-			D3DXMatrixMultiply(&g_ModelInfo[nCntModel].mtxWorld, &g_ModelInfo[nCntModel].mtxWorld, &mtxRot);	// かけ合わせる
-
-			// 位置を反映
-			D3DXMatrixTranslation(&mtxTrans,
-				g_ModelInfo[nCntModel].pos.x, g_ModelInfo[nCntModel].pos.y, g_ModelInfo[nCntModel].pos.z);
-			D3DXMatrixMultiply(&g_ModelInfo[nCntModel].mtxWorld, &g_ModelInfo[nCntModel].mtxWorld, &mtxTrans);	// かけ合わせる
-
 			// ワールドマトリックスの設定
 			pDevice->SetTransform(D3DTS_WORLD, &g_ModelInfo[nCntModel].mtxWorld);
 
@@ -169,9 +154,6 @@ void DrawModel(void)
 	pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);		// アルファテストを無効化
 	pDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);	// 無条件にZバッファに書き込み
 	pDevice->SetRenderState(D3DRS_ALPHAREF, 0);					// 基準値
-
-	// デバイスの破棄
-	EndDevice();
 }
 
 // =================================================
@@ -199,9 +181,11 @@ void SetModel(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nNumIdx, int nUseShadow)
 				g_ModelInfo[nCntModel].bUseShadow = false;
 			}
 
-#ifdef _DEBUG
-			MyMathUtil::CalcWorldMatrix(&g_ModelInfo[nCntModel].mtxWorld, g_ModelInfo[nCntModel].pos, g_ModelInfo[nCntModel].rot);
-#endif
+			// 変化しないマトリックスをここであらかじめ計算
+			MyMathUtil::CalcWorldMatrix(&g_ModelInfo[nCntModel].mtxWorld,
+				g_ModelInfo[nCntModel].pos,
+				g_ModelInfo[nCntModel].rot);
+
 			break;
 		}
 	}
@@ -914,7 +898,14 @@ bool JudgeComent(char* pStr)
 // =================================================
 // モデルの当たり判定
 // =================================================
-bool CollisionModel(D3DXVECTOR3* pPos, D3DXVECTOR3* pPosOld, D3DXVECTOR3* pMove)
+bool CollisionModel
+(
+	D3DXVECTOR3 *pPos,
+	D3DXVECTOR3 *pPosOld,
+	D3DXVECTOR3 *pMove,
+	float fRadius,
+	float fHeight
+)
 {
 	// 当たっているかどうかをbool型で返す
 	bool bLand = false;

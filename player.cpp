@@ -14,6 +14,7 @@
 #include "gimmick.h"
 #include "input.h"
 #include "item.h"
+#include "mode.h"
 #include "model.h"
 #include "modeldata.h"
 #include "motion.h"
@@ -173,9 +174,11 @@ void InitPlayer(void)
 	g_aMovePlayer[0] = false;
 	g_aMovePlayer[1] = false;
 
-#ifdef _DEBUG
-	g_nNumPlayer = 1;
-#endif
+	if (GetFirstMode() == MODE_GAME)
+	{
+		g_nNumPlayer = 1;
+	}
+
 	// デバイスの破棄
 	EndDevice();
 }
@@ -299,7 +302,7 @@ void UpdatePlayer(void)
 		}
 
 		// モデルとの当たり判定
-		if (CollisionModel(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move))
+		if (CollisionModel(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move, 5, 50))
 		{
 			if (pPlayer->bJump == true
 				&& pPlayer->motionType != MOTIONTYPE_LANDING
@@ -317,7 +320,18 @@ void UpdatePlayer(void)
 		CollisionItem(pPlayer->pos, PLAYER_RANGE);
 
 		// ギミックとの当たり判定
-		CollisionGimmick(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move, &g_aPlayer[nCntPlayer]);
+		if (CollisionGimmick(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move, &g_aPlayer[nCntPlayer], 5.0f, 20.0f))
+		{
+			if (pPlayer->bJump == true
+				&& pPlayer->motionType != MOTIONTYPE_LANDING
+				&& pPlayer->motionTypeBlend != MOTIONTYPE_LANDING)
+			{// 着地モーション
+				SetMotionType(MOTIONTYPE_LANDING, true, 15, (PlayerType)nCntPlayer);
+				pPlayer->bUseLandMotion = true;
+			}
+
+			pPlayer->bJump = false;
+		}
 
 		// デバッグ表示
 		//if (g_Functionkey != 0)
@@ -392,10 +406,8 @@ void DrawPlayer(void)
 	// プレイヤー構造体をポインタ化
 	Player* pPlayer = &g_aPlayer[0];
 
-	LPDIRECT3DDEVICE9 pDevice;		// デバイスへのポインタ
-
-	// デバイスの取得
-	pDevice = GetDevice();
+	AUTODEVICE9 Auto;		// デバイスの自動取得
+	LPDIRECT3DDEVICE9 pDevice = Auto.pDevice;		// デバイスへのポインタ
 
 	D3DXMATRIX mtxRot, mtxTrans;	// 計算用マトリックス
 	D3DMATERIAL9 matDef;			// 現在のマテリアル保存用
@@ -435,9 +447,6 @@ void DrawPlayer(void)
 		// 各パーツのマトリックスを計算
 		CalcMatrix(pPlayer);
 
-		// Zテストを無効に
-		SetEnableZFunction(pDevice, false);
-
 		// 全モデル(パーツ)の影の描画
 		for (int nCntModel = 0; nCntModel < pPlayer->PartsInfo.nNumParts; nCntModel++)
 		{
@@ -454,15 +463,6 @@ void DrawPlayer(void)
 				// 影の描画(腕切り替え版)
 				DrawShadowPlayer(pPlayer, nCntModelArm, pDevice);
 			}
-		}
-
-		// Zテストを有効に
-		SetEnableZFunction(pDevice, true);
-
-		if (nCntPlayer == PLAYERTYPE_MOUSE && g_aPlayer[PLAYERTYPE_GIRL].state == PLAYERSTATE_THROWWAITING)
-		{
-			// Zテストを有効に
-			SetEnableZFunction(pDevice, false);
 		}
 
 		// プレイヤーのワールドマトリックスの設定
@@ -489,12 +489,6 @@ void DrawPlayer(void)
 		// 保存していたマテリアルを戻す
 		pDevice->SetMaterial(&matDef);
 	}
-
-	// Zテストを有効に
-	SetEnableZFunction(pDevice, true);
-
-	// デバイスの破棄
-	EndDevice();
 }
 
 // =================================================

@@ -100,6 +100,7 @@ GIMMICK_DATA g_aGimmickData[GIMMICKTYPE_MAX] =
 	{"data/Scripts/smallbutton_g.txt", COULD_PLAYER_MOUSE, D3DXVECTOR3(565, 100, -630), D3DXVECTOR3(0, 0, 0), 0.0f},
 	{"data/Scripts/station_g.txt", COULD_PLAYER_ALL, D3DXVECTOR3(573, 100, -900), D3DXVECTOR3(0, D3DX_PI + D3DX_HALFPI, 0), 200.0f },
 	{},
+	{"data/Scripts/tunnel_g.txt", COULD_PLAYER_ALL, D3DXVECTOR3(1609, 100, -760), D3DXVECTOR3(0, D3DX_PI + D3DX_HALFPI, 0), 200.0f },
 };
 
 //==================================================================================
@@ -402,7 +403,7 @@ void CaseSolo(LPGIMMICK pGimmick)
 		&& (pGimmick->could == type || pGimmick->could == COULD_PLAYER_ALL))
 	{ // 操作中プレイヤーの判定
 		if (pGimmick->motionType == MOTIONTYPE_ACTION) return;
-		SetMotionType(MOTIONTYPE_ACTION, false, 0, pGimmick->myType);
+		//SetMotionType(MOTIONTYPE_ACTION, false, 0, pGimmick->myType);
 
 		bDetection = true;
 	}
@@ -420,7 +421,13 @@ void CaseSolo(LPGIMMICK pGimmick)
 //==================================================================================
 // --- 当たり判定 ---
 //==================================================================================
-bool CollisionGimmick(D3DXVECTOR3* pPos, D3DXVECTOR3* pPosOld, D3DXVECTOR3* pMove, Player *pPlayer)
+bool CollisionGimmick(
+	D3DXVECTOR3* pPos,
+	D3DXVECTOR3* pPosOld,
+	D3DXVECTOR3* pMove,
+	Player* pPlayer,
+	float fRadius,
+	float fHeight)
 {
 	// 当たっているかどうかをbool型で返す
 	bool bLand = false;
@@ -435,6 +442,7 @@ bool CollisionGimmick(D3DXVECTOR3* pPos, D3DXVECTOR3* pPosOld, D3DXVECTOR3* pMov
 			{
 				LPMODELDATA pObjInfo = GetModelData(pObject->parts.aParts[nCntParts].nIdxModel);
 #if 1
+				D3DXVECTOR3 offset = pObject->parts.aParts[nCntParts].pos;
 				D3DXVECTOR3 posVtx[4] = {};		// オブジェクトの四辺の頂点
 				D3DXVECTOR3 vecMove = D3DXVECTOR3_NULL;		// 移動ベクトル
 				D3DXVECTOR3 vecLine = D3DXVECTOR3_NULL;		// 境界線ベクトル
@@ -451,125 +459,113 @@ bool CollisionGimmick(D3DXVECTOR3* pPos, D3DXVECTOR3* pPosOld, D3DXVECTOR3* pMov
 				float fRate = 0.0f;							// 面積比率
 				float fVecPosToNor = 0.0f;					// 逆法線との外積
 
-				if (pPos->y >= pObject->pos.y + pObjInfo->mtxMin.y - 10.0f
-					&& pPos->y <= pObject->pos.y + pObjInfo->mtxMax.y)
+				D3DXVECTOR3 Length;
+				float fLength = 0.0f;
+				float fAngle = 0.0f;
+				bool bCollision[4] = {};
+
+				posVtx[0].x = pObjInfo->mtxMin.x;
+				posVtx[0].y = 0;
+				posVtx[0].z = pObjInfo->mtxMin.z;
+
+				D3DXVec3TransformCoord(&posVtx[0], &posVtx[0], &pObject->parts.aParts[nCntParts].mtxWorld);
+
+				posVtx[1].x = pObjInfo->mtxMax.x;
+				posVtx[1].y = 0;
+				posVtx[1].z = pObjInfo->mtxMin.z;
+
+				D3DXVec3TransformCoord(&posVtx[1], &posVtx[1], &pObject->parts.aParts[nCntParts].mtxWorld);
+
+				posVtx[2].x = pObjInfo->mtxMax.x;
+				posVtx[2].y = 0;
+				posVtx[2].z = pObjInfo->mtxMax.z;
+
+				D3DXVec3TransformCoord(&posVtx[2], &posVtx[2], &pObject->parts.aParts[nCntParts].mtxWorld);
+
+				posVtx[3].x = pObjInfo->mtxMin.x;
+				posVtx[3].y = 0;
+				posVtx[3].z = pObjInfo->mtxMax.z;
+
+				D3DXVec3TransformCoord(&posVtx[3], &posVtx[3], &pObject->parts.aParts[nCntParts].mtxWorld);
+
+				/*** 移動ベクトルの取得 ***/
+				vecMove = *pPos - *pPosOld;
+
+				for (int nCntCollision = 0; nCntCollision < 4; nCntCollision++)
 				{
-					D3DXVECTOR3 Length;
-					float fLength = 0.0f;
-					float fAngle = 0.0f;
-					bool bCollision[4] = {};
+					D3DXVECTOR3 vecNor = D3DXVECTOR3_NULL;		// 壁の逆法線ベクトル
+					D3DXVECTOR3 vecCutLine = D3DXVECTOR3_NULL;	// 交点からの境界線ベクトル
 
-					posVtx[0].x = pObjInfo->mtxMin.x;
-					posVtx[0].y = 0;
-					posVtx[0].z = pObjInfo->mtxMin.z;
+					vecLine = posVtx[(nCntCollision + 1) % 4] - posVtx[nCntCollision];
 
-					D3DXVec3TransformCoord(&posVtx[0], &posVtx[0], &pObject->parts.aParts[nCntParts].mtxWorld);
+					RepairFloat(&vecLine.x);
+					RepairFloat(&vecLine.z);
 
-					if (nCntParts == 1)
-						SetEffect(posVtx[0], D3DXCOLOR_NULL, VECNULL, 5, 5, 0, 3);
+					/*** 現在位置との関係を外積を使い求める ***/
+					vecToPos = *pPos - posVtx[nCntCollision];
 
-					posVtx[1].x = pObjInfo->mtxMax.x;
-					posVtx[1].y = 0;
-					posVtx[1].z = pObjInfo->mtxMin.z;
+					fVecPos = (vecLine.z * vecToPos.x) - (vecLine.x * vecToPos.z);
 
-					D3DXVec3TransformCoord(&posVtx[1], &posVtx[1], &pObject->parts.aParts[nCntParts].mtxWorld);
+					RepairFloat(&fVecPos);
 
-					if (nCntParts == 1)
-						SetEffect(posVtx[1], D3DXCOLOR_NULL, VECNULL, 5, 5, 0, 3);
+					/*** 過去位置との関係を外積を使い求める ***/
+					vecToPosOld = *pPosOld - posVtx[nCntCollision];
 
-					posVtx[2].x = pObjInfo->mtxMax.x;
-					posVtx[2].y = 0;
-					posVtx[2].z = pObjInfo->mtxMax.z;
+					fVecPosOld = (vecLine.z * vecToPosOld.x) - (vecLine.x * vecToPosOld.z);
 
-					D3DXVec3TransformCoord(&posVtx[2], &posVtx[2], &pObject->parts.aParts[nCntParts].mtxWorld);
+					RepairFloat(&fVecPosOld);
 
-					if (nCntParts == 1)
-						SetEffect(posVtx[2], D3DXCOLOR_NULL, VECNULL, 5, 5, 0, 3);
+					/*** 強制位置の判定 ***/
 
-					posVtx[3].x = pObjInfo->mtxMin.x;
-					posVtx[3].y = 0;
-					posVtx[3].z = pObjInfo->mtxMax.z;
+					/** 現在位置との外積 **/
+					fPosToMove = (vecToPos.z * vecMove.x) - (vecToPos.x * vecMove.z);
 
-					D3DXVec3TransformCoord(&posVtx[3], &posVtx[3], &pObject->parts.aParts[nCntParts].mtxWorld);
+					/** 最大値との外積 **/
+					fLineToMove = (vecLine.z * vecMove.x) - (vecLine.x * vecMove.z);
 
-					if (nCntParts == 1)
-						SetEffect(posVtx[3], D3DXCOLOR_NULL, VECNULL, 5, 5, 0, 3);
+					/** 面積比率の計算 **/
+					fRate = fPosToMove / fLineToMove;
 
-					/*** 移動ベクトルの取得 ***/
-					vecMove = *pPos - *pPosOld;
+					vecNor.x = vecLine.z;
+					vecNor.z = -vecLine.x;
 
-					for (int nCntCollision = 0; nCntCollision < 4; nCntCollision++)
+					D3DXVec3Normalize(&vecNor, &vecNor);
+
+					fVecPosToNor = (vecNor.z * vecMove.x) - (vecNor.x * vecMove.z);
+
+					D3DXVECTOR3 vecF;
+					vecCutLine = vecLine;
+
+					if (fVecPosToNor == 0)
 					{
-						D3DXVECTOR3 vecNor = D3DXVECTOR3_NULL;		// 壁の逆法線ベクトル
-						D3DXVECTOR3 vecCutLine = D3DXVECTOR3_NULL;	// 交点からの境界線ベクトル
+						fVecPosToNor = fabsf(fVecPosToNor);
+						D3DXVec3Normalize(&vecCutLine, &vecCutLine);
 
-						vecLine = posVtx[(nCntCollision + 1) % 4] - posVtx[nCntCollision];
+						vecF = vecCutLine * fVecPosToNor;
+					}
+					else if (fVecPosToNor > 0)
+					{
+						fVecPosToNor = fabsf(fVecPosToNor);
+						D3DXVec3Normalize(&vecCutLine, &vecCutLine);
 
-						RepairFloat(&vecLine.x);
-						RepairFloat(&vecLine.z);
+						vecF = -vecCutLine * fVecPosToNor;
+					}
+					else if (fVecPosToNor < 0)
+					{
+						fVecPosToNor = fabsf(fVecPosToNor);
+						D3DXVec3Normalize(&vecCutLine, &vecCutLine);
 
-						/*** 現在位置との関係を外積を使い求める ***/
-						vecToPos = *pPos - posVtx[nCntCollision];
+						vecF = vecCutLine * fVecPosToNor;
+					}
 
-						fVecPos = (vecLine.z * vecToPos.x) - (vecLine.x * vecToPos.z);
-
-						RepairFloat(&fVecPos);
-
-						/*** 過去位置との関係を外積を使い求める ***/
-						vecToPosOld = *pPosOld - posVtx[nCntCollision];
-
-						fVecPosOld = (vecLine.z * vecToPosOld.x) - (vecLine.x * vecToPosOld.z);
-
-						RepairFloat(&fVecPosOld);
-
-						/*** 強制位置の判定 ***/
-
-						/** 現在位置との外積 **/
-						fPosToMove = (vecToPos.z * vecMove.x) - (vecToPos.x * vecMove.z);
-
-						/** 最大値との外積 **/
-						fLineToMove = (vecLine.z * vecMove.x) - (vecLine.x * vecMove.z);
-
-						/** 面積比率の計算 **/
-						fRate = fPosToMove / fLineToMove;
-
-						vecNor.x = vecLine.z;
-						vecNor.z = -vecLine.x;
-
-						D3DXVec3Normalize(&vecNor, &vecNor);
-
-						fVecPosToNor = (vecNor.z * vecMove.x) - (vecNor.x * vecMove.z);
-
-						D3DXVECTOR3 vecF;
-						vecCutLine = vecLine;
-
-						if (fVecPosToNor == 0)
+					/*** プレイヤーの壁のめり込み判定 ***/
+					if (fVecPos <= 0 && fVecPosOld >= 0)
+					{
+						/*** もしも比率が範囲内であれば,衝突 ***/
+						if (fRate >= 0.0f && fRate <= 1.0f)
 						{
-							fVecPosToNor = fabsf(fVecPosToNor);
-							D3DXVec3Normalize(&vecCutLine, &vecCutLine);
-
-							vecF = vecCutLine * fVecPosToNor;
-						}
-						else if (fVecPosToNor > 0)
-						{
-							fVecPosToNor = fabsf(fVecPosToNor);
-							D3DXVec3Normalize(&vecCutLine, &vecCutLine);
-
-							vecF = -vecCutLine * fVecPosToNor;
-						}
-						else if (fVecPosToNor < 0)
-						{
-							fVecPosToNor = fabsf(fVecPosToNor);
-							D3DXVec3Normalize(&vecCutLine, &vecCutLine);
-
-							vecF = vecCutLine * fVecPosToNor;
-						}
-
-						/*** プレイヤーの壁のめり込み判定 ***/
-						if (fVecPos <= 0 && fVecPosOld >= 0)
-						{
-							/*** もしも比率が範囲内であれば,衝突 ***/
-							if (fRate >= 0.0f && fRate <= 1.0f)
+							if (pPos->y >= pObject->pos.y + offset.y + pObjInfo->mtxMin.y - 0.01f
+								&& pPos->y <= pObject->pos.y + offset.y + pObjInfo->mtxMax.y)
 							{
 								if (g_aGimmick[nCntModel].myType != GIMMICKTYPE_BIGBUTTON && g_aGimmick[nCntModel].myType != GIMMICKTYPE_SMALLBUTTON)
 								{// ボタン以外には側面の当たり判定をつける
@@ -578,37 +574,46 @@ bool CollisionGimmick(D3DXVECTOR3* pPos, D3DXVECTOR3* pPosOld, D3DXVECTOR3* pMov
 								}
 							}
 						}
-
-						if (fVecPos < 0 && fVecPosOld < 0)
-						{
-							bCollision[nCntCollision] = true;
-						}
 					}
 
-					if (bCollision[0] == true
-						&& bCollision[1] == true
-						&& bCollision[2] == true
-						&& bCollision[3] == true)
-					{// 上の当たり判定
-						pPos->y = pObject->pos.y + pObjInfo->mtxMax.y;
+					if (fVecPos < 0 && fVecPosOld < 0)
+					{
+						bCollision[nCntCollision] = true;
+					}
+				}
+
+				if (bCollision[0] == true
+					&& bCollision[1] == true
+					&& bCollision[2] == true
+					&& bCollision[3] == true)
+				{// 上の当たり判定
+					if (pPos->y + fHeight >= pObject->pos.y + offset.y + pObjInfo->mtxMin.y
+						&& pPosOld->y + fHeight <= pObject->pos.y + offset.y + pObjInfo->mtxMin.y)
+					{
+						pPos->y = pObject->pos.y + offset.y + pObjInfo->mtxMin.y - fHeight;
+					}
+					else if (pPos->y <= pObject->pos.y + offset.y + pObjInfo->mtxMax.y
+						&& pPosOld->y >= pObject->pos.y + offset.y + pObjInfo->mtxMax.y)
+					{
+						pPos->y = pObject->pos.y + offset.y + pObjInfo->mtxMax.y;
 						bLand = true;
 						pMove->y = 0.0f;
-						
-						if (g_aGimmick[nCntModel].bClear == false && g_aGimmick[nCntModel].myType == GIMMICKTYPE_BIGBUTTON && GetActivePlayer() == PLAYERTYPE_GIRL)
-						{// でかボタンを押す
-							SetMotionType(MOTIONTYPE_ACTION, false, 0, GIMMICKTYPE_BIGBUTTON);
-							ClearGimmick(GIMMICKTYPE_BIGBUTTON);
-						}
-						else if (g_aGimmick[nCntModel].bClear == false && g_aGimmick[nCntModel].myType == GIMMICKTYPE_SMALLBUTTON && GetActivePlayer() == PLAYERTYPE_MOUSE)
-						{// ちびボタンを押す
-							SetMotionType(MOTIONTYPE_ACTION, false, 0, GIMMICKTYPE_SMALLBUTTON);
-							ClearGimmick(GIMMICKTYPE_SMALLBUTTON);
-						}
+					}
+
+					if (g_aGimmick[nCntModel].bClear == false && g_aGimmick[nCntModel].myType == GIMMICKTYPE_BIGBUTTON && GetActivePlayer() == PLAYERTYPE_GIRL)
+					{// でかボタンを押す
+						SetMotionType(MOTIONTYPE_ACTION, false, 0, GIMMICKTYPE_BIGBUTTON);
+						ClearGimmick(GIMMICKTYPE_BIGBUTTON);
+					}
+					else if (g_aGimmick[nCntModel].bClear == false && g_aGimmick[nCntModel].myType == GIMMICKTYPE_SMALLBUTTON && GetActivePlayer() == PLAYERTYPE_MOUSE)
+					{// ちびボタンを押す
+						SetMotionType(MOTIONTYPE_ACTION, false, 0, GIMMICKTYPE_SMALLBUTTON);
+						ClearGimmick(GIMMICKTYPE_SMALLBUTTON);
 					}
 				}
 			}
-#endif
 		}
+#endif
 	}
 
 	return bLand;

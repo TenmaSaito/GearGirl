@@ -1,42 +1,31 @@
 //================================================================================================================
 //
-// DirectXのモード切り替え用のヘッダーファイル [mode.h]
+// DirectXの壁表示用ヘッダファイル [wall.h]
 // Author : TENMA
 //
 //================================================================================================================
-#ifndef _MODE_H_
-#define _MODE_H_
+#ifndef _WALL_H_
+#define _WALL_H_
 
 //**********************************************************************************
 //*** インクルードファイル ***
 //**********************************************************************************
 #include "main.h"
+#include "input.h"
 
 //**********************************************************************************
 //*** マクロ定義 ***
 //**********************************************************************************
 
 //**********************************************************************************
-//*** 画面モードの種類 ***
-//**********************************************************************************
-typedef enum
-{
-	MODE_TEAMLOGO = 0,	// チームロゴ表示
-	MODE_TITLE,			// タイトル画面
-	MODE_GAME,			// ゲーム画面
-	MODE_RESULT,		// エンディング画面
-	MODE_MAX
-}MODE;
-
-//**********************************************************************************
 //*** プロトタイプ宣言 ***
 //**********************************************************************************
-void InitMode(void);
-void UninitMode(void);
-void UpdateMode(void);
-void DrawMode(void);
+void InitWall(void);
+void UninitWall(void);
+void UpdateWall(void);
+void DrawWall(void);
 
-void SetMode(MODE mode);
-MODE GetMode(void);
-MODE GetFirstMode(void);
+void SetWall(D3DXVECTOR3 pos, D3DXVECTOR3 rot, float fWidth, float fHeight, int nIndexTexture, int nXblock, int nZblock, D3DXCOLOR col = D3DXCOLOR_NULL, D3DCULL type = D3DCULL_CCW);
+void CollisionWall(D3DXVECTOR3 *pPos, D3DXVECTOR3 *pPosOld, D3DXVECTOR3 *pMove);
+void ReflectWall(D3DXVECTOR3 *pPos, D3DXVECTOR3 *pPosOld, D3DXVECTOR3 *pMove);
 #endif
