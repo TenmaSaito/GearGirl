@@ -187,14 +187,14 @@ void UpdateCamera(void)
 	pCamera = GetCamera();
 	if (GetActivePlayer() == CAMERATYPE_PLAYER_ONE && GetKeyboardPress(CAM_2POPRAT) == false)
 	{
-		CameraOrbit(pCamera);		// 回転
 		CameraMove(pCamera);		// カメラ距離の変更
+		CameraOrbit(pCamera);		// 回転
 	}
 	else
 	{
 		pCamera++;					// 2Pのカメラにする
-		CameraOrbit(pCamera);
 		CameraMove(pCamera);
+		CameraOrbit(pCamera);
 	}
 
 	CameraFollow();	// 追従
@@ -206,9 +206,9 @@ void UpdateCamera(void)
 	{
 		if (pCamera->bUse)
 		{
-			pCamera->posV.x = pCamera->posR.x - sinf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
-			pCamera->posV.y = pCamera->posR.y - cosf(D3DX_PI - pCamera->rot.x) * pCamera->fDist;
-			pCamera->posV.z = pCamera->posR.z + cosf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
+			pCamera->posV.x = pCamera->posR.x - sinf(pCamera->rot.y) * sinf(pCamera->rot.x) * pCamera->fDist;
+			pCamera->posV.y = pCamera->posR.y - cosf(pCamera->rot.x) * pCamera->fDist;
+			pCamera->posV.z = pCamera->posR.z - cosf(pCamera->rot.y) * sinf(pCamera->rot.x) * pCamera->fDist;
 
 			if (g_bCameraDebug)
 			{
@@ -422,7 +422,7 @@ void CameraRotation(P_CAMERA pCamera)
 }
 
 //==============================================================
-// 注視点を中心に手動で回転
+// 注視点を中心に回転
 void CameraOrbit(P_CAMERA pCamera)
 {
 	//**************************************************************
@@ -444,7 +444,6 @@ void CameraOrbit(P_CAMERA pCamera)
 		bUse = true;
 	}
 
-#if FALSE
 	if (GetKeyboardPress(CAM_ORBIT_UP))
 	{
 		pCamera->rot.x -= CAMERA_SPIN;
@@ -456,20 +455,21 @@ void CameraOrbit(P_CAMERA pCamera)
 		pCamera->rot.x += CAMERA_SPIN;
 		bUse = true;
 	}
-#endif
+
 	// コントローラー操作
-	 if (GetJoypadRightStick((int)pCamera->type,&rightStick))
-	 {
+	 if (GetJoypadRightStick(GetNumPlayer() == 1 ?  0:(int)pCamera->type,&rightStick))
+	 {// 1人プレイなら常に一つ目のコントローラー情報を取得。そうじゃなければカメラのタイプ（対応プレイヤーナンバー）のコントローラー情報を取得
 		pCamera->rot.y += rightStick.x * CAMERA_SPIN;
+		pCamera->rot.x -= rightStick.y * CAMERA_SPIN;
 		bUse = true;
 	 }
 
 	//**************************************************************
 	// -πからπまでにする	
-	if (pCamera->rot.x < -D3DX_PI)
-		pCamera->rot.x = D3DX_PI;
-	else if (D3DX_PI < pCamera->rot.x)
-		pCamera->rot.x = -D3DX_PI;
+	if (pCamera->rot.x < 0.5f)
+		pCamera->rot.x = 0.5f;
+	else if (2.8f < pCamera->rot.x)
+		pCamera->rot.x = 2.8f;
 
 	if (pCamera->rot.y < -D3DX_PI)
 		pCamera->rot.y = D3DX_PI;
@@ -480,15 +480,6 @@ void CameraOrbit(P_CAMERA pCamera)
 		pCamera->rot.z = D3DX_PI;
 	else if (D3DX_PI < pCamera->rot.z)
 		pCamera->rot.z = -D3DX_PI;
-
-	//**************************************************************
-	// 視点から注視点を求める
-	if (bUse)
-	{
-		pCamera->posV.x = pCamera->posR.x - cosf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
-		pCamera->posV.y = pCamera->posR.y - cosf(D3DX_PI - pCamera->rot.x) * pCamera->fDist;
-		pCamera->posV.z = pCamera->posR.z - sinf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
-	}
 }
 
 //=========================================================================================
