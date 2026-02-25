@@ -329,13 +329,15 @@ bool GetJoypadLeftStick(int nPlayer, D3DXVECTOR3* value)
 	(*value).z = -atan2f((float)-g_Joypad[nPlayer].joykeyState.Gamepad.sThumbLX, (float)g_Joypad[nPlayer].joykeyState.Gamepad.sThumbLY);
 
 	// デッドゾーン
-	if ((*value).x <= -DEADZONE_LEFTSTICK || DEADZONE_LEFTSTICK <= (*value).x ||
-		(*value).y <= -DEADZONE_LEFTSTICK || DEADZONE_LEFTSTICK <= (*value).y)
+	if (-DEADZONE_LEFTSTICK <= (*value).x && (*value).x <= DEADZONE_LEFTSTICK &&
+		-DEADZONE_LEFTSTICK <= (*value).y && (*value).y <= DEADZONE_LEFTSTICK)
 	{
 		return false;
 	}
-
-	return true;
+	else
+	{
+		return true;
+	}
 }
 
 //=======================================
@@ -351,12 +353,15 @@ bool GetJoypadRightStick(int nPlayer, D3DXVECTOR3* value)
 	}
 
 	// デッドゾーン
-	if ((*value).x <= -DEADZONE_RIGHTSTICK || DEADZONE_RIGHTSTICK <= (*value).x ||
-		(*value).y <= -DEADZONE_RIGHTSTICK || DEADZONE_RIGHTSTICK <= (*value).y)
+	if (-DEADZONE_LEFTSTICK <= (*value).x && (*value).x <= DEADZONE_LEFTSTICK &&
+		-DEADZONE_LEFTSTICK <= (*value).y && (*value).y <= DEADZONE_LEFTSTICK)
 	{
 		return false;
 	}
-	return true;
+	else
+	{
+		return true;
+	}
 }
 
 //=========================================================================================================

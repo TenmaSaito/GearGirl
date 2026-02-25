@@ -457,10 +457,10 @@ void CameraOrbit(P_CAMERA pCamera)
 	}
 
 	// コントローラー操作
-	 if (GetJoypadRightStick(GetNumPlayer() == 1 ?  0:(int)pCamera->type,&rightStick))
+	 if (GetJoypadRightStick(GetNumPlayer() == 1 ? 0:(int)pCamera->type,&rightStick))
 	 {// 1人プレイなら常に一つ目のコントローラー情報を取得。そうじゃなければカメラのタイプ（対応プレイヤーナンバー）のコントローラー情報を取得
 		pCamera->rot.y += rightStick.x * CAMERA_SPIN;
-		pCamera->rot.x -= rightStick.y * CAMERA_SPIN;
+		pCamera->rot.x += rightStick.y * CAMERA_SPIN;
 		bUse = true;
 	 }
 
