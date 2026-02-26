@@ -42,6 +42,7 @@ POINTER(ItemQuota, P_ITEMQUOTA);
 // グローバル変数宣言
 int				g_nSetItemNum = 0;								// 設置済みのアイテム数
 int				g_nSelectPut = -1;								// 提出時のカーソル
+int				g_nItemQuotaFlameTex = -1;						// アイテム欄のフレームのテクスチャ番号
 bool			g_bPutOut = false;								// アイテムを提出するときtrue
 Item			g_aItem[MAX_ITEM];								// アイテム情報
 ItemQuota		g_aItemQuota[ITEMTYPE_MAX];						// 所持アイテムを表示する枠のインデックス
@@ -95,6 +96,7 @@ void InitItem(void)
 
 	g_bPutOut = false;		// アイテムを提出状態ではない
 	g_nSelectPut = -1;		// 提出時のカーソル
+	LoadTexture("data\\TEXTURE\\flame.png", & g_nItemQuotaFlameTex);
 
 	// アイテム情報読込
 	for (int nCntItem = 0; nCntItem < ITEMTYPE_MAX; nCntItem++, pItemInfo++)
@@ -112,10 +114,10 @@ void InitItem(void)
 	// 所持アイテムの枠を取得
 	for (int nCntQuota = 0; nCntQuota < ITEMTYPE_MAX; nCntQuota++, pItemQuota++)
 	{
-		pItemQuota->pos = vec3(SCREEN_WIDTH / ITEMTYPE_MAX * (nCntQuota + 0.5f), SCREEN_HEIGHT * 0.5f, 0.0f);
+		pItemQuota->pos = vec3(nCntQuota * SCREEN_WIDTH * 0.2f, SCREEN_HEIGHT * 0.5f, 0.0f);
 		pItemQuota->col = colX_ZERO;
-		pItemQuota->size = vec2(SCREEN_WIDTH * 0.05f, SCREEN_WIDTH * 0.05f);
-		pItemQuota->nIdxBox = Set2DPolygon(pItemQuota->pos,vec3_ZERO, pItemQuota->size, -1, pItemQuota->col);
+		pItemQuota->size = vec2(SCREEN_WIDTH * 0.08f, SCREEN_WIDTH * 0.08f);
+		pItemQuota->nIdxBox = Set2DPolygon(pItemQuota->pos,vec3_ZERO, pItemQuota->size, g_nItemQuotaFlameTex, pItemQuota->col);
 		pItemQuota->nType = -1;
 		pItemQuota->bUse = false;
 	}
@@ -236,7 +238,7 @@ void UpdatePouchItem(void)
 		// 所持アイテム枠の位置を変更
 		for (int nCntQuota = 0; nCntQuota < ITEMTYPE_MAX; nCntQuota++, pItemQuota++)
 		{
-			pItemQuota->pos = vec3(SCREEN_WIDTH / ITEMTYPE_MAX * (nCntQuota + 0.5f), SCREEN_HEIGHT * 0.5f, 0.0f);
+			pItemQuota->pos = vec3(nCntQuota * SCREEN_WIDTH * 0.12f, SCREEN_HEIGHT * 0.5f, 0.0f);
 			SetPosition2DPolygon(pItemQuota->nIdxBox, pItemQuota->pos);
 		}
 
@@ -336,11 +338,13 @@ void DrawItem(void)
 //=========================================================================================
 void DrawUIItem(void)
 {
+	// 提出処理
 	if (g_bPutOut)
 	{
 		 OnUIitemEnable(&g_aPutQuota[0], NUM_PUTOUTITEM);
 		 OnUIitemEnable(&g_aItemQuota[0], ITEMTYPE_MAX);
 	}
+	// 所持アイテムの確認
 	else if (GetEnableUImenu())
 	{
 		OnUIitemEnable(&g_aItemQuota[0], ITEMTYPE_MAX);
