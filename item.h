@@ -16,10 +16,10 @@
 //=========================================================================================
 // マクロ定義
 //=========================================================================================
-#define MAX_ITEM		(16)		// アイテム最大数
+#define MAX_ITEM		(32)		// アイテム最大数
 #define ITEM_RANK		(2)			// アイテムの等級段数
 #define NUM_PUTOUTITEM	(5)			// 提出アイテム数
-#define ITEM_RANGE		(25.0f)		// アイテム当たり判定範囲
+#define ITEM_RANGE		(15.0f)		// アイテム当たり判定範囲
 
 #define SPIN_ITEM		(0.02f)		// アイテムの回転速度
 
@@ -79,6 +79,7 @@ typedef struct Item
 	int				nIdxModel;			// モデルデータのインデックス
 	D3DXMATRIX		mtxWorld;			// ワールドマトリックス
 	int				nIdxQuota;			// 表示用の枠のインデックス
+	int				nIdxMeshEffect;		// エフェクト用メッシュリングのインデックス 
 }Item;
 POINTER(Item, P_ITEM);
 

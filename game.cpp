@@ -72,6 +72,8 @@ void InitGame(void)
 {
 	/*** Aの初期化 ***/
 
+	//===========================================
+	// 初期化
 	/*** カメラの初期化 ***/
 	InitCamera();
 
@@ -98,9 +100,6 @@ void InitGame(void)
 
 	/*** モデルの初期化 ***/
 	InitModel();
-
-	/*** モデルのスクリプト読み込み ***/
-	LoadModel();
 
 	/*** アイテムの初期化 ***/
 	InitItem();
@@ -137,6 +136,10 @@ void InitGame(void)
 
 	/*** 放物線の初期化 ***/
 	InitParabola();
+
+	//==========================================
+	/*** モデルのスクリプト読み込み ***/
+	LoadModel();
 
 	/***ギミックの設置 ***/
 	//SetGimmick(D3DXVECTOR3(0, 0, 0), D3DXVECTOR3(0.0f, 0.0f, 0.0f), GIMMICKTYPE_DUCT);
