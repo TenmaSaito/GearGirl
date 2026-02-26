@@ -81,7 +81,6 @@ bool g_aMovePlayer[PLAYERTYPE_MAX];	// プレイヤーが動いているか
 int	g_nMotionCounter = 0;			// モーションカウンター
 bool g_bShotMouse = false;			// ネズミを発射するフラグ
 D3DXVECTOR3 g_Effectmove = {};
-int g_EffectCounter = 0;
 
 // =================================================
 // 初期化処理
@@ -177,7 +176,6 @@ void InitPlayer(void)
 	g_aMovePlayer[0] = false;
 	g_aMovePlayer[1] = false;
 	g_Effectmove = {};
-	g_EffectCounter = 0;
 
 	if (GetFirstMode() == MODE_GAME)
 	{
@@ -257,17 +255,12 @@ void UpdatePlayer(void)
 			// 出したベクトルを正規化
 			D3DXVec3Normalize(&vec, &vec);
 
-			g_Effectmove.x = vec.x * 1.0f;
-			g_Effectmove.z = vec.z * 1.0f;
+			g_Effectmove.x = vec.x;
+			g_Effectmove.z = vec.z;
 			g_Effectmove.y = 5.5f;
 
 			// エフェクトの描画
-			SetParabola(g_aPlayer[PLAYERTYPE_MOUSE].pos, g_Effectmove, 0.1f, 0.1f, true);
-		}
-		else if(pPlayer->state != PLAYERSTATE_THROWWAITING && nCntPlayer == PLAYERTYPE_GIRL)
-		{
-			// エフェクトカウンターを0に
-			g_EffectCounter = 0;
+			SetParabola(g_aPlayer[PLAYERTYPE_MOUSE].pos, g_Effectmove, D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f), 2.0f, 2.0f, 1.0f, true);
 		}
 
 		// === 何もしていない場合(何も入力されていない場合) === //
@@ -736,7 +729,6 @@ void ActionPlayer(PlayerType nPlayer, Player* pPlayer)
 			{
 				// NORMAL
 			case ARMTYPE_NORMAL:
-
 				break;
 
 				// CATAPULT
@@ -1779,19 +1771,18 @@ void ShotMouse(void)
 			if (pPlayer->state == PLAYERSTATE_NEUTRAL)
 			{
 				// ネズミを飛ばす
-				//D3DXVec3TransformCoord(&pMouse->pos, &pMouse->pos, &pPlayer->PartsInfo.aParts[19].mtxWorld);
-
 				pMouse->move.x += vec.x * 1.0f;
 				pMouse->move.z += vec.z * 1.0f;
 				if (g_nMotionCounter == -10)
 				{// Y軸移動は1Fのみ
+					// 投げる手の位置に移動
 					D3DXVec3TransformCoord(&pMouse->pos, &offset, &pPlayer->PartsInfo.aParts[19].mtxWorld);
 					pMouse->move.y = 5.5f;
 				}
 			}
 
 			if (g_nMotionCounter < -67)
-			{
+			{// 余韻を持たせて初期化
 				g_bShotMouse = false;
 				g_nMotionCounter = 0;
 			}

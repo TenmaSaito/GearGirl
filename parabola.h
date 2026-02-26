@@ -24,6 +24,7 @@ typedef struct
 	D3DXVECTOR3 posOri;		// 発射した位置
 	D3DXVECTOR3 posOld;		// 1f前の位置
 	D3DXVECTOR3 move;		// 移動量
+	D3DXVECTOR3 vec;		// 移動量用のベクトルを保管
 	D3DXMATRIX mtxWorld;	// ワールドマトリックス
 	int nLife;				// 寿命
 	int nCounter;			// 処理を行いたい回数用のカウンター
@@ -39,7 +40,6 @@ void InitParabola(void);	// 初期化処理
 void UninitParabola(void);	// 終了処理
 void UpdateParabola(void);	// 更新処理
 void DrawParabola(void);	// 描画処理
-void SetParabola(D3DXVECTOR3 pos, D3DXVECTOR3 move, float Width, float Height, bool bUseGravity);	// 放物線の設定
 Parabola *GetParabola(void);// 放物線の情報の譲渡
 
 #endif

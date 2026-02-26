@@ -8,8 +8,9 @@
 //*** インクルードファイル ***
 //**********************************************************************************
 #include"main.h"
-#include"player.h"
+#include"camera.h"
 #include"effect.h"
+#include"player.h"
 
 //*************************************************************************************************
 //*** マクロ定義 ***
@@ -29,6 +30,10 @@ typedef struct
 	bool bGravity;		// 重力適用の有無
 	float Width;		// 横
 	float Height;		// 縦
+	D3DXVECTOR3 posOri;	// 発射した位置
+	D3DXVECTOR3 move;	// 移動量
+	int nCounter;		// 処理を行いたい回数用のカウンター
+	int nType;			// 普通のエフェクトか放物線か
 
 	D3DXMATRIX mtxWorld; // ワールドマトリックス
 }Effect;
@@ -59,7 +64,7 @@ void InitEffect(void)
 	for (nCntEffect = 0; nCntEffect < MAX_EFFECT; nCntEffect++)
 	{
 		g_aEffect[nCntEffect].pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		g_aEffect[nCntEffect].col = D3DXCOLOR(1,1,1,1);	// 白
+		g_aEffect[nCntEffect].col = D3DXCOLOR(1, 1, 1, 1);	// 白
 		g_aEffect[nCntEffect].vec = D3DXVECTOR3(0, 0, 0);	// 黄色
 		g_aEffect[nCntEffect].nLife = 100;
 		g_aEffect[nCntEffect].bUse = false;	// 使用していない状態にする
@@ -67,11 +72,11 @@ void InitEffect(void)
 
 	// 頂点バッファの生成
 	pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * 4 * MAX_EFFECT,
-								D3DUSAGE_WRITEONLY,
-								FVF_VERTEX_3D,
-								D3DPOOL_MANAGED,
-								&g_pVtxBuffEffect,
-								NULL);
+		D3DUSAGE_WRITEONLY,
+		FVF_VERTEX_3D,
+		D3DPOOL_MANAGED,
+		&g_pVtxBuffEffect,
+		NULL);
 
 	VERTEX_3D* pVtx;	// 頂点情報へのポインタ
 
@@ -138,6 +143,9 @@ void UninitEffect(void)
 //================================================================================================================
 void UpdateEffect(void)
 {
+	// プレイヤー情報を取得
+	Player* pPlayer = GetPlayer();
+
 	int nCntEffect;
 	VERTEX_3D* pVtx;
 
@@ -149,16 +157,21 @@ void UpdateEffect(void)
 		if (g_aEffect[nCntEffect].bUse == true)
 		{// 弾が使用されている
 
-			 //弾の位置更新
-			g_aEffect[nCntEffect].pos.x += g_aEffect[nCntEffect].vec.x;
-			g_aEffect[nCntEffect].pos.y += g_aEffect[nCntEffect].vec.y;
-			g_aEffect[nCntEffect].pos.z += g_aEffect[nCntEffect].vec.z;
+			g_aEffect[nCntEffect].move.x += g_aEffect[nCntEffect].vec.x;
+			g_aEffect[nCntEffect].move.z += g_aEffect[nCntEffect].vec.z;
 
-			if (g_aEffect[nCntEffect].bGravity)
+			if (g_aEffect[nCntEffect].bGravity == true)
 			{
-				g_aEffect[nCntEffect].vec.y += GRAVITY;
+				g_aEffect[nCntEffect].move.y += GRAVITY;
 			}
-			
+
+			//弾の位置更新
+			g_aEffect[nCntEffect].pos += g_aEffect[nCntEffect].move;
+
+			// 慣性を掛ける
+			g_aEffect[nCntEffect].move.x += (0.0f - g_aEffect[nCntEffect].move.x) * (PLAYER_INI * 1.5f);
+			g_aEffect[nCntEffect].move.z += (0.0f - g_aEffect[nCntEffect].move.z) * (PLAYER_INI * 1.5f);
+
 			// 頂点座標の設定
 			pVtx[0].pos = D3DXVECTOR3(-g_aEffect[nCntEffect].Width * 0.5f, g_aEffect[nCntEffect].Height * 0.5f, 0.0f);
 			pVtx[1].pos = D3DXVECTOR3(g_aEffect[nCntEffect].Width * 0.5f, g_aEffect[nCntEffect].Height * 0.5f, 0.0f);
@@ -167,15 +180,29 @@ void UpdateEffect(void)
 
 			g_aEffect[nCntEffect].nLife -= 1;
 
-			 //寿命のカウントダウン
+			//寿命のカウントダウン
 			if (g_aEffect[nCntEffect].nLife < 0)
 			{
-				 //使用していない状態にする
+				//使用していない状態にする
 				g_aEffect[nCntEffect].bUse = false;
 			}
 
-			g_aEffect[nCntEffect].Width	-=0.01f;
-			g_aEffect[nCntEffect].Height -= 0.01f;
+			if (g_aEffect[nCntEffect].nType == 0)
+			{// 通常エフェクトの処理
+				g_aEffect[nCntEffect].Width -= 0.01f;
+				g_aEffect[nCntEffect].Height -= 0.01f;
+			}
+			else if (g_aEffect[nCntEffect].nType == 1)
+			{// 放物線エフェクト専用の処理
+				if (g_aEffect[nCntEffect].pos.y < 100.0f)
+				{
+					g_aEffect[nCntEffect].bUse = false;
+				}
+				else if (pPlayer->state != PLAYERSTATE_THROWWAITING)
+				{
+					g_aEffect[nCntEffect].bUse = false;
+				}
+			}
 		}
 
 		pVtx += 4;	// 頂点データ
@@ -203,7 +230,7 @@ void DrawEffect(void)
 	// 頂点バッファをデータストリームに設定
 	pDevice->SetStreamSource(0, g_pVtxBuffEffect, 0, sizeof(VERTEX_3D));
 
-	// 頂点フォーマットの設定............................................
+	// 頂点フォーマットの設定
 	pDevice->SetFVF(FVF_VERTEX_3D);
 
 	// テクスチャの設定
@@ -211,14 +238,14 @@ void DrawEffect(void)
 
 	// aブレンディングを加算合計に設定
 	pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-	pDevice->SetRenderState(D3DRS_SRCBLEND,D3DBLEND_SRCALPHA);
-	pDevice->SetRenderState(D3DRS_DESTBLEND,D3DBLEND_ONE);
+	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 
 	// Zテストを設定
 	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, false);
 	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESS);
 
-	for(nCntEffect = 0; nCntEffect < MAX_EFFECT; nCntEffect++)
+	for (nCntEffect = 0; nCntEffect < MAX_EFFECT; nCntEffect++)
 	{
 		if (g_aEffect[nCntEffect].bUse == true)
 		{// 弾が使用されている
@@ -249,7 +276,7 @@ void DrawEffect(void)
 			pDevice->SetTransform(D3DTS_WORLD, &g_aEffect[nCntEffect].mtxWorld);
 
 			// ポリゴン描写
-			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, nCntEffect*4, 2);
+			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, nCntEffect * 4, 2);
 		}
 	}
 
@@ -289,9 +316,10 @@ void SetEffect(D3DXVECTOR3 pos, D3DXCOLOR col, D3DXVECTOR3 vec, float Width, flo
 			g_aEffect[nCntEffect].nLife = nLife;
 			g_aEffect[nCntEffect].Width = Width;
 			g_aEffect[nCntEffect].Height = Height;
-			g_aEffect[nCntEffect].vec = vecNor * speed;
+			g_aEffect[nCntEffect].move = vecNor * speed;
 			g_aEffect[nCntEffect].bUse = true;	// 使用している状態にする
 			g_aEffect[nCntEffect].bGravity = bUseGravity;
+			g_aEffect[nCntEffect].nType = 0;
 
 			g_aEffect[nCntEffect].pos = pos;
 
@@ -306,6 +334,63 @@ void SetEffect(D3DXVECTOR3 pos, D3DXCOLOR col, D3DXVECTOR3 vec, float Width, flo
 
 		pVtx += 4;	// 頂点データ
 	}
+
+	// 頂点バッファをアンロックする
+	g_pVtxBuffEffect->Unlock();
+}
+
+// =================================================
+// 放物線の設定処理
+// =================================================
+void SetParabola(D3DXVECTOR3 pos, D3DXVECTOR3 move, D3DXCOLOR col, float Width, float Height, float speed, bool bUseGravity)
+{
+	Player* pPlayer = GetPlayer();
+	Camera* pCamera = GetCamera();
+
+	VERTEX_3D* pVtx;
+
+	// 頂点バッファをロックして、頂点情報へのポインタを取得
+	g_pVtxBuffEffect->Lock(0, 0, (void**)&pVtx, 0);
+
+	for (int nCntEffect = 0; nCntEffect < MAX_EFFECT; nCntEffect++)
+	{
+		if (g_aEffect[nCntEffect].bUse == false)
+		{// 放物線未使用
+
+			// === 引数を各変数に代入 === //
+			g_aEffect[nCntEffect].move = move;		// 移動量
+			g_aEffect[nCntEffect].Width = Width;	// 幅
+			g_aEffect[nCntEffect].Height = Height;	// 高さ
+			g_aEffect[nCntEffect].nLife = 120;		// 寿命の設定
+			g_aEffect[nCntEffect].bUse = true;		// 使用状態に
+			g_aEffect[nCntEffect].bGravity = bUseGravity;	// 重力をかけるかどうか
+			g_aEffect[nCntEffect].nCounter = 0;
+			g_aEffect[nCntEffect].nType = 1;
+
+			for (int nCnt = 0; nCnt < 4; nCnt++)
+			{// 色を設定
+				pVtx[nCnt].col = col;
+			}
+
+			D3DXVECTOR3 vec = move;
+
+			// 出したベクトルを正規化
+			D3DXVec3Normalize(&vec, &vec);
+
+			g_aEffect[nCntEffect].vec.x = vec.x * speed;
+			g_aEffect[nCntEffect].vec.z = vec.z * speed;
+
+			// 出したベクトルを正規化
+			D3DXVec3Normalize(&g_aEffect[nCntEffect].vec, &g_aEffect[nCntEffect].vec);
+
+			g_aEffect[nCntEffect].pos = pos;	// 位置を代入
+			g_aEffect[nCntEffect].posOri = pos;	// 発射位置を代入
+
+			break;
+		}
+		pVtx += 4;
+	}
+
 
 	// 頂点バッファをアンロックする
 	g_pVtxBuffEffect->Unlock();

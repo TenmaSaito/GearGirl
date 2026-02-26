@@ -4,14 +4,9 @@
 // Author : Shu Tanaka
 // 
 // =================================================
-#include "main.h"
-#include "field.h"
 #include "parabola.h"
-#include "explosion.h"
 #include "player.h"
-#include "debugproc.h"
 #include "camera.h"
-#include "input.h"
 
 // =================================================
 // グローバル変数
@@ -44,12 +39,16 @@ void InitParabola(void)
 		&g_pVtxBuffParabola,
 		NULL);
 
+	// 構造体の中身を初期化
 	for (int nCntParabola = 0; nCntParabola < MAX_PARABOLA; nCntParabola++)
 	{
 		g_aParabola[nCntParabola].pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_aParabola[nCntParabola].move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_aParabola[nCntParabola].nLife = 0;
 		g_aParabola[nCntParabola].bUse = false;
+		g_aParabola[nCntParabola].Width = 0.0f;
+		g_aParabola[nCntParabola].Height = 0.0f;
+		g_aParabola[nCntParabola].bUseGravity = false;
 	}
 
 	VERTEX_3D* pVtx;		// 頂点情報へのポインタ
@@ -117,6 +116,7 @@ void UninitParabola(void)
 // =================================================
 void UpdateParabola(void)
 {
+	// === 各種情報をポインタとして取得 === //
 	Player* pPlayer = GetPlayer();
 	Parabola* pParabola = &g_aParabola[0];
 	Camera* pCamera = GetCamera();
@@ -132,27 +132,21 @@ void UpdateParabola(void)
 		{
 			pParabola->posOld = pParabola->pos;
 
-			// 注視点までのベクトルをだす
-			D3DXVECTOR3 vec = pCamera->posR - pCamera->posV;
+			//// 注視点までのベクトルをだす
+			//D3DXVECTOR3 vec = pCamera->posR - pCamera->posV;
 
-			// 出したベクトルを正規化
-			D3DXVec3Normalize(&vec, &vec);
+			//// 出したベクトルを正規化
+			//D3DXVec3Normalize(&vec, &vec);
 
-			pParabola->move.x += vec.x * 1.0f;
-			pParabola->move.z += vec.z * 1.0f;
+			pParabola->move.x += pParabola->vec.x;
+			pParabola->move.z += pParabola->vec.z;
 
-			if (pParabola->nCounter == 0)
-			{// 1Fだけ入る
-				pParabola->move.y = 5.5f;
-				pParabola->nCounter = 1;
-			}
+			//if (pParabola->nCounter == 0)
+			//{// 1Fだけ入る
+			//	pParabola->move.y = 5.5f;
+			//	pParabola->nCounter = 1;
+			//}
 
-			// 頂点座標の設定
-			pVtx[0].pos = D3DXVECTOR3(-pParabola->Width * 0.5f, pParabola->Height * 0.5f, 0.0f);
-			pVtx[1].pos = D3DXVECTOR3(pParabola->Width * 0.5f, pParabola->Height * 0.5f, 0.0f);
-			pVtx[2].pos = D3DXVECTOR3(-pParabola->Width * 0.5f, -pParabola->Height * 0.5f, 0.0f);
-			pVtx[3].pos = D3DXVECTOR3(pParabola->Width * 0.5f, -pParabola->Height * 0.5f, 0.0f);
-			
 			if (pParabola->bUseGravity == true)
 			{
 				// 重力をかけ続ける
@@ -166,12 +160,13 @@ void UpdateParabola(void)
 			pParabola->move.x += (0.0f - pParabola->move.x) * (PLAYER_INI * 1.5f);
 			pParabola->move.z += (0.0f - pParabola->move.z) * (PLAYER_INI * 1.5f);
 
+			// === 各種条件で未使用状態に === //
 			if (pParabola->pos.y < 100.0f)
-			{
+			{// 地面の下に埋まる
 				pParabola->bUse = false;
 			}
 			else if (pPlayer->state != PLAYERSTATE_THROWWAITING)
-			{
+			{// 投げ待機状態を解除
 				pParabola->bUse = false;
 			}
 		}
@@ -242,50 +237,71 @@ void DrawParabola(void)
 		pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 		pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 	}
+
+	EndDevice();
 }
 
 // =================================================
 // 放物線の設定処理
 // =================================================
-void SetParabola(D3DXVECTOR3 pos, D3DXVECTOR3 move, float Width, float Height, bool bUseGravity)
-{
-	Player* pPlayer = GetPlayer();
-
-	VERTEX_3D* pVtx;
-
-	// 頂点バッファをロックして、頂点情報へのポインタを取得
-	g_pVtxBuffParabola->Lock(0, 0, (void**)&pVtx, 0);
-
-	for (int nCntParabola = 0; nCntParabola < MAX_PARABOLA; nCntParabola++)
-	{
-		if (g_aParabola[nCntParabola].bUse == false)
-		{// 放物線未使用
-
-			// === 引数を各変数に代入 === //
-			g_aParabola[nCntParabola].move = move;		// 移動量
-			g_aParabola[nCntParabola].Width = Width;	// 幅
-			g_aParabola[nCntParabola].Height = Height;	// 高さ
-			g_aParabola[nCntParabola].nLife = 120;		// 寿命の設定
-			g_aParabola[nCntParabola].bUse = true;		// 使用状態に
-			g_aParabola[nCntParabola].bUseGravity = bUseGravity;	// 重力をかけるかどうか
-			g_aParabola[nCntParabola].nCounter = 0;
-
-			// 頂点座標の設定
-			pVtx[0].pos = D3DXVECTOR3(-g_aParabola[nCntParabola].Width * 0.5f, g_aParabola[nCntParabola].Height * 0.5f, 0.0f);
-			pVtx[1].pos = D3DXVECTOR3(g_aParabola[nCntParabola].Width * 0.5f, g_aParabola[nCntParabola].Height * 0.5f, 0.0f);
-			pVtx[2].pos = D3DXVECTOR3(-g_aParabola[nCntParabola].Width * 0.5f, -g_aParabola[nCntParabola].Height, 0.0f);
-			pVtx[3].pos = D3DXVECTOR3(g_aParabola[nCntParabola].Width * 0.5f, -g_aParabola[nCntParabola].Height * 0.5f, 0.0f);
-
-			g_aParabola[nCntParabola].pos = pos;	// 位置を代入
-			g_aParabola[nCntParabola].posOri = pos;	// 発射位置を代入
-
-			break;
-		}
-	}
-
-	// 頂点バッファをアンロックする
-	g_pVtxBuffParabola->Unlock();
-}
+//void SetParabola(D3DXVECTOR3 pos, D3DXVECTOR3 move, D3DXCOLOR col, float Width, float Height, float speed, bool bUseGravity)
+//{
+//	Player* pPlayer = GetPlayer();
+//	Camera* pCamera = GetCamera();
+//
+//	VERTEX_3D* pVtx;
+//
+//	// 頂点バッファをロックして、頂点情報へのポインタを取得
+//	g_pVtxBuffParabola->Lock(0, 0, (void**)&pVtx, 0);
+//
+//	for (int nCntParabola = 0; nCntParabola < MAX_PARABOLA; nCntParabola++)
+//	{
+//		if (g_aParabola[nCntParabola].bUse == false)
+//		{// 放物線未使用
+//
+//			// === 引数を各変数に代入 === //
+//			g_aParabola[nCntParabola].move = move;		// 移動量
+//			g_aParabola[nCntParabola].Width = Width;	// 幅
+//			g_aParabola[nCntParabola].Height = Height;	// 高さ
+//			g_aParabola[nCntParabola].nLife = 120;		// 寿命の設定
+//			g_aParabola[nCntParabola].bUse = true;		// 使用状態に
+//			g_aParabola[nCntParabola].bUseGravity = bUseGravity;	// 重力をかけるかどうか
+//			g_aParabola[nCntParabola].nCounter = 0;
+//
+//			for (int nCnt = 0; nCnt < 4; nCnt++)
+//			{// 色を設定
+//				pVtx[nCnt].col = col;
+//			}
+//
+//			pVtx += 4;
+//
+//			D3DXVECTOR3 vec = move;
+//
+//			// 出したベクトルを正規化
+//			D3DXVec3Normalize(&vec, &vec);
+//
+//			g_aParabola[nCntParabola].vec.x = vec.x * speed;
+//			g_aParabola[nCntParabola].vec.z = vec.z * speed;
+//
+//			D3DXVec3Normalize(&g_aParabola[nCntParabola].vec, &g_aParabola[nCntParabola].vec);
+//
+//
+//			//if (g_aParabola[nCntParabola].nCounter == 0)
+//			//{// 1Fだけ入る
+//			//	g_aParabola[nCntParabola].move.y = 5.5f;
+//			//	g_aParabola[nCntParabola].nCounter = 1;
+//			//}
+//
+//			g_aParabola[nCntParabola].pos = pos;	// 位置を代入
+//			g_aParabola[nCntParabola].posOri = pos;	// 発射位置を代入
+//
+//			break;
+//		}
+//	}
+//
+//	// 頂点バッファをアンロックする
+//	g_pVtxBuffParabola->Unlock();
+//}
 
 // =================================================
 // 放物線の情報の譲渡
