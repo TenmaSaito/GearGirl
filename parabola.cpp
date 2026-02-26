@@ -26,8 +26,10 @@ void InitParabola(void)
 {
 	LPDIRECT3DDEVICE9 pDevice;		// デバイスへのポインタ
 
+	AUTODEVICE9 Auto;
+
 	// デバイスの取得
-	pDevice = GetDevice();
+	pDevice = Auto.pDevice;
 
 	// テクスチャの読み込み
 	D3DXCreateTextureFromFile(pDevice,
@@ -64,16 +66,16 @@ void InitParabola(void)
 		pVtx[3].pos = D3DXVECTOR3(g_aParabola[nCntParabola].pos.x + PARABOLA_XSIZE, g_aParabola[nCntParabola].pos.y - PARABOLA_YSIZE, g_aParabola[nCntParabola].pos.z);
 
 		// 法線ベクトルの設定
-		pVtx[0].nor = D3DXVECTOR3(0.0f, 0.0f, -1.0f);
-		pVtx[1].nor = D3DXVECTOR3(0.0f, 0.0f, -1.0f);
-		pVtx[2].nor = D3DXVECTOR3(0.0f, 0.0f, -1.0f);
-		pVtx[3].nor = D3DXVECTOR3(0.0f, 0.0f, -1.0f);
+		pVtx[0].nor = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+		pVtx[1].nor = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+		pVtx[2].nor = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+		pVtx[3].nor = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 
 		// 頂点カラーの設定
-		pVtx[0].col = D3DCOLOR_RGBA(255, 255, 255, 255);
-		pVtx[1].col = D3DCOLOR_RGBA(255, 255, 255, 255);
-		pVtx[2].col = D3DCOLOR_RGBA(255, 255, 255, 255);
-		pVtx[3].col = D3DCOLOR_RGBA(255, 255, 255, 255);
+		pVtx[0].col = D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f);
+		pVtx[1].col = D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f);
+		pVtx[2].col = D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f);
+		pVtx[3].col = D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f);
 
 		// テクスチャ座標の設定
 		pVtx[0].tex = D3DXVECTOR2(0.0f, 0.0f);
@@ -145,22 +147,30 @@ void UpdateParabola(void)
 				pParabola->nCounter = 1;
 			}
 
+			// 頂点座標の設定
+			pVtx[0].pos = D3DXVECTOR3(-pParabola->Width * 0.5f, pParabola->Height * 0.5f, 0.0f);
+			pVtx[1].pos = D3DXVECTOR3(pParabola->Width * 0.5f, pParabola->Height * 0.5f, 0.0f);
+			pVtx[2].pos = D3DXVECTOR3(-pParabola->Width * 0.5f, -pParabola->Height * 0.5f, 0.0f);
+			pVtx[3].pos = D3DXVECTOR3(pParabola->Width * 0.5f, -pParabola->Height * 0.5f, 0.0f);
+			
 			if (pParabola->bUseGravity == true)
 			{
 				// 重力をかけ続ける
 				pParabola->move.y += GRAVITY;
 			}
 
-			// 頂点座標の設定
-			pVtx[0].pos = D3DXVECTOR3(-pParabola->Width * 0.5f, pParabola->Height * 0.5f, 0.0f);
-			pVtx[1].pos = D3DXVECTOR3(pParabola->Width * 0.5f, pParabola->Height * 0.5f, 0.0f);
-			pVtx[2].pos = D3DXVECTOR3(-pParabola->Width * 0.5f, -pParabola->Height, 0.0f);
-			pVtx[3].pos = D3DXVECTOR3(pParabola->Width * 0.5f, -pParabola->Height * 0.5f, 0.0f);
-
 			// 位置を更新
 			pParabola->pos += pParabola->move;
 
+			// 慣性を掛ける
+			pParabola->move.x += (0.0f - pParabola->move.x) * (PLAYER_INI * 1.5f);
+			pParabola->move.z += (0.0f - pParabola->move.z) * (PLAYER_INI * 1.5f);
+
 			if (pParabola->pos.y < 100.0f)
+			{
+				pParabola->bUse = false;
+			}
+			else if (pPlayer->state != PLAYERSTATE_THROWWAITING)
 			{
 				pParabola->bUse = false;
 			}
@@ -221,10 +231,6 @@ void DrawParabola(void)
 		pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 		pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 
-		// Zテストを設定
-		pDevice->SetRenderState(D3DRS_ZWRITEENABLE, false);
-		pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESS);
-
 		if (g_aParabola[nCntParabola].bUse == true)
 		{
 			// 放物線の描画
@@ -235,10 +241,6 @@ void DrawParabola(void)
 		pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
 		pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 		pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-
-		// 
-		pDevice->SetRenderState(D3DRS_ZWRITEENABLE, true);
-		pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
 	}
 }
 

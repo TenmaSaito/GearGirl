@@ -11,9 +11,9 @@
 
 // =================================================
 // マクロ定義
-#define PARABOLA_XSIZE	(10)	// 放物線のXサイズ
-#define PARABOLA_YSIZE	(10)	// 放物線のYサイズ
-#define PARABOLA_ZSIZE	(10)	// 放物線のZサイズ(奥行き)
+#define PARABOLA_XSIZE	(1)	// 放物線のXサイズ
+#define PARABOLA_YSIZE	(1)	// 放物線のYサイズ
+#define PARABOLA_ZSIZE	(1)	// 放物線のZサイズ(奥行き)
 #define MAX_PARABOLA	(256)	// 放物線数
 
 // =================================================

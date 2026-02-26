@@ -261,13 +261,8 @@ void UpdatePlayer(void)
 			g_Effectmove.z = vec.z * 1.0f;
 			g_Effectmove.y = 5.5f;
 
-			if (g_EffectCounter == 0)
-			{// 1Fだけ入る
-				g_EffectCounter = 1;
-			}
-
 			// エフェクトの描画
-			SetParabola(g_aPlayer[PLAYERTYPE_MOUSE].pos, g_Effectmove, 10.0f, 10.0f, true);
+			SetParabola(g_aPlayer[PLAYERTYPE_MOUSE].pos, g_Effectmove, 0.1f, 0.1f, true);
 		}
 		else if(pPlayer->state != PLAYERSTATE_THROWWAITING && nCntPlayer == PLAYERTYPE_GIRL)
 		{
@@ -1790,6 +1785,7 @@ void ShotMouse(void)
 				pMouse->move.z += vec.z * 1.0f;
 				if (g_nMotionCounter == -10)
 				{// Y軸移動は1Fのみ
+					D3DXVec3TransformCoord(&pMouse->pos, &offset, &pPlayer->PartsInfo.aParts[19].mtxWorld);
 					pMouse->move.y = 5.5f;
 				}
 			}
