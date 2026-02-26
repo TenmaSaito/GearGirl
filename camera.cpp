@@ -435,31 +435,31 @@ void CameraOrbit(P_CAMERA pCamera)
 	// キーボード操作
 	if (GetKeyboardPress(CAM_ORBIT_R) && GetKeyboardPress(DIK_M) != true)
 	{
-		pCamera->rot.y -= CAMERA_SPIN;
+		pCamera->rot.y -= CAMERA_SPIN_X;
 		bUse = true;
 	}
 	if (GetKeyboardPress(CAM_ORBIT_L))
 	{
-		pCamera->rot.y += CAMERA_SPIN;
+		pCamera->rot.y += CAMERA_SPIN_X;
 		bUse = true;
 	}
 
 	if (GetKeyboardPress(CAM_ORBIT_UP))
 	{
-		pCamera->rot.x -= CAMERA_SPIN;
+		pCamera->rot.x -= CAMERA_SPIN_Y;
 		bUse = true;
 	}
 	if (GetKeyboardPress(CAM_ORBIT_DW))
 	{
-		pCamera->rot.x += CAMERA_SPIN;
+		pCamera->rot.x += CAMERA_SPIN_Y;
 		bUse = true;
 	}
 
 	// コントローラー操作
 	 if (GetJoypadRightStick(GetNumPlayer() == 1 ? 0:(int)pCamera->type,&rightStick))
 	 {// 1人プレイなら常に一つ目のコントローラー情報を取得。そうじゃなければカメラのタイプ（対応プレイヤーナンバー）のコントローラー情報を取得
-		pCamera->rot.y += rightStick.x * CAMERA_SPIN;
-		pCamera->rot.x += rightStick.y * CAMERA_SPIN;
+		pCamera->rot.y += rightStick.x * CAMERA_SPIN_X;
+		pCamera->rot.x += rightStick.y * CAMERA_SPIN_Y;
 		bUse = true;
 	 }
 
