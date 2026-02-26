@@ -926,8 +926,8 @@ void MovePlayer(PlayerType nPlayer)
 	else
 	{// ネズミの操作
 		if (g_nNumPlayer == 2)
-		{// 1人プレイ時
-			if (GetJoypadLeftStick(0, &stick))
+		{// 2人プレイ時
+			if (GetJoypadLeftStick(nPlayer, &stick))
 			{// スティックの入力がある
 				CheckMotionMove(nPlayer, pPlayer);
 
@@ -1047,8 +1047,8 @@ void MovePlayer(PlayerType nPlayer)
 			}
 		}
 		else
-		{// 2人プレイ時
-			if (GetJoypadLeftStick(nPlayer, &stick))
+		{// 1人プレイ時
+			if (GetJoypadLeftStick(0, &stick))
 			{// スティックの入力がある
 				CheckMotionMove(nPlayer, pPlayer);
 
