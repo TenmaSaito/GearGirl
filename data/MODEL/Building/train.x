@@ -2229,7 +2229,7 @@ Mesh {
    0.200000;0.200000;0.200000;;
    0.000000;0.000000;0.000000;;
    TextureFilename {
-    "C:\\Users\\student\\Downloads\\train2.png";
+    "data\\TEXTURE\\train2.png";
    }
   }
   Material {
