@@ -18,6 +18,7 @@
 #include "model.h"
 #include "modeldata.h"
 #include "motion.h"
+#include "particle.h"
 #include "player.h"
 #include "prompt.h"
 #include "titleselect.h"
@@ -78,6 +79,8 @@ int g_nUseArm = 0;
 bool g_aMovePlayer[PLAYERTYPE_MAX];	// プレイヤーが動いているか
 int	g_nMotionCounter = 0;			// モーションカウンター
 bool g_bShotMouse = false;			// ネズミを発射するフラグ
+D3DXVECTOR3 g_Effectmove = {};
+int g_EffectCounter = 0;
 
 // =================================================
 // 初期化処理
@@ -173,6 +176,8 @@ void InitPlayer(void)
 	g_armPlayer = ARMTYPE_NORMAL;	// 通常アーム
 	g_aMovePlayer[0] = false;
 	g_aMovePlayer[1] = false;
+	g_Effectmove = {};
+	g_EffectCounter = 0;
 
 	if (GetFirstMode() == MODE_GAME)
 	{
@@ -198,6 +203,9 @@ void UpdatePlayer(void)
 {
 	// プレイヤー構造体をポインタ化
 	Player* pPlayer = &g_aPlayer[0];
+	Player* pMouse = &g_aPlayer[1];
+
+	Camera* pCamera = GetCamera();
 
 	pPlayer->bUseLandMotion = false;
 
@@ -222,6 +230,7 @@ void UpdatePlayer(void)
 
 		if (nCntPlayer == PLAYERTYPE_GIRL)
 		{
+			// 腕の切り替え
 			UpdateArm();
 
 			// カタパルトを起動した後の処理
@@ -239,9 +248,34 @@ void UpdatePlayer(void)
 			UpdateMotion((PlayerType)nCntPlayer);
 		}
 
-		// エフェクトの描画
-		//SetEffect(g_aPlayer[PLAYERTYPE_MOUSE].pos, DEF_COL, VECNULL, 10.0f, 10.0f, 1.0f, 1, false);
+		// === ネズミ射出の予測軌跡の描画 === //
+		//if (pPlayer->state == PLAYERSTATE_THROWWAITING && nCntPlayer == PLAYERTYPE_GIRL)
+		//{
+		//	// 注視点までのベクトルをだす
+		//	D3DXVECTOR3 vec = pCamera->posR - pCamera->posV;
 
+		//	// 出したベクトルを正規化
+		//	D3DXVec3Normalize(&vec, &vec);
+
+		//	g_Effectmove.x = 5.0f;
+		//	g_Effectmove.z = 5.0f;
+		//	g_Effectmove.y = 5.5f;
+
+		//	if (g_EffectCounter == 0)
+		//	{// 1Fだけ入る
+		//		g_EffectCounter = 1;
+		//	}
+
+		//	// エフェクトの描画
+		//	SetParticle(g_aPlayer[PLAYERTYPE_MOUSE].pos, DEF_COL, g_Effectmove, D3DXVECTOR3(50.0f, 10.0f, 10.0f), 10, 10.0f, 10, 5, true);
+		//}
+		//else if(pPlayer->state != PLAYERSTATE_THROWWAITING && nCntPlayer == PLAYERTYPE_GIRL)
+		//{
+		//	// エフェクトカウンターを0に
+		//	g_EffectCounter = 0;
+		//}
+
+		// === 何もしていない場合(何も入力されていない場合) === //
 		if ((pPlayer->motionType != MOTIONTYPE_ACTION
 			&& pPlayer->motionType != MOTIONTYPE_JUMP
 			&& pPlayer->motionType != MOTIONTYPE_LANDING
@@ -258,7 +292,7 @@ void UpdatePlayer(void)
 		// 重力をかけ続ける
 		pPlayer->move.y += GRAVITY;
 
-		// === マップの限界値まで行った時に、各移動量を0にする
+		// === マップの限界値まで行った時に、各移動量を0にする === //
 		if (pPlayer->pos.z <= MAX_ZMOVE1)
 		{// Z軸
 			pPlayer->pos.z = MAX_ZMOVE1;
@@ -336,8 +370,8 @@ void UpdatePlayer(void)
 		// デバッグ表示
 		//if (g_Functionkey != 0)
 	//	{
-			PrintDebugProc("\nPlayer座標 : [%~3f]\n", pPlayer->pos.x, pPlayer->pos.y, pPlayer->pos.z);
-	//	}
+		PrintDebugProc("\nPlayer座標 : [%~3f]\n", pPlayer->pos.x, pPlayer->pos.y, pPlayer->pos.z);
+		//	}
 	}
 
 	// プロンプトを描画
