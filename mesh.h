@@ -85,7 +85,7 @@ void DrawMeshRing(void);
 void SetMeshSphere	(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int nCircleDivision, D3DCULL cull = D3DCULL_CCW, int nTex = -1, bool bPat = false);
 void SetMeshDome	(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int nCircleDivision, D3DCULL cull = D3DCULL_CCW, int nTex = -1, bool bPat = false);
 void SetMeshCylinder(vec3 pos, vec3 rot, float fRadius,float fHeight, int nHeightDivision, int nCircleDivision, D3DCULL cull = D3DCULL_CCW, int nTex = -1, bool bPat = false);
-void SetMeshRing	(vec3 pos, vec3 rot, float fInner, float fOuter, int nHeightDivision, int nCircleDivision,  D3DCULL cull = D3DCULL_CCW, int nTex = -1, bool bPat = false);
+int SetMeshRing	(vec3 pos, vec3 rot, float fInner, float fOuter, int nHeightDivision, int nCircleDivision,  D3DCULL cull = D3DCULL_CCW, int nTex = -1, bool bPat = false);
 
 P_MESH GetMeshSphere(void);
 P_MESH GetMeshDome(void);

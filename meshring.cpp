@@ -151,7 +151,7 @@ void DrawMeshRing(void)
 //=========================================================================================
 // メッシュリングを設置
 //=========================================================================================
-void SetMeshRing(vec3 pos, vec3 rot, float fInner, float fOuter, int nHeightDivision, int nCircleDivision, D3DCULL cull, int nTex, bool bPat)
+int SetMeshRing(vec3 pos, vec3 rot, float fInner, float fOuter, int nHeightDivision, int nCircleDivision, D3DCULL cull, int nTex, bool bPat)
 {
 	//**************************************************************
 	// 変数宣言
@@ -265,10 +265,44 @@ void SetMeshRing(vec3 pos, vec3 rot, float fInner, float fOuter, int nHeightDivi
 
 			pMesh->bUse = true;
 			g_nSetMeshRing++;
-			break;
+			return nCntMeshRing;
 		}
 	}
 	EndDevice();// デバイス取得終了
+}
+
+//=========================================================================================
+// メッシュリングの位置を変更
+//=========================================================================================
+bool SetPositionMeshRing(vec3 pos, int nIdx)
+{
+	if (-1 < nIdx && nIdx < MAX_MESHRING)
+	{
+		P_MESH pMesh = &g_aMeshRing[nIdx];
+		if (pMesh->bUse)
+		{
+			pMesh->pos = pos;
+			return true;
+		}
+	}
+	return false;
+}
+
+//=========================================================================================
+// メッシュリングの角度を変更
+//=========================================================================================
+bool SetRotationMeshRing(vec3 rot, int nIdx)
+{
+	if (-1 < nIdx && nIdx < MAX_MESHRING)
+	{
+		P_MESH pMesh = &g_aMeshRing[nIdx];
+		if (pMesh->bUse)
+		{
+			pMesh->rot = rot;
+			return true;
+		}
+	}
+	return false;
 }
 
 //=========================================================================================
