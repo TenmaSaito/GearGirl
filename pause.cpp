@@ -229,13 +229,13 @@ void UpdatePause(void)
 	{
 		switch (nPauseData)
 		{
-		case PAUSE_MENU_RESTART:
+		case PAUSE_MENU_CLOSE:
 			break;
-		case PAUSE_MENU_RETITLE:
+		case PAUSE_MENU_RESTART:
 			FadeSound(SOUND_LABEL_BGM_GAME);
 			SetFade(MODE_GAME);
 			break;
-		case PAUSE_MENU_CLOSE:
+		case PAUSE_MENU_RETITLE:
 			FadeSound(SOUND_LABEL_BGM_TITLE);
 			SetFade(MODE_TITLE);
 			break;
