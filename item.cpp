@@ -18,6 +18,8 @@
 #include "judgeEnd.h"
 #include "camera.h"
 #include "fade.h"
+#include "mesh.h"
+#include "particle.h"
 
 using  namespace MyMathUtil;
 
@@ -27,6 +29,7 @@ using  namespace MyMathUtil;
 typedef struct ItemQuota
 {
 	vec3		pos;
+	vec3		rot;
 	colX		col;
 	vec2		size;
 	int			nType;			// 表示するアイテムの種類 もしくはテクスチャ番号
@@ -60,8 +63,6 @@ ItemInfo		g_aItemInfo[ITEMTYPE_MAX] =
 	{"data\\MODEL\\Item\\ShaftCurv.x",-1},		 // [8] 少しい曲がった軸
 	{"data\\MODEL\\Item\\GearLarge.x",-1},		 // [9] ゆがんだぜんまい
 };
-
-vec3 g_rot = vec3_ZERO;
 
 //**************************************************************
 // プロトタイプ宣言
@@ -105,11 +106,13 @@ void InitItem(void)
 		pItem->bGet = false;
 		pItem->bUse = false;
 		pItem->nIdxQuota = -1;
+		pItem->nIdxMeshEffect = -1;
 	}
+
 	// 所持アイテムの枠を取得
 	for (int nCntQuota = 0; nCntQuota < ITEMTYPE_MAX; nCntQuota++, pItemQuota++)
 	{
-		pItemQuota->pos = vec3(SCREEN_WIDTH / ITEMTYPE_MAX * (nCntQuota + 0.5f), SCREEN_HEIGHT * 0.9f, 0.0f);
+		pItemQuota->pos = vec3(SCREEN_WIDTH / ITEMTYPE_MAX * (nCntQuota + 0.5f), SCREEN_HEIGHT * 0.5f, 0.0f);
 		pItemQuota->col = colX_ZERO;
 		pItemQuota->size = vec2(SCREEN_WIDTH * 0.05f, SCREEN_WIDTH * 0.05f);
 		pItemQuota->nIdxBox = Set2DPolygon(pItemQuota->pos,vec3_ZERO, pItemQuota->size, -1, pItemQuota->col);
@@ -143,6 +146,8 @@ void InitItem(void)
 	// 設置
 	g_nSetItemNum = 0;	// 配置数を初期化
 
+#ifdef _DEBUG
+	// デバッグ用　見た目だけ
 	vec3 pos = vec3(450.0f, 120.0f, -600.0f);
 
 	for (int nCnt = 0; nCnt < ITEMTYPE_MAX; nCnt++)
@@ -153,12 +158,11 @@ void InitItem(void)
 			pos.z = -600.0f;
 		}
 
-		SetItem(pos, vec3_ZERO, (ITEMTYPE)nCnt, true, true, true);
+		// SetItem(pos, vec3_ZERO, (ITEMTYPE)nCnt, true, true, true);
 		pos.z += 50.0f;
 
 	}
-
-
+#endif
 }
 
 //=========================================================================================
@@ -182,8 +186,6 @@ void UpdateItem(void)
 
 	if (GetKeyboardTrigger(DIK_F3))
 		EnableItemPut();
-
-	g_rot += vec3(0.01f, 0.01f, 0.0f);
 }
 
 //=========================================================================================
@@ -207,6 +209,7 @@ void UpdateMapItem(void)
 				MyMathUtil::RepairRot(pItem->rot.x);
 				MyMathUtil::RepairRot(pItem->rot.y);
 
+				SetRotationMesh(GetMeshRing(), vec3(D3DX_PI * 0.5f, -pItem->rot.y, 0.0f), pItem->nIdxMeshEffect, MAX_MESHRING);
 				break;
 			}
 		}
@@ -228,11 +231,12 @@ void UpdatePouchItem(void)
 		SelectItem();	// 選んだアイテム表示
 	}
 	else
-	{
+	{// プレイ中
+
 		// 所持アイテム枠の位置を変更
 		for (int nCntQuota = 0; nCntQuota < ITEMTYPE_MAX; nCntQuota++, pItemQuota++)
 		{
-			pItemQuota->pos = vec3(SCREEN_WIDTH / ITEMTYPE_MAX * (nCntQuota + 0.5f), SCREEN_HEIGHT * 0.9f, 0.0f);
+			pItemQuota->pos = vec3(SCREEN_WIDTH / ITEMTYPE_MAX * (nCntQuota + 0.5f), SCREEN_HEIGHT * 0.5f, 0.0f);
 			SetPosition2DPolygon(pItemQuota->nIdxBox, pItemQuota->pos);
 		}
 
@@ -244,6 +248,7 @@ void UpdatePouchItem(void)
 			pPutQuota->bUse = false;
 		}
 
+		// 
 		P_ITEMQUOTA pItemQuota = &g_aItemQuota[0];		// ポインタを先頭に戻す
 		if (GetEnableUImenu())
 		{
@@ -374,7 +379,7 @@ void OnUIitemEnable(P_ITEMQUOTA pQuota, int nMAX)
 			D3DXMatrixIdentity(&mtxWorld);
 
 			// 向きを反映
-			D3DXMatrixRotationYawPitchRoll(&mtxRot, g_rot.y, g_rot.x, g_rot.z);
+			D3DXMatrixRotationYawPitchRoll(&mtxRot, pQuota->rot.y, pQuota->rot.x, pQuota->rot.z);
 			D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxRot);
 
 			// 位置を反映
@@ -433,19 +438,26 @@ void CollisionItem(vec3 pos, float fRange)
 			float fDistZ = SQUARE(pItem->pos.z - pos.z);
 			float fDist = sqrtf(__ABSOLUTE(SQUARE(pItem->pos.x - pos.x) + SQUARE(pItem->pos.y - pos.y) + SQUARE(pItem->pos.z - pos.z)));
 
+			// 距離計算
 			if (fDist <= pItem->fRange + fRange)
 			{
+				// アイテム欄の空き状況を取得
 				for (int nCntQuota = 0; nCntQuota < ITEMTYPE_MAX; nCntQuota++,pItemQuota++)
 				{
 					if (pItemQuota->bUse == false)
 					{
+						// アイテム欄に保存
 						pItemQuota->bUse = true;
 						pItemQuota->nType = (int)pItem->type;
 						pItem->nIdxQuota = nCntQuota;
 						break;
 					}
 				}
+
+				// 取得処理
 				pItem->bGet = true;
+				ReleaseMesh(GetMeshRing(), pItem->nIdxMeshEffect, MAX_MESHRING);
+				SetParticle(pItem->pos, colX(0.5f, 0.1f, 0.1f, 0.3f), vec3(-0.5f, -0.5f, -0.5f), vec3(1.0f, 1.0f, 1.0f), 1, 5.0f, 20, 10, false);
 				break;
 			}
 		}
@@ -582,6 +594,7 @@ void SetItem(vec3 pos, vec3 rot, ITEMTYPE type, bool bReflectGirl, bool bReflect
 				pItem->fRange = ITEM_RANGE;
 				pItem->type = type;								// アイテムタイプ
 				pItem->nIdxModel = g_aItemInfo[type].nNumGet;	// モデルデータインデックス
+				pItem->nIdxMeshEffect = SetMeshRing(pos, vec3(D3DX_PI * 0.5f, 0.0f, 0.0f), 5.0f, 15.0f, 2, 16, D3DCULL_NONE, -1, true);
 				pItem->bCollision = bColi;
 				pItem->bGirl = bReflectGirl;
 				pItem->bMouse = bReflectMouse;

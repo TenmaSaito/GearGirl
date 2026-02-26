@@ -97,4 +97,8 @@ int GetNumMeshDome(void);
 int GetNumMeshCylinder(void);
 int GetNumMeshRing(void);
 
+bool SetPositionMesh(P_MESH pMesh, vec3 pos, int nIdx, int MAX);
+bool SetRotationMesh(P_MESH pMesh, vec3 rot, int nIdx, int MAX);
+bool ReleaseMesh(P_MESH pMesh, int nIdx, int MAX);
+
 #endif // !_MESH_H_

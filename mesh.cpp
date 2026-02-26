@@ -36,11 +36,6 @@ void InitMesh(void)
 
 	// Ring
 	InitMeshRing();
-
-	//SetMeshCylinder(vec3(0.0f, 120.0f, 0.0f), vec3_ZERO, 100.0f, 100.0f, 1, 16);
-	//SetMeshSphere(vec3(200.0f, 120.0f, 0.0f), vec3_ZERO, 100.0f, 16, 32);
-	//SetMeshRing(vec3(0.0f, 120.0f, 100.0f), vec3_ZERO, 100.0f, 120.0f, 3, 16);
-	//SetMeshDome(vec3(200.0f, 120.0f, 100.0f), vec3_ZERO, 100.0f, 8, 16);
 }
 
 //=========================================================================================
@@ -158,7 +153,6 @@ void DrawMesh(void)
 
 //=========================================================================================
 // メッシュの描画処理　簡易化のための関数わけ
-//=========================================================================================
 void DrawMeshOne(P_MESH pMesh, int nMax)
 {
 	//**************************************************************
@@ -223,4 +217,72 @@ void DrawMeshOne(P_MESH pMesh, int nMax)
 
 	EndDevice();	// デバイス取得終了
 
+}
+
+//=========================================================================================
+// メッシュリングの位置を変更
+//=========================================================================================
+bool ReleaseMesh(P_MESH pMesh, int nIdx, int MAX)
+{
+	if (-1 < nIdx && nIdx < MAX)
+	{
+		pMesh += nIdx;
+		if (pMesh->bUse)
+		{
+			//**************************************************************
+			// 頂点バッファの破棄
+			if (pMesh->pVtxBuff != NULL)
+			{
+				pMesh->pVtxBuff->Release();
+				pMesh->pVtxBuff = NULL;
+			}
+
+			//**************************************************************
+			// インデックスバッファの破棄
+			if (pMesh->pIdxBuffer != NULL)
+			{
+				pMesh->pIdxBuffer->Release();
+				pMesh->pIdxBuffer = NULL;
+			}
+
+			// 未使用状態に戻す
+			pMesh->bUse = false;
+			return true;
+		}
+	}
+	return false;
+}
+
+//=========================================================================================
+// メッシュリングの位置を変更
+//=========================================================================================
+bool SetPositionMesh(P_MESH pMesh, vec3 pos, int nIdx, int MAX)
+{
+	if (-1 < nIdx && nIdx < MAX)
+	{
+		pMesh += nIdx;
+		if (pMesh->bUse)
+		{
+			pMesh->pos = pos;
+			return true;
+		}
+	}
+	return false;
+}
+
+//=========================================================================================
+// メッシュリングの角度を変更
+//=========================================================================================
+bool SetRotationMesh(P_MESH pMesh, vec3 rot, int nIdx, int MAX)
+{
+	if (-1 < nIdx && nIdx < MAX)
+	{
+		pMesh += nIdx;
+		if (pMesh->bUse)
+		{
+			pMesh->rot = rot;
+			return true;
+		}
+	}
+	return false;
 }

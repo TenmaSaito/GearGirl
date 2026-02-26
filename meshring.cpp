@@ -266,43 +266,11 @@ int SetMeshRing(vec3 pos, vec3 rot, float fInner, float fOuter, int nHeightDivis
 			pMesh->bUse = true;
 			g_nSetMeshRing++;
 			return nCntMeshRing;
+			EndDevice();// デバイス取得終了
 		}
 	}
 	EndDevice();// デバイス取得終了
-}
-
-//=========================================================================================
-// メッシュリングの位置を変更
-//=========================================================================================
-bool SetPositionMeshRing(vec3 pos, int nIdx)
-{
-	if (-1 < nIdx && nIdx < MAX_MESHRING)
-	{
-		P_MESH pMesh = &g_aMeshRing[nIdx];
-		if (pMesh->bUse)
-		{
-			pMesh->pos = pos;
-			return true;
-		}
-	}
-	return false;
-}
-
-//=========================================================================================
-// メッシュリングの角度を変更
-//=========================================================================================
-bool SetRotationMeshRing(vec3 rot, int nIdx)
-{
-	if (-1 < nIdx && nIdx < MAX_MESHRING)
-	{
-		P_MESH pMesh = &g_aMeshRing[nIdx];
-		if (pMesh->bUse)
-		{
-			pMesh->rot = rot;
-			return true;
-		}
-	}
-	return false;
+	return -1;
 }
 
 //=========================================================================================
