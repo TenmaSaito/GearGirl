@@ -231,6 +231,9 @@
     <ClCompile Include="wall.cpp">
       <Filter>ソース ファイル\Object</Filter>
     </ClCompile>
+    <ClCompile Include="parabola.cpp">
+      <Filter>ソース ファイル\Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h">
@@ -363,6 +366,9 @@
       <Filter>ヘッダー ファイル\Object</Filter>
     </ClInclude>
     <ClInclude Include="wall.h">
+      <Filter>ヘッダー ファイル\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="parabola.h">
       <Filter>ヘッダー ファイル\Object</Filter>
     </ClInclude>
   </ItemGroup>

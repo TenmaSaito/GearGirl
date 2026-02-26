@@ -19,6 +19,7 @@
 #include "modeldata.h"
 #include "motion.h"
 #include "particle.h"
+#include "parabola.h"
 #include "player.h"
 #include "prompt.h"
 #include "titleselect.h"
@@ -168,7 +169,6 @@ void InitPlayer(void)
 	}
 
 	// === グローバル変数の初期化 === // 
-
 	g_nNumPlayer = GetPlayerNum();		// プレイ人数
 	g_ActivePlayer = 0;		// 現在の操作対象
 	g_Functionkey = 0;		// デバッグ表示の切り替え用
@@ -249,31 +249,31 @@ void UpdatePlayer(void)
 		}
 
 		// === ネズミ射出の予測軌跡の描画 === //
-		//if (pPlayer->state == PLAYERSTATE_THROWWAITING && nCntPlayer == PLAYERTYPE_GIRL)
-		//{
-		//	// 注視点までのベクトルをだす
-		//	D3DXVECTOR3 vec = pCamera->posR - pCamera->posV;
+		if (pPlayer->state == PLAYERSTATE_THROWWAITING && nCntPlayer == PLAYERTYPE_GIRL)
+		{
+			// 注視点までのベクトルをだす
+			D3DXVECTOR3 vec = pCamera->posR - pCamera->posV;
 
-		//	// 出したベクトルを正規化
-		//	D3DXVec3Normalize(&vec, &vec);
+			// 出したベクトルを正規化
+			D3DXVec3Normalize(&vec, &vec);
 
-		//	g_Effectmove.x = 5.0f;
-		//	g_Effectmove.z = 5.0f;
-		//	g_Effectmove.y = 5.5f;
+			g_Effectmove.x = vec.x * 1.0f;
+			g_Effectmove.z = vec.z * 1.0f;
+			g_Effectmove.y = 5.5f;
 
-		//	if (g_EffectCounter == 0)
-		//	{// 1Fだけ入る
-		//		g_EffectCounter = 1;
-		//	}
+			if (g_EffectCounter == 0)
+			{// 1Fだけ入る
+				g_EffectCounter = 1;
+			}
 
-		//	// エフェクトの描画
-		//	SetParticle(g_aPlayer[PLAYERTYPE_MOUSE].pos, DEF_COL, g_Effectmove, D3DXVECTOR3(50.0f, 10.0f, 10.0f), 10, 10.0f, 10, 5, true);
-		//}
-		//else if(pPlayer->state != PLAYERSTATE_THROWWAITING && nCntPlayer == PLAYERTYPE_GIRL)
-		//{
-		//	// エフェクトカウンターを0に
-		//	g_EffectCounter = 0;
-		//}
+			// エフェクトの描画
+			SetParabola(g_aPlayer[PLAYERTYPE_MOUSE].pos, g_Effectmove, 10.0f, 10.0f, true);
+		}
+		else if(pPlayer->state != PLAYERSTATE_THROWWAITING && nCntPlayer == PLAYERTYPE_GIRL)
+		{
+			// エフェクトカウンターを0に
+			g_EffectCounter = 0;
+		}
 
 		// === 何もしていない場合(何も入力されていない場合) === //
 		if ((pPlayer->motionType != MOTIONTYPE_ACTION

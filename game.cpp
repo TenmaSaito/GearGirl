@@ -24,6 +24,7 @@
 #include "modeldata.h"
 #include "motion.h"
 #include "player.h"
+#include "parabola.h"
 #include "particle.h"
 #include "pause.h"
 #include "prompt.h"
@@ -134,6 +135,9 @@ void InitGame(void)
 	/*** パーティクルの初期化 ***/
 	InitParticle();
 
+	/*** 放物線の初期化 ***/
+	InitParabola();
+
 	/***ギミックの設置 ***/
 	//SetGimmick(D3DXVECTOR3(0, 0, 0), D3DXVECTOR3(0.0f, 0.0f, 0.0f), GIMMICKTYPE_DUCT);
 
@@ -213,6 +217,9 @@ void UninitGame(void)
 
 	/*** パーティクルの終了 ***/
 	UninitParticle();
+
+	/*** 放物線の終了 ***/
+	UninitParabola();
 }
 
 //==================================================================================
@@ -286,6 +293,9 @@ void UpdateGame(void)
 
 		/*** エフェクトの更新 ***/
 		UpdateEffect();
+
+		/*** 放物線の更新 ***/
+		UpdateParabola();
 
 		if (g_nCounterGame % 60 == 0)
 		{
@@ -363,6 +373,9 @@ void DrawGame(void)
 
 		/*** エフェクトの描画 ***/
 		DrawEffect();
+
+		/*** 放物線の描画 ***/
+		DrawParabola();
 
 		/*** フォグをクリア ***/
 		CleanFog();
