@@ -448,7 +448,6 @@ void CameraOrbit(P_CAMERA pCamera)
 	{
 		pCamera->rot.x -= CAMERA_SPIN;
 		bUse = true;
-
 	}
 	if (GetKeyboardPress(CAM_ORBIT_DW))
 	{

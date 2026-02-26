@@ -787,9 +787,28 @@ void MovePlayer(PlayerType nPlayer)
 	// カメラの情報を取得
 	GetCameraRot(nPlayer, &Camerarot);
 
+	// 左スティックの情報
+	vec3 stick = vec3_ZERO;
+
 	if (nPlayer == 0)
 	{// 少女の操作
-		if (GetKeyboardPress(DIK_A) == true || GetJoypadPress(nPlayer, JOYKEY_LEFT) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_LEFT))
+		if (GetJoypadLeftStick(nPlayer, &stick))
+		{// スティックの入力がある
+			CheckMotionMove(nPlayer, pPlayer);
+
+			// プレイヤーの状態を移動状態に
+			pPlayer->state = PLAYERSTATE_MOVE;
+
+			pPlayer->move.x += (sinf(-Camerarot.y) * stick.y + cosf(-Camerarot.y) * stick.x) * PLAYER_MOVE;
+			pPlayer->move.z += (cosf(Camerarot.y) * -stick.y + sinf(Camerarot.y) * -stick.x) * PLAYER_MOVE;
+
+			pPlayer->rotDest.y = atan2f(-pPlayer->move.x, -pPlayer->move.z);	// 目標の角度を設定
+			pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
+
+			// rotの補正
+			RotRepair(nPlayer);
+		}
+		else if (GetKeyboardPress(DIK_A) == true || GetJoypadPress(nPlayer, JOYKEY_LEFT) == true)
 		{//Aキーが押される	
 			CheckMotionMove(nPlayer, pPlayer);
 
@@ -830,7 +849,7 @@ void MovePlayer(PlayerType nPlayer)
 				RotRepair(nPlayer);
 			}
 		}
-		else if (GetKeyboardPress(DIK_D) == true || GetJoypadPress(nPlayer, JOYKEY_RIGHT) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_RIGHT))
+		else if (GetKeyboardPress(DIK_D) == true || GetJoypadPress(nPlayer, JOYKEY_RIGHT) == true)
 		{//Dキーが押される
 			CheckMotionMove(nPlayer, pPlayer);
 
@@ -871,7 +890,7 @@ void MovePlayer(PlayerType nPlayer)
 				RotRepair(nPlayer);
 			}
 		}
-		else if (GetKeyboardPress(DIK_W) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
+		else if (GetKeyboardPress(DIK_W) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true)
 		{//Wキーが押される
 			CheckMotionMove(nPlayer, pPlayer);
 
@@ -887,7 +906,7 @@ void MovePlayer(PlayerType nPlayer)
 			// rotの補正
 			RotRepair(nPlayer);
 		}
-		else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
+		else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true)
 		{//Sキーが押される
 			CheckMotionMove(nPlayer, pPlayer);
 
@@ -908,7 +927,23 @@ void MovePlayer(PlayerType nPlayer)
 	{// ネズミの操作
 		if (g_nNumPlayer == 2)
 		{// 1人プレイ時
-			if (GetKeyboardPress(DIK_LEFT) == true || GetJoypadPress(nPlayer, JOYKEY_LEFT) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_LEFT))
+			if (GetJoypadLeftStick(0, &stick))
+			{// スティックの入力がある
+				CheckMotionMove(nPlayer, pPlayer);
+
+				// プレイヤーの状態を移動状態に
+				pPlayer->state = PLAYERSTATE_MOVE;
+
+				pPlayer->move.x += (sinf(-Camerarot.y) * stick.y + cosf(-Camerarot.y) * stick.x) * PLAYER_MOVE;
+				pPlayer->move.z += (cosf(Camerarot.y) * -stick.y + sinf(Camerarot.y) * -stick.x) * PLAYER_MOVE;
+
+				pPlayer->rotDest.y = atan2f(-pPlayer->move.x, -pPlayer->move.z);	// 目標の角度を設定
+				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
+
+				// rotの補正
+				RotRepair(nPlayer);
+			}
+			else if (GetKeyboardPress(DIK_LEFT) == true || GetJoypadPress(nPlayer, JOYKEY_LEFT) == true)
 			{// 左矢印が押される	
 				CheckMotionMove(nPlayer, pPlayer);
 
@@ -946,7 +981,7 @@ void MovePlayer(PlayerType nPlayer)
 					RotRepair(nPlayer);
 				}
 			}
-			else if (GetKeyboardPress(DIK_RIGHT) == true || GetJoypadPress(nPlayer, JOYKEY_RIGHT) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_RIGHT))
+			else if (GetKeyboardPress(DIK_RIGHT) == true || GetJoypadPress(nPlayer, JOYKEY_RIGHT) == true)
 			{// 右矢印が押される
 				CheckMotionMove(nPlayer, pPlayer);
 
@@ -984,7 +1019,7 @@ void MovePlayer(PlayerType nPlayer)
 					RotRepair(nPlayer);
 				}
 			}
-			else if (GetKeyboardPress(DIK_UP) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
+			else if (GetKeyboardPress(DIK_UP) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true)
 			{//上矢印が押される
 				CheckMotionMove(nPlayer, pPlayer);
 
@@ -997,7 +1032,7 @@ void MovePlayer(PlayerType nPlayer)
 				// rotの補正
 				RotRepair(nPlayer);
 			}
-			else if (GetKeyboardPress(DIK_DOWN) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
+			else if (GetKeyboardPress(DIK_DOWN) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true)
 			{//下矢印が押される
 				CheckMotionMove(nPlayer, pPlayer);
 
@@ -1013,7 +1048,23 @@ void MovePlayer(PlayerType nPlayer)
 		}
 		else
 		{// 2人プレイ時
-			if (GetKeyboardPress(DIK_A) == true || GetJoypadPress(nPlayer, JOYKEY_LEFT) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_LEFT))
+			if (GetJoypadLeftStick(nPlayer, &stick))
+			{// スティックの入力がある
+				CheckMotionMove(nPlayer, pPlayer);
+
+				// プレイヤーの状態を移動状態に
+				pPlayer->state = PLAYERSTATE_MOVE;
+
+				pPlayer->move.x += (sinf(-Camerarot.y) * stick.y + cosf(-Camerarot.y) * stick.x) * PLAYER_MOVE;
+				pPlayer->move.z += (cosf(Camerarot.y) * -stick.y + sinf(Camerarot.y) * -stick.x) * PLAYER_MOVE;
+
+				pPlayer->rotDest.y = atan2f(-pPlayer->move.x, -pPlayer->move.z);	// 目標の角度を設定
+				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
+
+				// rotの補正
+				RotRepair(nPlayer);
+			}
+			else if (GetKeyboardPress(DIK_A) == true || GetJoypadPress(nPlayer, JOYKEY_LEFT) == true)
 			{// 左矢印が押される	
 				CheckMotionMove(nPlayer, pPlayer);
 
@@ -1051,7 +1102,7 @@ void MovePlayer(PlayerType nPlayer)
 					RotRepair(nPlayer);
 				}
 			}
-			else if (GetKeyboardPress(DIK_D) == true || GetJoypadPress(nPlayer, JOYKEY_RIGHT) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_RIGHT))
+			else if (GetKeyboardPress(DIK_D) == true || GetJoypadPress(nPlayer, JOYKEY_RIGHT) == true)
 			{// 右矢印が押される
 				CheckMotionMove(nPlayer, pPlayer);
 
@@ -1089,7 +1140,7 @@ void MovePlayer(PlayerType nPlayer)
 					RotRepair(nPlayer);
 				}
 			}
-			else if (GetKeyboardPress(DIK_W) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
+			else if (GetKeyboardPress(DIK_W) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true)
 			{//上矢印が押される
 				CheckMotionMove(nPlayer, pPlayer);
 
@@ -1102,7 +1153,7 @@ void MovePlayer(PlayerType nPlayer)
 				// rotの補正
 				RotRepair(nPlayer);
 			}
-			else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
+			else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true)
 			{//下矢印が押される
 				CheckMotionMove(nPlayer, pPlayer);
 
