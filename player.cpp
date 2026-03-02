@@ -272,6 +272,8 @@ void UpdatePlayer(void)
 			&& pPlayer->motionTypeBlend != MOTIONTYPE_LANDING
 			&& pPlayer->motionType != MOTIONTYPE_NEUTRAL
 			&& pPlayer->motionTypeBlend != MOTIONTYPE_NEUTRAL
+			&& pPlayer->motionType != MOTIONTYPE_CUTTING
+			&& pPlayer->motionTypeBlend != MOTIONTYPE_CUTTING
 			&& g_aMovePlayer[nCntPlayer] == false))
 		{
 			SetMotionType(MOTIONTYPE_NEUTRAL, true, 10, (PlayerType)nCntPlayer);
@@ -744,8 +746,7 @@ void ActionPlayer(PlayerType nPlayer, Player* pPlayer)
 
 				// CUT
 			case ARMTYPE_CUT:
-				// âºÉÇÅ[ÉVÉáÉìçƒê∂
-				SetMotionType(MOTIONTYPE_ACTION, true, 10, nPlayer);
+				SetMotionType(MOTIONTYPE_CUTTING, true, 10, nPlayer);
 				g_nMotionCounter = 8;
 				break;
 

@@ -31,7 +31,7 @@ typedef enum
 	MOTIONTYPE_ACTION,				// 行動
 	MOTIONTYPE_JUMP,				// ジャンプ
 	MOTIONTYPE_LANDING,				// 着地
-	MOTIONTYPE_RESERVED_0,			// モーション0
+	MOTIONTYPE_CUTTING,				// 切る
 	MOTIONTYPE_RESERVED_1,			// モーション1
 	MOTIONTYPE_RESERVED_2,			// モーション2
 	MOTIONTYPE_RESERVED_3,			// モーション3
