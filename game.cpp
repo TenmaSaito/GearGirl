@@ -59,8 +59,7 @@ STRUCT()
 //**********************************************************************************
 //*** グローバル変数 ***
 //**********************************************************************************
-int g_nIdx3DModel;		// 設置した3Dモデルのインデックス
-int g_nIdxCamera;		// 設置したカメラのインデックス
+int g_nIdxShopPrompt = -1;	// 店前のプロンプトインデックス
 int g_nCounterGame = 0;	// ゲームのカウンター
 bool g_bPause = false;	//ポーズ状態のON/OFF
 ObserveEnding g_obEnding;			// エンディングへの移行状態
@@ -145,10 +144,10 @@ void InitGame(void)
 	//SetGimmick(D3DXVECTOR3(0, 0, 0), D3DXVECTOR3(0.0f, 0.0f, 0.0f), GIMMICKTYPE_DUCT);
 
 	g_nCounterGame = 0;
-	int nIdxPrompt, Tex;
+	IDX_TEX Tex;
 	LoadTexture("data/TEXTURE/TestPrompt.png", &Tex);
-	nIdxPrompt = SetPrompt(D3DXVECTOR3(1463, 116, -455), D3DXVECTOR2(10.0f, 5.0f), Tex, true);
-	SetEnablePrompt(true, nIdxPrompt);
+	g_nIdxShopPrompt = SetPrompt(D3DXVECTOR3(1463, 116, -455), D3DXVECTOR2(10.0f, 5.0f), Tex, true);
+	SetEnablePrompt(true, g_nIdxShopPrompt);
 	//Play3DSound(SOUND_LABEL_SE_GETPARTS, VECNULL, VECNULL, VECNULL);
 
 	SetParticle(D3DXVECTOR3(1463, 116, -455), CParamColor::RED, -CParamVector::V3ONE * 0.5f, CParamVector::V3ONE, 5, 10.0f, 1000, 10, true);
@@ -430,4 +429,12 @@ void SetGameEnding(int nCountWait)
 
 	g_obEnding.bAlreadyEnd = true;		// エンディング移行開始
 	g_obEnding.nCountWait = nCountWait;	// エンディング移行待機時間
+}
+
+//==================================================================================
+// --- ショップのインデックス取得 ---
+//==================================================================================
+int GetIdxShopPrompt(void)
+{
+	return g_nIdxShopPrompt;
 }

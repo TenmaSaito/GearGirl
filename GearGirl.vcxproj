@@ -181,6 +181,7 @@
     <ClCompile Include="tCamera.cpp" />
     <ClCompile Include="teamLogo.cpp" />
     <ClCompile Include="titleSelect.cpp" />
+    <ClCompile Include="tLogo.cpp" />
     <ClCompile Include="tutorial.cpp" />
     <ClCompile Include="UImenu.cpp" />
     <ClCompile Include="mesh.cpp" />
@@ -235,6 +236,7 @@
     <ClInclude Include="tCamera.h" />
     <ClInclude Include="teamLogo.h" />
     <ClInclude Include="titleSelect.h" />
+    <ClInclude Include="tLogo.h" />
     <ClInclude Include="tutorial.h" />
     <ClInclude Include="UImenu.h" />
     <ClInclude Include="mesh.h" />

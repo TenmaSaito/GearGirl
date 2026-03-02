@@ -10,9 +10,12 @@
 #include "light.h"
 #include "param.h"
 #include "tCamera.h"
+#include "Texture.h"
 #include "title.h"
 #include "titleSelect.h"
+#include "tLogo.h"
 #include "modeldata.h"
+#include "2Dpolygon.h"
 #include "3Dmodel.h"
 #include "mathUtil.h"
 #include "skybox.h"
@@ -25,7 +28,8 @@ using namespace Constants;
 //*** マクロ定義 ***
 //**********************************************************************************
 #define MOVE_INTERVAL		(360)		// 電車が揺れる間隔
-#define MOVE_TIME			(MOVE_INTERVAL + 10)		// 揺れた座標に居続ける時間
+#define MOVE_TIME			(MOVE_INTERVAL + 10)				// 揺れた座標に居続ける時間
+#define LOGOTEX_PATH		"data/TEXTURE/GearGirl_Logo.png"	// ロゴのテクスチャパス
 
 //**********************************************************************************
 //*** プロトタイプ宣言 ***
@@ -36,6 +40,12 @@ using namespace Constants;
 //**********************************************************************************
 int g_nIdxTrain;
 int g_nCounterTrain;
+const D3DXVECTOR3 g_aPosTLogo[2] =	// ロゴの位置 
+{
+	D3DXVECTOR3(0, 0, 0),
+	D3DXVECTOR3(250, 150, 0)
+};
+const D3DXVECTOR2 g_sizeTLogo = D3DXVECTOR2(475, 270);	// ロゴのサイズ
 
 //==================================================================================
 // --- 初期化 ---
@@ -44,6 +54,9 @@ void InitTitle(void)
 {
 	/*** モデルデータの初期化 ***/
 	InitModelData();
+
+	/*** テクスチャの初期化 ***/
+	InitTexture();
 
 	/*** ライトの初期化 ***/
 	InitLight();
@@ -57,8 +70,14 @@ void InitTitle(void)
 	/*** 3Dモデルの初期化 ***/
 	Init3DModel();
 
+	/*** 2Dポリゴンの初期化 ***/
+	Init2DPolygon();
+
 	/*** スカイボックスの初期化 ***/
 	InitSkybox();
+
+	/*** ロゴの初期化 ***/
+	InitTLogo();
 
 	// カメラの追加
 	AddTCamera(D3DXVECTOR3(-35.0f, 30.0f, 0.0f), VEC_Y(CParamFloat::HALFPI), 100.0f);
@@ -73,6 +92,13 @@ void InitTitle(void)
 	// スカイボックスの設置
 	SetSkybox(SKYBOX::NORMAL);
 
+	// ロゴテクスチャの読み込み
+	IDX_TEX tex;
+	LoadTexture(LOGOTEX_PATH, &tex);
+
+	// ロゴの設置
+	SetTLogo(g_aPosTLogo[0], g_aPosTLogo[1], g_sizeTLogo, tex);
+
 	g_nCounterTrain = 0;
 }
 
@@ -83,6 +109,12 @@ void UninitTitle(void)
 {
 	/*** モデルデータの終了 ***/
 	UninitModelData();
+
+	/*** テクスチャの終了 ***/
+	UninitTexture();
+
+	/*** 2Dポリゴンの終了 ***/
+	Uninit2DPolygon();
 
 	/*** スカイボックスの終了 ***/
 	UninitSkybox();
@@ -95,6 +127,9 @@ void UninitTitle(void)
 
 	/*** 選択肢の終了 ***/
 	UninitTitleSelect();
+
+	/*** ロゴの終了 ***/
+	UninitTLogo();
 
 	/*** カメラの終了 ***/
 	UninitTCamera();
@@ -114,11 +149,17 @@ void UpdateTitle(void)
 	/*** 選択肢の更新 ***/
 	UpdateTitleSelect();
 
+	/*** 2Dポリゴンの更新 ***/
+	Update2DPolygon();
+
 	/*** カメラの更新 ***/
 	UpdateTCamera();
 
 	/*** スカイボックスの更新 ***/
 	UpdateSkybox();
+
+	/*** ロゴの更新 ***/
+	UpdateTLogo();
 
 	// モデルの座標更新
 	if (g_nCounterTrain > MOVE_INTERVAL)
@@ -173,4 +214,7 @@ void DrawTitle(void)
 
 	/*** 選択肢の描画 ***/
 	DrawTitleSelect();
+
+	/*** 2Dポリゴンの描画 ***/
+	Draw2DPolygon();
 }

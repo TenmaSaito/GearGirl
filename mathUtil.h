@@ -105,14 +105,6 @@ namespace MyMathUtil
 	}INT_VECTOR2;
 
 	//******************************************************************************
-	//*** 安全構造体 ***
-	//******************************************************************************
-	struct Safer
-	{
-		int structSize;
-	};
-
-	//******************************************************************************
 	//*** DualInputのフラグ列挙 ***
 	//******************************************************************************
 	ENUM()
@@ -1322,6 +1314,36 @@ namespace MyLib
 			}
 
 			return false;
+		}
+
+		//------------------------------------------------------------
+		// --- コピー演算子 --- 
+		//------------------------------------------------------------
+		CVector& operator = (const CVector& Copy)
+		{
+			// コピー元が自分自身の場合
+			if (this == &Copy) return *this;
+
+			// メモリ確保済みの場合
+			if (pHead != nullptr)
+			{ // メモリを解放
+				End();
+			}
+
+			if (Copy.vectorNum > 0 && Copy.vectorCapacity > 0)
+			{ // 使用中の配列数が1以上なら
+				// メモリを確保
+				pHead = (ElemType*)malloc(sizeof(ElemType) * Copy.vectorCapacity);
+				if (pHead != nullptr)
+				{ // 確保成功時
+					// 値を格納
+					memcpy(pHead, Copy.pHead, sizeof(ElemType) * Copy.vectorNum);
+					vectorCapacity = Copy.vectorCapacity;	// キャパシティをコピー
+					vectorNum = Copy.vectorNum;				// 使用中の配列数をコピー
+				}
+			}
+
+			return *this;
 		}
 	};
 

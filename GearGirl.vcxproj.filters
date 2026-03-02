@@ -249,6 +249,9 @@
     <ClCompile Include="dialog.cpp">
       <Filter>ソース ファイル\Mode\Tutorial</Filter>
     </ClCompile>
+    <ClCompile Include="tLogo.cpp">
+      <Filter>ソース ファイル\Mode\Title</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h">
@@ -394,6 +397,9 @@
     </ClInclude>
     <ClInclude Include="dialog.h">
       <Filter>ヘッダー ファイル\Mode\Tutorial</Filter>
+    </ClInclude>
+    <ClInclude Include="tLogo.h">
+      <Filter>ヘッダー ファイル\Mode\Title</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

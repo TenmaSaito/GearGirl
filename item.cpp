@@ -8,6 +8,7 @@
 // インクルード
 #include "item.h"
 
+#include "game.h"
 #include "camera.h"
 #include "debugproc.h"
 #include "input.h"
@@ -20,6 +21,8 @@
 #include "fade.h"
 #include "mesh.h"
 #include "particle.h"
+#include "prompt.h"
+#include "player.h"
 
 using  namespace MyMathUtil;
 
@@ -186,8 +189,18 @@ void UpdateItem(void)
 	// ポーチアイテム更新
 	UpdatePouchItem();
 
-	if (GetKeyboardTrigger(DIK_F3))
-		EnableItemPut();
+	// 提出判定
+	if (IsDispPrompt(GetIdxShopPrompt()))
+	{
+		if (GetKeyboardTrigger(DIK_F3) || GetJoypadTrigger(PLAYERTYPE_GIRL, JOYKEY_A))
+		{
+			EnableItemPut();
+		}
+	}
+	else
+	{
+		g_bPutOut = false;
+	}
 }
 
 //=========================================================================================
@@ -349,7 +362,6 @@ void DrawUIItem(void)
 	{
 		OnUIitemEnable(&g_aItemQuota[0], ITEMTYPE_MAX);
 	}
-	
 }
 
 //=========================================================================================
@@ -573,6 +585,7 @@ void SelectItem(void)
 		}
 		else
 		{// アイテム以外（決定ボタン）を選択していたら
+			if (GetFade() != FADE_NONE) return;
 			JudgmentEnding(&g_aPutOut[0],5);
 			SetFade(MODE_RESULT);
 		}

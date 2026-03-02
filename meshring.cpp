@@ -265,8 +265,8 @@ int SetMeshRing(vec3 pos, vec3 rot, float fInner, float fOuter, int nHeightDivis
 
 			pMesh->bUse = true;
 			g_nSetMeshRing++;
-			return nCntMeshRing;
 			EndDevice();// デバイス取得終了
+			return nCntMeshRing;
 		}
 	}
 	EndDevice();// デバイス取得終了

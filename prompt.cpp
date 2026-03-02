@@ -261,8 +261,6 @@ int DetectionPrompt(D3DXVECTOR3 pos, float fLength)
 bool DetectionPromptFromIdx(int nIdxPrompt, D3DXVECTOR3 pos, float fLength)
 {
 	LPPROMPT pPrompt = &g_aPrompt[nIdxPrompt];		// プロンプトポインタ
-	int nNearDetection = -1;				// 検知したプロンプト
-	float fDetectionLength = 1000000.0f;	// プロンプトとの距離
 
 	if (pPrompt->bUse == true && pPrompt->bAuto == true)
 	{ // 使用されていて、検知判定オンなら
@@ -319,5 +317,5 @@ LPPROMPT GetPrompt(void)
 //==================================================================================
 bool IsDispPrompt(int nIdxPrompt)
 {
-	return &g_aPrompt[nIdxPrompt];
+	return g_aPrompt[nIdxPrompt].bDisp;
 }
