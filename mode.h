@@ -23,6 +23,7 @@ typedef enum
 {
 	MODE_TEAMLOGO = 0,	// チームロゴ表示
 	MODE_TITLE,			// タイトル画面
+	MODE_TUTORIAL,		// チュートリアル画面
 	MODE_GAME,			// ゲーム画面
 	MODE_RESULT,		// エンディング画面
 	MODE_MAX

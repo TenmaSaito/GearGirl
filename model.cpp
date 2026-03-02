@@ -32,7 +32,6 @@ using namespace MyMathUtil;
 
 // =================================================
 // グローバル変数
-LPDIRECT3DTEXTURE9 g_pTextureModel[128] = {};	// 読み込むテクスチャ
 Model g_Model[MAX_MODEL];			// モデルの情報
 ModelInfo g_ModelInfo[MAX_MODEL];	// モデル位置の情報
 int g_nNumTexture;					// テクスチャの数
@@ -304,12 +303,8 @@ bool LoadModel(void)
 								// テクスチャの数を読み込む
 								(void)sscanf(pEqual, "%s", &g_TextureName[nCntTexture][0]);
 
-								LoadTexture(&g_TextureName[nCntTexture][0], &aIdxTexture[nCntTexture]);
-
 								// テクスチャの読み込み
-								D3DXCreateTextureFromFile(pDevice,
-									&g_TextureName[nCntTexture][0],
-									&g_pTextureModel[nCntTexture]);
+								LoadTexture(&g_TextureName[nCntTexture][0], &aIdxTexture[nCntTexture]);
 
 								// テクスチャのファイル名をカウント
 								nCntTexture++;

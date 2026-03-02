@@ -14,11 +14,15 @@
 
 using namespace Constants;
 
+//**********************************************************************************
+//*** スタック領域管理構造体 ***
+//**********************************************************************************
 STRUCT(StackData)
 {
-	void *pData;
-	UINT ID;
-	bool bStack;
+	void *pData;	// ヒープへのポインタ
+	size_t size;	// 確保したメモリサイズ
+	UINT ID;		// 識別ID(どちらかを使用)
+	STACKID SID;	// 識別名(どちらかを使用)
 } StackData;
 
 typedef StackData *LPSTACKDATA, *PSTACKDATA;
@@ -680,9 +684,9 @@ D3DXVECTOR3 MyMathUtil::GetRandomVector3(int mx, int my, int mz)
 void MyMathUtil::RepairFloat(float *fRepairTarget, int nCnt)
 {
 	int nRepairedFloat;
-	nRepairedFloat = *fRepairTarget * 10 * nCnt;
+	NOT_WARNING(4244) nRepairedFloat = *fRepairTarget * 10 * nCnt;
 	nRepairedFloat /= 10 * nCnt;
-	*fRepairTarget = nRepairedFloat;
+	NOT_WARNING(4244)*fRepairTarget = nRepairedFloat;
 }
 
 //==================================================================
@@ -811,7 +815,7 @@ char *MyMathUtil::UniteChar(char* pOut, const char* fmt, ...)
 					{
 						memset(aStr, 0, sizeof aStr);
 
-						f = va_arg(ap, double);
+						UNABLE(FLOATTOINT) f = va_arg(ap, double);
 						nc += sprintf(&aStr[0], "%f ", f);
 
 						/*** 文字列を結合 ***/
@@ -1968,59 +1972,299 @@ bool MyMathUtil::GetDualInput
 }
 
 //==================================================================================
-// --- DualInput ---
+// --- ヒープに新規でデータを保存 ---
 //==================================================================================
-bool PushDataForStack(void* pData, size_t size, UINT ID)
+bool MyMathUtil::SaveDataForHeap(const void *pData, size_t size, UINT ID)
 {
+	// メモリを新規で拡張
 	LPSTACKDATA pStackData = (LPSTACKDATA)realloc(g_pStackData, sizeof(StackData) * (g_nNumStackData + 1));
 	if (pStackData != NULL)
-	{
-		g_pStackData->pData = malloc(size);
-		if (g_pStackData->pData != NULL)
-		{
+	{ // 拡張成功時
+		g_pStackData = pStackData;		// ポインタ更新
+
+		// 要求分のメモリを新規で確保、ポインタを先程動的に確保した構造体のメンバ変数に代入
+		g_pStackData[g_nNumStackData].pData = malloc(size);
+		if (g_pStackData[g_nNumStackData].pData != NULL)
+		{ // 確保成功時
+			// 初期値を設定
+			memset(g_pStackData[g_nNumStackData].pData, 0xCD, size);
+
+			// 確保したメモリに保存要求のあるメモリを要求サイズ分コピー
 			memcpy(g_pStackData[g_nNumStackData].pData, pData, size);
+
+			// pop時に使用するIDを保存
 			g_pStackData[g_nNumStackData].ID = ID;
-			g_pStackData[g_nNumStackData].bStack = true;
-			g_nNumStackData++;
-			return true;
+
+			// サイズを保存
+			g_pStackData[g_nNumStackData].size = size;
+			g_nNumStackData++;		// スタック中データの数を増加
+			return true;			// 成功
 		}
 		else
-		{
+		{ // 確保失敗時
+
+			// 拡張したメモリを破棄し、元のサイズに縮小
 			pStackData = (LPSTACKDATA)realloc(g_pStackData, sizeof(StackData) * g_nNumStackData);
 			if (pStackData == NULL)
-			{
+			{ // 縮小失敗時
+
+				// メモリをすべて解放
 				free(g_pStackData);
-				g_nNumStackData = 0;
+				g_pStackData = NULL;		// NULL値を代入
+				g_nNumStackData = 0;		// スタック中データの数を0にリセット
+			}
+			else
+			{ // 縮小成功時
+				g_pStackData = pStackData;	// ポインタ更新
 			}
 
-			return false;
+			return false;	// 失敗
 		}
 	}
 	else
-	{
+	{ // 拡張失敗時
+		
+		// メモリをすべて解放
 		free(g_pStackData);
-		g_nNumStackData = 0;
-		return false;
+		g_pStackData = NULL;	// NULL値を代入
+		g_nNumStackData = 0;	// スタック中データの数を0にリセット
+		return false;			// 失敗
 	}
 }
 
 //==================================================================================
-// --- DualInput ---
+// --- ヒープに新規でデータを保存 ---
 //==================================================================================
-bool PopDataFromStack(void *pData, size_t size, UINT ID)
+bool MyMathUtil::SaveDataForHeap(const void *pData, size_t size, STACKID SID)
 {
-	if (g_nNumStackData == 0) return false;
+	// メモリを新規で拡張
+	LPSTACKDATA pStackData = (LPSTACKDATA)realloc(g_pStackData, sizeof(StackData) * (g_nNumStackData + 1));
+	if (pStackData != NULL)
+	{ // 拡張成功時
+		g_pStackData = pStackData;		// ポインタ更新
 
-	for (int nCntCheck = 0; nCntCheck < g_nNumStackData; nCntCheck++)
-	{
-		if (g_pStackData[nCntCheck].ID == ID)
-		{
-			if (pData != NULL)
-			{
-				memcpy(pData, g_pStackData[nCntCheck].pData, size);
+		// 要求分のメモリを新規で確保、ポインタを先程動的に確保した構造体のメンバ変数に代入
+		g_pStackData[g_nNumStackData].pData = malloc(size);
+		if (g_pStackData[g_nNumStackData].pData != NULL)
+		{ // 確保成功時
+
+			// 初期値を設定
+			memset(g_pStackData[g_nNumStackData].pData, 0xCD, size);
+
+			// 確保したメモリに保存要求のあるメモリを要求サイズ分コピー
+			memcpy(g_pStackData[g_nNumStackData].pData, pData, size);
+
+			// pop時に使用するIDを保存
+			strcpy(g_pStackData[g_nNumStackData].SID, SID);
+
+			// サイズを保存
+			g_pStackData[g_nNumStackData].size = size;
+			g_nNumStackData++;		// スタック中データの数を増加
+			return true;			// 成功
+		}
+		else
+		{ // 確保失敗時
+
+			// 拡張したメモリを破棄し、元のサイズに縮小
+			pStackData = (LPSTACKDATA)realloc(g_pStackData, sizeof(StackData) * g_nNumStackData);
+			if (pStackData == NULL)
+			{ // 縮小失敗時
+
+				// メモリをすべて解放
+				free(g_pStackData);
+				g_pStackData = NULL;		// NULL値を代入
+				g_nNumStackData = 0;		// スタック中データの数を0にリセット
+			}
+			else
+			{ // 縮小成功時
+				g_pStackData = pStackData;	// ポインタ更新
 			}
 
-			free(g_pStackData[nCntCheck].pData);
+			return false;	// 失敗
 		}
 	}
+	else
+	{ // 拡張失敗時
+
+		// メモリをすべて解放
+		free(g_pStackData);
+		g_pStackData = NULL;	// NULL値を代入
+		g_nNumStackData = 0;	// スタック中データの数を0にリセット
+		return false;			// 失敗
+	}
+}
+
+//==================================================================================
+// --- ヒープ中データを取得及び解放 ---
+//==================================================================================
+bool MyMathUtil::LoadDataFromHeap(void *pData, size_t size, UINT ID)
+{
+	bool bResult = false;		// popの結果
+
+	// スタック中データがない場合失敗
+	if (g_nNumStackData == 0) return bResult;
+
+	for (UINT nCntCheck = 0; nCntCheck < g_nNumStackData; nCntCheck++)
+	{
+		if (g_pStackData[nCntCheck].ID == ID)
+		{ // IDが一致した場合
+			if (g_pStackData[nCntCheck].pData != NULL)
+			{ // IDのデータへのポインタがNULLではない場合
+				if (pData != NULL)
+				{ // 保存先ポインタがnullではない場合
+					// データをコピー
+					memcpy(pData, g_pStackData[nCntCheck].pData, size - labs(g_pStackData[nCntCheck].size - size));
+				}
+
+				// 確保していたメモリを解放
+				free(g_pStackData[nCntCheck].pData);
+				g_pStackData[nCntCheck].pData = NULL;
+				g_nNumStackData--;		// スタック中データの数を減少
+				bResult = true;
+
+				if (g_nNumStackData == 0)
+				{ // 0弧になった場合
+					if (g_pStackData != NULL)
+					{ // メモリを全開放
+						free(g_pStackData);
+						g_pStackData = NULL;
+					}
+				}
+				else
+				{ // 1つ以上ある場合
+					// メモリをずらして保存
+					memmove(&g_pStackData[nCntCheck], &g_pStackData[nCntCheck + 1], sizeof(StackData) * (g_nNumStackData - nCntCheck));
+
+					// メモリを縮小して再確保
+					LPSTACKDATA pStackData = (LPSTACKDATA)realloc(g_pStackData, sizeof(StackData) * g_nNumStackData);
+					if (pStackData == NULL)
+					{ // 確保失敗時
+						if (g_pStackData != NULL)
+						{
+							// 全開放
+							free(g_pStackData);
+							g_pStackData = NULL;
+						}
+
+						g_nNumStackData = 0;
+						bResult = false;
+					}
+					else
+					{
+						g_pStackData = pStackData;
+					}
+				}
+
+				break;
+			}
+		}
+	}
+
+	return bResult;
+}
+
+//==================================================================================
+// --- ヒープ中データを取得及び解放 ---
+//==================================================================================
+bool MyMathUtil::LoadDataFromHeap(void* pData, size_t size, STACKID SID)
+{
+	bool bResult = false;		// popの結果
+
+	// スタック中データがない場合失敗
+	if (g_nNumStackData == 0) return bResult;
+
+	for (UINT nCntCheck = 0; nCntCheck < g_nNumStackData; nCntCheck++)
+	{
+		if (C_SUCCEED(g_pStackData[nCntCheck].SID, SID))
+		{ // IDが一致した場合
+			if (g_pStackData[nCntCheck].pData != NULL)
+			{ // IDのデータへのポインタがNULLではない場合
+				if (pData != NULL)
+				{ // 保存先ポインタがnullではない場合
+					size_t cpysize = labs(g_pStackData[nCntCheck].size - size);
+
+					// データをコピー
+					memcpy(pData, g_pStackData[nCntCheck].pData, size - cpysize);
+				}
+
+				// 確保していたメモリを解放
+				free(g_pStackData[nCntCheck].pData);
+				g_pStackData[nCntCheck].pData = NULL;
+				g_nNumStackData--;		// スタック中データの数を減少
+				bResult = true;
+
+				if (g_nNumStackData == 0)
+				{ // 0弧になった場合
+					if (g_pStackData != NULL)
+					{ // メモリを全開放
+						free(g_pStackData);
+						g_pStackData = NULL;
+					}
+				}
+				else
+				{ // 1つ以上ある場合
+					// メモリをずらして保存
+					memmove(&g_pStackData[nCntCheck], &g_pStackData[nCntCheck + 1], sizeof(StackData) * (g_nNumStackData - nCntCheck));
+
+					// メモリを縮小して再確保
+					LPSTACKDATA pStackData = (LPSTACKDATA)realloc(g_pStackData, sizeof(StackData) * g_nNumStackData);
+					if (pStackData == NULL)
+					{ // 確保失敗時
+						if (g_pStackData != NULL)
+						{
+							// 全開放
+							free(g_pStackData);
+							g_pStackData = NULL;
+						}
+
+						g_nNumStackData = 0;
+						bResult = false;
+					}
+					else
+					{
+						g_pStackData = pStackData;
+					}
+				}
+
+				break;
+			}
+		}
+	}
+
+	return bResult;
+}
+
+//==================================================================================
+// --- ヒープ中データを全開放 ---
+//==================================================================================
+void MyMathUtil::AllReleaseFromHeap(void)
+{
+	// スタック中データがない場合失敗
+	if (g_nNumStackData == 0) return;
+
+	// NULLチェック
+	if (g_pStackData == NULL) return;
+
+	for (UINT nCntCheck = 0; nCntCheck < g_nNumStackData; nCntCheck++)
+	{
+		if (g_pStackData[nCntCheck].pData != NULL)
+		{ // ポインタがNULLではない場合
+			// メモリ開放
+			free(g_pStackData[nCntCheck].pData);
+			g_pStackData[nCntCheck].pData = NULL;
+		}
+	}
+
+	// メモリ開放
+	free(g_pStackData);
+	g_pStackData = NULL;
+	g_nNumStackData = 0;
+}
+
+//==================================================================================
+// --- キャパシティチェック関数 ---
+//==================================================================================
+bool MyLib::IsCapacityOver(UINT num, UINT capasity)
+{
+	return (num >= capasity) ? true : false;
 }

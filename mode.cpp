@@ -8,8 +8,10 @@
 //*** インクルードファイル ***
 //*************************************************************************************************
 #include "mode.h"
+
 #include "teamLogo.h"
 #include "Title.h"
+#include "tutorial.h"
 #include "game.h"
 #include "Result.h"
 
@@ -45,6 +47,11 @@ void InitMode(void)
 		InitTitle();
 		break;
 
+		// チュートリアル画面
+	case MODE_TUTORIAL:
+		InitTutorial();
+		break;
+
 		// ゲーム画面
 	case MODE_GAME:
 		InitGame();
@@ -68,6 +75,9 @@ void UninitMode(void)
 	// タイトル画面の終了処理
 	UninitTitle();
 
+	// チュートリアル画面の終了処理
+	UninitTutorial();
+
 	// ゲーム画面の終了処理
 	UninitGame();
 
@@ -90,6 +100,11 @@ void UpdateMode(void)
 		// タイトル画面
 	case MODE_TITLE:
 		UpdateTitle();
+		break;
+
+		// チュートリアル画面
+	case MODE_TUTORIAL:
+		UpdateTutorial();
 		break;
 
 		// ゲーム画面
@@ -130,6 +145,11 @@ void DrawMode(void)
 		DrawTitle();
 		break;
 
+		// チュートリアル画面
+	case MODE_TUTORIAL:
+		DrawTutorial();
+		break;
+
 		// ゲーム画面
 	case MODE_GAME:
 		DrawGame();
@@ -163,6 +183,11 @@ void SetMode(MODE mode)
 		UninitTitle();
 		break;
 
+		// チュートリアル画面
+	case MODE_TUTORIAL:
+		UninitTutorial();
+		break;
+
 		// ゲーム画面
 	case MODE_GAME:
 		UninitGame();
@@ -185,6 +210,11 @@ void SetMode(MODE mode)
 		// タイトル画面
 	case MODE_TITLE:
 		InitTitle();
+		break;
+
+		// チュートリアル画面
+	case MODE_TUTORIAL:
+		InitTutorial();
 		break;
 
 		// ゲーム画面

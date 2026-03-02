@@ -88,6 +88,12 @@
     <Filter Include="ヘッダー ファイル\Mode\TeamLogo">
       <UniqueIdentifier>{2fa447db-45c2-4c77-b31c-ca5e7471dd6e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\Mode\Tutorial">
+      <UniqueIdentifier>{4a38cbcd-50c4-4317-ab64-6a548f1dcf46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Mode\Tutorial">
+      <UniqueIdentifier>{b40ecda2-f803-47cd-ad0e-5b9632d11d1c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Texture.cpp">
@@ -234,6 +240,15 @@
     <ClCompile Include="parabola.cpp">
       <Filter>ソース ファイル\Object</Filter>
     </ClCompile>
+    <ClCompile Include="tutorial.cpp">
+      <Filter>ソース ファイル\Mode\Tutorial</Filter>
+    </ClCompile>
+    <ClCompile Include="MessageLog.cpp">
+      <Filter>ソース ファイル\Mode\Tutorial</Filter>
+    </ClCompile>
+    <ClCompile Include="dialog.cpp">
+      <Filter>ソース ファイル\Mode\Tutorial</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h">
@@ -370,6 +385,15 @@
     </ClInclude>
     <ClInclude Include="parabola.h">
       <Filter>ヘッダー ファイル\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="tutorial.h">
+      <Filter>ヘッダー ファイル\Mode\Tutorial</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageLog.h">
+      <Filter>ヘッダー ファイル\Mode\Tutorial</Filter>
+    </ClInclude>
+    <ClInclude Include="dialog.h">
+      <Filter>ヘッダー ファイル\Mode\Tutorial</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

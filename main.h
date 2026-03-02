@@ -7,7 +7,9 @@
 #ifndef _MAIN_H_				// このマクロ定義がされていなければ
 #define _MAIN_H_				// 2重インクルード防止のマクロを定義
 
-//#define _CRTDBG_MAP_ALLOC		// メモリリーク検知範囲拡大マクロ
+#ifdef _DEBUG
+#define _CRTDBG_MAP_ALLOC		// メモリリーク検知範囲拡大マクロ
+#endif
 
 //**********************************************************************************
 //*** インクルードファイル(DirectX関係) ***
@@ -30,6 +32,7 @@
 #pragma comment(lib,"dinput8.lib")			// 入力処理に必要
 #pragma comment(lib,"xinput.lib")			// ジョイパッド処理に必要
 #pragma comment(lib,"xaudio2.lib")			// 3Dオーディオに必要
+#pragma comment(lib,"Rpcrt4.lib")			// UUIDの作成に必要
 
 //**********************************************************************************
 //*** インクルードファイル ***
@@ -53,7 +56,7 @@
 #define D3DXCOLOR_INV		D3DXCOLOR(1.0f,1.0f,1.0f,0.0f)			// COLORの透明版
 #define STRING_MAX			(1024)									// 文字列の最大文字数
 #define WINDOW_MID			D3DXVECTOR3(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, 0.0f)	// ウィンドウの中心
-#define RELEASE(p)			{ if ((p) != NULL) {(p)->Release(); (p) = nullptr; } }			// メモリ確保ポインタのRelease用マクロ
+#define RELEASE(p)			do{ if ((p) != NULL) {(p)->Release(); (p) = nullptr; } }while(0)			// メモリ確保ポインタのRelease用マクロ
 #define D3DX_2PI			(D3DX_PI * 2.0f)				// 角度の一周分
 #define D3DX_HALFPI			(D3DX_PI * 0.5f)				// 角度の1/4周分
 #ifndef STRUCT

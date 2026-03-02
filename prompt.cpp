@@ -86,7 +86,7 @@ void UninitPrompt(void)
 	LPPROMPT pPrompt = &g_aPrompt[0];		// プロンプトポインタ
 
 	// バッファの解放
-	RELEASE(g_pVtxBuffPrompt)
+	RELEASE(g_pVtxBuffPrompt);
 }
 
 //==================================================================================

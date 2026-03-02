@@ -37,37 +37,37 @@ typedef enum
 //**********************************************************************************
 typedef struct
 {
-	D3DXVECTOR3 pos;						// 中心位置
-	D3DXVECTOR3 rot;						// ギミック全体の向き
-	D3DXMATRIX mtxWorld;					// ワールドマトリックス
-	PARTS_INFO parts;						// ギミックパーツ
-	COULD_PLAYER could;						// クリア可能なプレイヤータイプ
-	GIMMICKTYPE myType;						// 自身のギミックの種類
-	float fRadius;							// 検知半径
-	int nCounter;							// 汎用カウンター
-	int nIdxPrompt;							// プロンプトのインデックス
-	bool bUse;								// 使用状況
+	UNABLE(26495) D3DXVECTOR3 pos;		// 中心位置
+	UNABLE(26495) D3DXVECTOR3 rot;		// ギミック全体の向き
+	UNABLE(26495) D3DXMATRIX mtxWorld;	// ワールドマトリックス
+	UNABLE(26495) PARTS_INFO parts;		// ギミックパーツ
+	UNABLE(26495) COULD_PLAYER could;	// クリア可能なプレイヤータイプ
+	UNABLE(26495) GIMMICKTYPE myType;	// 自身のギミックの種類
+	UNABLE(26495) float fRadius;		// 検知半径
+	UNABLE(26495) int nCounter;			// 汎用カウンター
+	UNABLE(26495) int nIdxPrompt;		// プロンプトのインデックス
+	UNABLE(26495) bool bUse;			// 使用状況
 
-	MOTION_INFO aMotionInfo[MOTIONTYPE_MAX];// クリア時モーション
-	int nNumMotion;							// 現在のモーションの総数
-	bool bLoop;								// ループするかどうか
-	int nNumKey;							// 現在のモーションのキーの総数
-	int nKey;								// 現在のモーションの現在のキーNo.
-	int nCounterMotion;						// 現在のモーションのカウンター
-	bool bFinishMotion;						// 現在のモーションが終了したかどうか
+	UNABLE(26495) MOTION_INFO aMotionInfo[MOTIONTYPE_MAX];	// クリア時モーション
+	UNABLE(26495) int nNumMotion;		// 現在のモーションの総数
+	UNABLE(26495) bool bLoop;			// ループするかどうか
+	UNABLE(26495) int nNumKey;			// 現在のモーションのキーの総数
+	UNABLE(26495) int nKey;				// 現在のモーションの現在のキーNo.
+	UNABLE(26495) int nCounterMotion;	// 現在のモーションのカウンター
+	UNABLE(26495) bool bFinishMotion;	// 現在のモーションが終了したかどうか
 
 	// モーションブレンドの要素
-	bool bBlendMotion;						// ブレンドモーションするかどうか
-	MOTIONTYPE motionTypeBlend;				// ブレンドモーションの種類
-	bool bLoopMotionBlend;					// ブレンドモーションがループするか
-	int nNumKeyBlend;						// ブレンドモーションの総キー数
-	int nKeyBlend;							// ブレンドモーションの現在のキーNo.
-	int nCounterMotionBlend;				// ブレンドモーションのカウンター
-	int nFrameBlend;						// ブレンドフレーム数
-	int nCounterBlend;						// ブレンドカウンター
+	UNABLE(26495) bool bBlendMotion;			// ブレンドモーションするかどうか
+	UNABLE(26495) MOTIONTYPE motionTypeBlend;	// ブレンドモーションの種類
+	UNABLE(26495) bool bLoopMotionBlend;		// ブレンドモーションがループするか
+	UNABLE(26495) int nNumKeyBlend;				// ブレンドモーションの総キー数
+	UNABLE(26495) int nKeyBlend;				// ブレンドモーションの現在のキーNo.
+	UNABLE(26495) int nCounterMotionBlend;		// ブレンドモーションのカウンター
+	UNABLE(26495) int nFrameBlend;				// ブレンドフレーム数
+	UNABLE(26495) int nCounterBlend;			// ブレンドカウンター
 
-	MOTIONTYPE motionType;					// モーションタイプ
-	bool bClear;							// クリアしたか
+	UNABLE(26495) MOTIONTYPE motionType;		// モーションタイプ
+	UNABLE(26495) bool bClear;					// クリアしたか
 }Gimmick, * LPGIMMICK;
 
 //**********************************************************************************

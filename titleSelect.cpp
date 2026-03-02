@@ -328,8 +328,8 @@ void ChangePhase(void)
 					g_nPlayerNum = 2;
 				}
 
-				SetFade(MODE_GAME);
-				FadeSound(SOUND_LABEL_BGM_GAME);
+				SetFade(MODE_TUTORIAL);
+				//FadeSound(SOUND_LABEL_BGM_GAME);
 			}
 		}
 		else if (GetDualInput(JOYKEY_B, DUAL_JOYPAD | DUAL_RELEASE | DUAL_OR,

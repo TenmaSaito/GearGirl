@@ -157,6 +157,7 @@
     <ClCompile Include="billboard.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="debugproc.cpp" />
+    <ClCompile Include="dialog.cpp" />
     <ClCompile Include="effect.cpp" />
     <ClCompile Include="explosion.cpp" />
     <ClCompile Include="fade.cpp" />
@@ -170,6 +171,7 @@
     <ClCompile Include="light.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mathUtil.cpp" />
+    <ClCompile Include="MessageLog.cpp" />
     <ClCompile Include="normalend.cpp" />
     <ClCompile Include="parabola.cpp" />
     <ClCompile Include="particle.cpp" />
@@ -179,6 +181,7 @@
     <ClCompile Include="tCamera.cpp" />
     <ClCompile Include="teamLogo.cpp" />
     <ClCompile Include="titleSelect.cpp" />
+    <ClCompile Include="tutorial.cpp" />
     <ClCompile Include="UImenu.cpp" />
     <ClCompile Include="mesh.cpp" />
     <ClCompile Include="meshcylinder.cpp" />
@@ -207,6 +210,7 @@
     <ClInclude Include="billboard.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="debugproc.h" />
+    <ClInclude Include="dialog.h" />
     <ClInclude Include="effect.h" />
     <ClInclude Include="endomacro.h" />
     <ClInclude Include="explosion.h" />
@@ -221,6 +225,7 @@
     <ClInclude Include="light.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="mathUtil.h" />
+    <ClInclude Include="MessageLog.h" />
     <ClInclude Include="normalend.h" />
     <ClInclude Include="parabola.h" />
     <ClInclude Include="particle.h" />
@@ -230,6 +235,7 @@
     <ClInclude Include="tCamera.h" />
     <ClInclude Include="teamLogo.h" />
     <ClInclude Include="titleSelect.h" />
+    <ClInclude Include="tutorial.h" />
     <ClInclude Include="UImenu.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="mode.h" />

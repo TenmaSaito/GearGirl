@@ -528,9 +528,25 @@ void Draw(void)
 
 		if (errorString == nullptr)
 		{
-			MyMathUtil::GenerateMessageBox(MB_ICONERROR,
-				"error",
-				"Failed Get Error String");
+			hr = g_pD3DDevice->TestCooperativeLevel();
+			if (hr == D3DERR_DEVICELOST)
+			{
+				MyMathUtil::GenerateMessageBox(MB_ICONERROR,
+					"error",
+					"デバイスロストが発生したよ！");
+			}
+			else if (hr == D3DERR_DEVICENOTRESET)
+			{
+				MyMathUtil::GenerateMessageBox(MB_ICONERROR,
+					"error",
+					"リセット待機中！");
+			}
+			else
+			{
+				MyMathUtil::GenerateMessageBox(MB_ICONERROR,
+					"error",
+					"Failed Get Error String");
+			}
 		}
 		else
 		{

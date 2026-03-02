@@ -17,6 +17,8 @@
 #include "mathUtil.h"
 #include "skybox.h"
 
+// 名前空間の省略
+using namespace MyMathUtil;
 using namespace Constants;
 
 //**********************************************************************************
@@ -103,9 +105,6 @@ void UninitTitle(void)
 //==================================================================================
 void UpdateTitle(void)
 {
-	// 名前空間の省略
-	using namespace MyMathUtil;
-
 	/*** ライトの更新 ***/
 	UpdateLight();
 
