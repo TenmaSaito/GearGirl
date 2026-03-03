@@ -156,6 +156,7 @@
     <ClCompile Include="badend.cpp" />
     <ClCompile Include="billboard.cpp" />
     <ClCompile Include="camera.cpp" />
+    <ClCompile Include="CharacterSprite.cpp" />
     <ClCompile Include="debugproc.cpp" />
     <ClCompile Include="dialog.cpp" />
     <ClCompile Include="effect.cpp" />
@@ -170,6 +171,7 @@
     <ClCompile Include="judgeEnd.cpp" />
     <ClCompile Include="light.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="map.cpp" />
     <ClCompile Include="mathUtil.cpp" />
     <ClCompile Include="MessageLog.cpp" />
     <ClCompile Include="normalend.cpp" />
@@ -210,6 +212,7 @@
     <ClInclude Include="badend.h" />
     <ClInclude Include="billboard.h" />
     <ClInclude Include="camera.h" />
+    <ClInclude Include="CharacterSprite.h" />
     <ClInclude Include="debugproc.h" />
     <ClInclude Include="dialog.h" />
     <ClInclude Include="effect.h" />
@@ -225,6 +228,7 @@
     <ClInclude Include="judgeEnd.h" />
     <ClInclude Include="light.h" />
     <ClInclude Include="main.h" />
+    <ClInclude Include="map.h" />
     <ClInclude Include="mathUtil.h" />
     <ClInclude Include="MessageLog.h" />
     <ClInclude Include="normalend.h" />
@@ -254,6 +258,7 @@
     <ClInclude Include="modeldata.h" />
     <ClInclude Include="UIarm.h" />
     <ClInclude Include="wall.h" />
+    <ClInclude Include="MyLib.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

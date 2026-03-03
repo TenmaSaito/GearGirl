@@ -79,8 +79,8 @@
 //*********************************************************************************
 //*** マクロ定義 ***
 //*********************************************************************************
-#ifndef FPS
-	#define FPS		60
+#ifndef DEF_FPS
+	#define DEF_FPS		60
 #endif
 
 #ifndef RELEASE
@@ -92,7 +92,7 @@
 #define SAFE_DELETE(buffer)				do{ if(buffer != nullptr){delete buffer; buffer = nullptr;}}while(0)		// 動的バッファの解放
 #define SAFE_DELETEARRAY(buffer)		do{ if(buffer != nullptr){delete[] buffer; buffer = nullptr;}}while(0)		// 動的配列バッファの解放
 #define MESSAGELOG_FLAG					(DT_LEFT | DT_TOP | DT_WORDBREAK)					// メッセージログのフラグ
-#define SECOND(nCount)					(nCount / FPS)					// 1秒判定
+#define SECOND(nCount)					(nCount / DEF_FPS)				// 1秒判定
 #define IFSECOND(nCount, nSecond)		(nCount % nSecond == 0)			// フレーム判定省略	
 #define CMP_SUCCESS(cmp)				(cmp == 0)						// strcmp,strncmpでの成功判定
 #define CMP_FAILED(cmp)					(cmp != 0)						// strcmp,strncmpでの失敗判定
@@ -100,8 +100,8 @@
 #define STR_FAILED(str)					(str == NULL)					// strstrでの失敗判定
 #define SIZEOFWCHAR(size)				(sizeof(size) / 2)				// ワイド文字列使用時のsizeof
 #define SAFE_FUNC(pointer, func)		do{ if(pointer != nullptr){ pointer##->##func; } }while(0)		// ポインタのNULLCHECKを含んだポインタ参照型関数呼び出し
-#define KEEP_USING						-INT_MAX						// 現在の値を使用
-#define KEEP_USING_COL					(D3DXCOLOR(0.0000001f, 1, 1, 1))// 現在の色を使用
+#define KEEP_USING						INT_MIN						// 現在の値を使用
+#define KEEP_USING_COL					(D3DXCOLOR(-1, -1, -1, -1))// 現在の色を使用
 #ifdef UNICODE
 #define DEF_WIDE						true
 #else

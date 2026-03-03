@@ -1,7 +1,7 @@
 #==============================================================================
 #
-# ギミック[駅の施錠ドア解放]スクリプトファイル [station_g.txt]
-# Author : TENMA SAITO
+# 『モーションビューワ』スクリプトファイル [motion.txt]
+# Author : AKIRA TANAKA
 #
 #==============================================================================
 SCRIPT			# この行は絶対消さないこと！
@@ -9,33 +9,73 @@ SCRIPT			# この行は絶対消さないこと！
 #------------------------------------------------------------------------------
 # モデル数
 #------------------------------------------------------------------------------
-NUM_MODEL = 2
+NUM_MODEL = 7
 
 #------------------------------------------------------------------------------
 # モデルファイル名
 #------------------------------------------------------------------------------
-MODEL_FILENAME = data/MODEL/Building/stationGlass.x		# [0]ガラス本体
-MODEL_FILENAME = data/MODEL/Building/stationGlassDoor.x	# [1]ドア
+MODEL_FILENAME = data/MODEL/Gimmick/station/rail.x			# [0]レール本体
+MODEL_FILENAME = data/MODEL/Gimmick/station/stationGlassDoor.x		# [1]ドア
+MODEL_FILENAME = data/MODEL/Gimmick/station/grass_long.x	# [2]奥のグラス
+MODEL_FILENAME = data/MODEL/Gimmick/station/grass_left.x	# [3]左のグラス
+MODEL_FILENAME = data/MODEL/Gimmick/station/grass_upper.x	# [4]ドア上のグラス
+MODEL_FILENAME = data/MODEL/Gimmick/station/grass_right.x	# [5]ドア右のグラス
+MODEL_FILENAME = data/MODEL/Gimmick/station/invisible_wall.x	# [6]ギミック未クリア時用透明壁
 
 #------------------------------------------------------------------------------
 # キャラクター情報
 #------------------------------------------------------------------------------
 CHARACTERSET
-	NUM_PARTS = 2					# パーツ数
-	MOVE = 0.0						# 移動量
-	JUMP = 0.0					# ジャンプ量
+	NUM_PARTS = 7	# パーツ数
+	MOVE = 0.0		# 移動量
+	JUMP = 0.0		# ジャンプ量
 
 	PARTSSET
-		INDEX = 0					# StationGlass
-		PARENT = -1					# (親)NULL
+		INDEX = 0		# StationGlass
+		PARENT = -1		# (親)NULL
 		POS = 0.0 0.0 0.0
 		ROT = 0.0 0.0 0.0
 	END_PARTSSET
 	
 	PARTSSET
-		INDEX = 1					# StationGlassDoor
-		PARENT = -1					# (親)NULL
+		INDEX = 1		# StationGlassDoor
+		PARENT = -1		# (親)NULL
 		POS = 195.90 0.0 200.50
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+	
+	PARTSSET
+		INDEX = 2		# Glass_long
+		PARENT = -1		# (親)NULL
+		POS = -195.0 0.0 0.0
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+	
+	PARTSSET
+		INDEX = 3		# Glass_long
+		PARENT = -1		# (親)NULL
+		POS = 195.0 0.0 0.0
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+	
+	PARTSSET
+		INDEX = 4		# Glass_long
+		PARENT = -1		# (親)NULL
+		POS = 195.0 43.0 215.0
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+	
+	PARTSSET
+		INDEX = 5		# Glass_long
+		PARENT = -1		# (親)NULL
+		POS = 195.0 0.0 252.0
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+	
+	PARTSSET
+		INDEX = 6		# invisible_wall
+		PARENT = -1		# (親)NULL
+		POS = 195.0 0.0 0.0
 		ROT = 0.0 0.0 0.0
 	END_PARTSSET
 END_CHARACTERSET
@@ -114,7 +154,7 @@ MOTIONSET
 
 		KEY	# ----- [ 1 ] -----
 			POS = 0.00 0.00 0.00
-			ROT = 0.00 1.57 0.00
+			ROT = 0.00 2.76 0.00
 		END_KEY
 	END_KEYSET
 END_MOTIONSET

@@ -3,3 +3,7 @@
 // 詳細については次を参照してください https://go.microsoft.com/fwlink/?linkid=865984
 #define STRUCT(__VA_ARGS__)
 #define UNABLE(C) NOT_WARNING(C)
+#define UNABLE_THISFILE(C) NOT_WARNING_THISFILE(C)
+#define START_UNABLE __pragma(warning(push))
+#define END_UNABLE __pragma(warning(pop))
+#define FLOATTOINT

@@ -14,6 +14,7 @@
 #include "gimmick.h"
 #include "input.h"
 #include "item.h"
+#include "mesh.h"
 #include "mode.h"
 #include "model.h"
 #include "modeldata.h"
@@ -22,8 +23,10 @@
 #include "parabola.h"
 #include "player.h"
 #include "prompt.h"
+#include "sound.h"
 #include "titleselect.h"
 #include "MathUtil.h"
+#include "wall.h"
 
 using namespace MyMathUtil;
 
@@ -318,11 +321,9 @@ void UpdatePlayer(void)
 			{// 着地モーション
 				SetMotionType(MOTIONTYPE_LANDING, true, 15, (PlayerType)nCntPlayer);
 				pPlayer->bUseLandMotion = true;
-				//g_Land++;
 			}
 
 			pPlayer->bJump = false;
-			//pPlayer->state = PLAYERSTATE_NEUTRAL;
 		}
 
 		// モデルとの当たり判定
@@ -334,7 +335,6 @@ void UpdatePlayer(void)
 			{// 着地モーション
 				SetMotionType(MOTIONTYPE_LANDING, true, 15, (PlayerType)nCntPlayer);
 				pPlayer->bUseLandMotion = true;
-				//g_Land++;
 			}
 
 			pPlayer->bJump = false;
@@ -344,7 +344,7 @@ void UpdatePlayer(void)
 		CollisionItem(pPlayer->pos, PLAYER_RANGE);
 
 		// ギミックとの当たり判定
-		if (CollisionGimmick(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move, &g_aPlayer[nCntPlayer], 5.0f, 20.0f))
+		if (CollisionGimmick(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move, &g_aPlayer[nCntPlayer], 5.0f, 20.0f - (nCntPlayer * 18.0f)))
 		{
 			if (pPlayer->bJump == true
 				&& pPlayer->motionType != MOTIONTYPE_LANDING
@@ -357,11 +357,14 @@ void UpdatePlayer(void)
 			pPlayer->bJump = false;
 		}
 
+		// 壁との当たり判定
+		CollisionWall(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move);
+
 		// デバッグ表示
-		//if (g_Functionkey != 0)
-	//	{
-		PrintDebugProc("\nPlayer座標 : [%~3f]\n", pPlayer->pos.x, pPlayer->pos.y, pPlayer->pos.z);
-		//	}
+		if (g_Functionkey != 0)
+		{
+			PrintDebugProc("\nPlayer座標 : [%~3f]\n", pPlayer->pos.x, pPlayer->pos.y, pPlayer->pos.z);
+		}
 	}
 
 	// プロンプトを描画
@@ -383,7 +386,6 @@ void UpdatePlayer(void)
 					g_ActivePlayer = 1;
 				}
 			}
-
 		}
 	}
 
@@ -737,6 +739,7 @@ void ActionPlayer(PlayerType nPlayer, Player* pPlayer)
 			case ARMTYPE_CATAPULT:
 				if (pPlayer->state != PLAYERSTATE_THROWWAITING)
 				{
+					PlaySound(SOUND_LABEL_SE_G_THROW);
 					SetMotionType(MOTIONTYPE_ACTION, true, 10, nPlayer);
 					g_nMotionCounter = 10;
 					g_bShotMouse = true;
@@ -768,6 +771,32 @@ void MovePlayer(PlayerType nPlayer)
 {
 	// プレイヤー構造体をポインタ化
 	Player* pPlayer = &g_aPlayer[nPlayer];
+
+	// 歩行音再生
+	if (nPlayer == PLAYERTYPE_GIRL)
+	{ // 主人公
+		if (!IsPlayingSound(SOUND_LABEL_SE_G_MOVE) 
+			&& pPlayer->motionType == MOTIONTYPE_MOVE)
+		{
+			PlaySound(SOUND_LABEL_SE_G_MOVE);
+		}
+		else if (pPlayer->motionType != MOTIONTYPE_MOVE)
+		{
+			StopSound(SOUND_LABEL_SE_G_MOVE);
+		}
+	}
+	else
+	{ // ネズミ
+		if (!IsPlayingSound(SOUND_LABEL_SE_G_MOUSEMOVE)
+			&& pPlayer->motionType == MOTIONTYPE_MOVE)
+		{
+			PlaySound(SOUND_LABEL_SE_G_MOUSEMOVE);
+		}
+		else if (pPlayer->motionType != MOTIONTYPE_MOVE)
+		{
+			StopSound(SOUND_LABEL_SE_G_MOUSEMOVE);
+		}
+	}
 
 	// カメラの向きを保存する
 	vec3 Camerarot;
@@ -1171,7 +1200,7 @@ void JumpPlayer(PlayerType nPlayer)
 		// ジャンプする
 		if ((GetKeyboardTrigger(DIK_SPACE) == true || GetJoypadTrigger(nPlayer, JOYKEY_A)) && pPlayer->bJump == false)
 		{
-			//PlaySound(SOUND_LABEL_JUMP);
+			PlaySound(SOUND_LABEL_SE_G_JUMP);
 			pPlayer->state = PLAYERSTATE_JUMP;
 			SetMotionType(MOTIONTYPE_JUMP, true, 20, nPlayer);
 
@@ -1186,7 +1215,7 @@ void JumpPlayer(PlayerType nPlayer)
 		{// 2人プレイ時
 			if ((GetKeyboardTrigger(DIK_RSHIFT) == true || GetJoypadTrigger(nPlayer, JOYKEY_A)) && pPlayer->bJump == false)
 			{
-				//PlaySound(SOUND_LABEL_JUMP);
+				PlaySound(SOUND_LABEL_SE_G_MOUSEJUMP);
 				pPlayer->state = PLAYERSTATE_JUMP;
 				SetMotionType(MOTIONTYPE_JUMP, true, 10, nPlayer);
 
@@ -1198,7 +1227,7 @@ void JumpPlayer(PlayerType nPlayer)
 		{// 1人プレイ時
 			if ((GetKeyboardTrigger(DIK_SPACE) == true || GetJoypadTrigger(nPlayer, JOYKEY_A)) && pPlayer->bJump == false)
 			{
-				//PlaySound(SOUND_LABEL_JUMP);
+				PlaySound(SOUND_LABEL_SE_G_MOUSEJUMP);
 				pPlayer->state = PLAYERSTATE_JUMP;
 				SetMotionType(MOTIONTYPE_JUMP, true, 10, nPlayer);
 
@@ -1219,6 +1248,19 @@ void SetMotionType(MOTIONTYPE motionTypeNext, bool bBlend, int nFrameBlend, Play
 	if (motionTypeNext < 0 || motionTypeNext >= MOTIONTYPE_MAX)
 	{ // モーションインデックスの上下限確認
 		return;
+	}
+
+	// 着地音再生
+	if (motionTypeNext == MOTIONTYPE_LANDING)
+	{
+		if (PlayerType == PLAYERTYPE_GIRL)
+		{
+			PlaySound(SOUND_LABEL_SE_G_LANDING);
+		}
+		else
+		{
+			PlaySound(SOUND_LABEL_SE_G_MOUSELANDING);
+		}
 	}
 
 	// ブレンドモーションをするかどうか
@@ -1323,9 +1365,6 @@ void UpdateMotion(PlayerType Type)
 	/*** 全パーツの更新！ ***/
 	for (int nCntModel = 0; nCntModel < pPlayer->PartsInfo.nNumParts; nCntModel++)
 	{
-		if ((pPlayer->nKey + 1) == pPlayer->aMotionInfo[pPlayer->motionType].nNumKey
-			&& pPlayer->aMotionInfo[pPlayer->motionType].bLoop == false) continue;
-
 		int nNext = (pPlayer->nKey + 1) % pPlayer->aMotionInfo[pPlayer->motionType].nNumKey;
 
 		// 次のキーの値		
@@ -1489,7 +1528,10 @@ void UpdateMotion(PlayerType Type)
 		if (pPlayer->nCounterMotion >= pInfo->nFrame)
 		{ // モーションカウンターが現在のキー情報のフレーム数を超えた場合
 			if (pPlayer->motionType < 0 || pPlayer->motionType >= MOTIONTYPE_MAX)
-			{ // モーションインデックスの上下限確認		
+			{ // モーションインデックスの上下限確認
+				pPlayer->bFinishMotion = true;
+				SetMotionType(MOTIONTYPE_NEUTRAL, true, 40, Type);
+				pPlayer->state = PLAYERSTATE_NEUTRAL;
 				return;
 			}
 
@@ -1500,7 +1542,7 @@ void UpdateMotion(PlayerType Type)
 			if (pPlayer->nKey == pPlayer->aMotionInfo[pPlayer->motionType].nNumKey - 1 && pPlayer->bLoop == false)
 			{
 				pPlayer->bFinishMotion = true;
-				SetMotionType(MOTIONTYPE_NEUTRAL, true, 40, Type);
+				SetMotionType(MOTIONTYPE_NEUTRAL, true, 20, Type);
 				pPlayer->state = PLAYERSTATE_NEUTRAL;
 			}
 
@@ -1760,6 +1802,7 @@ void ShotMouse(void)
 
 			// 出したベクトルを正規化
 			D3DXVec3Normalize(&vec, &vec);
+			PrintDebugProc("vec %~3f", vec.x, vec.y, vec.z);
 
 			if (GetKeyboardTrigger(DIK_RETURN) == true)
 			{
@@ -1774,11 +1817,12 @@ void ShotMouse(void)
 				// ネズミを飛ばす
 				pMouse->move.x += vec.x * 1.0f;
 				pMouse->move.z += vec.z * 1.0f;
-				if (g_nMotionCounter == -10)
+
+				if (g_nMotionCounter == -5)
 				{// Y軸移動は1Fのみ
 					// 投げる手の位置に移動
 					D3DXVec3TransformCoord(&pMouse->pos, &offset, &pPlayer->PartsInfo.aParts[19].mtxWorld);
-					pMouse->move.y = 5.5f;
+					pMouse->move.y = vec.y * 25.0f;
 				}
 			}
 

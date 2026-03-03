@@ -252,6 +252,12 @@
     <ClCompile Include="tLogo.cpp">
       <Filter>ソース ファイル\Mode\Title</Filter>
     </ClCompile>
+    <ClCompile Include="CharacterSprite.cpp">
+      <Filter>ソース ファイル\Mode\Tutorial</Filter>
+    </ClCompile>
+    <ClCompile Include="map.cpp">
+      <Filter>ソース ファイル\Mode\Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h">
@@ -400,6 +406,15 @@
     </ClInclude>
     <ClInclude Include="tLogo.h">
       <Filter>ヘッダー ファイル\Mode\Title</Filter>
+    </ClInclude>
+    <ClInclude Include="MyLib.h">
+      <Filter>ヘッダー ファイル\Main\System</Filter>
+    </ClInclude>
+    <ClInclude Include="CharacterSprite.h">
+      <Filter>ヘッダー ファイル\Mode\Tutorial</Filter>
+    </ClInclude>
+    <ClInclude Include="map.h">
+      <Filter>ヘッダー ファイル\Mode\Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -129,7 +129,7 @@ public:
 	LPDIRECT3DDEVICE9 pDevice;
 
 	// コンストラクタ
-	AUTODEVICE9() : pDevice(GetDevice()), bGetDevice(false)
+	AUTODEVICE9(void) : pDevice(GetDevice()), bGetDevice(false)
 	{ // 自動変数作成時、自動でデバイスの取得を行う
 		if (pDevice != nullptr)
 		{ // 取得成功時
@@ -138,15 +138,54 @@ public:
 	}
 
 	// デストラクタ
-	~AUTODEVICE9() noexcept
+	~AUTODEVICE9(void) noexcept
 	{ // 自動変数の破棄時に、デバイスの解放を行う
+		Release();
+	}
+
+	// デバイスの解放
+	void Release(void)
+	{
 		if (bGetDevice == true)
 		{ // 取得に成功
 			EndDevice();
 			bGetDevice = false;
 		}
 	}
+
 } AUTODEVICE9;
+
+#pragma warning(push)
+#pragma warning(disable : 4244)
+STRUCT(TIME)
+{
+	// フレーム開始
+	void SetFrame(void)
+	{
+		dwExacTime = timeGetTime();
+	}
+
+	void EndFrame(void)
+	{
+		dwCurrentTime = timeGetTime();
+		frame = dwCurrentTime - dwExacTime;
+		frame *= 0.001f;
+	}
+
+	// フレーム間秒数取得
+	float DeltaTime(void)
+	{
+		return frame;
+	}
+
+private:
+	float frame;		// 経過秒数
+	DWORD dwCurrentTime;
+	DWORD dwExacTime;
+} TIME;
+
+TIME *GetDeltaTime(void);
+#pragma warning(pop)
 
 #endif
 

@@ -65,7 +65,6 @@ void UpdateParticle(void)
 	D3DXVECTOR3 pos;
 	D3DXVECTOR3 move;
 	D3DXCOLOR col;
-	float fRadius;
 	float fSpeed;
 	int nLife;
 

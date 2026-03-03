@@ -194,7 +194,6 @@ bool LoadFileFromMotionScript(const char* pMotionFileName)
 	HRESULT hr;						// 正誤判定
 	char aStr[MAX_PATH] = {};		// Xファイルのファイル名
 	char aModelPath[MAX_PATH] = {};	// Xファイルパス
-	char* PosTrash;					// ゴミ捨て場(コメント消去用変数)
 	char* pStart;					// 値の開始位置
 	const char* pNull = "\0";		// 何もなし
 	char aErrorText[MAX_PATH] = {};	// エラー文用

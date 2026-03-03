@@ -12,10 +12,15 @@
 #include "motion.h"
 #include "modeldata.h"
 #include "mathUtil.h"
+#include "param.h"
 #include "prompt.h"
 #include "Texture.h"
 
-using namespace MyMathUtil;
+// 自作ユーティリティ使用宣言
+USE_UTIL;
+
+// パラメータ使用宣言
+USE_PARAM;
 
 //**********************************************************************************
 //*** マクロ定義 ***
@@ -35,40 +40,43 @@ typedef enum
 //**********************************************************************************
 //*** ギミック構造体 ***
 //**********************************************************************************
+START_UNABLE
+UNABLE_THISFILE(26495)
 typedef struct
 {
-	UNABLE(26495) D3DXVECTOR3 pos;		// 中心位置
-	UNABLE(26495) D3DXVECTOR3 rot;		// ギミック全体の向き
-	UNABLE(26495) D3DXMATRIX mtxWorld;	// ワールドマトリックス
-	UNABLE(26495) PARTS_INFO parts;		// ギミックパーツ
-	UNABLE(26495) COULD_PLAYER could;	// クリア可能なプレイヤータイプ
-	UNABLE(26495) GIMMICKTYPE myType;	// 自身のギミックの種類
-	UNABLE(26495) float fRadius;		// 検知半径
-	UNABLE(26495) int nCounter;			// 汎用カウンター
-	UNABLE(26495) int nIdxPrompt;		// プロンプトのインデックス
-	UNABLE(26495) bool bUse;			// 使用状況
+	D3DXVECTOR3 pos;		// 中心位置
+	D3DXVECTOR3 rot;		// ギミック全体の向き
+	D3DXMATRIX mtxWorld;	// ワールドマトリックス
+	PARTS_INFO parts;		// ギミックパーツ
+	COULD_PLAYER could;		// クリア可能なプレイヤータイプ
+	GIMMICKTYPE myType;		// 自身のギミックの種類
+	float fRadius;			// 検知半径
+	int nCounter;			// 汎用カウンター
+	int nIdxPrompt;			// プロンプトのインデックス
+	bool bUse;				// 使用状況
+	bool bClear;			// クリアしたか
 
-	UNABLE(26495) MOTION_INFO aMotionInfo[MOTIONTYPE_MAX];	// クリア時モーション
-	UNABLE(26495) int nNumMotion;		// 現在のモーションの総数
-	UNABLE(26495) bool bLoop;			// ループするかどうか
-	UNABLE(26495) int nNumKey;			// 現在のモーションのキーの総数
-	UNABLE(26495) int nKey;				// 現在のモーションの現在のキーNo.
-	UNABLE(26495) int nCounterMotion;	// 現在のモーションのカウンター
-	UNABLE(26495) bool bFinishMotion;	// 現在のモーションが終了したかどうか
+	// モーション関連
+	MOTION_INFO aMotionInfo[MOTIONTYPE_MAX];	// クリア時モーション
+	int nNumMotion;			// 現在のモーションの総数
+	bool bLoop;				// ループするかどうか
+	int nNumKey;			// 現在のモーションのキーの総数
+	int nKey;				// 現在のモーションの現在のキーNo.
+	int nCounterMotion;		// 現在のモーションのカウンター
+	bool bFinishMotion;		// 現在のモーションが終了したかどうか
+	MOTIONTYPE motionType;	// モーションタイプ
 
-	// モーションブレンドの要素
-	UNABLE(26495) bool bBlendMotion;			// ブレンドモーションするかどうか
-	UNABLE(26495) MOTIONTYPE motionTypeBlend;	// ブレンドモーションの種類
-	UNABLE(26495) bool bLoopMotionBlend;		// ブレンドモーションがループするか
-	UNABLE(26495) int nNumKeyBlend;				// ブレンドモーションの総キー数
-	UNABLE(26495) int nKeyBlend;				// ブレンドモーションの現在のキーNo.
-	UNABLE(26495) int nCounterMotionBlend;		// ブレンドモーションのカウンター
-	UNABLE(26495) int nFrameBlend;				// ブレンドフレーム数
-	UNABLE(26495) int nCounterBlend;			// ブレンドカウンター
-
-	UNABLE(26495) MOTIONTYPE motionType;		// モーションタイプ
-	UNABLE(26495) bool bClear;					// クリアしたか
+	// モーションブレンド関連
+	bool bBlendMotion;			// ブレンドモーションするかどうか
+	MOTIONTYPE motionTypeBlend;	// ブレンドモーションの種類
+	bool bLoopMotionBlend;		// ブレンドモーションがループするか
+	int nNumKeyBlend;			// ブレンドモーションの総キー数
+	int nKeyBlend;				// ブレンドモーションの現在のキーNo.
+	int nCounterMotionBlend;	// ブレンドモーションのカウンター
+	int nFrameBlend;			// ブレンドフレーム数
+	int nCounterBlend;			// ブレンドカウンター
 }Gimmick, * LPGIMMICK;
+END_UNABLE
 
 //**********************************************************************************
 //*** ギミッククリア構造体 ***
@@ -97,10 +105,10 @@ Gimmick g_aGimmick[GIMMICKTYPE_MAX];		// ギミック情報
 GIMMICK_DATA g_aGimmickData[GIMMICKTYPE_MAX] =
 {
 	{"data/Scripts/bigbutton_g.txt", COULD_PLAYER_GIRL, D3DXVECTOR3(535, 100, -630), D3DXVECTOR3(0, 0, 0), 0.0f},
-	{"data/Scripts/smallbutton_g.txt", COULD_PLAYER_MOUSE, D3DXVECTOR3(565, 100, -630), D3DXVECTOR3(0, 0, 0), 0.0f},
-	{"data/Scripts/station_g.txt", COULD_PLAYER_ALL, D3DXVECTOR3(573, 100, -900), D3DXVECTOR3(0, D3DX_PI + D3DX_HALFPI, 0), 200.0f },
-	{},
-	{"data/Scripts/tunnel_g.txt", COULD_PLAYER_ALL, D3DXVECTOR3(1609, 100, -760), D3DXVECTOR3(0, D3DX_PI + D3DX_HALFPI, 0), 200.0f },
+	{"data/Scripts/smallbutton_g.txt", COULD_PLAYER_MOUSE, D3DXVECTOR3(573, 100, -900), D3DXVECTOR3(0, 0, 0), 0.0f},
+	{"data/Scripts/fallenTree.txt", COULD_PLAYER_GIRL, D3DXVECTOR3(1720, 100, 475), D3DXVECTOR3(0, CParamFloat::HALFPI, 0), 30.0f},
+	{"data/Scripts/station_g.txt", COULD_PLAYER_ALL, D3DXVECTOR3(573, 100, -1000), D3DXVECTOR3(0, D3DX_PI + CParamFloat::HALFPI, 0), 200.0f },
+	{"data/Scripts/tunnel_g.txt", COULD_PLAYER_ALL, D3DXVECTOR3(1609, 100, -760), D3DXVECTOR3(0, D3DX_PI + CParamFloat::HALFPI, 0), 200.0f },
 };
 
 //==================================================================================
@@ -146,15 +154,15 @@ void InitGimmick(void)
 
 				g_aGimmick[nCntMotion].bUse = true;
 
-				int Tex;
-				LoadTexture("data/TEXTURE/TestPrompt.png", &Tex);
-				g_aGimmick[nCntMotion].nIdxPrompt = SetPrompt(g_aGimmick[nCntMotion].pos, D3DXVECTOR2(15.0f, 8.0f), Tex, false);
-				SetEnablePrompt(true, g_aGimmick[nCntMotion].nIdxPrompt);
-
 				g_aGimmick[nCntMotion].could = g_aGimmickData[nCntMotion].could;
 				g_aGimmick[nCntMotion].pos = g_aGimmickData[nCntMotion].posDefault;
 				g_aGimmick[nCntMotion].rot = g_aGimmickData[nCntMotion].rotDefault;
 				g_aGimmick[nCntMotion].fRadius = g_aGimmickData[nCntMotion].fRadius;
+
+				int Tex;
+				LoadTexture("data/TEXTURE/TestPrompt.png", &Tex);
+				g_aGimmick[nCntMotion].nIdxPrompt = SetPrompt(g_aGimmick[nCntMotion].pos, D3DXVECTOR2(15.0f, 8.0f), Tex, false);
+				SetEnablePrompt(true, g_aGimmick[nCntMotion].nIdxPrompt);
 			}
 		}
 	}
@@ -189,6 +197,13 @@ void UpdateGimmick(void)
 			CaseMulti(pGimmick);
 		}
 
+		LPGIMMICK pTarget = &g_aGimmick[GIMMICKTYPE_SMALLBUTTON];
+		if (pTarget->bClear == true && pGimmick->bClear == false)
+		{ // ネズミのボタンが押されたとき、扉ギミックをクリア判定
+			pGimmick->bClear = true;
+			SetMotionType(MOTIONTYPE_ACTION, false, 0, GIMMICKTYPE_CLOSEDDOOR);
+		}
+
 		UpdateMotion(pGimmick->myType);
 
 		pGimmick->nCounter++;		// カウンター増加
@@ -210,6 +225,12 @@ void DrawGimmick(void)
 	for (int nCntGimmick = 0; nCntGimmick < GIMMICKTYPE_MAX; nCntGimmick++, pGimmick++)
 	{
 		if (pGimmick->bUse == false) continue;
+
+		if ((pGimmick->myType == GIMMICKTYPE_FALLENTREE)
+			& (pGimmick->bClear == true))
+		{
+			continue;
+		}
 
 		// プレイヤーのワールドマトリックスの初期化
 		D3DXMatrixIdentity(&pGimmick->mtxWorld);
@@ -365,12 +386,19 @@ bool IsClearGimmick(GIMMICKTYPE type)
 //==================================================================================
 void CaseMulti(LPGIMMICK pGimmick)
 {
+	if (pGimmick->bClear == true) return;
+
 	Player* pPlayer = GetPlayer();
 	bool bDetection = false;
 
 	if (IsDetection(pGimmick->pos, pGimmick[PLAYERTYPE_GIRL].pos, pGimmick->fRadius)
 		&& (pGimmick->could == COULD_PLAYER_GIRL || pGimmick->could == COULD_PLAYER_ALL))
 	{ // 少女の判定
+		if (pGimmick->myType == GIMMICKTYPE_FALLENTREE && pPlayer->motionType == MOTIONTYPE_CUTTING)
+		{
+			pGimmick->bClear = true;
+		}
+
 		bDetection = true;
 	}
 
@@ -403,7 +431,11 @@ void CaseSolo(LPGIMMICK pGimmick)
 		&& (pGimmick->could == type || pGimmick->could == COULD_PLAYER_ALL))
 	{ // 操作中プレイヤーの判定
 		if (pGimmick->motionType == MOTIONTYPE_ACTION) return;
-		//SetMotionType(MOTIONTYPE_ACTION, false, 0, pGimmick->myType);
+
+		if (pGimmick->myType == GIMMICKTYPE_FALLENTREE && pPlayer->motionType == MOTIONTYPE_CUTTING)
+		{
+			pGimmick->bClear = true;
+		}
 
 		bDetection = true;
 	}
@@ -440,6 +472,18 @@ bool CollisionGimmick(
 
 			for (int nCntParts = 0; nCntParts < pObject->parts.nNumParts; nCntParts++)
 			{
+				if ((nCntModel == GIMMICKTYPE_CLOSEDDOOR)
+					& (g_aGimmick[nCntModel].bClear == true)
+					& (nCntParts == pObject->parts.nNumParts - 1))
+				{ // もしギミックがクリア済み且つ扉のギミックだった場合、透明壁を無視
+					continue;
+				}
+				else if ((nCntModel == GIMMICKTYPE_FALLENTREE)
+					& (g_aGimmick[nCntModel].bClear == true))
+				{
+					continue;
+				}
+
 				LPMODELDATA pObjInfo = GetModelData(pObject->parts.aParts[nCntParts].nIdxModel);
 #if 1
 				D3DXVECTOR3 offset = pObject->parts.aParts[nCntParts].pos;

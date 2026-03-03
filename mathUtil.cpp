@@ -2260,11 +2260,3 @@ void MyMathUtil::AllReleaseFromHeap(void)
 	g_pStackData = NULL;
 	g_nNumStackData = 0;
 }
-
-//==================================================================================
-// --- キャパシティチェック関数 ---
-//==================================================================================
-bool MyLib::IsCapacityOver(UINT num, UINT capasity)
-{
-	return (num >= capasity) ? true : false;
-}

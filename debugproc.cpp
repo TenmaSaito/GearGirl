@@ -118,6 +118,8 @@ void DrawDebugProc(void)
 //================================================================================================================
 // --- デバッグ表示の追加 ---
 //================================================================================================================
+START_UNABLE
+UNABLE_THISFILE(FLOATTOINT)
 void PrintDebugProc(const char *fmt, ...)
 {
 #ifdef _DEBUG
@@ -320,10 +322,13 @@ void PrintDebugProc(const char *fmt, ...)
 
 #endif
 }
+END_UNABLE
 
 //================================================================================================================
 // --- デバッグ表示の追加 ---
 //================================================================================================================
+START_UNABLE
+UNABLE_THISFILE(FLOATTOINT)
 void PrintDebugProc(int nIdxFont, const char* fmt, ...)
 {
 #ifdef _DEBUG
@@ -526,3 +531,4 @@ void PrintDebugProc(int nIdxFont, const char* fmt, ...)
 
 #endif
 }
+END_UNABLE

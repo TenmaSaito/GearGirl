@@ -38,16 +38,19 @@ void InitResult(void)
 	{
 	// バッドエンド
 	case ENDTYPE_BAD:
+		FadeSound(SOUND_LABEL_BGM_BADEND);
 		InitBadEnd();
 		break;
 
 	// ノーマルエンド
 	case ENDTYPE_NORMAL:
+		FadeSound(SOUND_LABEL_BGM_NORMALEND);
 		InitNormalEnd();
 		break;
 
 	// ハッピーエンド
 	case ENDTYPE_HAPPY:
+		FadeSound(SOUND_LABEL_BGM_SUPERHAPPYEND);
 		InitHappyEnd();
 		break;
 

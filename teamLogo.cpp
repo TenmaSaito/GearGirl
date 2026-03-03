@@ -78,7 +78,6 @@ void UpdateTeamLogo(void)
 		if (GetFade() == FADE_NONE)
 		{
 			SetFade(MODE_TITLE);
-			FadeSound(SOUND_LABEL_BGM_TITLE);
 		}
 	}
 
@@ -87,7 +86,6 @@ void UpdateTeamLogo(void)
 		if (GetFade() == FADE_NONE)
 		{
 			SetFade(MODE_TITLE);
-			FadeSound(SOUND_LABEL_BGM_TITLE);
 		}
 	}
 	else

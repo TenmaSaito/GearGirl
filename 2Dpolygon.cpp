@@ -28,7 +28,8 @@ typedef struct
 	int nIdTexture;			// テクスチャ番号
 	D3DXCOLOR col;			// 色
 	LPDIRECT3DVERTEXBUFFER9 pVtxBuff;	// 頂点バッファのポインタ
-	bool bUse;
+	bool bDisp;				// 描画するか
+	bool bUse;				// 使用状態
 }_2DPOLYGON, *LP2DPOLYGON;
 
 //*************************************************************************************************
@@ -78,7 +79,7 @@ void Draw2DPolygon(void)
 
 	for (int nCntPoly = 0; nCntPoly < MAX_POLYGON; nCntPoly++, p2DPoly++)
 	{
-		if (p2DPoly->bUse == true)
+		if ((p2DPoly->bUse & true) & (p2DPoly->bDisp & true))
 		{
 			/*** 頂点バッファをデータストリームに設定 ***/
 			pDevice->SetStreamSource(0, p2DPoly->pVtxBuff, 0, sizeof(VERTEX_2D));
@@ -118,6 +119,7 @@ int Set2DPolygon(D3DXVECTOR3 pos, D3DXVECTOR3 rot, D3DXVECTOR2 size, int nIdText
 			p2DPoly->nIdTexture = nIdTexture;
 			p2DPoly->col = col;
 			p2DPoly->bUse = true;
+			p2DPoly->bDisp = true;
 
 			if (p2DPoly->pVtxBuff == NULL)
 			{
@@ -160,7 +162,7 @@ int Set2DPolygon(D3DXVECTOR3 pos, D3DXVECTOR3 rot, D3DXVECTOR2 size, int nIdText
 //================================================================================================================
 // --- ポリゴンの移動処理 ---
 //================================================================================================================
-void SetPosition2DPolygon(int nId2DPolygon, D3DXVECTOR3 pos)
+void SetPosition2DPolygon(IDX_2DPOLYGON nId2DPolygon, D3DXVECTOR3 pos)
 {
 	if (nId2DPolygon == -1 || nId2DPolygon >= (sizeof g_a2DPolygon / sizeof(_2DPOLYGON))) return;
 	LP2DPOLYGON p2DPoly = &g_a2DPolygon[nId2DPolygon];
@@ -195,7 +197,7 @@ void SetPosition2DPolygon(int nId2DPolygon, D3DXVECTOR3 pos)
 //================================================================================================================
 // --- ポリゴンの色を変更する処理 ---
 //================================================================================================================
-void SetColor2DPolygon(int nId2DPolygon, D3DXCOLOR col)
+void SetColor2DPolygon(IDX_2DPOLYGON nId2DPolygon, D3DXCOLOR col)
 {
 	if (nId2DPolygon == -1 || nId2DPolygon >= (sizeof g_a2DPolygon / sizeof(_2DPOLYGON))) return;
 	LP2DPOLYGON p2DPoly = &g_a2DPolygon[nId2DPolygon];
@@ -219,7 +221,7 @@ void SetColor2DPolygon(int nId2DPolygon, D3DXCOLOR col)
 //================================================================================================================
 // --- ポリゴンのサイズを変更する処理 ---
 //================================================================================================================
-void SetSize2DPolygon(int nId2DPolygon, D3DXVECTOR2 size)
+void SetSize2DPolygon(IDX_2DPOLYGON nId2DPolygon, D3DXVECTOR2 size)
 {
 	if (nId2DPolygon == -1 || nId2DPolygon >= (sizeof g_a2DPolygon / sizeof(_2DPOLYGON))) return;
 	LP2DPOLYGON p2DPoly = &g_a2DPolygon[nId2DPolygon];
@@ -256,10 +258,21 @@ void SetSize2DPolygon(int nId2DPolygon, D3DXVECTOR2 size)
 //================================================================================================================
 // --- ポリゴンの移動処理 ---
 //================================================================================================================
-void Destroy2DPolygon(int nIdx2DPolygon)
+void Destroy2DPolygon(IDX_2DPOLYGON nIdx2DPolygon)
 {
 	if (nIdx2DPolygon == -1 || nIdx2DPolygon >= (sizeof g_a2DPolygon / sizeof(_2DPOLYGON))) return;
 	LP2DPOLYGON p2DPoly = &g_a2DPolygon[nIdx2DPolygon];
 
 	p2DPoly->bUse = false;
+}
+
+//================================================================================================================
+// --- ポリゴンの有効化 ---
+//================================================================================================================
+void SetEnable2DPolygon(IDX_2DPOLYGON Idx2DPolygon, bool bEnable)
+{
+	if (Idx2DPolygon == -1 || Idx2DPolygon >= (sizeof g_a2DPolygon / sizeof(_2DPOLYGON))) return;
+	LP2DPOLYGON p2DPoly = &g_a2DPolygon[Idx2DPolygon];
+
+	p2DPoly->bDisp = bEnable;
 }

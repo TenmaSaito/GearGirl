@@ -26,4 +26,3 @@ void DrawDialog(void);
 
 void SetDialog(void);
 #endif
-

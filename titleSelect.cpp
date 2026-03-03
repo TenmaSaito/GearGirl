@@ -329,7 +329,7 @@ void ChangePhase(void)
 				}
 
 				SetFade(MODE_TUTORIAL);
-				//FadeSound(SOUND_LABEL_BGM_GAME);
+				FadeSound(SOUND_LABEL_BGM_GAME);
 			}
 		}
 		else if (GetDualInput(JOYKEY_B, DUAL_JOYPAD | DUAL_RELEASE | DUAL_OR,

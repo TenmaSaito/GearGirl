@@ -50,6 +50,7 @@ bool g_isFullscreen = false;							// フルスクリーンの使用状況
 RECT g_windowRect;										// ウィンドウサイズ
 bool g_bMainThread;										// メインスレッドの実行状況
 MultiData g_mdDirect3DDevice;							// スレッドセーフ
+TIME g_Time;											// タイム
 
 //================================================================================================================
 // --- メイン関数 ---
@@ -156,11 +157,15 @@ void MessageLoop(LPMSG lpMsg)
 
 				dwExecLastTime = dwCurrentTime;			//処理開始時刻[現在時刻]を保存
 
+				g_Time.SetFrame();
+
 				// 更新処理
 				Update();
 
 				// 描画処理
 				Draw();
+
+				g_Time.EndFrame();
 
 				dwFrameCount++;							// フレームカウントを加算
 			}
@@ -633,4 +638,9 @@ void ToggleFullscreen(HWND hWnd)
 int GetEnterCriticalSectionCount(void)
 {
 	return g_mdDirect3DDevice.nCountEnterSection;
+}
+
+TIME *GetDeltaTime(void)
+{
+	return &g_Time;
 }

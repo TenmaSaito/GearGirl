@@ -8,7 +8,10 @@
 //*** インクルードファイル ***
 //*********************************************************************************
 #include "MessageLog.h"
+#include "mathUtil.h"
 
+START_UNABLE
+UNABLE_THISFILE(FLOATTOINT)
 //==================================================================================
 //--- 初期化 ---
 //==================================================================================
@@ -213,8 +216,18 @@ void MessageLog::Draw(void)
 //==================================================================================
 //--- メッセージログの新規作成 ---
 //==================================================================================
-bool MessageLog::SetMessageLogA(LPDIRECT3DDEVICE9 pDevice, D3DXVECTOR3 pos, FLOAT fWidth, FLOAT fHeight,
-	INT nFontSize, LPSTR pStr, INT nNumMessage, INT nSecond, D3DXCOLOR Col, BOOL bJapanise)
+bool MessageLog::SetMessageLogA(
+	LPDIRECT3DDEVICE9 pDevice, 
+	D3DXVECTOR3 pos, 
+	FLOAT fWidth,
+	FLOAT fHeight,
+	INT nFontSize,
+	LPSTR pStr, 
+	INT nNumMessage, 
+	INT nSecond,
+	D3DXCOLOR Col, 
+	BOOL bJapanise
+)
 {
 	if (pDevice == nullptr)
 	{// NULLチェック
@@ -281,9 +294,21 @@ bool MessageLog::SetMessageLogA(LPDIRECT3DDEVICE9 pDevice, D3DXVECTOR3 pos, FLOA
 //==================================================================================
 //--- メッセージログの新規作成(バイトの区別あり) ---
 //==================================================================================
-bool MessageLog::SetMessageLogExA(LPDIRECT3DDEVICE9 pDevice, D3DXVECTOR3 pos, FLOAT fWidth, FLOAT fHeight,
-	INT nFontSize, LPSTR pStr, INT nNumMessage, INT nSecond, D3DXCOLOR Col, BOOL bJapanise,
-	INT nNumOtherByte, INT nOtherByte, INT* pInt)
+bool MessageLog::SetMessageLogExA(
+	LPDIRECT3DDEVICE9 pDevice, 
+	D3DXVECTOR3 pos,
+	FLOAT fWidth,
+	FLOAT fHeight,
+	INT nFontSize, 
+	LPSTR pStr, 
+	INT nNumMessage,
+	INT nSecond,
+	D3DXCOLOR Col,
+	BOOL bJapanise,
+	INT nNumOtherByte,
+	INT nOtherByte,
+	INT* pInt
+)
 {
 	if (pDevice == nullptr)
 	{// NULLチェック
@@ -350,8 +375,17 @@ bool MessageLog::SetMessageLogExA(LPDIRECT3DDEVICE9 pDevice, D3DXVECTOR3 pos, FL
 //==================================================================================
 //--- メッセージログの新規作成(ワイド文字列) ---
 //==================================================================================
-bool MessageLog::SetMessageLogW(LPDIRECT3DDEVICE9 pDevice, D3DXVECTOR3 pos, FLOAT fWidth, FLOAT fHeight,
-	INT nFontSize, LPWSTR pStrW, INT nNumMessage, INT nSecond, D3DXCOLOR Col)
+bool MessageLog::SetMessageLogW(
+	LPDIRECT3DDEVICE9 pDevice,
+	D3DXVECTOR3 pos, 
+	FLOAT fWidth, 
+	FLOAT fHeight,
+	INT nFontSize,
+	LPWSTR pStrW, 
+	INT nNumMessage, 
+	INT nSecond,
+	D3DXCOLOR Col
+)
 {
 	if (pDevice == nullptr)
 	{// NULLチェック
@@ -437,8 +471,14 @@ void MessageLog::ImmeString(void)
 //==================================================================================
 //--- 文字列の置き換え(W->A, A->A) ---
 //==================================================================================
-bool MessageLog::ReplaceStringA(LPSTR pStrA, INT nNumMessage, INT nSecond,
-	D3DXCOLOR Col, BOOL bJapanise, BOOL bReset)
+bool MessageLog::ReplaceStringA(
+	LPSTR pStrA, 
+	INT nNumMessage, 
+	INT nSecond,
+	D3DXCOLOR Col, 
+	BOOL bJapanise, 
+	BOOL bReset
+)
 {
 	SAFE_DELETEARRAY(pDrawString);			// 元の文字列を破棄
 	SAFE_DELETEARRAY(pDrawStringW);			// 元の文字列を破棄
@@ -484,8 +524,13 @@ bool MessageLog::ReplaceStringA(LPSTR pStrA, INT nNumMessage, INT nSecond,
 //==================================================================================
 //--- 文字列の置き換え(A->W, W->W) ---
 //==================================================================================
-bool MessageLog::ReplaceStringW(LPWSTR pStrW, INT nNumMessage, INT nSecond,
-	D3DXCOLOR Col, BOOL bReset)
+bool MessageLog::ReplaceStringW(
+	LPWSTR pStrW, 
+	INT nNumMessage, 
+	INT nSecond,
+	D3DXCOLOR Col, 
+	BOOL bReset
+)
 {
 	SAFE_DELETEARRAY(pDrawString);			// 元の文字列を破棄
 	SAFE_DELETEARRAY(pDrawStringW);			// 元の文字列を破棄
@@ -704,9 +749,19 @@ bool MessageLog::CompairArray(int* pArray, int nTarget, int nSize)
 //==================================================================================
 //--- メッセージログの破棄及び新規作成(バイト固定) ---
 //==================================================================================
-void CreateMessageLogA(LPDIRECT3DDEVICE9 pDevice, D3DXVECTOR3 pos, FLOAT fWidth, FLOAT fHeight,
-	INT nFontSize, LPSTR pStr, INT nNumMessage, INT nSecond, D3DXCOLOR Col, BOOL bJapanise,
-	LPMESSAGELOG *pMessageLog)
+void CreateMessageLogA(
+	LPDIRECT3DDEVICE9 pDevice, 
+	D3DXVECTOR3 pos, 
+	FLOAT fWidth,
+	FLOAT fHeight,
+	INT nFontSize,
+	LPSTR pStr, 
+	INT nNumMessage,
+	INT nSecond,
+	D3DXCOLOR Col,
+	BOOL bJapanise,
+	LPMESSAGELOG *pMessageLog
+)
 {
 	if (pDevice == nullptr) return;
 	if (pStr == nullptr) return;
@@ -739,9 +794,22 @@ void CreateMessageLogA(LPDIRECT3DDEVICE9 pDevice, D3DXVECTOR3 pos, FLOAT fWidth,
 //==================================================================================
 //--- メッセージログの破棄及び新規作成(バイト動的) ---
 //==================================================================================
-void CreateMessageLogExA(LPDIRECT3DDEVICE9 pDevice, D3DXVECTOR3 pos, FLOAT fWidth, FLOAT fHeight,
-	INT nFontSize, LPSTR pStr, INT nNumMessage, INT nSecond, D3DXCOLOR Col, BOOL bJapanise,
-	INT nNumOtherByte, INT nOtherByte, INT* pInt, LPMESSAGELOG* pMessageLog)
+void CreateMessageLogExA(
+	LPDIRECT3DDEVICE9 pDevice,
+	D3DXVECTOR3 pos, 
+	FLOAT fWidth, 
+	FLOAT fHeight,
+	INT nFontSize, 
+	LPSTR pStr,
+	INT nNumMessage,
+	INT nSecond,
+	D3DXCOLOR Col,
+	BOOL bJapanise,
+	INT nNumOtherByte,
+	INT nOtherByte, 
+	INT* pInt, 
+	LPMESSAGELOG* pMessageLog
+)
 {
 	if (pDevice == nullptr) return;
 	if (pStr == nullptr) return;
@@ -777,9 +845,18 @@ void CreateMessageLogExA(LPDIRECT3DDEVICE9 pDevice, D3DXVECTOR3 pos, FLOAT fWidt
 //==================================================================================
 //--- メッセージログの破棄及び新規作成(ワイド文字列) ---
 //==================================================================================
-void CreateMessageLogW(LPDIRECT3DDEVICE9 pDevice, D3DXVECTOR3 pos, FLOAT fWidth, FLOAT fHeight,
-	INT nFontSize, LPWSTR pStr, INT nNumMessage, INT nSecond, D3DXCOLOR Col,
-	LPMESSAGELOG *pMessageLog)
+void CreateMessageLogW(
+	LPDIRECT3DDEVICE9 pDevice,
+	D3DXVECTOR3 pos,
+	FLOAT fWidth,
+	FLOAT fHeight,
+	INT nFontSize,
+	LPWSTR pStr,
+	INT nNumMessage,
+	INT nSecond,
+	D3DXCOLOR Col,
+	LPMESSAGELOG *pMessageLog
+)
 {
 	if (pDevice == nullptr) return;
 	if (pStr == nullptr) return;
@@ -816,3 +893,5 @@ void DeleteMessageLog(LPMESSAGELOG *pLog)
 	if (pLog == nullptr) return;
 	SAFE_DELETE(*pLog);
 }
+
+END_UNABLE

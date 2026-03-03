@@ -19,6 +19,7 @@
 #include "item.h"
 #include "light.h"
 #include "mathUtil.h"
+#include "map.h"
 #include "mesh.h"
 #include "model.h"
 #include "modeldata.h"
@@ -136,21 +137,22 @@ void InitGame(void)
 	/*** 放物線の初期化 ***/
 	InitParabola();
 
+	/*** マップの初期化 ***/
+	InitMap(D3DXVECTOR3(150.0f, 550.0f, 0.0f), D3DXVECTOR2(256, 256), 500.0f);
+
 	//==========================================
 	/*** モデルのスクリプト読み込み ***/
 	LoadModel();
-
-	/***ギミックの設置 ***/
-	//SetGimmick(D3DXVECTOR3(0, 0, 0), D3DXVECTOR3(0.0f, 0.0f, 0.0f), GIMMICKTYPE_DUCT);
 
 	g_nCounterGame = 0;
 	IDX_TEX Tex;
 	LoadTexture("data/TEXTURE/TestPrompt.png", &Tex);
 	g_nIdxShopPrompt = SetPrompt(D3DXVECTOR3(1463, 116, -455), D3DXVECTOR2(10.0f, 5.0f), Tex, true);
 	SetEnablePrompt(true, g_nIdxShopPrompt);
-	//Play3DSound(SOUND_LABEL_SE_GETPARTS, VECNULL, VECNULL, VECNULL);
 
 	SetParticle(D3DXVECTOR3(1463, 116, -455), CParamColor::RED, -CParamVector::V3ONE * 0.5f, CParamVector::V3ONE, 5, 10.0f, 1000, 10, true);
+
+	SetEnableMap(true);
 }
 
 //==================================================================================
@@ -222,6 +224,9 @@ void UninitGame(void)
 
 	/*** 放物線の終了 ***/
 	UninitParabola();
+
+	/*** マップの終了 ***/
+	UninitMap();
 }
 
 //==================================================================================
@@ -237,6 +242,7 @@ void UpdateGame(void)
 	{
 		g_bPause = g_bPause ? false : true;
 	}
+
 	//ポーズ状態がONの時
 	if (g_bPause == true)
 	{
@@ -299,6 +305,9 @@ void UpdateGame(void)
 		/*** 放物線の更新 ***/
 		UpdateParabola();
 
+		/*** マップの更新 ***/
+		UpdateMap();
+
 		if (g_nCounterGame % 60 == 0)
 		{
 			AddTimer(-1);
@@ -322,7 +331,6 @@ void UpdateGame(void)
 			&& GetFade() == FADE_NONE)
 		{
 			SetFade(MODE_RESULT);
-			FadeSound(SOUND_LABEL_BGM_RESULT);
 		}
 	}
 }
@@ -385,6 +393,9 @@ void DrawGame(void)
 
 	// ビューポートを設定
 	pDevice->SetViewport(&viewport);
+
+	/*** マップの描画 ***/
+	DrawMap();
 
 	// VERTEX_2D ============================================
 	/*** Aの描画 ***/
