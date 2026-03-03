@@ -25,7 +25,7 @@ TEXTURE_FILENAME = data/TEXTURE/road_mid.jpg		# [6]合流地点の道
 #------------------------------------------------------------------------------
 # モデル数
 #------------------------------------------------------------------------------
-NUM_MODEL = 34
+NUM_MODEL = 35
 
 #------------------------------------------------------------------------------
 # モデルファイル名
@@ -64,6 +64,8 @@ MODEL_FILENAME = data/MODEL/Building/Piano99.x			# [30]ピアノ
 MODEL_FILENAME = data/MODEL/Building/FallenTree.x		# [31]倒木
 MODEL_FILENAME = data/MODEL/Gimmick/BigButton98.x		# [32](人間)
 MODEL_FILENAME = data/MODEL/Gimmick/SmallButton98.x		# [33](ねずみ)
+MODEL_FILENAME = data/MODEL/Building//collisionwall.x	# [34]当たり判定用の透明な壁
+MODEL_FILENAME = data/MODEL/Building//collisionwallyoko.x	# [35]当たり判定用の透明な壁
 
 #------------------------------------------------------------------------------
 # カメラ情報
@@ -3852,17 +3854,164 @@ MODELSET
 	SHADOW = 0
 END_MODELSET
 
+#-----------------------------
+#3番目にX方向に+側
+
 MODELSET
-	TYPE = 32	# [32]ボタン(人間)
-	POS = 900 100 140
+	TYPE = 34	# [34]透明壁
+	POS = 1765 100 -235
+	ROT = 0 90 0
+	SHADOW = 0
+END_MODELSET
+
+#============================
+#かつ、家の長さが長いところ
+MODELSET
+	TYPE = 34	# [34]透明壁
+	POS = 1765 100 -920
 	ROT = 0 90 0
 	SHADOW = 0
 END_MODELSET
 
 MODELSET
-	TYPE = 33	# [33]ボタン(ねずみ)
-	POS = 900 100 160
+	TYPE = 34	# [34]透明壁
+	POS = 1765 100 -1215
 	ROT = 0 90 0
+	SHADOW = 0
+END_MODELSET
+#=============================
+#-----------------------------
+
+#-----------------------------
+#2番目にX方向に+側
+
+MODELSET
+	TYPE = 34	# [34]透明壁
+	POS = 2025 100 -235
+	ROT = 0 90 0
+	SHADOW = 0
+END_MODELSET
+#============================
+#かつ、家の長さが長いところ
+MODELSET
+	TYPE = 34	# [34]透明壁
+	POS = 2025 100 -920
+	ROT = 0 90 0
+	SHADOW = 0
+END_MODELSET
+
+MODELSET
+	TYPE = 34	# [34]透明壁
+	POS = 2025 100 -1215
+	ROT = 0 90 0
+	SHADOW = 0
+END_MODELSET
+#=============================
+#-----------------------------
+
+#-----------------------------
+#X方向に+側の家
+
+MODELSET
+	TYPE = 34	# [34]透明壁
+	POS = 2280 100 -235
+	ROT = 0 90 0
+	SHADOW = 0
+END_MODELSET
+
+MODELSET
+	TYPE = 34	# [34]透明壁
+	POS = 2280 100 455
+	ROT = 0 90 0
+	SHADOW = 0
+END_MODELSET
+
+#============================
+#かつ、家の長さが長いところ
+MODELSET
+	TYPE = 34	# [34]透明壁
+	POS = 2280 100 -920
+	ROT = 0 90 0
+	SHADOW = 0
+END_MODELSET
+
+MODELSET
+	TYPE = 34	# [34]透明壁
+	POS = 2280 100 -1215
+	ROT = 0 90 0
+	SHADOW = 0
+END_MODELSET
+#=============================
+#-----------------------------
+
+#=================================
+#川に一番近い家群
+
+#-----------------------------
+#1番駅に近い横向きの家群
+MODELSET
+	TYPE = 35	# [35]透明壁
+	POS = 700 100 -395
+	ROT = 0 0 0
+	SHADOW = 0
+END_MODELSET
+
+#-----------------------------
+#2番に駅に近い横向きの家群
+MODELSET
+	TYPE = 35	# [35]透明壁
+	POS = 700 100 -80
+	ROT = 0 0 0
+	SHADOW = 0
+END_MODELSET
+
+#-----------------------------
+#3番に駅に近い横向きの家群
+MODELSET
+	TYPE = 35	# [35]透明壁
+	POS = 700 100 300
+	ROT = 0 0 0
+	SHADOW = 0
+END_MODELSET
+
+#-----------------------------
+#4番に駅に近い横向きの家群
+MODELSET
+	TYPE = 35	# [35]透明壁
+	POS = 700 100 610
+	ROT = 0 0 0
+	SHADOW = 0
+END_MODELSET
+#=================================
+
+#=================================
+#川から2ばんめの家群
+
+#------------------------------
+#便利屋の1つ奥
+
+MODELSET
+	TYPE = 35	# [35]透明壁
+	POS = 1285 100 -80
+	ROT = 0 0 0
+	SHADOW = 0
+END_MODELSET
+
+#-----------------------------
+#3番に駅に近い横向きの家群
+MODELSET
+	TYPE = 35	# [35]透明壁
+	POS = 1285 100 300
+	ROT = 0 0 0
+	SHADOW = 0
+END_MODELSET
+
+#-----------------------------
+#4番に駅に近い横向きの家群
+MODELSET
+	TYPE = 35	# [35]透明壁
+	POS = 1285 100 610
+	ROT = 0 0 0
 	SHADOW = 0
 END_MODELSET
 
