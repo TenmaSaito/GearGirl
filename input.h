@@ -15,8 +15,8 @@
 #define NUM_KEY_MAX		(256)			// キーボードの最大数
 #define NUM_JOY_MAX		(JOYKEY_MAX)	// ジョイパッドの最大数
 #define MAX_PLAYER		(2)				// 最大人数
-#define DEADZONE_LEFTSTICK	(0.001f)		// 左スティックのデッドゾーン
-#define DEADZONE_RIGHTSTICK	(0.001f)		// 右スティックのデッドゾーン
+#define DEADZONE_LEFTSTICK	(0.1f)		// 左スティックのデッドゾーン
+#define DEADZONE_RIGHTSTICK	(0.1f)		// 右スティックのデッドゾーン
 
 
 //=========================================================
