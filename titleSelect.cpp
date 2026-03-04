@@ -328,7 +328,7 @@ void ChangePhase(void)
 					g_nPlayerNum = 2;
 				}
 
-				SetFade(MODE_TUTORIAL);
+				SetFade(MODE_GAME);
 				FadeSound(SOUND_LABEL_BGM_GAME);
 			}
 		}
