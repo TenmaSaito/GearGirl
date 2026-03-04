@@ -150,8 +150,6 @@ void InitGame(void)
 	g_nIdxShopPrompt = SetPrompt(D3DXVECTOR3(1463, 116, -455), D3DXVECTOR2(10.0f, 5.0f), Tex, true);
 	SetEnablePrompt(true, g_nIdxShopPrompt);
 
-	SetParticle(D3DXVECTOR3(1463, 116, -455), CParamColor::RED, -CParamVector::V3ONE * 0.5f, CParamVector::V3ONE, 5, 10.0f, 1000, 10, false);
-
 	SetEnableMap(true);
 }
 
@@ -236,8 +234,8 @@ void UpdateGame(void)
 {
 	//É|Å[ÉYèÛë‘ÇÃON/OFFÇêÿÇËë÷Ç¶
 	if ((GetKeyboardTrigger(DIK_P) == true
-		|| GetDualInput(JOYKEY_BACK, DUAL_JOYPAD | DUAL_OR | DUAL_TRIGGER,
-			JOYKEY_BACK, DUAL_JOYPAD | DUAL_DUAL | DUAL_TRIGGER))
+		|| GetDualInput(JOYKEY_START, DUAL_JOYPAD | DUAL_OR | DUAL_TRIGGER,
+			JOYKEY_START, DUAL_JOYPAD | DUAL_DUAL | DUAL_TRIGGER))
 		&& g_obEnding.bAlreadyEnd == false)
 	{
 		g_bPause = g_bPause ? false : true;
@@ -313,7 +311,7 @@ void UpdateGame(void)
 			AddTimer(-1);
 		}
 
-		if (GetKeyboardTrigger(DIK_5))
+		if (GetKeyboardTrigger(DIK_5) || GetJoypadTrigger(0, JOYKEY_BACK))
 		{
 			SetEnableUImenu(!GetEnableUImenu(), 0);
 		}

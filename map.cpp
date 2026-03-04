@@ -112,11 +112,19 @@ void UpdateMap(void)
 	// マップカメラの取得
 	LPMAPCAMERA pMCam = GetMapCamera();
 
+	// 現在のプレイヤータイプ
+	PlayerType Type = PLAYERTYPE_GIRL;
+
+	if (GetNumPlayer() == 1)
+	{
+		Type = (PlayerType)GetActivePlayer();
+	}
+
 	D3DXVECTOR3 rot;
-	rot.y = GetPosToPos(GetPlayer()[PLAYERTYPE_GIRL].pos, GetCamera()[PLAYERTYPE_GIRL].posV);
+	rot.y = GetPosToPos(GetPlayer()[Type].pos, GetCamera()[Type].posV);
 
 	// カメラの位置をプレイヤーの位置と同期
-	pMCam->posR = GetPlayer()[PLAYERTYPE_GIRL].pos;
+	pMCam->posR = GetPlayer()[Type].pos;
 
 	// 各情報から視点の位置を逆算
 	pMCam->posV.x = pMCam->posR.x + 0.001f;
