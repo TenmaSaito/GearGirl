@@ -113,6 +113,8 @@ void InitPlayer(void)
 		g_aPlayer[nCntPlayer].motionType = MOTIONTYPE_NEUTRAL;
 		g_aPlayer[nCntPlayer].motionTypeBlend = MOTIONTYPE_NEUTRAL;
 		g_aPlayer[nCntPlayer].bFinishMotion = true;
+		g_aPlayer[nCntPlayer].fMove = PLAYER_MOVE;
+		g_aPlayer[nCntPlayer].bDash = false;
 
 		if (nCntPlayer == PLAYERTYPE_GIRL)
 		{
@@ -207,6 +209,7 @@ void UpdatePlayer(void)
 	Player* pMouse = &g_aPlayer[1];
 
 	Camera* pCamera = GetCamera();
+	bool bDash;
 
 	pPlayer->bUseLandMotion = false;
 
@@ -217,7 +220,25 @@ void UpdatePlayer(void)
 		// 現在位置の保存
 		pPlayer->posOld = pPlayer->pos;
 
-		// ２人プレイもしくはアクティブなプレイヤーの処理
+		// 左スティックを押し込むとダッシュ状態(速度)に
+		if (nCntPlayer == PLAYERTYPE_GIRL && GetJoypadTrigger(0, JOYKEY_LEFT_PUSH) == true)
+		{
+			pPlayer->bDash = true;
+			pPlayer->fMove = PLAYER_MOVE * 1.5f;
+		}
+		else if (GetKeyboardTrigger(DIK_L) == true)
+		{
+			bDash = pPlayer->bDash;
+			pPlayer->bDash = true;
+			pPlayer->fMove = PLAYER_MOVE * 1.5f;
+		}
+
+		if (pPlayer->bDash == false)
+		{
+			pPlayer->fMove = PLAYER_MOVE;
+		}
+
+		// === ２人プレイもしくはアクティブなプレイヤーの処理 === //
 		if (GetNumPlayer() == 2 || GetActivePlayer() == PlayerType(nCntPlayer))
 		{
 			ActionPlayer((PlayerType)nCntPlayer, pPlayer);
@@ -229,6 +250,7 @@ void UpdatePlayer(void)
 			MouseKeepUp();						// 少女にネズミが追従する処理
 		}
 
+		// === 少女操作時のみの処理 === //
 		if (nCntPlayer == PLAYERTYPE_GIRL)
 		{
 			// 腕の切り替え
@@ -243,6 +265,7 @@ void UpdatePlayer(void)
 			MouseKeepUp();
 		}
 
+		// === 投げモーション以外時は常時再生(投げ待機状態をキープするため) === //
 		if (pPlayer->state != PLAYERSTATE_THROWWAITING)
 		{
 			// モーションの更新
@@ -280,6 +303,7 @@ void UpdatePlayer(void)
 			&& g_aMovePlayer[nCntPlayer] == false))
 		{
 			SetMotionType(MOTIONTYPE_NEUTRAL, true, 10, (PlayerType)nCntPlayer);
+			pPlayer->bDash = false;
 		}
 
 		// 重力をかけ続ける
@@ -378,7 +402,7 @@ void UpdatePlayer(void)
 			// 駅の範囲内なら切り替えを行わないようにする
 			if (g_aPlayer[PLAYERTYPE_MOUSE].pos.z <= -770.0f && g_aPlayer[PLAYERTYPE_MOUSE].pos.x <= 700.0f)
 			{
-
+				// ここなら切り替え可能
 			}
 			else
 			{
@@ -793,178 +817,45 @@ void MovePlayer(PlayerType nPlayer)
 	// プレイヤー構造体をポインタ化
 	Player* pPlayer = &g_aPlayer[nPlayer];
 
-	// 歩行音再生
-	if (nPlayer == PLAYERTYPE_GIRL)
-	{ // 主人公
-		if (!IsPlayingSound(SOUND_LABEL_SE_G_MOVE)
-			&& pPlayer->motionType == MOTIONTYPE_MOVE)
-		{
-			PlaySound(SOUND_LABEL_SE_G_MOVE);
-		}
-		else if (pPlayer->motionType != MOTIONTYPE_MOVE)
-		{
-			StopSound(SOUND_LABEL_SE_G_MOVE);
-		}
-	}
-	else
-	{ // ネズミ
-		if (!IsPlayingSound(SOUND_LABEL_SE_G_MOUSEMOVE)
-			&& pPlayer->motionType == MOTIONTYPE_MOVE)
-		{
-			PlaySound(SOUND_LABEL_SE_G_MOUSEMOVE);
-		}
-		else if (pPlayer->motionType != MOTIONTYPE_MOVE)
-		{
-			StopSound(SOUND_LABEL_SE_G_MOUSEMOVE);
-		}
-	}
-
-	// カメラの向きを保存する
-	vec3 Camerarot;
-
-	// カメラの情報を取得
-	GetCameraRot(nPlayer, &Camerarot);
-
-	// 左スティックの情報
-	vec3 stick = vec3_ZERO;
-
-	if (nPlayer == 0)
-	{// 少女の操作
-		if (GetJoypadLeftStick(nPlayer, &stick))
-		{// スティックの入力がある
-			CheckMotionMove(nPlayer, pPlayer);
-
-			// プレイヤーの状態を移動状態に
-			pPlayer->state = PLAYERSTATE_MOVE;
-
-			pPlayer->move.x += (sinf(-Camerarot.y) * stick.y + cosf(-Camerarot.y) * stick.x) * PLAYER_MOVE;
-			pPlayer->move.z += (cosf(Camerarot.y) * -stick.y + sinf(Camerarot.y) * -stick.x) * PLAYER_MOVE;
-
-			pPlayer->rotDest.y = atan2f(-pPlayer->move.x, -pPlayer->move.z);	// 目標の角度を設定
-			pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-			// rotの補正
-			RotRepair(nPlayer);
-		}
-		else if (GetKeyboardPress(DIK_A) == true || GetJoypadPress(nPlayer, JOYKEY_LEFT) == true)
-		{//Aキーが押される	
-			CheckMotionMove(nPlayer, pPlayer);
-
-			// プレイヤーの状態を移動状態に
-			pPlayer->state = PLAYERSTATE_MOVE;
-
-			if (GetKeyboardPress(DIK_W) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
-			{// WとA(左上)の入力
-				pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.25f) * PLAYER_MOVE;
-				pPlayer->move.z += cosf(-Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
-
-				pPlayer->rotDest.y = D3DX_PI * 0.75f + Camerarot.y;	// 目標の角度を設定
-				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-				// rotの補正
-				RotRepair(nPlayer);
+	if (IsEnableItemPut() == false)
+	{
+		// 歩行音再生
+		if (nPlayer == PLAYERTYPE_GIRL)
+		{ // 主人公
+			if (!IsPlayingSound(SOUND_LABEL_SE_G_MOVE)
+				&& pPlayer->motionType == MOTIONTYPE_MOVE)
+			{
+				PlaySound(SOUND_LABEL_SE_G_MOVE);
 			}
-			else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
-			{// SとA(左下)の入力
-				pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
-				pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
-
-				pPlayer->rotDest.y = D3DX_PI * 0.25f + Camerarot.y;	// 目標の角度を設定
-				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-				// rotの補正
-				RotRepair(nPlayer);
-			}
-			else
-			{// A単体の入力
-				pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
-				pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
-
-				pPlayer->rotDest.y = D3DX_PI * 0.5f + Camerarot.y;	// 目標の角度を設定
-				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-				// rotの補正
-				RotRepair(nPlayer);
+			else if (pPlayer->motionType != MOTIONTYPE_MOVE)
+			{
+				StopSound(SOUND_LABEL_SE_G_MOVE);
 			}
 		}
-		else if (GetKeyboardPress(DIK_D) == true || GetJoypadPress(nPlayer, JOYKEY_RIGHT) == true)
-		{//Dキーが押される
-			CheckMotionMove(nPlayer, pPlayer);
-
-			// プレイヤーの状態を移動状態に
-			pPlayer->state = PLAYERSTATE_MOVE;
-
-			if (GetKeyboardPress(DIK_W) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
-			{// WとD(右上)の入力
-				pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
-				pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
-
-				pPlayer->rotDest.y = -D3DX_PI * 0.75f + Camerarot.y;	// 目標の角度を設定
-				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-				// rotの補正
-				RotRepair(nPlayer);
+		else
+		{ // ネズミ
+			if (!IsPlayingSound(SOUND_LABEL_SE_G_MOUSEMOVE)
+				&& pPlayer->motionType == MOTIONTYPE_MOVE)
+			{
+				PlaySound(SOUND_LABEL_SE_G_MOUSEMOVE);
 			}
-			else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
-			{// SとD(右下)の入力
-				pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.75f) * PLAYER_MOVE;
-				pPlayer->move.z += cosf(-Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
-
-				pPlayer->rotDest.y = -D3DX_PI * 0.25f + Camerarot.y;	// 目標の角度を設定
-				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-				// rotの補正
-				RotRepair(nPlayer);
-			}
-			else
-			{// Dだけの入力
-				pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
-				pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
-
-				pPlayer->rotDest.y = -D3DX_PI * 0.5f + Camerarot.y;	// 目標の角度を設定
-				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-				// rotの補正
-				RotRepair(nPlayer);
+			else if (pPlayer->motionType != MOTIONTYPE_MOVE)
+			{
+				StopSound(SOUND_LABEL_SE_G_MOUSEMOVE);
 			}
 		}
-		else if (GetKeyboardPress(DIK_W) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true)
-		{//Wキーが押される
-			CheckMotionMove(nPlayer, pPlayer);
 
-			// プレイヤーの状態を移動状態に
-			pPlayer->state = PLAYERSTATE_MOVE;
+		// カメラの向きを保存する
+		vec3 Camerarot;
 
-			pPlayer->move.z += cosf(Camerarot.y) * PLAYER_MOVE;
-			pPlayer->move.x += sinf(Camerarot.y) * PLAYER_MOVE;
+		// カメラの情報を取得
+		GetCameraRot(nPlayer, &Camerarot);
 
-			pPlayer->rotDest.y = D3DX_PI + Camerarot.y;	// 目標の角度を設定
-			pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
+		// 左スティックの情報
+		vec3 stick = vec3_ZERO;
 
-			// rotの補正
-			RotRepair(nPlayer);
-		}
-		else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true)
-		{//Sキーが押される
-			CheckMotionMove(nPlayer, pPlayer);
-
-			// プレイヤーの状態を移動状態に
-			pPlayer->state = PLAYERSTATE_MOVE;
-
-			pPlayer->move.z += cosf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
-			pPlayer->move.x += sinf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
-
-			pPlayer->rotDest.y = Camerarot.y;	// 目標の角度を設定
-			pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-			// rotの補正
-			RotRepair(nPlayer);
-		}
-	}
-	else
-	{// ネズミの操作
-		if (g_nNumPlayer == 2)
-		{// 2人プレイ時
+		if (nPlayer == 0)
+		{// 少女の操作
 			if (GetJoypadLeftStick(nPlayer, &stick))
 			{// スティックの入力がある
 				CheckMotionMove(nPlayer, pPlayer);
@@ -972,8 +863,9 @@ void MovePlayer(PlayerType nPlayer)
 				// プレイヤーの状態を移動状態に
 				pPlayer->state = PLAYERSTATE_MOVE;
 
-				pPlayer->move.x += (sinf(-Camerarot.y) * stick.y + cosf(-Camerarot.y) * stick.x) * PLAYER_MOVE;
-				pPlayer->move.z += (cosf(Camerarot.y) * -stick.y + sinf(Camerarot.y) * -stick.x) * PLAYER_MOVE;
+				pPlayer->move.x += (sinf(-Camerarot.y) * stick.y + cosf(-Camerarot.y) * stick.x) * pPlayer->fMove;
+				pPlayer->move.z += (cosf(Camerarot.y) * -stick.y + sinf(Camerarot.y) * -stick.x) * pPlayer->fMove;
+
 
 				pPlayer->rotDest.y = atan2f(-pPlayer->move.x, -pPlayer->move.z);	// 目標の角度を設定
 				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
@@ -981,14 +873,17 @@ void MovePlayer(PlayerType nPlayer)
 				// rotの補正
 				RotRepair(nPlayer);
 			}
-			else if (GetKeyboardPress(DIK_LEFT) == true || GetJoypadPress(nPlayer, JOYKEY_LEFT) == true)
-			{// 左矢印が押される	
+			else if (GetKeyboardPress(DIK_A) == true)
+			{//Aキーが押される	
 				CheckMotionMove(nPlayer, pPlayer);
 
-				if (GetKeyboardPress(DIK_UP) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
-				{// 左上の入力
-					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.25f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(-Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
+				// プレイヤーの状態を移動状態に
+				pPlayer->state = PLAYERSTATE_MOVE;
+
+				if (GetKeyboardPress(DIK_W) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
+				{// WとA(左上)の入力
+					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.25f) * pPlayer->fMove;
+					pPlayer->move.z += cosf(-Camerarot.y + D3DX_PI * 0.25f) * pPlayer->fMove;
 
 					pPlayer->rotDest.y = D3DX_PI * 0.75f + Camerarot.y;	// 目標の角度を設定
 					pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
@@ -996,10 +891,10 @@ void MovePlayer(PlayerType nPlayer)
 					// rotの補正
 					RotRepair(nPlayer);
 				}
-				else if (GetKeyboardPress(DIK_DOWN) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
-				{// 左下の入力
-					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
+				else if (GetKeyboardPress(DIK_S) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
+				{// SとA(左下)の入力
+					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.75f) * pPlayer->fMove;
+					pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.75f) * pPlayer->fMove;
 
 					pPlayer->rotDest.y = D3DX_PI * 0.25f + Camerarot.y;	// 目標の角度を設定
 					pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
@@ -1008,9 +903,9 @@ void MovePlayer(PlayerType nPlayer)
 					RotRepair(nPlayer);
 				}
 				else
-				{// 左矢印単体の入力
-					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
+				{// A単体の入力
+					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.5f) * pPlayer->fMove;
+					pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.5f) * pPlayer->fMove;
 
 					pPlayer->rotDest.y = D3DX_PI * 0.5f + Camerarot.y;	// 目標の角度を設定
 					pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
@@ -1019,14 +914,17 @@ void MovePlayer(PlayerType nPlayer)
 					RotRepair(nPlayer);
 				}
 			}
-			else if (GetKeyboardPress(DIK_RIGHT) == true || GetJoypadPress(nPlayer, JOYKEY_RIGHT) == true)
-			{// 右矢印が押される
+			else if (GetKeyboardPress(DIK_D) == true)
+			{//Dキーが押される
 				CheckMotionMove(nPlayer, pPlayer);
 
-				if (GetKeyboardPress(DIK_UP) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
-				{// 右上の入力
-					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
+				// プレイヤーの状態を移動状態に
+				pPlayer->state = PLAYERSTATE_MOVE;
+
+				if (GetKeyboardPress(DIK_W) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
+				{// WとD(右上)の入力
+					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.25f) * pPlayer->fMove;
+					pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.25f) * pPlayer->fMove;
 
 					pPlayer->rotDest.y = -D3DX_PI * 0.75f + Camerarot.y;	// 目標の角度を設定
 					pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
@@ -1034,10 +932,10 @@ void MovePlayer(PlayerType nPlayer)
 					// rotの補正
 					RotRepair(nPlayer);
 				}
-				else if (GetKeyboardPress(DIK_DOWN) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
-				{// 右下の入力
-					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.75f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(-Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
+				else if (GetKeyboardPress(DIK_S) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
+				{// SとD(右下)の入力
+					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.75f) * pPlayer->fMove;
+					pPlayer->move.z += cosf(-Camerarot.y - D3DX_PI * 0.75f) * pPlayer->fMove;
 
 					pPlayer->rotDest.y = -D3DX_PI * 0.25f + Camerarot.y;	// 目標の角度を設定
 					pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
@@ -1046,9 +944,9 @@ void MovePlayer(PlayerType nPlayer)
 					RotRepair(nPlayer);
 				}
 				else
-				{// 右矢印だけの入力
-					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
+				{// Dだけの入力
+					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.5f) * pPlayer->fMove;
+					pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.5f) * pPlayer->fMove;
 
 					pPlayer->rotDest.y = -D3DX_PI * 0.5f + Camerarot.y;	// 目標の角度を設定
 					pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
@@ -1057,12 +955,15 @@ void MovePlayer(PlayerType nPlayer)
 					RotRepair(nPlayer);
 				}
 			}
-			else if (GetKeyboardPress(DIK_UP) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true)
-			{//上矢印が押される
+			else if (GetKeyboardPress(DIK_W) == true)
+			{//Wキーが押される
 				CheckMotionMove(nPlayer, pPlayer);
 
-				pPlayer->move.z += cosf(Camerarot.y) * PLAYER_MOVE;
-				pPlayer->move.x += sinf(Camerarot.y) * PLAYER_MOVE;
+				// プレイヤーの状態を移動状態に
+				pPlayer->state = PLAYERSTATE_MOVE;
+
+				pPlayer->move.z += cosf(Camerarot.y) * pPlayer->fMove;
+				pPlayer->move.x += sinf(Camerarot.y) * pPlayer->fMove;
 
 				pPlayer->rotDest.y = D3DX_PI + Camerarot.y;	// 目標の角度を設定
 				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
@@ -1070,12 +971,15 @@ void MovePlayer(PlayerType nPlayer)
 				// rotの補正
 				RotRepair(nPlayer);
 			}
-			else if (GetKeyboardPress(DIK_DOWN) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true)
-			{//下矢印が押される
+			else if (GetKeyboardPress(DIK_S) == true)
+			{//Sキーが押される
 				CheckMotionMove(nPlayer, pPlayer);
 
-				pPlayer->move.z += cosf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
-				pPlayer->move.x += sinf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
+				// プレイヤーの状態を移動状態に
+				pPlayer->state = PLAYERSTATE_MOVE;
+
+				pPlayer->move.z += cosf(Camerarot.y - D3DX_PI) * pPlayer->fMove;
+				pPlayer->move.x += sinf(Camerarot.y - D3DX_PI) * pPlayer->fMove;
 
 				pPlayer->rotDest.y = Camerarot.y;	// 目標の角度を設定
 				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
@@ -1085,127 +989,253 @@ void MovePlayer(PlayerType nPlayer)
 			}
 		}
 		else
-		{// 1人プレイ時
-			if (GetJoypadLeftStick(0, &stick))
-			{// スティックの入力がある
-				CheckMotionMove(nPlayer, pPlayer);
+		{// ネズミの操作
+			if (g_nNumPlayer == 2)
+			{// 2人プレイ時
+				if (GetJoypadLeftStick(nPlayer, &stick))
+				{// スティックの入力がある
+					CheckMotionMove(nPlayer, pPlayer);
 
-				// プレイヤーの状態を移動状態に
-				pPlayer->state = PLAYERSTATE_MOVE;
+					// プレイヤーの状態を移動状態に
+					pPlayer->state = PLAYERSTATE_MOVE;
 
-				pPlayer->move.x += (sinf(-Camerarot.y) * stick.y + cosf(-Camerarot.y) * stick.x) * PLAYER_MOVE;
-				pPlayer->move.z += (cosf(Camerarot.y) * -stick.y + sinf(Camerarot.y) * -stick.x) * PLAYER_MOVE;
+					pPlayer->move.x += (sinf(-Camerarot.y) * stick.y + cosf(-Camerarot.y) * stick.x) * PLAYER_MOVE;
+					pPlayer->move.z += (cosf(Camerarot.y) * -stick.y + sinf(Camerarot.y) * -stick.x) * PLAYER_MOVE;
 
-				pPlayer->rotDest.y = atan2f(-pPlayer->move.x, -pPlayer->move.z);	// 目標の角度を設定
-				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
+					pPlayer->rotDest.y = atan2f(-pPlayer->move.x, -pPlayer->move.z);	// 目標の角度を設定
+					pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
 
-				// rotの補正
-				RotRepair(nPlayer);
+					// rotの補正
+					RotRepair(nPlayer);
+				}
+				else if (GetKeyboardPress(DIK_LEFT) == true)
+				{// 左矢印が押される	
+					CheckMotionMove(nPlayer, pPlayer);
+
+					if (GetKeyboardPress(DIK_UP) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
+					{// 左上の入力
+						pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.25f) * PLAYER_MOVE;
+						pPlayer->move.z += cosf(-Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
+
+						pPlayer->rotDest.y = D3DX_PI * 0.75f + Camerarot.y;	// 目標の角度を設定
+						pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
+
+						// rotの補正
+						RotRepair(nPlayer);
+					}
+					else if (GetKeyboardPress(DIK_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
+					{// 左下の入力
+						pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
+						pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
+
+						pPlayer->rotDest.y = D3DX_PI * 0.25f + Camerarot.y;	// 目標の角度を設定
+						pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
+
+						// rotの補正
+						RotRepair(nPlayer);
+					}
+					else
+					{// 左矢印単体の入力
+						pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
+						pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
+
+						pPlayer->rotDest.y = D3DX_PI * 0.5f + Camerarot.y;	// 目標の角度を設定
+						pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
+
+						// rotの補正
+						RotRepair(nPlayer);
+					}
+				}
+				else if (GetKeyboardPress(DIK_RIGHT) == true)
+				{// 右矢印が押される
+					CheckMotionMove(nPlayer, pPlayer);
+
+					if (GetKeyboardPress(DIK_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
+					{// 右上の入力
+						pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
+						pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
+
+						pPlayer->rotDest.y = -D3DX_PI * 0.75f + Camerarot.y;	// 目標の角度を設定
+						pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
+
+						// rotの補正
+						RotRepair(nPlayer);
+					}
+					else if (GetKeyboardPress(DIK_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
+					{// 右下の入力
+						pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.75f) * PLAYER_MOVE;
+						pPlayer->move.z += cosf(-Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
+
+						pPlayer->rotDest.y = -D3DX_PI * 0.25f + Camerarot.y;	// 目標の角度を設定
+						pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
+
+						// rotの補正
+						RotRepair(nPlayer);
+					}
+					else
+					{// 右矢印だけの入力
+						pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
+						pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
+
+						pPlayer->rotDest.y = -D3DX_PI * 0.5f + Camerarot.y;	// 目標の角度を設定
+						pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
+
+						// rotの補正
+						RotRepair(nPlayer);
+					}
+				}
+				else if (GetKeyboardPress(DIK_UP) == true)
+				{//上矢印が押される
+					CheckMotionMove(nPlayer, pPlayer);
+
+					pPlayer->move.z += cosf(Camerarot.y) * PLAYER_MOVE;
+					pPlayer->move.x += sinf(Camerarot.y) * PLAYER_MOVE;
+
+					pPlayer->rotDest.y = D3DX_PI + Camerarot.y;	// 目標の角度を設定
+					pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
+
+					// rotの補正
+					RotRepair(nPlayer);
+				}
+				else if (GetKeyboardPress(DIK_DOWN) == true)
+				{//下矢印が押される
+					CheckMotionMove(nPlayer, pPlayer);
+
+					pPlayer->move.z += cosf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
+					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
+
+					pPlayer->rotDest.y = Camerarot.y;	// 目標の角度を設定
+					pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
+
+					// rotの補正
+					RotRepair(nPlayer);
+				}
 			}
-			else if (GetKeyboardPress(DIK_A) == true || GetJoypadPress(nPlayer, JOYKEY_LEFT) == true)
-			{// 左矢印が押される	
-				CheckMotionMove(nPlayer, pPlayer);
+			else
+			{// 1人プレイ時
+				if (GetJoypadLeftStick(0, &stick))
+				{// スティックの入力がある
+					CheckMotionMove(nPlayer, pPlayer);
 
-				if (GetKeyboardPress(DIK_W) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
-				{// 左上の入力
-					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.25f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(-Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
+					// プレイヤーの状態を移動状態に
+					pPlayer->state = PLAYERSTATE_MOVE;
 
-					pPlayer->rotDest.y = D3DX_PI * 0.75f + Camerarot.y;	// 目標の角度を設定
+					pPlayer->move.x += (sinf(-Camerarot.y) * stick.y + cosf(-Camerarot.y) * stick.x) * PLAYER_MOVE;
+					pPlayer->move.z += (cosf(Camerarot.y) * -stick.y + sinf(Camerarot.y) * -stick.x) * PLAYER_MOVE;
+
+					pPlayer->rotDest.y = atan2f(-pPlayer->move.x, -pPlayer->move.z);	// 目標の角度を設定
 					pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
 
 					// rotの補正
 					RotRepair(nPlayer);
 				}
-				else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
-				{// 左下の入力
-					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
+				else if (GetKeyboardPress(DIK_A) == true)
+				{// Aキーが押される	
+					CheckMotionMove(nPlayer, pPlayer);
 
-					pPlayer->rotDest.y = D3DX_PI * 0.25f + Camerarot.y;	// 目標の角度を設定
+					if (GetKeyboardPress(DIK_W) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
+					{// Wキーとの入力
+						pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.25f) * PLAYER_MOVE;
+						pPlayer->move.z += cosf(-Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
+
+						pPlayer->rotDest.y = D3DX_PI * 0.75f + Camerarot.y;	// 目標の角度を設定
+						pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
+
+						// rotの補正
+						RotRepair(nPlayer);
+					}
+					else if (GetKeyboardPress(DIK_S) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
+					{// Sキーとの入力
+						pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
+						pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
+
+						pPlayer->rotDest.y = D3DX_PI * 0.25f + Camerarot.y;	// 目標の角度を設定
+						pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
+
+						// rotの補正
+						RotRepair(nPlayer);
+					}
+					else
+					{// Aキー単体の入力
+						pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
+						pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
+
+						pPlayer->rotDest.y = D3DX_PI * 0.5f + Camerarot.y;	// 目標の角度を設定
+						pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
+
+						// rotの補正
+						RotRepair(nPlayer);
+					}
+				}
+				else if (GetKeyboardPress(DIK_D) == true)
+				{// 右矢印が押される
+					CheckMotionMove(nPlayer, pPlayer);
+
+					if (GetKeyboardPress(DIK_W) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
+					{// Wキーとの入力
+						pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
+						pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
+
+						pPlayer->rotDest.y = -D3DX_PI * 0.75f + Camerarot.y;	// 目標の角度を設定
+						pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
+
+						// rotの補正
+						RotRepair(nPlayer);
+					}
+					else if (GetKeyboardPress(DIK_S) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
+					{// Sキーとの入力
+						pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.75f) * PLAYER_MOVE;
+						pPlayer->move.z += cosf(-Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
+
+						pPlayer->rotDest.y = -D3DX_PI * 0.25f + Camerarot.y;	// 目標の角度を設定
+						pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
+
+						// rotの補正
+						RotRepair(nPlayer);
+					}
+					else
+					{// Dキーだけの入力
+						pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
+						pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
+
+						pPlayer->rotDest.y = -D3DX_PI * 0.5f + Camerarot.y;	// 目標の角度を設定
+						pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
+
+						// rotの補正
+						RotRepair(nPlayer);
+					}
+				}
+				else if (GetKeyboardPress(DIK_W) == true)
+				{// Wキーが押される
+					CheckMotionMove(nPlayer, pPlayer);
+
+					pPlayer->move.z += cosf(Camerarot.y) * PLAYER_MOVE;
+					pPlayer->move.x += sinf(Camerarot.y) * PLAYER_MOVE;
+
+					pPlayer->rotDest.y = D3DX_PI + Camerarot.y;	// 目標の角度を設定
 					pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
 
 					// rotの補正
 					RotRepair(nPlayer);
 				}
-				else
-				{// 左矢印単体の入力
-					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(Camerarot.y - D3DX_PI * 0.5f) * PLAYER_MOVE;
+				else if (GetKeyboardPress(DIK_S) == true)
+				{// Sキーが押される
+					CheckMotionMove(nPlayer, pPlayer);
 
-					pPlayer->rotDest.y = D3DX_PI * 0.5f + Camerarot.y;	// 目標の角度を設定
+					pPlayer->move.z += cosf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
+					pPlayer->move.x += sinf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
+
+					pPlayer->rotDest.y = Camerarot.y;	// 目標の角度を設定
 					pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
 
 					// rotの補正
 					RotRepair(nPlayer);
 				}
-			}
-			else if (GetKeyboardPress(DIK_D) == true || GetJoypadPress(nPlayer, JOYKEY_RIGHT) == true)
-			{// 右矢印が押される
-				CheckMotionMove(nPlayer, pPlayer);
-
-				if (GetKeyboardPress(DIK_W) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_UP))
-				{// 右上の入力
-					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.25f) * PLAYER_MOVE;
-
-					pPlayer->rotDest.y = -D3DX_PI * 0.75f + Camerarot.y;	// 目標の角度を設定
-					pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-					// rotの補正
-					RotRepair(nPlayer);
-				}
-				else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true || GetJoypadStickLeft(nPlayer, JOYKEY_LEFT_STICK_DOWN))
-				{// 右下の入力
-					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.75f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(-Camerarot.y - D3DX_PI * 0.75f) * PLAYER_MOVE;
-
-					pPlayer->rotDest.y = -D3DX_PI * 0.25f + Camerarot.y;	// 目標の角度を設定
-					pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-					// rotの補正
-					RotRepair(nPlayer);
-				}
-				else
-				{// 右矢印だけの入力
-					pPlayer->move.x += sinf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
-					pPlayer->move.z += cosf(Camerarot.y + D3DX_PI * 0.5f) * PLAYER_MOVE;
-
-					pPlayer->rotDest.y = -D3DX_PI * 0.5f + Camerarot.y;	// 目標の角度を設定
-					pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-					// rotの補正
-					RotRepair(nPlayer);
-				}
-			}
-			else if (GetKeyboardPress(DIK_W) == true || GetJoypadPress(nPlayer, JOYKEY_UP) == true)
-			{//上矢印が押される
-				CheckMotionMove(nPlayer, pPlayer);
-
-				pPlayer->move.z += cosf(Camerarot.y) * PLAYER_MOVE;
-				pPlayer->move.x += sinf(Camerarot.y) * PLAYER_MOVE;
-
-				pPlayer->rotDest.y = D3DX_PI + Camerarot.y;	// 目標の角度を設定
-				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-				// rotの補正
-				RotRepair(nPlayer);
-			}
-			else if (GetKeyboardPress(DIK_S) == true || GetJoypadPress(nPlayer, JOYKEY_DOWN) == true)
-			{//下矢印が押される
-				CheckMotionMove(nPlayer, pPlayer);
-
-				pPlayer->move.z += cosf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
-				pPlayer->move.x += sinf(Camerarot.y - D3DX_PI) * PLAYER_MOVE;
-
-				pPlayer->rotDest.y = Camerarot.y;	// 目標の角度を設定
-				pPlayer->rotDiff.y = pPlayer->rotDest.y - pPlayer->rot.y;	// 現在と目標の角度の差分を算出
-
-				// rotの補正
-				RotRepair(nPlayer);
 			}
 		}
 	}
+
+
 }
 
 // =================================================

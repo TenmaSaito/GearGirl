@@ -82,6 +82,8 @@ typedef struct
 	Playerstate state;			// プレイヤーの状態
 	ArmType Armtype;			// 腕の種類
 	PlayerType playertype;		// 操作対象
+	float fMove;				// プレイヤーの速度
+	bool bDash;					// ダッシュ状態かどうか
 
 	// モーションの要素
 	MOTION_INFO aMotionInfo[MOTIONTYPE_MAX];	// モーション情報
