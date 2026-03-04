@@ -119,7 +119,6 @@ void InitItem(void)
 		pItem->bGet = false;
 		pItem->bUse = false;
 		pItem->nIdxQuota = -1;
-		pItem->nIdxMeshEffect = -1;
 	}
 
 	// その他のUIを取得
@@ -198,13 +197,14 @@ void UpdateItem(void)
 	UpdatePouchItem();
 
 	// 提出判定
-	if (IsDispPrompt(GetIdxShopPrompt()) && g_bPutOut == false)
+	if (IsDispPrompt(GetIdxShopPrompt()))
 	{
 		if (GetKeyboardTrigger(DIK_RETURN) || GetJoypadTrigger(PLAYERTYPE_GIRL, JOYKEY_A))
 		{
 			g_bPutOut = true;
-			g_nSelectPut = 0;
 		}
+		if (g_bPutOut == false)
+			g_nSelectPut = 0;
 	}
 	else if(g_bOnDebugItem == false)
 	{
@@ -240,9 +240,7 @@ void UpdateMapItem(void)
 
 				MyMathUtil::RepairRot(pItem->rot.x);
 				MyMathUtil::RepairRot(pItem->rot.y);
-#ifdef SPAWN_RING
-				SetRotationMesh(GetMeshRing(), vec3(D3DX_PI * 0.5f, -pItem->rot.y, 0.0f), pItem->nIdxMeshEffect, MAX_MESHRING);
-#endif
+
 				break;
 			}
 		}
@@ -510,9 +508,6 @@ void CollisionItem(vec3 pos, float fRange)
 
 				// 取得処理
 				pItem->bGet = true;
-#ifdef SPAWN_RING
-				ReleaseMesh(GetMeshRing(), pItem->nIdxMeshEffect, MAX_MESHRING);
-#endif
 				SetParticle(pItem->pos, colX(0.5f, 0.1f, 0.1f, 0.3f), vec3(-0.5f, -0.5f, -0.5f), vec3(1.0f, 1.0f, 1.0f), 1, 5.0f, 20, 10, false);
 				break;
 			}
@@ -713,9 +708,6 @@ void SetItem(vec3 pos, vec3 rot, ITEMTYPE type, bool bReflectGirl, bool bReflect
 				pItem->fRange = ITEM_RANGE;
 				pItem->type = type;								// アイテムタイプ
 				pItem->nIdxModel = g_aItemInfo[type].nNumGet;	// モデルデータインデックス
-#ifdef SPAWN_RING
-				pItem->nIdxMeshEffect = SetMeshRing(pos, vec3(D3DX_PI * 0.5f, 0.0f, 0.0f), 5.0f, 15.0f, 2, 16, D3DCULL_NONE, -1, true);
-#endif
 				pItem->bCollision = bColi;
 				pItem->bGirl = bReflectGirl;
 				pItem->bMouse = bReflectMouse;

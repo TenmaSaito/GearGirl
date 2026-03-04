@@ -185,12 +185,13 @@ void UpdateCamera(void)
 	//**************************************************************
 	// ƒJƒƒ‰“®‚©‚·ˆ—
 	pCamera = GetCamera();
-	if (GetActivePlayer() == CAMERATYPE_PLAYER_ONE && GetKeyboardPress(CAM_2POPRAT) == false)
+	if (GetActivePlayer() == CAMERATYPE_PLAYER_ONE)
 	{
 		CameraMove(pCamera);		// ƒJƒƒ‰‹——£‚Ì•ÏX
 		CameraOrbit(pCamera);		// ‰ñ“]
 	}
-	else
+	
+	if(GetActivePlayer() == CAMERATYPE_PLAYER_TWO || GetNumPlayer() == 2)
 	{
 		pCamera++;					// 2P‚ÌƒJƒƒ‰‚É‚·‚é
 		CameraMove(pCamera);
@@ -464,7 +465,7 @@ void CameraOrbit(P_CAMERA pCamera)
 	 }
 
 	//**************************************************************
-	// -ƒÎ‚©‚çƒÎ‚Ü‚Å‚É‚·‚é	
+	// Šp“x³‹K‰»
 	if (pCamera->rot.x < 0.5f)
 		pCamera->rot.x = 0.5f;
 	else if (2.8f < pCamera->rot.x)
