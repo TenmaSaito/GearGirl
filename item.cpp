@@ -198,7 +198,7 @@ void UpdateItem(void)
 	UpdatePouchItem();
 
 	// 提出判定
-	if (IsDispPrompt(GetIdxShopPrompt()))
+	if (IsDispPrompt(GetIdxShopPrompt()) && g_bPutOut == false)
 	{
 		if (GetKeyboardTrigger(DIK_RETURN) || GetJoypadTrigger(PLAYERTYPE_GIRL, JOYKEY_A))
 		{
@@ -634,7 +634,7 @@ void SelectItem(void)
 	}
 
 	// 決定処理
-	if (GetKeyboardTrigger(DIK_RETURN))
+	if (GetKeyboardTrigger(DIK_RETURN) || GetJoypadTrigger(0,JOYKEY_A))
 	{
 		// アイテム枠なら
 		if (-1 < g_nSelectPut && g_nSelectPut < ITEMTYPE_MAX)
