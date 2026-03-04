@@ -375,15 +375,23 @@ void UpdatePlayer(void)
 	{// シングルプレイ時
 		if (GetJoypadTrigger(0, JOYKEY_LB) == true || GetKeyboardTrigger(DIK_Q) == true)
 		{
-			if (g_aPlayer[PLAYERTYPE_GIRL].state != PLAYERSTATE_THROWWAITING && g_bShotMouse == false)
+			// 駅の範囲内なら切り替えを行わないようにする
+			if (g_aPlayer[PLAYERTYPE_MOUSE].pos.z <= -770.0f && g_aPlayer[PLAYERTYPE_MOUSE].pos.x <= 700.0f)
 			{
-				if (g_ActivePlayer == 1)
-				{// ネズミ→少女
-					g_ActivePlayer = 0;
-				}
-				else
-				{// 少女→ネズミ
-					g_ActivePlayer = 1;
+
+			}
+			else
+			{
+				if (g_aPlayer[PLAYERTYPE_GIRL].state != PLAYERSTATE_THROWWAITING && g_bShotMouse == false)
+				{
+					if (g_ActivePlayer == 1)
+					{// ネズミ→少女
+						g_ActivePlayer = 0;
+					}
+					else
+					{// 少女→ネズミ
+						g_ActivePlayer = 1;
+					}
 				}
 			}
 		}
@@ -737,12 +745,25 @@ void ActionPlayer(PlayerType nPlayer, Player* pPlayer)
 
 				// CATAPULT
 			case ARMTYPE_CATAPULT:
-				if (pPlayer->state != PLAYERSTATE_THROWWAITING)
+				if (pPlayer->state != PLAYERSTATE_THROWWAITING && GetNumPlayer() == 1)
 				{
 					PlaySound(SOUND_LABEL_SE_G_THROW);
 					SetMotionType(MOTIONTYPE_ACTION, true, 10, nPlayer);
 					g_nMotionCounter = 10;
 					g_bShotMouse = true;
+				}
+				else if (pPlayer->state != PLAYERSTATE_THROWWAITING && GetNumPlayer() == 2)
+				{
+					if (g_aPlayer[PLAYERTYPE_MOUSE].pos.x - g_aPlayer[PLAYERTYPE_GIRL].pos.x <= 20.0f
+						&& g_aPlayer[PLAYERTYPE_MOUSE].pos.x - g_aPlayer[PLAYERTYPE_GIRL].pos.x >= -20.0f
+						&& g_aPlayer[PLAYERTYPE_MOUSE].pos.z - g_aPlayer[PLAYERTYPE_GIRL].pos.z <= 20.0f
+						&& g_aPlayer[PLAYERTYPE_MOUSE].pos.z - g_aPlayer[PLAYERTYPE_GIRL].pos.z >= -20.0f)
+					{
+						PlaySound(SOUND_LABEL_SE_G_THROW);
+						SetMotionType(MOTIONTYPE_ACTION, true, 10, nPlayer);
+						g_nMotionCounter = 10;
+						g_bShotMouse = true;
+					}
 				}
 
 				break;
@@ -775,7 +796,7 @@ void MovePlayer(PlayerType nPlayer)
 	// 歩行音再生
 	if (nPlayer == PLAYERTYPE_GIRL)
 	{ // 主人公
-		if (!IsPlayingSound(SOUND_LABEL_SE_G_MOVE) 
+		if (!IsPlayingSound(SOUND_LABEL_SE_G_MOVE)
 			&& pPlayer->motionType == MOTIONTYPE_MOVE)
 		{
 			PlaySound(SOUND_LABEL_SE_G_MOVE);

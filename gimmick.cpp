@@ -107,7 +107,7 @@ GIMMICK_DATA g_aGimmickData[GIMMICKTYPE_MAX] =
 	{"data/Scripts/bigbutton_g.txt", COULD_PLAYER_GIRL, D3DXVECTOR3(535, 100, -630), D3DXVECTOR3(0, 0, 0), 0.0f},
 	{"data/Scripts/smallbutton_g.txt", COULD_PLAYER_MOUSE, D3DXVECTOR3(573, 100, -900), D3DXVECTOR3(0, 0, 0), 0.0f},
 	{"data/Scripts/fallenTree.txt", COULD_PLAYER_GIRL, D3DXVECTOR3(1720, 100, 475), D3DXVECTOR3(0, CParamFloat::HALFPI, 0), 30.0f},
-	{"data/Scripts/station_g.txt", COULD_PLAYER_ALL, D3DXVECTOR3(573, 100, -1000), D3DXVECTOR3(0, D3DX_PI + CParamFloat::HALFPI, 0), 200.0f },
+	{"data/Scripts/station_g.txt", COULD_PLAYER_ALL, D3DXVECTOR3(550, 100, -970), D3DXVECTOR3(0, D3DX_PI + CParamFloat::HALFPI, 0), 200.0f },
 	{"data/Scripts/tunnel_g.txt", COULD_PLAYER_ALL, D3DXVECTOR3(1609, 100, -760), D3DXVECTOR3(0, D3DX_PI + CParamFloat::HALFPI, 0), 200.0f },
 };
 
