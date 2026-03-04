@@ -727,7 +727,7 @@ void ActionPlayer(PlayerType nPlayer, Player* pPlayer)
 {
 	if (nPlayer == PLAYERTYPE_GIRL)
 	{
-		if (GetKeyboardTrigger(DIK_RETURN))
+		if (GetKeyboardTrigger(DIK_RETURN) == true || GetJoypadTrigger(0, JOYKEY_B) == true)
 		{
 			switch (g_armPlayer)
 			{
@@ -1198,7 +1198,7 @@ void JumpPlayer(PlayerType nPlayer)
 	if (nPlayer == 0)
 	{// 少女
 		// ジャンプする
-		if ((GetKeyboardTrigger(DIK_SPACE) == true || GetJoypadTrigger(nPlayer, JOYKEY_A)) && pPlayer->bJump == false)
+		if ((GetKeyboardTrigger(DIK_SPACE) == true || GetJoypadTrigger(0, JOYKEY_A)) && pPlayer->bJump == false)
 		{
 			PlaySound(SOUND_LABEL_SE_G_JUMP);
 			pPlayer->state = PLAYERSTATE_JUMP;
@@ -1225,7 +1225,7 @@ void JumpPlayer(PlayerType nPlayer)
 		}
 		else
 		{// 1人プレイ時
-			if ((GetKeyboardTrigger(DIK_SPACE) == true || GetJoypadTrigger(nPlayer, JOYKEY_A)) && pPlayer->bJump == false)
+			if ((GetKeyboardTrigger(DIK_SPACE) == true || GetJoypadTrigger(0, JOYKEY_A)) && pPlayer->bJump == false)
 			{
 				PlaySound(SOUND_LABEL_SE_G_MOUSEJUMP);
 				pPlayer->state = PLAYERSTATE_JUMP;
@@ -1728,7 +1728,7 @@ void UpdateArm(void)
 
 		g_armPlayer = (ArmType)nArm;
 	}
-	else if (GetKeyboardTrigger(DIK_0))
+	else if (GetKeyboardTrigger(DIK_0) == true || GetJoypadTrigger(0, JOYKEY_RB) == true)
 	{
 		int nArm = g_armPlayer;
 		nArm++;
@@ -1804,7 +1804,7 @@ void ShotMouse(void)
 			D3DXVec3Normalize(&vec, &vec);
 			PrintDebugProc("vec %~3f", vec.x, vec.y, vec.z);
 
-			if (GetKeyboardTrigger(DIK_RETURN) == true)
+			if (GetKeyboardTrigger(DIK_RETURN) == true || GetJoypadTrigger(0, JOYKEY_B) == true)
 			{
 				pPlayer->state = PLAYERSTATE_NEUTRAL;
 
@@ -1823,6 +1823,11 @@ void ShotMouse(void)
 					// 投げる手の位置に移動
 					D3DXVec3TransformCoord(&pMouse->pos, &offset, &pPlayer->PartsInfo.aParts[19].mtxWorld);
 					pMouse->move.y = vec.y * 25.0f;
+					// 下限
+					if (pMouse->move.y < 5.5f)
+					{
+						pMouse->move.y = 5.5f;
+					}
 				}
 			}
 
