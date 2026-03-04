@@ -283,7 +283,7 @@ void ChangePhase(void)
 {
 	if (GetFade() == FADE_NONE)
 	{
-		if (GetKeyboardTrigger(DIK_RETURN))
+		if (GetKeyboardTrigger(DIK_RETURN) || GetJoypadTrigger(0, JOYKEY_A) || GetJoypadTrigger(1, JOYKEY_A))
 		{
 			PlaySound(SOUND_LABEL_SE_T_ENTER);
 
@@ -407,7 +407,9 @@ void ChangeSelect(void)
 	// ŠJŽn‘O‚È‚ç–³Ž‹
 	if (g_nPhaseSelect == 0) return;
 
-	if (GetKeyboardRepeat(DIK_W))
+	if (GetKeyboardRepeat(DIK_W)
+		|| GetJoypadTrigger(0, JOYKEY_UP) || GetJoypadTrigger(1, JOYKEY_UP)
+		|| GetJoypadStickLeft(0, JOYKEY_LEFT_STICK_UP) || GetJoypadStickLeft(1, JOYKEY_LEFT_STICK_UP))
 	{
 		g_aSelect[g_nSelect].bSelect = false;
 		g_aSelect[g_nSelect].col = D3DXCOLOR(0.5f, 0.5f, 0.5f, g_aSelect[g_nSelect].col.a);
@@ -423,7 +425,9 @@ void ChangeSelect(void)
 
 		PlaySound(SOUND_LABEL_SE_T_SELECT);
 	}
-	else if (GetKeyboardRepeat(DIK_S))
+	else if (GetKeyboardRepeat(DIK_S)
+		|| GetJoypadTrigger(0, JOYKEY_DOWN) || GetJoypadTrigger(1, JOYKEY_DOWN)
+		|| GetJoypadStickLeft(0, JOYKEY_LEFT_STICK_DOWN) || GetJoypadStickLeft(1, JOYKEY_LEFT_STICK_DOWN))
 	{
 		g_aSelect[g_nSelect].bSelect = false;
 		g_aSelect[g_nSelect].col = D3DXCOLOR(0.5f, 0.5f, 0.5f, g_aSelect[g_nSelect].col.a);
