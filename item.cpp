@@ -26,6 +26,12 @@
 
 using  namespace MyMathUtil;
 
+//**************************************************************
+// マクロ定義
+#ifdef _DEBUG
+#define SPAWN_RING		// メッシュリング出現用マクロ
+#endif
+
 //==============================================================
 // アイテム配置構造体定義
 //==============================================================
@@ -232,8 +238,9 @@ void UpdateMapItem(void)
 
 				MyMathUtil::RepairRot(pItem->rot.x);
 				MyMathUtil::RepairRot(pItem->rot.y);
-
+#ifdef SPAWN_RING
 				SetRotationMesh(GetMeshRing(), vec3(D3DX_PI * 0.5f, -pItem->rot.y, 0.0f), pItem->nIdxMeshEffect, MAX_MESHRING);
+#endif
 				break;
 			}
 		}
@@ -481,8 +488,10 @@ void CollisionItem(vec3 pos, float fRange)
 
 				// 取得処理
 				pItem->bGet = true;
+#ifdef SPAWN_RING
 				ReleaseMesh(GetMeshRing(), pItem->nIdxMeshEffect, MAX_MESHRING);
-				SetParticle(pItem->pos, colX(0.5f, 0.1f, 0.1f, 0.3f), vec3(-0.5f, -0.5f, -0.5f), vec3(1.0f, 1.0f, 1.0f), 1, 5.0f, 20, 10, false);
+#endif
+				SetParticle(pItem->pos, colX(0.5f, 0.1f, 0.1f, 0.3f), vec3(-1.0f, -1.0f, -1.0f), vec3(1.0f, 1.0f, 1.0f), 1, 5.0f, 20, 10, false);
 				break;
 			}
 		}
@@ -680,7 +689,9 @@ void SetItem(vec3 pos, vec3 rot, ITEMTYPE type, bool bReflectGirl, bool bReflect
 				pItem->fRange = ITEM_RANGE;
 				pItem->type = type;								// アイテムタイプ
 				pItem->nIdxModel = g_aItemInfo[type].nNumGet;	// モデルデータインデックス
+#ifdef SPAWN_RING
 				pItem->nIdxMeshEffect = SetMeshRing(pos, vec3(D3DX_PI * 0.5f, 0.0f, 0.0f), 5.0f, 15.0f, 2, 16, D3DCULL_NONE, -1, true);
+#endif
 				pItem->bCollision = bColi;
 				pItem->bGirl = bReflectGirl;
 				pItem->bMouse = bReflectMouse;

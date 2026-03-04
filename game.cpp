@@ -150,7 +150,7 @@ void InitGame(void)
 	g_nIdxShopPrompt = SetPrompt(D3DXVECTOR3(1463, 116, -455), D3DXVECTOR2(10.0f, 5.0f), Tex, true);
 	SetEnablePrompt(true, g_nIdxShopPrompt);
 
-	SetParticle(D3DXVECTOR3(1463, 116, -455), CParamColor::RED, -CParamVector::V3ONE * 0.5f, CParamVector::V3ONE, 5, 10.0f, 1000, 10, true);
+	SetParticle(D3DXVECTOR3(1463, 116, -455), CParamColor::RED, -CParamVector::V3ONE * 0.5f, CParamVector::V3ONE, 5, 10.0f, 1000, 10, false);
 
 	SetEnableMap(true);
 }
@@ -375,11 +375,11 @@ void DrawGame(void)
 		/*** メッシュの描画 ***/
 		DrawMesh();
 
-		/*** プロンプトの描画 ***/
-		DrawPrompt();
-
 		/*** ギミックの描画 ***/
 		DrawGimmick();
+
+		/*** プロンプトの描画 ***/
+		DrawPrompt();
 
 		/*** エフェクトの描画 ***/
 		DrawEffect();

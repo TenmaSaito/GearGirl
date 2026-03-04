@@ -3786,24 +3786,10 @@ MODELSET
 END_MODELSET
 
 ITEMSET
-	ITEMTYPE = 2	# [2]ギア大
-	POS = 1400 130 -825
-	ROT = 0 0 0
-	VISIBLE = 0
-END_ITEMSET
-
-ITEMSET
 	ITEMTYPE = 1	# [1]ギア小
 	POS = 1600 130 -50
 	ROT = 0 0 0
 	VISIBLE = 2
-END_ITEMSET
-
-ITEMSET
-	ITEMTYPE = 2	# [2]
-	POS = 1500 130 -280
-	ROT = 0 0 0
-	VISIBLE = 0
 END_ITEMSET
 
 ITEMSET
@@ -3990,21 +3976,21 @@ END_MODELSET
 #川から2ばんめの家群
 #------------------------------
 #便利屋の横
-MODELSET
-	TYPE = 36	# [36]透明壁
-	POS = 1200 100 -420
-	ROT = 0 0 0
-	SHADOW = 0
-END_MODELSET
+#MODELSET
+#	TYPE = 36	# [36]透明壁
+#	POS = 1200 100 -420
+#	ROT = 0 0 0
+#	SHADOW = 0
+#END_MODELSET
 
 #------------------------------
 #便利屋の後ろ
-MODELSET
-	TYPE = 37	# [37]透明壁
-	POS = 1270 100 -325
-	ROT = 0 0 0
-	SHADOW = 0
-END_MODELSET
+#MODELSET
+#	TYPE = 37	# [37]透明壁
+#	POS = 1270 100 -325
+#	ROT = 0 0 0
+#	SHADOW = 0
+#END_MODELSET
 
 #------------------------------
 #便利屋の1つ奥
@@ -4033,6 +4019,36 @@ MODELSET
 	ROT = 0 0 0
 	SHADOW = 0
 END_MODELSET
+
+#------------------------------------------------------------------------------
+# アイテム設置
+#  
+#  ITEMTYPE : アイテムの種類(0～4が通常,5～9が間違い)
+#  VISIBLE : 各プレイヤーへの可視状態
+#  (0 -> 各プレイヤーが視認可能
+#   1 -> 少女   (PLAYERTYPE_GIRL)  のみ視認可能
+#   2 -> ネズミ (PLAYERTYPE_MOUSE) のみ視認可能)
+#------------------------------------------------------------------------------
+ITEMSET
+	ITEMTYPE = 0				# [0]ネジ
+	POS = 1200.0 140.0 -400.0	# 位置
+	ROT = 0 0 0					# 角度
+	VISIBLE = 2					# 可視状態
+END_ITEMSET
+
+ITEMSET
+	ITEMTYPE = 2				# [2]大きな歯車
+	POS = 500.0 140.0 -1150.0			# 位置
+	ROT = 0 0 0					# 角度
+	VISIBLE = 1					# 可視状態
+END_ITEMSET
+
+ITEMSET
+	ITEMTYPE = 3				# [3]軸(シャフト)
+	POS = 1750.0 140.0 475.0			# 位置
+	ROT = 0 0 0					# 角度
+	VISIBLE = 0					# 可視状態
+END_ITEMSET
 
 #------------------------------------------------------------------------------
 # ビルボード配置情報

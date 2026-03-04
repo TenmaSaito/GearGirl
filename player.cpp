@@ -32,7 +32,7 @@ using namespace MyMathUtil;
 
 // =================================================
 // マクロ定義
-#define PLAYER_RANGE	(50.0f)		// プレイヤーとアイテムとの当たり判定の距離
+#define PLAYER_RANGE	(20.0f)		// プレイヤーとアイテムとの当たり判定の距離
 #define START_ARMTYPE	(14)		// アームの開始配列番号
 #define MAX_PARTS		(17)		// 少女の全パーツ数
 #define MAX_ZMOVE1		(-1590)		// Z軸移動可能領域1
