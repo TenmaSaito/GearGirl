@@ -4109,7 +4109,7 @@ Mesh {
    0.300000;0.300000;0.300000;;
    0.000000;0.000000;0.000000;;
    TextureFilename {
-    "C:\\Users\\student\\Downloads\\glass.jpg";
+    "data\\TEXTURE\\glass.jpg";
    }
   }
  }
