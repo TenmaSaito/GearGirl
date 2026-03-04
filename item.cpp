@@ -26,6 +26,12 @@
 
 using  namespace MyMathUtil;
 
+//**************************************************************
+// マクロ定義
+#ifdef _DEBUG
+#define SPAWN_RING		// メッシュリング出現用マクロ
+#endif
+
 //==============================================================
 // アイテム配置構造体定義
 //==============================================================
@@ -195,8 +201,10 @@ void UpdateItem(void)
 	if (IsDispPrompt(GetIdxShopPrompt()))
 	{
 		if (GetKeyboardTrigger(DIK_RETURN) || GetJoypadTrigger(PLAYERTYPE_GIRL, JOYKEY_A))
+		{
 			g_bPutOut = true;
-		
+			g_nSelectPut = 0;
+		}
 	}
 	else if(g_bOnDebugItem == false)
 	{
@@ -232,8 +240,9 @@ void UpdateMapItem(void)
 
 				MyMathUtil::RepairRot(pItem->rot.x);
 				MyMathUtil::RepairRot(pItem->rot.y);
-
+#ifdef SPAWN_RING
 				SetRotationMesh(GetMeshRing(), vec3(D3DX_PI * 0.5f, -pItem->rot.y, 0.0f), pItem->nIdxMeshEffect, MAX_MESHRING);
+#endif
 				break;
 			}
 		}
@@ -257,15 +266,35 @@ void UpdatePouchItem(void)
 	else
 	{// 提出フラグが消えたら
 
+		// アイテムを選ぶ
+		if (GetKeyboardTrigger(DIK_D) || GetKeyboardTrigger(DIK_RIGHT)
+			|| GetJoypadRepeat(0, JOYKEY_RIGHT) || GetJoypadRepeat(0, JOYKEY_LEFT_STICK_RIGHT))
+		{
+			g_nSelectPut++;
+			if (ITEMTYPE_MAX - 1 < g_nSelectPut)
+			{
+				g_nSelectPut = 0;
+			}
+		}
+		if (GetKeyboardTrigger(DIK_A) || GetKeyboardTrigger(DIK_LEFT)
+			|| GetJoypadRepeat(0, JOYKEY_LEFT) || GetJoypadRepeat(0, JOYKEY_LEFT_STICK_LEFT))
+		{
+			g_nSelectPut--;
+			if (g_nSelectPut < 0)
+			{
+				g_nSelectPut = ITEMTYPE_MAX - 1;
+			}
+		}
+
 		// 所持アイテム枠の位置を変更
 		for (int nCntQuota = 0; nCntQuota < ITEMTYPE_MAX; nCntQuota++, pItemQuota++)
 		{
-			pItemQuota->pos = vec3(nCntQuota * SCREEN_WIDTH * 0.12f, SCREEN_HEIGHT * 0.5f, 0.0f);
+			pItemQuota->pos = vec3(SCREEN_WIDTH * (0.5f - 0.12f * g_nSelectPut) + SCREEN_WIDTH * 0.12f * nCntQuota, SCREEN_HEIGHT * 0.6f, 0.0f);
+		//	pItemQuota->pos = vec3(nCntQuota * SCREEN_WIDTH * 0.12f, SCREEN_HEIGHT * 0.5f, 0.0f);
 			SetPosition2DPolygon(pItemQuota->nIdxBox, pItemQuota->pos);
 		}
 
 		// 選択した分を初期化
-		g_nSelectPut = 0;
 		for (int nCntQuota = 0; nCntQuota < NUM_PUTOUTITEM; nCntQuota++, pPutQuota++)
 		{
 			SetColor2DPolygon(pPutQuota->nIdxBox, colX(0.8f, 0.8f, 0.8f, 0.0f));	// 消す
@@ -481,7 +510,9 @@ void CollisionItem(vec3 pos, float fRange)
 
 				// 取得処理
 				pItem->bGet = true;
+#ifdef SPAWN_RING
 				ReleaseMesh(GetMeshRing(), pItem->nIdxMeshEffect, MAX_MESHRING);
+#endif
 				SetParticle(pItem->pos, colX(0.5f, 0.1f, 0.1f, 0.3f), vec3(-0.5f, -0.5f, -0.5f), vec3(1.0f, 1.0f, 1.0f), 1, 5.0f, 20, 10, false);
 				break;
 			}
@@ -494,17 +525,18 @@ void CollisionItem(vec3 pos, float fRange)
 void PutOut(void)
 {
 	P_ITEMQUOTA pItemQuota = &g_aItemQuota[0];
+	P_ITEMQUOTA pUI = &g_aPutOutUI[0];
 
 	for (int nCntQuota = 0; nCntQuota < ITEMTYPE_MAX; nCntQuota++, pItemQuota++)
 	{
 		// 位置を更新
-		pItemQuota->pos = vec3(SCREEN_WIDTH / ITEMTYPE_MAX * (nCntQuota + 0.5f), SCREEN_HEIGHT * 0.6f, 0.0f);
+		pItemQuota->pos = vec3(SCREEN_WIDTH * (0.5f - 0.2f * g_nSelectPut) + SCREEN_WIDTH * 0.2f * nCntQuota, SCREEN_HEIGHT * 0.6f, 0.0f);
 		SetPosition2DPolygon(pItemQuota->nIdxBox, pItemQuota->pos);
 
 		// アイテム欄
 		if (nCntQuota == g_nSelectPut)
 		{// 選択中なら
-			pItemQuota->size = vec2(SCREEN_WIDTH * 0.06f, SCREEN_WIDTH * 0.06f);
+			pItemQuota->size = vec2(SCREEN_WIDTH * 0.1f, SCREEN_WIDTH * 0.1f);
 			SetSize2DPolygon(pItemQuota->nIdxBox, pItemQuota->size);					// 少し拡大
 			
 			if (pItemQuota->bUse)
@@ -514,7 +546,7 @@ void PutOut(void)
 		}
 		else
 		{// 選択されていない
-			pItemQuota->size = vec2(SCREEN_WIDTH * 0.05f, SCREEN_WIDTH * 0.05f);
+			pItemQuota->size = vec2(SCREEN_WIDTH * 0.08f, SCREEN_WIDTH * 0.08f);
 			SetSize2DPolygon(pItemQuota->nIdxBox, pItemQuota->size);					// 元の大きさ
 			
 			if (pItemQuota->bUse)
@@ -530,11 +562,12 @@ void PutOut(void)
 
 	// アイテム以外を選択している場合
 	if (g_nSelectPut <= -1)
-	{
-
+	{// 選択リセット
+		pUI->size = vec2();
+		SetSize2DPolygon(pUI->nIdxBox,pUI->size);
 	}
 	else if (ITEMTYPE_MAX <= g_nSelectPut)
-	{
+	{// 決定
 
 	}
 
@@ -680,7 +713,9 @@ void SetItem(vec3 pos, vec3 rot, ITEMTYPE type, bool bReflectGirl, bool bReflect
 				pItem->fRange = ITEM_RANGE;
 				pItem->type = type;								// アイテムタイプ
 				pItem->nIdxModel = g_aItemInfo[type].nNumGet;	// モデルデータインデックス
+#ifdef SPAWN_RING
 				pItem->nIdxMeshEffect = SetMeshRing(pos, vec3(D3DX_PI * 0.5f, 0.0f, 0.0f), 5.0f, 15.0f, 2, 16, D3DCULL_NONE, -1, true);
+#endif
 				pItem->bCollision = bColi;
 				pItem->bGirl = bReflectGirl;
 				pItem->bMouse = bReflectMouse;

@@ -423,11 +423,13 @@ void CaseMulti(LPGIMMICK pGimmick)
 //==================================================================================
 void CaseSolo(LPGIMMICK pGimmick)
 {
+	if (pGimmick->bClear == true) return;
+
 	Player* pPlayer = GetPlayer();
 	PlayerType type = (PlayerType)GetActivePlayer();
 	bool bDetection = false;
 
-	if (IsDetection(pGimmick->pos, pGimmick[type].pos, pGimmick->fRadius)
+	if (IsDetection(pGimmick->pos, pPlayer[type].pos, pGimmick->fRadius)
 		&& (pGimmick->could == type || pGimmick->could == COULD_PLAYER_ALL))
 	{ // ‘€ì’†ƒvƒŒƒCƒ„[‚Ì”»’è
 		if (pGimmick->motionType == MOTIONTYPE_ACTION) return;
