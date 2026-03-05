@@ -283,7 +283,10 @@ void UpdateGame(void)
 		UpdatePlayer();
 
 		/*** アイテムの更新 ***/
-		UpdateItem();
+		if (IsEndDialog() == true)
+		{
+			UpdateItem();
+		}
 
 		/*** ライトの更新 ***/
 		UpdateLight();

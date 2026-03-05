@@ -11,7 +11,7 @@
 
 // 基本インクルード群
 #include "input.h"
-#include "fade.h"
+#include "common_fade.h"
 #include "sound.h"
 
 // 汎用インクルード群
@@ -22,6 +22,7 @@
 
 // 通常インクルード群
 #include "tutorial.h"
+#include "player.h"
 #include "MessageLog.h"
 
 USE_PARAM;
@@ -29,10 +30,11 @@ USE_PARAM;
 //**********************************************************************************
 //*** マクロ定義 ***
 //**********************************************************************************
-#define DIALOG_NUM		(2)						// ダイアログボックスの数
-#define LOG_POS		D3DXVECTOR3(125.0f, 510.0f, 0.0f)	// ログの位置
+#define DIALOG_NUM		(2)									// ダイアログボックスの数
+#define LOG_POS		D3DXVECTOR3(125.0f, 510.0f, 0.0f)		// ログの位置
 #define LOG_WIDTH	(1000.0f)	// ログの幅
 #define LOG_HEIGHT	(250.0f)	// ログの高さ
+#define SHOP_POS	D3DXVECTOR3(1450.0f, 100.0f, -475.0f)	// 店前の座標
 
 //**********************************************************************************
 //*** 型宣言 ***
@@ -121,8 +123,8 @@ Log g_apLog[] =		// ログの情報
 Log g_apTutorialLog[] =		// チュートリアルログの情報
 {
 	{L"よぉ。嬢ちゃん。少しお願い聞いてくれねぇか。", LOGTYPE_OLDMAN},
-	{L"この街のシンボルの時計台が壊れちまって、直さなきゃならないんだ。", LOGTYPE_OLDMAN},
-	{L"その為に街から時計台のパーツを集めてきてほしい。お礼は弾むぜ。", LOGTYPE_OLDMAN},
+	{L"この街のシンボルの時計台が壊れちまって、\n直さなきゃならないんだ。", LOGTYPE_OLDMAN},
+	{L"その為に街から時計台のパーツを集めてきてほしい。\nお礼は弾むぜ。", LOGTYPE_OLDMAN},
 	{L"......分かった。", LOGTYPE_GIRL},
 };
 
@@ -182,12 +184,8 @@ void UpdateDialog(void)
 	{ // チュートリアルスキップ
 		g_bIsEndTutorial = true;
 	}
-	else if (GetKeyboardTrigger(DIK_RETURN)
-		|| GetJoypadTrigger(0, JOYKEY_A)
-		|| GetJoypadTrigger(1, JOYKEY_A))
-	{ // ログ再生
-		NowLog();
-	}
+	
+	NowLog();
 
 	// メッセージログの更新
 	UpdateMessageLog(&g_pLog, sizeof(g_pLog));
@@ -308,6 +306,7 @@ void FirstLog(void)
 		if (g_CurrentID >= g_MaxID)
 		{ // ログを流し終わった時、ゲーム開始
 			NextLog();
+			SetCommonFade(30, 45, 30);
 		}
 		else
 		{ // ログを進める
@@ -332,10 +331,37 @@ void FirstLog(void)
 //==================================================================================
 void TutorialLog(void)
 {
+	Player* pPlayer = GetPlayer();		// プレイヤーの取得
+	if (GetCommonFade() == FADE_IN
+		&& pPlayer->pos != SHOP_POS)
+	{
+		pPlayer->pos = SHOP_POS;
+	}
+
+	if (GetCommonFade() != FADE_NONE)
+	{
+		return;
+	}
+
 	Log* pLogInfo = &g_apTutorialLog[g_CurrentID];
 	const LPMESSAGELOG pMessageLog = GetMessageLogPointer();
 
-	if (GetKeyboardTrigger(DIK_RETURN)
+	if (g_CurrentID == 0)
+	{
+		USE_LIB;
+		WString string;
+		string.AddPointer(pLogInfo->pLog, wcslen(pLogInfo->pLog) + 1);
+		g_CurrentID++;
+
+		SetEnable2DPolygon(g_aDialog[pLogInfo->type].polygon, true);
+		SetEnable2DPolygon(g_aDialog[(pLogInfo->type + 1) % LOGTYPE_MAX].polygon, false);
+		pMessageLog->ReplaceStringW(string.GetHead(),
+			string.GetVectorNum(),
+			KEEP_USING,
+			KEEP_USING_COL,
+			TRUE);
+	}
+	else if (GetKeyboardTrigger(DIK_RETURN)
 		|| GetJoypadTrigger(0, JOYKEY_A)
 		|| GetJoypadTrigger(1, JOYKEY_A))
 	{
