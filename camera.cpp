@@ -29,7 +29,7 @@ void CameraChange(void);					// カメラを変更
 void CameraFollow(void);					// プレイヤーに追従移動
 void CameraRotation(P_CAMERA pCamera);		// プレイヤーと同じ向きに回転
 void CameraOrbit(P_CAMERA pCamera);			// オービット処理
-void CameraMove(P_CAMERA pCamera);			// カメラ移動（ポーズ中のみ
+void CameraMove(void);						// カメラ移動（ポーズ中のみ
 
 //=========================================================================================
 // カメラ初期化
@@ -51,10 +51,10 @@ void InitCamera(void)
 	{
 		// カメラ座標等
 		pCamera->bUse = true;
-		pCamera->posV = vec3 CAMERA_V_DEFPOS;					// 視点
+		pCamera->posV = vec3 CAMERA_V_DEFPOS;							// 視点
 		pCamera->posR = PLAYER_POSDEF;									// 注視点
 		pCamera->posRDest = PLAYER_POSDEF;								// 目的の注視点
-		pCamera->vecU = vec3(0.0f, 1.0f, 0.0f);					// 上方向ベクトル
+		pCamera->vecU = vec3(0.0f, 1.0f, 0.0f);							// 上方向ベクトル
 
 		switch (nCntCamera)
 		{
@@ -163,41 +163,40 @@ void UpdateCamera(void)
 	// プレイヤー数が変わったら
 	if (g_nNumEnableCamera != GetNumPlayer())
 	{
-		SetCameraOption();
+		SetCameraOption();				// 各カメラの設定
 	}
 
 	//**************************************************************
-	// 画面
-	// ２人プレイ時
+	// 画面	
 	if (GetNumPlayer() == 2)
-	{
-		// 近ければ結合
-		NearCameraIntegration();
+	{// ２人プレイ時
+		NearCameraIntegration();		// 近ければ結合
 	}
-	// 操作キャラが変わったら
 	else if (g_nActivePlayer != nActivePlayer)
-	{
-		// 切り替え
-		CameraChange();
+	{// 操作キャラが変わったら
+		CameraChange();		// 切り替え
 	}
 
 	//**************************************************************
 	// カメラ動かす処理
 	pCamera = GetCamera();
+
+	// シングルプレイ || 少女アクティブ
 	if (GetActivePlayer() == CAMERATYPE_PLAYER_ONE)
 	{
-		CameraMove(pCamera);		// カメラ距離の変更
 		CameraOrbit(pCamera);		// 回転
 	}
 	
+	// マルチプレイ || ネズミアクティブ
 	if(GetActivePlayer() == CAMERATYPE_PLAYER_TWO || GetNumPlayer() == 2)
 	{
 		pCamera++;					// 2Pのカメラにする
-		CameraMove(pCamera);
 		CameraOrbit(pCamera);
 	}
 
-	CameraFollow();	// 追従
+	// 共有部
+	CameraFollow();					// 追従
+	CameraReset();					// カメラリセット
 
 	//**************************************************************
 	// 注視点から視点を求める
@@ -217,7 +216,9 @@ void UpdateCamera(void)
 				PrintDebugProc("視野角: %d\n", (int)pCamera->fViewRadian);
 			}
 		}
-	}		
+	}
+	pCamera = GetCamera();
+	PrintDebugProc("\nCAMERA rot.y %f\nPLAYER rot,y %f\n", pCamera->rot.y, GetPlayer()->rot.y);
 }
 
 //==============================================================
@@ -287,6 +288,7 @@ void CameraFollow(void)
 	float fPlayerFront;							// プレイヤーより前
 	float fPlayerMoveRot;						// プレイヤーが移動している方向
 	float fCameraFactor = CAMERA_FOLLOW_FACTOR;	// カメラ追従速度倍率
+	vec3  stick;
 
 	for (int nPlayer = 0; nPlayer < MAX_PLAYER; nPlayer++, pCamera++, pPlayer++)
 	{
@@ -295,6 +297,7 @@ void CameraFollow(void)
 		if (CAMERA_PLFR_DEADZONE < SQUARE(pPlayer->move.x) + SQUARE(pPlayer->move.z)
 			|| (CAMERA_PLFR_DEADZONE < SQUARE(pPlayer->pos.x - pPlayer->posOld.x) + SQUARE(pPlayer->pos.z - pPlayer->posOld.z)))
 		{// カメラを少し先へ
+			GetJoypadLeftStick(nPlayer, &stick);
 			fPlayerFront = pCamera->fDist * 0.2f;
 			fPlayerMoveRot = atan2f(-pPlayer->move.x, -pPlayer->move.z);
 
@@ -345,9 +348,13 @@ void CameraFollow(void)
 
 //==============================================================
 // カメラ移動（ポーズ中のみ
-void CameraMove(P_CAMERA pCamera)
+void CameraMove(void)
 {
 #if 0
+	//**************************************************************
+	// 変数宣言
+	P_CAMERA pCamera = GetCamera();				// カメラ情報
+
 	//**************************************************************
 	// 移動
 	if (GetKeyboardRepeat(CAM_MOVE_UP) == true)
@@ -370,7 +377,6 @@ void CameraMove(P_CAMERA pCamera)
 		 pCamera->posR.z += sinf(D3DX_PI * 0.5f - pCamera->rot.y) * 5;
 		 pCamera->posR.x += cosf(D3DX_PI * 0.5f - pCamera->rot.y) * 5;
 	}
-#endif
 
 	//**************************************************************
 	// 距離の変更
@@ -382,6 +388,7 @@ void CameraMove(P_CAMERA pCamera)
 	{
 		pCamera->fDist -= 1;
 	}
+#endif
 }
 
 //==============================================================
@@ -471,14 +478,14 @@ void CameraOrbit(P_CAMERA pCamera)
 		pCamera->rot.x = CAMERA_UPLIM;
 
 	if (pCamera->rot.y < -D3DX_PI)
-		pCamera->rot.y = D3DX_PI;
+		pCamera->rot.y += D3DX_PI * 2;
 	else if (D3DX_PI < pCamera->rot.y)
-		pCamera->rot.y = -D3DX_PI;
+		pCamera->rot.y -= D3DX_PI * 2;
 
 	if (pCamera->rot.z < -D3DX_PI)
-		pCamera->rot.z = D3DX_PI;
+		pCamera->rot.z += D3DX_PI * 2;
 	else if (D3DX_PI < pCamera->rot.z)
-		pCamera->rot.z = -D3DX_PI;
+		pCamera->rot.z -= D3DX_PI * 2;
 }
 
 //=========================================================================================
@@ -711,19 +718,30 @@ CameraType GetReadyCamera(void)
 //=========================================================================================
 // カメラリセット
 //=========================================================================================
-void CameraReset(P_CAMERA pCamera)
+void CameraReset(void)
 {
 	//**************************************************************
-	// 注視点
-	pCamera->posR = GetPlayer()->pos;
+	// 変数宣言
+	P_CAMERA pCamera = GetCamera();				// カメラ情報
+	Player* pPlayer = GetPlayer();
+	float	fPlayerRot;
 
-	//**************************************************************
-	// 注視点から視点を求める
-	pCamera->fDist = CAMERA_1P_DISTANS;										// 視点と注視点の距離
-	pCamera->rot = vec3(D3DX_PI * 0.2f, D3DX_PI * 0.5f, 0.0f);				// カメラの角度
-	pCamera->posV.x = pCamera->posR.x - cosf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
-	pCamera->posV.y = pCamera->posR.y - cosf(D3DX_PI - pCamera->rot.x) * pCamera->fDist;
-	pCamera->posV.z = pCamera->posR.z - sinf(D3DX_PI - pCamera->rot.y) * pCamera->fDist;
+	for (int nCntCamera = 0; nCntCamera < PLAYERTYPE_MAX; nCntCamera++, pCamera++,pPlayer++)
+	{
+		if (GetJoypadTrigger(nCntCamera, CAMERA_RESETKEY)
+			|| (nCntCamera == PLAYERTYPE_GIRL && GetKeyboardTrigger(DIK_X))
+			|| (nCntCamera == PLAYERTYPE_MOUSE && GetKeyboardTrigger(DIK_RALT)))
+		{
+			if (GetNumPlayer() == 1 && GetActivePlayer() == PLAYERTYPE_MOUSE)
+			{// 1人プレイでネズミがアクティブなら
+				pCamera++;
+				pPlayer++;
+			}
+
+			fPlayerRot = pPlayer->rot.y - D3DX_PI;
+			pCamera->rot.y = fPlayerRot;
+		}
+	}
 }
 
 //=========================================================================================

@@ -36,8 +36,8 @@
 #define CAMERA_PLFR_DEADZONE	(0.01f)					// これ以上速度があればカメラを動かす
 #define SETCAMERAPOS_COUNTER	(30)					// カメラ切り替え時このフレーム以内に元の位置に戻る
 #define MAX_CAMERA_UI			(64)					// インターフェース用のカメラ最大数
-#define UICAMERA_POSV			vec3(0.0f,50.0f,-50.0f)	// インターフェース用カメラの座標
-#define UICAMERA_POSR			vec3(0.0f,0.0f,0.0f)
+#define UICAMERA_POSV			vec3(0.0f,20.0f,-20.0f)	// インターフェース用カメラの座標
+#define UICAMERA_POSR			vec3(0.0f,0.0f,0.0f)	// インターフェース用カメラの注視点座標
 #define CAMERA_UPLIM			(2.8f)					// カメラの上限角度
 #define CAMERA_LOWLIM			(1.3f)					// カメラの下限角度
 
@@ -46,6 +46,7 @@
 //**************************************************************
 // カメラ操作
 #define CAM_2POPRAT		DIK_LCONTROL			// ２Pのカメラを操作
+#define CAMERA_RESETKEY	JOYKEY_X				// カメラをリセットするキー
 
 #define CAM_RESET		DIK_TAB					// カメラ位置角度リセット
 #define CAM_MOVE_UP		DIK_W					// カメラ移動　上
@@ -119,7 +120,7 @@ void GetCameraPos(int nCamNum, vec3* pPosV, vec3* pPosR);				// カメラの位置情報
 void GetCameraRot(int nCamNum, vec3* pRot);								// カメラの角度情報を取得
 int GetCameraNum(void);													// 使用中のカメラの数を取得
 CameraType GetReadyCamera(void);										// 描画中のカメラ番号を取得
-void CameraReset(P_CAMERA pCamera);										// カメラリセット
+void CameraReset(void);													// カメラリセット
 void FogEnable(CameraType type, bool bEnable = true, D3DXCOLOR col = colX_ZERO, float fStart = 0.0f, float fEnd = 0.0f);
 																		// 霧を有効化
 void CleanFog(void);													// 霧を削除

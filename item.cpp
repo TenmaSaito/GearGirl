@@ -28,9 +28,6 @@ using  namespace MyMathUtil;
 
 //**************************************************************
 // マクロ定義
-#ifdef _DEBUG
-#define SPAWN_RING		// メッシュリング出現用マクロ
-#endif
 
 //==============================================================
 // アイテム配置構造体定義
@@ -50,30 +47,30 @@ POINTER(ItemQuota, P_ITEMQUOTA);
 
 //**************************************************************
 // グローバル変数宣言
-bool			g_bOnDebugItem = false;							// デバッグ中
-int				g_nSetItemNum = 0;								// 設置済みのアイテム数
-int				g_nSelectPut = -1;								// 提出時のカーソル
-int				g_nItemQuotaFlameTex = -1;						// アイテム欄のフレームのテクスチャ番号
-bool			g_bPutOut = false;								// アイテムを提出するときtrue
-Item			g_aItem[MAX_ITEM];								// アイテム情報
-ItemQuota		g_aItemQuota[ITEMTYPE_MAX];						// 所持アイテムを表示する枠のインデックス
-ItemQuota		g_aPutQuota[NUM_PUTOUTITEM];					// 提出アイテムを表示する枠のインデックス
+bool			g_bOnDebugItem = false;				// デバッグ中
+int				g_nSetItemNum = 0;					// 設置済みのアイテム数
+int				g_nSelectPut = -1;					// 提出時のカーソル
+int				g_nItemQuotaFlameTex = -1;			// アイテム欄のフレームのテクスチャ番号
+bool			g_bPutOut = false;					// アイテムを提出するときtrue
+Item			g_aItem[MAX_ITEM];					// アイテム情報
+ItemQuota		g_aItemQuota[ITEMTYPE_MAX];			// 所持アイテムを表示する枠のインデックス
+ItemQuota		g_aPutQuota[NUM_PUTOUTITEM];		// 提出アイテムを表示する枠のインデックス
 
-ItemQuota		g_aPutOutUI[PUTOUTUI_MAX];						// 提出時　背景の暗転、決定やとりけしのUI等
-ITEMTYPE		g_aPutOut[NUM_PUTOUTITEM];						// 提出したアイテム
+ItemQuota		g_aPutOutUI[PUTOUTUI_MAX];			// 提出時　背景の暗転、決定やとりけしのUI等
+ITEMTYPE		g_aPutOut[NUM_PUTOUTITEM];			// 提出したアイテム
 ItemInfo		g_aItemInfo[ITEMTYPE_MAX] =
 {
-	{"data\\MODEL\\Item\\Screw.x",-1},			 // [0] 新品ののねじ
-	{"data\\MODEL\\Item\\GearSmall.x",-1},		 // [1] 磨かれた小さな歯車
-	{"data\\MODEL\\Item\\GearLarge.x",-1},		 // [2] 綺麗な大きい歯車
-	{"data\\MODEL\\Item\\Shaft.x",-1},			 // [3] まっすぐな軸
-	{"data\\MODEL\\Item\\GearLarge.x",-1},		 // [4] 丁寧に直されたぜんまい
+	{"data\\MODEL\\Item\\Screw.x",-1},				// [0] 新品ののねじ
+	{"data\\MODEL\\Item\\GearSmall.x",-1},			// [1] 磨かれた小さな歯車
+	{"data\\MODEL\\Item\\GearLarge.x",-1},			// [2] 綺麗な大きい歯車
+	{"data\\MODEL\\Item\\Shaft.x",-1},				// [3] まっすぐな軸
+	{"data\\MODEL\\Item\\GearLarge.x",-1},			// [4] 丁寧に直されたぜんまい
 
-	{"data\\MODEL\\Item\\old_screw.x",-1},		 // [5] 古いねじ
-	{"data\\MODEL\\Item\\GearSmallDificit.x",-1},// [6] 錆びた小さい歯車
-	{"data\\MODEL\\Item\\GearLargeDificit.x",-1},// [7] 欠けた大きい歯車
-	{"data\\MODEL\\Item\\ShaftCurv.x",-1},		 // [8] 少しい曲がった軸
-	{"data\\MODEL\\Item\\GearLarge.x",-1},		 // [9] ゆがんだぜんまい
+	{"data\\MODEL\\Item\\old_screw.x",-1},			// [5] 古いねじ
+	{"data\\MODEL\\Item\\GearSmallDificit.x",-1},	// [6] 錆びた小さい歯車
+	{"data\\MODEL\\Item\\GearLargeDificit.x",-1},	// [7] 欠けた大きい歯車
+	{"data\\MODEL\\Item\\ShaftCurv.x",-1},			// [8] 少しい曲がった軸
+	{"data\\MODEL\\Item\\GearLarge.x",-1},			// [9] ゆがんだぜんまい
 };
 
 //**************************************************************
@@ -158,6 +155,7 @@ void InitItem(void)
 	// 設置
 	g_nSetItemNum = 0;	// 配置数を初期化
 	g_bOnDebugItem = false;
+
 #ifdef _DEBUG
 	// デバッグ用　見た目だけ
 	vec3 pos = vec3(450.0f, 120.0f, -600.0f);
@@ -172,7 +170,6 @@ void InitItem(void)
 
 		// SetItem(pos, vec3_ZERO, (ITEMTYPE)nCnt, true, true, true);
 		pos.z += 50.0f;
-
 	}
 #endif
 }
@@ -202,6 +199,11 @@ void UpdateItem(void)
 		if (GetKeyboardTrigger(DIK_RETURN) || GetJoypadTrigger(PLAYERTYPE_GIRL, JOYKEY_A))
 		{
 			g_bPutOut = true;
+		}
+
+		if (GetKeyboardTrigger(DIK_BACK) || GetJoypadTrigger(0, JOYKEY_B))
+		{
+			g_bPutOut = false;
 		}
 		if (g_bPutOut == false)
 			g_nSelectPut = 0;
@@ -473,7 +475,7 @@ void OnUIitemEnable(P_ITEMQUOTA pQuota, int nMAX)
 //=========================================================================================
 // 当たり判定
 //=========================================================================================
-void CollisionItem(vec3 pos, float fRange)
+void CollisionItem(vec3 pos, float fRange, int type)
 {
 	//**************************************************************
 	// 変数宣言
@@ -484,6 +486,12 @@ void CollisionItem(vec3 pos, float fRange)
 	{
 		if (pItem->bUse && pItem->bGet == false)
 		{
+			// 見えていないプレイヤーがあたっても取得できないように
+			if (pItem->bGirl == false && (PlayerType)type == PLAYERTYPE_GIRL)
+				continue;
+			if (pItem->bMouse == false && (PlayerType)type == PLAYERTYPE_MOUSE)
+				continue;
+
 			// 距離の計算
 			float fDistX = SQUARE(pItem->pos.x - pos.x);
 			float fDistY = SQUARE(pItem->pos.y - pos.y);
