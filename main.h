@@ -63,7 +63,7 @@
 #define STRUCT(...)				typedef struct __VA_ARGS__			// STRUCTéŒ¾
 #endif
 #ifndef ENUM
-#define ENUM(...)				typedef enum __VA_ARGS__			// ENUMéŒ¾
+#define ENUM(...)				typedef enum						// ENUMéŒ¾
 #endif
 #ifndef PARENT
 #define PARENT(...)				: public __VA_ARGS__				// Œp³éŒ¾

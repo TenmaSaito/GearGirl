@@ -8,6 +8,7 @@
 //*** インクルードファイル ***
 //**********************************************************************************
 #include "camera.h"
+#include "common_fade.h"
 #include "debugproc.h"
 #include "dialog.h"
 #include "effect.h"
@@ -283,7 +284,7 @@ void UpdateGame(void)
 		UpdatePlayer();
 
 		/*** アイテムの更新 ***/
-		if (IsEndDialog() == true)
+		if (IsEndDialog() == true && GetCommonFade() == FADE_NONE)
 		{
 			UpdateItem();
 		}
@@ -321,12 +322,12 @@ void UpdateGame(void)
 		/*** ダイアログの更新 ***/
 		UpdateDialog();
 
-		if (IsEndDialog() == true)
+		if (IsEndDialog() == true && GetCommonFade() == FADE_NONE)
 		{
 			AddTimer(-1);
 		}
 
-		if ((GetKeyboardTrigger(DIK_5) || GetJoypadTrigger(0, JOYKEY_BACK)) && IsEndDialog() == true)
+		if ((GetKeyboardTrigger(DIK_5) || GetJoypadTrigger(0, JOYKEY_BACK)) && IsEndDialog() == true && GetCommonFade() == FADE_NONE)
 		{
 			SetEnableUImenu(!GetEnableUImenu(), 0);
 		}
@@ -382,8 +383,12 @@ void DrawGame(void)
 		/*** プレイヤーの描画 ***/
 		DrawPlayer();
 
-		/*** アイテムの描画 ***/
-		DrawItem();
+		/*** アイテムの更新 ***/
+		if (IsEndDialog() == true && GetCommonFade() == FADE_NONE)
+		{
+			/*** アイテムの描画 ***/
+			DrawItem();
+		}
 
 		/*** メッシュの描画 ***/
 		DrawMesh();
@@ -408,7 +413,7 @@ void DrawGame(void)
 	pDevice->SetViewport(&viewport);
 
 	/*** マップの描画 ***/
-	if (IsEndDialog() == true)
+	if (IsEndDialog() == true && GetCommonFade() == FADE_NONE)
 	{
 		DrawMap();
 	}
@@ -417,13 +422,13 @@ void DrawGame(void)
 	/*** Aの描画 ***/
 
 	/*** タイマーの描画 ***/
-	if (IsEndDialog() == true)
+	if (IsEndDialog() == true && GetCommonFade() == FADE_NONE)
 	{
 		DrawTimer();
 	}
 
 	/*** UIアームの描画 ***/
-	if (IsEndDialog() == true)
+	if (IsEndDialog() == true && GetCommonFade() == FADE_NONE)
 	{
 		DrawUIarm();
 	}

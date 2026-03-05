@@ -31,11 +31,13 @@ USE_PARAM;
 //**********************************************************************************
 //*** マクロ定義 ***
 //**********************************************************************************
-#define DIALOG_NUM		(2)									// ダイアログボックスの数
-#define LOG_POS		D3DXVECTOR3(125.0f, 510.0f, 0.0f)		// ログの位置
-#define LOG_WIDTH	(1000.0f)	// ログの幅
-#define LOG_HEIGHT	(250.0f)	// ログの高さ
-#define SHOP_POS	D3DXVECTOR3(1450.0f, 100.0f, -475.0f)	// 店前の座標
+#define DIALOG_NUM		(2)										// ダイアログボックスの数
+#define LOG_POS			D3DXVECTOR3(125.0f, 510.0f, 0.0f)		// ログの位置
+#define LOG_WIDTH		(1000.0f)	// ログの幅
+#define LOG_HEIGHT		(250.0f)	// ログの高さ
+#define SHOP_POS		D3DXVECTOR3(1450.0f, 100.0f, -475.0f)	// 店前の座標
+#define ANIMTEX_NUM		(3)			// 動くテクスチャの数
+#define START_ANIMTEX	(3)			// アニメーションテクスチャの開始ログID
 
 //**********************************************************************************
 //*** 型宣言 ***
@@ -45,7 +47,7 @@ typedef int ID_LOG;				// ログの順番
 //**********************************************************************************
 //*** ログの人物の種類 ***
 //**********************************************************************************
-ENUM()
+typedef enum
 {
 	LOGTYPE_GIRL,
 	LOGTYPE_OLDMAN,
@@ -55,7 +57,7 @@ ENUM()
 //**********************************************************************************
 //*** ログのフェーズの種類 ***
 //**********************************************************************************
-ENUM()
+typedef enum
 {
 	LOGPHASE_FIRST,
 	LOGPHASE_TUTORIAL,
@@ -70,6 +72,19 @@ ENUM_DECREMENT_STOP(LOGPHASE, LOGPHASE_FIRST, LOGPHASE_MAX)
 END_UNABLE
 
 //**********************************************************************************
+//*** チュートリアルテクスチャの種類 ***
+//**********************************************************************************
+typedef enum
+{
+	TUTORIAL_TEX_LEFTSTICK = 0,		// 左スティックの説明
+	TUTORIAL_TEX_RIGHTSTICK,		// 右スティックの説明
+	TUTORIAL_TEX_GEAR,				// ギアの画像
+	TUTORIAL_TEX_SCREW,				// ネジの画像
+	TUTORIAL_TEX_UNKNOWN,			// ?の画像
+	TUTORIAL_TEX_MAX
+} TUTORIAL_TEX;
+
+//**********************************************************************************
 //*** ダイアログボックス構造体 ***
 //**********************************************************************************
 STRUCT()
@@ -81,6 +96,15 @@ STRUCT()
 } Dialog;
 
 //**********************************************************************************
+//*** チュートリアルテクスチャ構造体 ***
+//**********************************************************************************
+STRUCT()
+{
+	D3DXVECTOR3 pos;		// 描画位置
+	D3DXVECTOR2 size;		// 描画サイズ
+} TutorialTex;
+
+//**********************************************************************************
 //*** ログ構造体 ***
 //**********************************************************************************
 STRUCT()
@@ -88,6 +112,19 @@ STRUCT()
 	const wchar_t *pLog;		// ログの内容
 	LOGTYPE type;				// タイプ
 } Log;	
+
+//**********************************************************************************
+//*** チュートリアルで動くテクスチャの情報 ***
+//**********************************************************************************
+STRUCT()
+{
+	IDX_2DPOLYGON poly;			// ポリゴンインデックス
+	ID_LOG showID;				// 描画開始するID(Initで設定)
+	D3DXVECTOR3 start, end;		// 動く範囲(Lerpで移動)
+	D3DXCOLOR col;				// 色
+	float s;					// 座標及び透明度変換係数(Lerpで使用)
+	bool bReverse;				// 移動反転
+} Tutorial_TexAnim;
 
 //**********************************************************************************
 //*** プロトタイプ宣言 ***
@@ -103,43 +140,84 @@ void MovableTutorial(void);
 //*** グローバル変数 ***
 //**********************************************************************************
 Dialog g_aDialog[DIALOG_NUM];
-const Dialog g_aDialogInfo[DIALOG_NUM] =		// ダイアログの情報
+
+// ダイアログの情報
+const Dialog g_aDialogInfo[DIALOG_NUM] =		
 {
 	{D3DXVECTOR3(CParamVector::WINMID.x, CParamVector::WINMID.y * 1.75f, 0.0f), D3DXVECTOR2(1280.0f, 300.0f), -1, -1},
 	{D3DXVECTOR3(CParamVector::WINMID.x, CParamVector::WINMID.y * 1.75f, 0.0f), D3DXVECTOR2(1280.0f, 300.0f), -1, -1},
 };
 
-const char *g_apDialogTexture[DIALOG_NUM] =		// テクスチャパス
+// テクスチャパス
+const char *g_apDialogTexture[DIALOG_NUM] =		
 {
 	"data/TEXTURE/tutorial_frame.png",
 	"data/TEXTURE/tutorial_frame.png",
 };
 
-Log g_apLog[] =		// ログの情報
+// チュートリアル中のテクスチャ
+const char *g_apTutorialTexture[TUTORIAL_TEX_MAX] =
 {
-	{L"......街に着いた。", LOGTYPE_GIRL},
+	"data/TEXTURE/LeftStick.png",
+	"data/TEXTURE/RightStick.png",
+
+	// ここから動くテクスチャ
+	"data/TEXTURE/Item_Gear.png",
+	"data/TEXTURE/Item_Screw.png",
+	"data/TEXTURE/Item_Unknown.png",
+};
+
+// アニメーションテクスチャの動く範囲
+const D3DXVECTOR3 g_aMoveTexture[TUTORIAL_TEX_MAX][2] =
+{
+	{D3DXVECTOR3(), D3DXVECTOR3()},
+	{D3DXVECTOR3(), D3DXVECTOR3()},
+
+	// ここから開始
+	{D3DXVECTOR3(300, 200, 0), D3DXVECTOR3(300, 250, 0)},
+	{D3DXVECTOR3(640, 225, 0), D3DXVECTOR3(640, 175, 0)},
+	{D3DXVECTOR3(1000, 225, 0), D3DXVECTOR3(1000, 300, 0)},
+};
+
+// ログの情報
+Log g_apLog[] =		
+{
+	{L"街に着いた。", LOGTYPE_GIRL},
 	{L"ん？あんな所に奇妙なお店がある。", LOGTYPE_GIRL},
-	{L"行ってみよう。", LOGTYPE_GIRL},
+	{L"気になるし、行ってみよう。", LOGTYPE_GIRL},
 };
 
-Log g_apTutorialLog[] =		// チュートリアルログの情報
+// チュートリアルログの情報
+Log g_apTutorialLog[] =		
 {
 	{L"よぉ。嬢ちゃん。少しお願い聞いてくれねぇか。", LOGTYPE_OLDMAN},
 	{L"この街のシンボルの時計台が壊れちまって、\n直さなきゃならないんだ。", LOGTYPE_OLDMAN},
-	{L"その為に街から時計台のパーツを集めてきてほしい。\nお礼は弾むぜ。", LOGTYPE_OLDMAN},
+	{L"その為に街から時計台のパーツを集めてきてほしい。\nうちのネズミを貸してやる。頼りになるぜ。", LOGTYPE_OLDMAN},
 	{L"......分かった。", LOGTYPE_GIRL},
 };
 
-ID_LOG g_CurrentID = 0;		// 現在のログのID
-ID_LOG g_MaxID;				// ログの最大数
-ID_LOG g_MaxTutorialID;		// チュートリアルログの最大数
-LOGPHASE g_logPhase;		// 現在のログフェーズ
-LPMESSAGELOG g_pLog = NULL;	// メッセージログへのポインタ
-bool g_bIsEndTutorial;		// チュートリアルの終了判定
-bool g_bIsShowAnyDialog;	// 何か一つでもダイアログが表示されているか
-bool g_bIsMovableTutorial;	// チュートリアルの動ける状態か
+// チュートリアル中の情報
+TutorialTex g_aTutorial[] =
+{
+	{D3DXVECTOR3(150, 550, 0), D3DXVECTOR2(150, 150)},
+	{D3DXVECTOR3(1130, 550, 0), D3DXVECTOR2(150, 150)},
+	{D3DXVECTOR3(300, 200, 0), D3DXVECTOR2(150, 150)},
+	{D3DXVECTOR3(640, 225, 0), D3DXVECTOR2(150, 150)},
+	{D3DXVECTOR3(1000, 225, 0), D3DXVECTOR2(150, 150)},
+};
+
+ID_LOG g_CurrentID = 0;			// 現在のログのID
+ID_LOG g_MaxID;					// ログの最大数
+ID_LOG g_MaxTutorialID;			// チュートリアルログの最大数
+LOGPHASE g_logPhase;			// 現在のログフェーズ
+LPMESSAGELOG g_pLog = NULL;		// メッセージログへのポインタ
+bool g_bIsEndTutorial;			// チュートリアルの終了判定
+bool g_bIsShowAnyDialog;		// 何か一つでもダイアログが表示されているか
+bool g_bIsMovableTutorial;		// チュートリアルの動ける状態か
+bool g_bShowMoveTex;			// テクスチャ表示済みか
 IDX_2DPOLYGON g_IdxLeftStick;	// 左スティックのチュートリアルポリゴン
 IDX_2DPOLYGON g_IdxRightStick;	// 右スティックのチュートリアルポリゴン
+Tutorial_TexAnim g_aAnimTex[TUTORIAL_TEX_MAX];	// テクスチャのポリゴン情報
 
 //==================================================================================
 // --- 初期化 ---
@@ -154,6 +232,7 @@ void InitDialog(void)
 	g_bIsEndTutorial = false;
 	g_bIsShowAnyDialog = false;
 	g_bIsMovableTutorial = false;
+	g_bShowMoveTex = false;
 	g_IdxLeftStick = -1;
 	g_IdxRightStick = -1;
 
@@ -169,6 +248,30 @@ void InitDialog(void)
 
 	// メッセージログの初期化
 	InitMessageLog(&g_pLog, sizeof(g_pLog));
+
+	// アニメーションテクスチャの設定
+
+	// 初期化
+	AutoZeroMemory(g_aAnimTex);
+
+	IDX_TEX tex;
+
+	for (int nCntTex = TUTORIAL_TEX_GEAR; nCntTex < TUTORIAL_TEX_MAX; nCntTex++)
+	{
+		LoadTexture(g_apTutorialTexture[nCntTex], &tex);
+		g_aAnimTex[nCntTex].poly =
+			Set2DPolygon(g_aMoveTexture[nCntTex][0],
+				CParamVector::V3NULL, 
+				g_aTutorial[nCntTex].size,
+				tex);
+
+		SetColor2DPolygon(g_aAnimTex[nCntTex].poly, g_aAnimTex[nCntTex].col);
+		SetEnable2DPolygon(g_aAnimTex[nCntTex].poly, false);
+
+		g_aAnimTex[nCntTex].showID = START_ANIMTEX;
+		g_aAnimTex[nCntTex].start = g_aMoveTexture[nCntTex][0];
+		g_aAnimTex[nCntTex].end = g_aMoveTexture[nCntTex][1];
+	}
 }
 
 //==================================================================================
@@ -192,9 +295,15 @@ void UpdateDialog(void)
 		|| GetJoypadTrigger(0, JOYKEY_START)
 		|| GetJoypadTrigger(1, JOYKEY_START))
 	{ // チュートリアルスキップ
+		SetCommonFade(30, 30, 30);
 		g_bIsEndTutorial = true;
 		g_bIsShowAnyDialog = false;
 		g_bIsMovableTutorial = false;
+
+		for (int nCntTex = TUTORIAL_TEX_GEAR; nCntTex < TUTORIAL_TEX_MAX; nCntTex++)
+		{
+			SetEnable2DPolygon(g_aAnimTex[nCntTex].poly, false);
+		}
 	}
 
 	if (g_bIsMovableTutorial == true)
@@ -207,6 +316,51 @@ void UpdateDialog(void)
 
 		// メッセージログの更新
 		UpdateMessageLog(&g_pLog, sizeof(g_pLog));
+	}
+
+	if (g_logPhase == LOGPHASE_TUTORIAL && g_CurrentID >= START_ANIMTEX)
+	{
+		if (g_bShowMoveTex == false)
+		{
+			for (int nCntTex = TUTORIAL_TEX_GEAR; nCntTex < TUTORIAL_TEX_MAX; nCntTex++)
+			{
+				SetEnable2DPolygon(g_aAnimTex[nCntTex].poly, true);
+			}
+
+			g_bShowMoveTex = true;
+		}
+
+		D3DXVECTOR3 pos;
+		D3DXCOLOR col;
+
+		for (int nCntTex = TUTORIAL_TEX_GEAR; nCntTex < TUTORIAL_TEX_MAX; nCntTex++)
+		{
+			if (g_aAnimTex[nCntTex - 1].col.a <= 0.75f && nCntTex != TUTORIAL_TEX_GEAR) continue;
+
+			g_aAnimTex[nCntTex].s += (0.005f + (nCntTex * 0.0008f)) * ((g_aAnimTex[nCntTex].bReverse) ? -1 : 1);
+
+			if (g_aAnimTex[nCntTex].s <= 0.0f)
+			{
+				g_aAnimTex[nCntTex].s = 0.0f;
+				g_aAnimTex[nCntTex].bReverse = !g_aAnimTex[nCntTex].bReverse;
+			}
+			else if (g_aAnimTex[nCntTex].s >= 1.0f)
+			{
+				g_aAnimTex[nCntTex].s = 1.0f;
+				g_aAnimTex[nCntTex].bReverse = !g_aAnimTex[nCntTex].bReverse;
+			}
+
+			USE_UTIL;
+			pos = GetPTPLerp(g_aAnimTex[nCntTex].start, g_aAnimTex[nCntTex].end, g_aAnimTex[nCntTex].s);
+
+			if (g_aAnimTex[nCntTex].col != CParamColor::WHITE)
+			{
+				g_aAnimTex[nCntTex].col = GetColLerp(CParamColor::INV_WHITE, CParamColor::WHITE, g_aAnimTex[nCntTex].s);
+			}
+
+			SetPosition2DPolygon(g_aAnimTex[nCntTex].poly, pos);
+			SetColor2DPolygon(g_aAnimTex[nCntTex].poly, g_aAnimTex[nCntTex].col);
+		}
 	}
 }
 
@@ -388,13 +542,19 @@ void TutorialLog(void)
 		|| GetJoypadTrigger(0, JOYKEY_A)
 		|| GetJoypadTrigger(1, JOYKEY_A))
 	{
-		if (g_CurrentID >= g_MaxID)
+		if (g_CurrentID >= g_MaxTutorialID)
 		{ // ログを流し終わった時、ゲーム開始
 			g_bIsEndTutorial = true;
 			g_bIsShowAnyDialog = false;
 			g_bIsMovableTutorial = false;
 			SetEnable2DPolygon(g_aDialog[0].polygon, false);
 			SetEnable2DPolygon(g_aDialog[1].polygon, false);
+			SetCommonFade(40, 40, 30);
+
+			for (int nCntTex = TUTORIAL_TEX_GEAR; nCntTex < TUTORIAL_TEX_MAX; nCntTex++)
+			{
+				SetEnable2DPolygon(g_aAnimTex[nCntTex].poly, false);
+			}
 		}
 		else
 		{ // ログを進める
@@ -427,12 +587,23 @@ void MovableTutorial(void)
 		{ // 移動中チュートリアル終了 -> ログ表示
 			g_bIsMovableTutorial = false;
 			g_bIsShowAnyDialog = true;
+			Destroy2DPolygon(g_IdxLeftStick);
+			Destroy2DPolygon(g_IdxRightStick);
 			NextLog();
 		}
 	}
 
 	if (g_IdxLeftStick == -1)
 	{
+		IDX_TEX tex;
+
+		// テクスチャ読み込み
+		LoadTexture(g_apTutorialTexture[0], &tex);
+
+		// 2Dポリゴンを設置
+		g_IdxLeftStick = Set2DPolygon(g_aTutorial[0].pos, CParamVector::V3NULL, g_aTutorial[0].size, tex);
+
+		// ログ及びダイアログを不可視に設定
 		const LPMESSAGELOG pMessageLog = GetMessageLogPointer();
 
 		USE_LIB;
@@ -449,7 +620,13 @@ void MovableTutorial(void)
 
 	if (g_IdxRightStick == -1)
 	{
+		IDX_TEX tex;
 
+		// テクスチャ読み込み
+		LoadTexture(g_apTutorialTexture[1], &tex);
+
+		// 2Dポリゴンを設置
+		g_IdxRightStick = Set2DPolygon(g_aTutorial[1].pos, CParamVector::V3NULL, g_aTutorial[1].size, tex);
 	}
 }
 

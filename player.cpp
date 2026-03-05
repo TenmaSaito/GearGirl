@@ -394,8 +394,11 @@ void UpdatePlayer(void)
 			pPlayer->bJump = false;
 		}
 
+		if (IsEndDialog() == true)
+		{// ダイアログが表示されている場合
 		// アイテムとの当たり判定
-		CollisionItem(pPlayer->pos, PLAYER_RANGE, nCntPlayer);
+			CollisionItem(pPlayer->pos, PLAYER_RANGE, nCntPlayer);
+		}
 
 		// ギミックとの当たり判定
 		if (CollisionGimmick(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move, &g_aPlayer[nCntPlayer], 5.0f, 20.0f - (nCntPlayer * 18.0f)))
@@ -1278,8 +1281,6 @@ void MovePlayer(PlayerType nPlayer)
 			}
 		}
 	}
-
-
 }
 
 // =================================================
