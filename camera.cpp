@@ -28,7 +28,7 @@ void NearCameraIntegration(void);			// 2P時近ければカメラ統合
 void CameraChange(void);					// カメラを変更
 void CameraFollow(void);					// プレイヤーに追従移動
 void CameraRotation(P_CAMERA pCamera);		// プレイヤーと同じ向きに回転
-void CameraOrbit(P_CAMERA pCamera);			// オービット処理
+void CameraOrbit(void);							// カメラ回転処理
 void CameraMove(void);						// カメラ移動（ポーズ中のみ
 
 //=========================================================================================
@@ -184,8 +184,6 @@ void UpdateCamera(void)
 	// シングルプレイ && ネズミアクティブでない
 	if (GetNumPlayer() == 1 && GetActivePlayer() != CAMERATYPE_PLAYER_TWO)
 	{
-		CameraOrbit(pCamera);		// 回転
-
 		if (GetPlayer()->bDash)
 		{
 			if (pCamera->fViewRadian <= VIEW_RADIAN * 1.5f)
@@ -201,10 +199,10 @@ void UpdateCamera(void)
 	if(GetNumPlayer() == 2 || GetActivePlayer() == CAMERATYPE_PLAYER_TWO)
 	{
 		pCamera++;					// 2Pのカメラにする
-		CameraOrbit(pCamera);
 	}
 
 	// 共有部
+	CameraOrbit();					// カメラ回転
 	CameraFollow();					// 追従
 	CameraReset();					// カメラリセット
 
@@ -438,62 +436,69 @@ void CameraRotation(P_CAMERA pCamera)
 
 //==============================================================
 // 注視点を中心に回転
-void CameraOrbit(P_CAMERA pCamera)
+void CameraOrbit(void)
 {
 	//**************************************************************
 	// 変数宣言
-	bool bUse = false;
+	P_CAMERA pCamera = GetCamera();				// カメラ情報
 	vec3 rightStick;
 
-	//**************************************************************
-	// 注視点のまわりを回転
-	// キーボード操作
-	if (GetKeyboardPress(CAM_ORBIT_R) && GetKeyboardPress(DIK_M) != true)
+	for (int nCntPlayer = 0; nCntPlayer < GetNumPlayer(); nCntPlayer++, pCamera++)
 	{
-		pCamera->rot.y -= CAMERA_SPIN_X;
-		bUse = true;
+		// 1人プレイ時
+		if (GetNumPlayer() == 1)
+		{
+			if (GetActivePlayer() == PLAYERTYPE_MOUSE)
+			{
+				pCamera++;
+			}
+		}
+
+		//**************************************************************
+		// 注視点のまわりを回転
+		// キーボード操作
+		if (GetKeyboardPress(CAM_ORBIT_R(nCntPlayer)))
+		{
+			pCamera->rot.y -= CAMERA_SPIN_X;
+		}
+		if (GetKeyboardPress(CAM_ORBIT_L(nCntPlayer)))
+		{
+			pCamera->rot.y += CAMERA_SPIN_X;
+		}
+
+		if (GetKeyboardPress(CAM_ORBIT_UP(nCntPlayer)))
+		{
+			pCamera->rot.x -= CAMERA_SPIN_Y;
+		}
+		if (GetKeyboardPress(CAM_ORBIT_DW(nCntPlayer)))
+		{
+			pCamera->rot.x += CAMERA_SPIN_Y;
+		}
+
+		// コントローラー操作
+		if (GetJoypadRightStick(GetNumPlayer() == 1 ? 0 : (int)pCamera->type, &rightStick))
+		{// 1人プレイなら常に一つ目のコントローラー情報を取得。そうじゃなければカメラのタイプ（対応プレイヤーナンバー）のコントローラー情報を取得
+			pCamera->rot.y += rightStick.x * CAMERA_SPIN_X;
+			pCamera->rot.x += rightStick.y * CAMERA_SPIN_Y;
+		}
+
+		//**************************************************************
+		// 角度正規化
+		if (pCamera->rot.x < CAMERA_LOWLIM)
+			pCamera->rot.x = CAMERA_LOWLIM;
+		else if (CAMERA_UPLIM < pCamera->rot.x)
+			pCamera->rot.x = CAMERA_UPLIM;
+
+		if (pCamera->rot.y < -D3DX_PI)
+			pCamera->rot.y += D3DX_PI * 2;
+		else if (D3DX_PI < pCamera->rot.y)
+			pCamera->rot.y -= D3DX_PI * 2;
+
+		if (pCamera->rot.z < -D3DX_PI)
+			pCamera->rot.z += D3DX_PI * 2;
+		else if (D3DX_PI < pCamera->rot.z)
+			pCamera->rot.z -= D3DX_PI * 2;
 	}
-	if (GetKeyboardPress(CAM_ORBIT_L))
-	{
-		pCamera->rot.y += CAMERA_SPIN_X;
-		bUse = true;
-	}
-
-	if (GetKeyboardPress(CAM_ORBIT_UP))
-	{
-		pCamera->rot.x -= CAMERA_SPIN_Y;
-		bUse = true;
-	}
-	if (GetKeyboardPress(CAM_ORBIT_DW))
-	{
-		pCamera->rot.x += CAMERA_SPIN_Y;
-		bUse = true;
-	}
-
-	// コントローラー操作
-	 if (GetJoypadRightStick(GetNumPlayer() == 1 ? 0:(int)pCamera->type,&rightStick))
-	 {// 1人プレイなら常に一つ目のコントローラー情報を取得。そうじゃなければカメラのタイプ（対応プレイヤーナンバー）のコントローラー情報を取得
-		pCamera->rot.y += rightStick.x * CAMERA_SPIN_X;
-		pCamera->rot.x += rightStick.y * CAMERA_SPIN_Y;
-		bUse = true;
-	 }
-
-	//**************************************************************
-	// 角度正規化
-	if (pCamera->rot.x < CAMERA_LOWLIM)
-		pCamera->rot.x = CAMERA_LOWLIM;
-	else if (CAMERA_UPLIM < pCamera->rot.x)
-		pCamera->rot.x = CAMERA_UPLIM;
-
-	if (pCamera->rot.y < -D3DX_PI)
-		pCamera->rot.y += D3DX_PI * 2;
-	else if (D3DX_PI < pCamera->rot.y)
-		pCamera->rot.y -= D3DX_PI * 2;
-
-	if (pCamera->rot.z < -D3DX_PI)
-		pCamera->rot.z += D3DX_PI * 2;
-	else if (D3DX_PI < pCamera->rot.z)
-		pCamera->rot.z -= D3DX_PI * 2;
 }
 
 //=========================================================================================
@@ -506,10 +511,7 @@ void SetCamera(void)
 	LPDIRECT3DDEVICE9	pDevice = GetDevice();		// デバイスへのポインタ
 	P_CAMERA			pCam = GetCamera();
 	static bool			bCameraSwitch = false;		// 複数カメラ設置時、1Pを描画したらtrue
-	static float		fViewRadian;				// 視野角
 
-		// 視野角の初期値
-		fViewRadian = VIEW_RADIAN;
 	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCam++)
 	{
 		// 設置するカメラが一つなら
@@ -731,9 +733,7 @@ void CameraReset(void)
 
 	for (int nCntCamera = 0; nCntCamera < PLAYERTYPE_MAX; nCntCamera++, pCamera++,pPlayer++)
 	{
-		if (GetJoypadTrigger(nCntCamera, CAMERA_RESETKEY)
-			|| (nCntCamera == PLAYERTYPE_GIRL && GetKeyboardTrigger(DIK_X))
-			|| (nCntCamera == PLAYERTYPE_MOUSE && GetKeyboardTrigger(DIK_RALT)))
+		if (GetJoypadTrigger(nCntCamera, CAM_RESETJOY) || GetKeyboardTrigger(CAM_RESETKEY(nCntCamera)))
 		{
 			if (GetNumPlayer() == 1 && GetActivePlayer() == PLAYERTYPE_MOUSE)
 			{// 1人プレイでネズミがアクティブなら
