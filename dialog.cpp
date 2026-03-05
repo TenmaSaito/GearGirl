@@ -50,6 +50,23 @@ ENUM()
 } LOGTYPE;
 
 //**********************************************************************************
+//*** ログのフェーズの種類 ***
+//**********************************************************************************
+ENUM()
+{
+	LOGPHASE_FIRST,
+	LOGPHASE_TUTORIAL,
+	LOGPHASE_MAX
+} LOGPHASE;
+
+// 列挙型のインクリメント,デクリメント定義
+START_UNABLE
+UNABLE_THISFILE(26812)
+ENUM_INCREMENT_STOP(LOGPHASE, LOGPHASE_FIRST, LOGPHASE_MAX)
+ENUM_DECREMENT_STOP(LOGPHASE, LOGPHASE_FIRST, LOGPHASE_MAX)
+END_UNABLE
+
+//**********************************************************************************
 //*** ダイアログボックス構造体 ***
 //**********************************************************************************
 STRUCT()
@@ -66,13 +83,17 @@ STRUCT()
 STRUCT()
 {
 	const wchar_t *pLog;		// ログの内容
-	LOGTYPE type;		// タイプ
+	LOGTYPE type;				// タイプ
 } Log;	
 
 //**********************************************************************************
 //*** プロトタイプ宣言 ***
 //**********************************************************************************
 LPMESSAGELOG GetMessageLogPointer(void);
+void NowLog(void);
+void NextLog(void);
+void FirstLog(void);
+void TutorialLog(void);
 
 //**********************************************************************************
 //*** グローバル変数 ***
@@ -87,30 +108,42 @@ const Dialog g_aDialogInfo[DIALOG_NUM] =		// ダイアログの情報
 const char *g_apDialogTexture[DIALOG_NUM] =		// テクスチャパス
 {
 	"data/TEXTURE/tutorial_frame.png",
-	"data/TEXTURE/.jpg",
+	"data/TEXTURE/tutorial_frame.png",
 };
 
 Log g_apLog[] =		// ログの情報
 {
 	{L"......街に着いた。", LOGTYPE_GIRL},
-	{L"一先ず、壊れた体を修理したい。", LOGTYPE_GIRL},
-	{L"どこかに修理してくれる人は......", LOGTYPE_GIRL},
 	{L"ん？あんな所に奇妙なお店がある。", LOGTYPE_GIRL},
-	{L"......行ってみよう。", LOGTYPE_GIRL},
+	{L"行ってみよう。", LOGTYPE_GIRL},
+};
+
+Log g_apTutorialLog[] =		// チュートリアルログの情報
+{
+	{L"よぉ。嬢ちゃん。少しお願い聞いてくれねぇか。", LOGTYPE_OLDMAN},
+	{L"この街のシンボルの時計台が壊れちまって、直さなきゃならないんだ。", LOGTYPE_OLDMAN},
+	{L"その為に街から時計台のパーツを集めてきてほしい。お礼は弾むぜ。", LOGTYPE_OLDMAN},
+	{L"......分かった。", LOGTYPE_GIRL},
 };
 
 ID_LOG g_CurrentID = 0;		// 現在のログのID
 ID_LOG g_MaxID;				// ログの最大数
-LPMESSAGELOG g_pLog = NULL;		// メッセージログへのポインタ
+ID_LOG g_MaxTutorialID;		// チュートリアルログの最大数
+LOGPHASE g_logPhase;		// 現在のログフェーズ
+LPMESSAGELOG g_pLog = NULL;	// メッセージログへのポインタ
+bool g_bIsEndTutorial;		// チュートリアルの終了判定
 
 //==================================================================================
 // --- 初期化 ---
 //==================================================================================
 void InitDialog(void)
 {
+	USE_UTIL;
 	// 初期化
 	memcpy(&g_aDialog[0], &g_aDialogInfo[0], sizeof(Dialog) * DIALOG_NUM);
 	g_CurrentID = 0;
+	g_logPhase = LOGPHASE_FIRST;
+	g_bIsEndTutorial = false;
 
 	// 値をコピー
 	for (int nCntDialog = 0; nCntDialog < DIALOG_NUM; nCntDialog++)
@@ -120,6 +153,7 @@ void InitDialog(void)
 
 	// ログの最大数を保存
 	g_MaxID = sizeof g_apLog / sizeof(Log);
+	g_MaxTutorialID = sizeof g_apTutorialLog / sizeof(Log);
 
 	// メッセージログの初期化
 	InitMessageLog(&g_pLog, sizeof(g_pLog));
@@ -142,52 +176,17 @@ void UpdateDialog(void)
 	Log *pLogInfo = &g_apLog[g_CurrentID];
 	const LPMESSAGELOG pMessageLog = GetMessageLogPointer();
 
-	if (GetKeyboardTrigger(DIK_RETURN)
-		|| GetJoypadTrigger(0, JOYKEY_A)
-		|| GetJoypadTrigger(1, JOYKEY_A))
-	{
-		if (GetFade() == FADE_NONE)
-		{
-			if (g_CurrentID >= g_MaxID)
-			{ // ログを流し終わった時、ゲーム開始
-
-			}
-			else
-			{ // ログを進める
-				USE_LIB;
-				WString string;
-				string.AddPointer(pLogInfo->pLog, wcslen(pLogInfo->pLog) + 1);
-				g_CurrentID++;
-
-				SetEnable2DPolygon(g_aDialog[pLogInfo->type].polygon, true);
-				SetEnable2DPolygon(g_aDialog[(pLogInfo->type + 1) % LOGTYPE_MAX].polygon, false);
-				pMessageLog->ReplaceStringW(string.GetHead(),
-					string.GetVectorNum(),
-					KEEP_USING,
-					KEEP_USING_COL,
-					TRUE);
-			}
-		}
-	}
-	else if (GetKeyboardTrigger(DIK_BACK)
+	if (GetKeyboardTrigger(DIK_BACK)
 		|| GetJoypadTrigger(0, JOYKEY_START)
 		|| GetJoypadTrigger(1, JOYKEY_START))
 	{ // チュートリアルスキップ
-		if (GetFade() == FADE_NONE)
-		{
-			if (g_CurrentID < g_MaxID)
-			{
-				USE_LIB;
-
-				WString testString = L"ちょっ、未だ話してる最中だからスキップなんてしないで。";
-
-				pMessageLog->ReplaceStringW(testString.GetHead(),
-					testString.GetVectorNum(),
-					KEEP_USING,
-					KEEP_USING_COL,
-					TRUE);
-			}
-		}
+		g_bIsEndTutorial = true;
+	}
+	else if (GetKeyboardTrigger(DIK_RETURN)
+		|| GetJoypadTrigger(0, JOYKEY_A)
+		|| GetJoypadTrigger(1, JOYKEY_A))
+	{ // ログ再生
+		NowLog();
 	}
 
 	// メッセージログの更新
@@ -261,4 +260,113 @@ void SetDialog(void)
 LPMESSAGELOG GetMessageLogPointer(void)
 {
 	return g_pLog;
+}
+
+//==================================================================================
+// --- ログの文章を更新 ---
+//==================================================================================
+void NowLog(void)
+{
+	switch (g_logPhase)
+	{
+	// 最初のログ
+	case LOGPHASE_FIRST:
+		FirstLog();
+		break;
+
+	// チュートリアル中のログ
+	case LOGPHASE_TUTORIAL:
+		TutorialLog();
+		break;
+
+	default:
+		return;
+	}
+}
+
+//==================================================================================
+// --- ログのインクリメント ---
+//==================================================================================
+void NextLog(void)
+{
+	g_logPhase++;
+	g_CurrentID = 0;
+}
+
+//==================================================================================
+// --- 最初のログ ---
+//==================================================================================
+void FirstLog(void)
+{
+	Log* pLogInfo = &g_apLog[g_CurrentID];
+	const LPMESSAGELOG pMessageLog = GetMessageLogPointer();
+
+	if (GetKeyboardTrigger(DIK_RETURN)
+		|| GetJoypadTrigger(0, JOYKEY_A)
+		|| GetJoypadTrigger(1, JOYKEY_A))
+	{
+		if (g_CurrentID >= g_MaxID)
+		{ // ログを流し終わった時、ゲーム開始
+			NextLog();
+		}
+		else
+		{ // ログを進める
+			USE_LIB;
+			WString string;
+			string.AddPointer(pLogInfo->pLog, wcslen(pLogInfo->pLog) + 1);
+			g_CurrentID++;
+
+			SetEnable2DPolygon(g_aDialog[pLogInfo->type].polygon, true);
+			SetEnable2DPolygon(g_aDialog[(pLogInfo->type + 1) % LOGTYPE_MAX].polygon, false);
+			pMessageLog->ReplaceStringW(string.GetHead(),
+				string.GetVectorNum(),
+				KEEP_USING,
+				KEEP_USING_COL,
+				TRUE);
+		}
+	}
+}
+
+//==================================================================================
+// --- チュートリアルのログ ---
+//==================================================================================
+void TutorialLog(void)
+{
+	Log* pLogInfo = &g_apTutorialLog[g_CurrentID];
+	const LPMESSAGELOG pMessageLog = GetMessageLogPointer();
+
+	if (GetKeyboardTrigger(DIK_RETURN)
+		|| GetJoypadTrigger(0, JOYKEY_A)
+		|| GetJoypadTrigger(1, JOYKEY_A))
+	{
+		if (g_CurrentID >= g_MaxID)
+		{ // ログを流し終わった時、ゲーム開始
+			g_bIsEndTutorial = true;
+			SetEnable2DPolygon(g_aDialog[0].polygon, false);
+			SetEnable2DPolygon(g_aDialog[1].polygon, false);
+		}
+		else
+		{ // ログを進める
+			USE_LIB;
+			WString string;
+			string.AddPointer(pLogInfo->pLog, wcslen(pLogInfo->pLog) + 1);
+			g_CurrentID++;
+
+			SetEnable2DPolygon(g_aDialog[pLogInfo->type].polygon, true);
+			SetEnable2DPolygon(g_aDialog[(pLogInfo->type + 1) % LOGTYPE_MAX].polygon, false);
+			pMessageLog->ReplaceStringW(string.GetHead(),
+				string.GetVectorNum(),
+				KEEP_USING,
+				KEEP_USING_COL,
+				TRUE);
+		}
+	}
+}
+
+//==================================================================================
+// --- ログの終了判定 ---
+//==================================================================================
+bool IsEndDialog(void)
+{
+	return g_bIsEndTutorial;
 }

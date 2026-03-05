@@ -65,8 +65,101 @@ SetWarning("modeldata.hがインクルードされていません。modeldata関連関数は無効化さ
 #define PARENT(...)				: public __VA_ARGS__				// 継承宣言
 #endif
 
+// 2Dポリゴンのバッファ作成用フラグまとめ
 #define CREATE_2DPOLYGON(p) sizeof(VERTEX_2D) * 4, D3DUSAGE_WRITEONLY, FVF_VERTEX_2D, D3DPOOL_MANAGED, &p, NULL	// 2Dフラグまとめ
+
+// 3Dポリゴンのバッファ作成用フラグまとめ
 #define CREATE_3DPOLYGON(p) sizeof(VERTEX_3D) * 4, D3DUSAGE_WRITEONLY, FVF_VERTEX_3D, D3DPOOL_MANAGED, &p, NULL	// 2Dフラグまとめ
+
+// 列挙型のインクリメント宣言(LOOP)
+#define ENUM_INCREMENT_LOOP(type, tmin, tmax)\
+inline type& operator++(type& target)\
+{\
+	if(target >= tmax)\
+	{\
+		return target;\
+	}\
+	else\
+	{\
+		target = (type)((int)target + 1);\
+		return target;\
+	}\
+}\
+\
+inline type operator++(type &target, int)\
+{\
+	type old = target;\
+	++target;\
+	return old;\
+}
+
+// 列挙型のインクリメント宣言(MAX手前でストップ)
+#define ENUM_INCREMENT_STOP(type, tmin, tmax)\
+inline type& operator++(type& target)\
+{\
+	if(target >= tmax)\
+	{\
+		return target;\
+	}\
+	else\
+	{\
+		target =(type)((int)(target) + 1);\
+		return target;\
+	}\
+}\
+\
+inline type operator++(type &target, int)\
+{\
+	type old = target;\
+	++target;\
+	return old;\
+}
+
+// 列挙型のデクリメント宣言(LOOP)
+#define ENUM_DECREMENT_LOOP(type, tmin, tmax)\
+inline type& operator--(type& target)\
+{\
+	if(target < tmin)\
+	{\
+		target = (type)((int)tmax - 1);\
+		return target;\
+	}\
+	else\
+	{\
+		target = (type)((int)target - 1);\
+		return target;\
+	}\
+}\
+\
+inline type operator--(type &target, int)\
+{\
+	type old = target;\
+	--target;\
+	return old;\
+}
+
+// 列挙型のデクリメント宣言(MAX手前でストップ)
+#define ENUM_DECREMENT_STOP(type, tmin, tmax)\
+inline type& operator--(type& target)\
+{\
+	if(target < tmin)\
+	{\
+		target = tmin;\
+		return target;\
+	}\
+	else\
+	{\
+		target = (type)((int)target - 1);\
+		return target;\
+	}\
+}\
+\
+inline type operator--(type &target, int)\
+{\
+	type old = target;\
+	--target;\
+	return old;\
+}
 
 #define USE_UTIL				using namespace MyMathUtil			// MyMathUtilの使用宣言
 #define USE_LIB					using namespace MyLib				// MyLibの使用宣言

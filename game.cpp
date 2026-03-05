@@ -155,6 +155,8 @@ void InitGame(void)
 	SetEnablePrompt(true, g_nIdxShopPrompt);
 
 	SetEnableMap(true);
+
+	SetDialog();
 }
 
 //==================================================================================
@@ -316,12 +318,12 @@ void UpdateGame(void)
 		/*** ダイアログの更新 ***/
 		UpdateDialog();
 
-		if (g_nCounterGame % 60 == 0)
+		if (IsEndDialog() == true)
 		{
 			AddTimer(-1);
 		}
 
-		if (GetKeyboardTrigger(DIK_5) || GetJoypadTrigger(0, JOYKEY_BACK))
+		if ((GetKeyboardTrigger(DIK_5) || GetJoypadTrigger(0, JOYKEY_BACK)) && IsEndDialog() == true)
 		{
 			SetEnableUImenu(!GetEnableUImenu(), 0);
 		}
@@ -403,16 +405,25 @@ void DrawGame(void)
 	pDevice->SetViewport(&viewport);
 
 	/*** マップの描画 ***/
-	DrawMap();
+	if (IsEndDialog() == true)
+	{
+		DrawMap();
+	}
 
 	// VERTEX_2D ============================================
 	/*** Aの描画 ***/
 
 	/*** タイマーの描画 ***/
-	DrawTimer();
+	if (IsEndDialog() == true)
+	{
+		DrawTimer();
+	}
 
 	/*** UIアームの描画 ***/
-	DrawUIarm();
+	if (IsEndDialog() == true)
+	{
+		DrawUIarm();
+	}
 	
 	/*** UIメニュー描画 ***/
 	DrawUImenu();
@@ -420,8 +431,11 @@ void DrawGame(void)
 	/*** 2Dポリゴンの描画 ***/
 	Draw2DPolygon();
 
-	/*** ダイアログの描画 ***/
-	DrawDialog();
+	if (IsEndDialog() == false)
+	{
+		/*** ダイアログの描画 ***/
+		DrawDialog();
+	}
 
 	/*** UIアイテム描画 ***/
 	DrawUIItem();

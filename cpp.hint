@@ -7,3 +7,5 @@
 #define START_UNABLE __pragma(warning(push))
 #define END_UNABLE __pragma(warning(pop))
 #define FLOATTOINT
+#define ENUM_DECREMENT_STOP(type, tmin, tmax) type& operator--(type& target){ if(target < tmin) { target = tmin; return target; } else { target = (type)((int)target - 1); return target; }}inline type operator--(type &target, int){ type old = target; --target; return old;}
+#define ENUM_INCREMENT_STOP(type, tmin, tmax) inline type& operator++(type& target){ if(target >= tmax) { return target; } else { target =(type)((int)(target) + 1); return target; }}inline type operator++(type &target, int){ type old = target; ++target; return old;}

@@ -38,6 +38,8 @@
 #define MAX_CAMERA_UI			(64)					// インターフェース用のカメラ最大数
 #define UICAMERA_POSV			vec3(0.0f,50.0f,-50.0f)	// インターフェース用カメラの座標
 #define UICAMERA_POSR			vec3(0.0f,0.0f,0.0f)
+#define CAMERA_UPLIM			(2.8f)					// カメラの上限角度
+#define CAMERA_LOWLIM			(1.3f)					// カメラの下限角度
 
 #define SetUiCameraCenter(A,size)		SetUICamera(vec3(A.x - (size.x * 0.5f),A.y - (size.y * 0.5f),A.z),size)
 
