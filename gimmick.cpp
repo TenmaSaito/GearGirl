@@ -106,7 +106,7 @@ GIMMICK_DATA g_aGimmickData[GIMMICKTYPE_MAX] =
 {
 	{"data/Scripts/bigbutton_g.txt", COULD_PLAYER_GIRL, D3DXVECTOR3(535, 100, -630), D3DXVECTOR3(0, 0, 0), 0.0f},
 	{"data/Scripts/smallbutton_g.txt", COULD_PLAYER_MOUSE, D3DXVECTOR3(573, 100, -900), D3DXVECTOR3(0, 0, 0), 0.0f},
-	{"data/Scripts/fallenTree.txt", COULD_PLAYER_GIRL, D3DXVECTOR3(1695, 100, 460), D3DXVECTOR3(0, CParamFloat::HALFPI, 0), 50.0f},
+	{"data/Scripts/fallenTree.txt", COULD_PLAYER_GIRL, D3DXVECTOR3(1695, 100, 460), D3DXVECTOR3(0, CParamFloat::HALFPI, 0), 30.0f},
 	{"data/Scripts/fallenTree.txt", COULD_PLAYER_GIRL, D3DXVECTOR3(1920, 100, 630), D3DXVECTOR3(0, CParamFloat::HALFPI, 0), 30.0f},
 	{"data/Scripts/fallenTree.txt", COULD_PLAYER_GIRL, D3DXVECTOR3(1750, 100, 400), D3DXVECTOR3(0, 0, 0), 30.0f},
 	{"data/Scripts/station_g.txt", COULD_PLAYER_ALL, D3DXVECTOR3(550, 100, -970), D3DXVECTOR3(0, D3DX_PI + CParamFloat::HALFPI, 0), 200.0f },
@@ -200,7 +200,9 @@ void UpdateGimmick(void)
 		}
 
 		LPGIMMICK pTarget = &g_aGimmick[GIMMICKTYPE_SMALLBUTTON];
-		if (pTarget->bClear == true && pGimmick->bClear == false)
+		LPGIMMICK pTargetBig = &g_aGimmick[GIMMICKTYPE_BIGBUTTON];
+
+		if (pTarget->bClear == true && pTargetBig->bClear == true && pGimmick->bClear == false && pGimmick->myType == GIMMICKTYPE_CLOSEDDOOR)
 		{ // ネズミのボタンが押されたとき、扉ギミックをクリア判定
 			pGimmick->bClear = true;
 			SetMotionType(MOTIONTYPE_ACTION, false, 0, GIMMICKTYPE_CLOSEDDOOR);

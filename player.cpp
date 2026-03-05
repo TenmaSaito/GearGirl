@@ -9,6 +9,7 @@
 #include "main.h"
 #include "camera.h"
 #include "debugproc.h"
+#include "dialog.h"
 #include "effect.h"
 #include "game.h"
 #include "gimmick.h"
@@ -104,7 +105,7 @@ void InitPlayer(void)
 		g_aPlayer[nCntPlayer].posOri = PLAYER_POSDEF;
 		g_aPlayer[nCntPlayer].pos = PLAYER_POSDEF;
 		g_aPlayer[nCntPlayer].posOld = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		g_aPlayer[nCntPlayer].rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		g_aPlayer[nCntPlayer].rot = D3DXVECTOR3(0.0f, D3DX_PI, 0.0f);
 		g_aPlayer[nCntPlayer].bDisp = true;
 		g_aPlayer[nCntPlayer].bJump = false;
 		g_aPlayer[nCntPlayer].nCounterMotion = 0;
@@ -209,7 +210,6 @@ void UpdatePlayer(void)
 	Player* pMouse = &g_aPlayer[1];
 
 	Camera* pCamera = GetCamera();
-	bool bDash;
 
 	pPlayer->bUseLandMotion = false;
 
@@ -220,74 +220,77 @@ void UpdatePlayer(void)
 		// 現在位置の保存
 		pPlayer->posOld = pPlayer->pos;
 
-		// 左スティックを押し込むとダッシュ状態(速度)に
-		if (nCntPlayer == PLAYERTYPE_GIRL && GetJoypadTrigger(0, JOYKEY_LEFT_PUSH) == true)
+		if (IsEndDialog() == false)
 		{
-			pPlayer->bDash = true;
-			pPlayer->fMove = PLAYER_MOVE * 1.5f;
+			// 左スティックを押し込むとダッシュ状態(速度)に
+			if (nCntPlayer == PLAYERTYPE_GIRL && GetJoypadTrigger(0, JOYKEY_LEFT_PUSH) == true)
+			{
+				pPlayer->bDash = pPlayer->bDash ^ true;
+				pPlayer->fMove = PLAYER_MOVE * 1.5f;
+			}
+			else if (GetKeyboardTrigger(DIK_L) == true)
+			{// キーボードだとLキー
+				pPlayer->bDash = pPlayer->bDash ^ true;
+				pPlayer->fMove = PLAYER_MOVE * 1.5f;
+			}
+
+			if (pPlayer->bDash == false)
+			{
+				pPlayer->fMove = PLAYER_MOVE;
+			}
+
+			// === ２人プレイもしくはアクティブなプレイヤーの処理 === //
+			if (GetNumPlayer() == 2 || GetActivePlayer() == PlayerType(nCntPlayer))
+			{
+				ActionPlayer((PlayerType)nCntPlayer, pPlayer);
+
+				MovePlayer((PlayerType)nCntPlayer);	// 移動に関する処理
+
+				JumpPlayer((PlayerType)nCntPlayer);	// ジャンプに関する処理
+
+				MouseKeepUp();						// 少女にネズミが追従する処理
+			}
+
+			// === 少女操作時のみの処理 === //
+			if (nCntPlayer == PLAYERTYPE_GIRL)
+			{
+				// 腕の切り替え
+				UpdateArm();
+
+				// カタパルトを起動した後の処理
+				ShotMouse();
+			}
+			else if (nCntPlayer == PLAYERTYPE_MOUSE && GetNumPlayer() == 1 && g_bShotMouse == false)
+			{
+				// 少女にネズミが追従する処理
+				MouseKeepUp();
+			}
+
+			// === 投げモーション以外時は常時再生(投げ待機状態をキープするため) === //
+			if (pPlayer->state != PLAYERSTATE_THROWWAITING)
+			{
+				// モーションの更新
+				UpdateMotion((PlayerType)nCntPlayer);
+			}
+
+			// === ネズミ射出の予測軌跡の描画 === //
+			if (pPlayer->state == PLAYERSTATE_THROWWAITING && nCntPlayer == PLAYERTYPE_GIRL)
+			{
+				// 注視点までのベクトルをだす
+				D3DXVECTOR3 vec = pCamera->posR - pCamera->posV;
+
+				// 出したベクトルを正規化
+				D3DXVec3Normalize(&vec, &vec);
+
+				g_Effectmove.x = vec.x;
+				g_Effectmove.z = vec.z;
+				g_Effectmove.y = 5.5f;
+
+				// エフェクトの描画
+				SetParabola(g_aPlayer[PLAYERTYPE_MOUSE].pos, g_Effectmove, D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f), 2.0f, 2.0f, 1.0f, true);
+			}
 		}
-		else if (GetKeyboardTrigger(DIK_L) == true)
-		{
-			bDash = pPlayer->bDash;
-			pPlayer->bDash = true;
-			pPlayer->fMove = PLAYER_MOVE * 1.5f;
-		}
 
-		if (pPlayer->bDash == false)
-		{
-			pPlayer->fMove = PLAYER_MOVE;
-		}
-
-		// === ２人プレイもしくはアクティブなプレイヤーの処理 === //
-		if (GetNumPlayer() == 2 || GetActivePlayer() == PlayerType(nCntPlayer))
-		{
-			ActionPlayer((PlayerType)nCntPlayer, pPlayer);
-
-			MovePlayer((PlayerType)nCntPlayer);	// 移動に関する処理
-
-			JumpPlayer((PlayerType)nCntPlayer);	// ジャンプに関する処理
-
-			MouseKeepUp();						// 少女にネズミが追従する処理
-		}
-
-		// === 少女操作時のみの処理 === //
-		if (nCntPlayer == PLAYERTYPE_GIRL)
-		{
-			// 腕の切り替え
-			UpdateArm();
-
-			// カタパルトを起動した後の処理
-			ShotMouse();
-		}
-		else if (nCntPlayer == PLAYERTYPE_MOUSE && GetNumPlayer() == 1 && g_bShotMouse == false)
-		{
-			// 少女にネズミが追従する処理
-			MouseKeepUp();
-		}
-
-		// === 投げモーション以外時は常時再生(投げ待機状態をキープするため) === //
-		if (pPlayer->state != PLAYERSTATE_THROWWAITING)
-		{
-			// モーションの更新
-			UpdateMotion((PlayerType)nCntPlayer);
-		}
-
-		// === ネズミ射出の予測軌跡の描画 === //
-		if (pPlayer->state == PLAYERSTATE_THROWWAITING && nCntPlayer == PLAYERTYPE_GIRL)
-		{
-			// 注視点までのベクトルをだす
-			D3DXVECTOR3 vec = pCamera->posR - pCamera->posV;
-
-			// 出したベクトルを正規化
-			D3DXVec3Normalize(&vec, &vec);
-
-			g_Effectmove.x = vec.x;
-			g_Effectmove.z = vec.z;
-			g_Effectmove.y = 5.5f;
-
-			// エフェクトの描画
-			SetParabola(g_aPlayer[PLAYERTYPE_MOUSE].pos, g_Effectmove, D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f), 2.0f, 2.0f, 1.0f, true);
-		}
 
 		// === 何もしていない場合(何も入力されていない場合) === //
 		if ((pPlayer->motionType != MOTIONTYPE_ACTION
@@ -798,8 +801,13 @@ void ActionPlayer(PlayerType nPlayer, Player* pPlayer)
 				// CUT
 			case ARMTYPE_CUT:
 
-				SetMotionType(MOTIONTYPE_CUTTING, true, 10, nPlayer);
-				g_nMotionCounter = 8;
+				if (g_aPlayer[PLAYERTYPE_GIRL].pos.z >= 200.0f && g_aPlayer[PLAYERTYPE_GIRL].pos.z <= 700.0f
+					&& g_aPlayer[PLAYERTYPE_GIRL].pos.x >= 1670.0f && g_aPlayer[PLAYERTYPE_GIRL].pos.x <= 2160.0f)
+				{// 教会の敷地内でのみ使用可能
+					SetMotionType(MOTIONTYPE_CUTTING, true, 10, nPlayer);
+					g_nMotionCounter = 8;
+				}
+
 				break;
 
 			default:
@@ -1250,47 +1258,51 @@ void JumpPlayer(PlayerType nPlayer)
 	// プレイヤー構造体をポインタ化
 	Player* pPlayer = &g_aPlayer[nPlayer];
 
-	if (nPlayer == 0)
-	{// 少女
-		// ジャンプする
-		if ((GetKeyboardTrigger(DIK_SPACE) == true || GetJoypadTrigger(0, JOYKEY_A)) && pPlayer->bJump == false)
-		{
-			PlaySound(SOUND_LABEL_SE_G_JUMP);
-			pPlayer->state = PLAYERSTATE_JUMP;
-			SetMotionType(MOTIONTYPE_JUMP, true, 20, nPlayer);
-
-			pPlayer->move.y = JUMP_FORCE;
-			pPlayer->bJump = true;
-		}
-	}
-	else
-	{// ネズミ
-		// ジャンプする
-		if (g_nNumPlayer == 2)
-		{// 2人プレイ時
-			if ((GetKeyboardTrigger(DIK_RSHIFT) == true || GetJoypadTrigger(nPlayer, JOYKEY_A)) && pPlayer->bJump == false)
+	if (IsDispPrompt(GetIdxShopPrompt()) == false)
+	{
+		if (nPlayer == 0)
+		{// 少女
+			// ジャンプする
+			if ((GetKeyboardTrigger(DIK_SPACE) == true || GetJoypadTrigger(0, JOYKEY_A)) && pPlayer->bJump == false)
 			{
-				PlaySound(SOUND_LABEL_SE_G_MOUSEJUMP);
+				PlaySound(SOUND_LABEL_SE_G_JUMP);
 				pPlayer->state = PLAYERSTATE_JUMP;
-				SetMotionType(MOTIONTYPE_JUMP, true, 10, nPlayer);
+				SetMotionType(MOTIONTYPE_JUMP, true, 20, nPlayer);
 
 				pPlayer->move.y = JUMP_FORCE;
 				pPlayer->bJump = true;
 			}
 		}
 		else
-		{// 1人プレイ時
-			if ((GetKeyboardTrigger(DIK_SPACE) == true || GetJoypadTrigger(0, JOYKEY_A)) && pPlayer->bJump == false)
-			{
-				PlaySound(SOUND_LABEL_SE_G_MOUSEJUMP);
-				pPlayer->state = PLAYERSTATE_JUMP;
-				SetMotionType(MOTIONTYPE_JUMP, true, 10, nPlayer);
+		{// ネズミ
+			// ジャンプする
+			if (g_nNumPlayer == 2)
+			{// 2人プレイ時
+				if ((GetKeyboardTrigger(DIK_RSHIFT) == true || GetJoypadTrigger(nPlayer, JOYKEY_A)) && pPlayer->bJump == false)
+				{
+					PlaySound(SOUND_LABEL_SE_G_MOUSEJUMP);
+					pPlayer->state = PLAYERSTATE_JUMP;
+					SetMotionType(MOTIONTYPE_JUMP, true, 10, nPlayer);
 
-				pPlayer->move.y = JUMP_FORCE;
-				pPlayer->bJump = true;
+					pPlayer->move.y = JUMP_FORCE;
+					pPlayer->bJump = true;
+				}
+			}
+			else
+			{// 1人プレイ時
+				if ((GetKeyboardTrigger(DIK_SPACE) == true || GetJoypadTrigger(0, JOYKEY_A)) && pPlayer->bJump == false)
+				{
+					PlaySound(SOUND_LABEL_SE_G_MOUSEJUMP);
+					pPlayer->state = PLAYERSTATE_JUMP;
+					SetMotionType(MOTIONTYPE_JUMP, true, 10, nPlayer);
+
+					pPlayer->move.y = JUMP_FORCE;
+					pPlayer->bJump = true;
+				}
 			}
 		}
 	}
+
 }
 
 //================================================================================================================
