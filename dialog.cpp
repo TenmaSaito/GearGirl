@@ -424,13 +424,25 @@ void MovableTutorial(void)
 			|| GetJoypadTrigger(PLAYERTYPE_GIRL, JOYKEY_A))
 		{ // 移動中チュートリアル終了 -> ログ表示
 			g_bIsMovableTutorial = false;
+			g_bIsShowAnyDialog = true;
 			NextLog();
 		}
 	}
 
 	if (g_IdxLeftStick == -1)
 	{
+		const LPMESSAGELOG pMessageLog = GetMessageLogPointer();
 
+		USE_LIB;
+		WString string = L"";
+
+		SetEnable2DPolygon(g_aDialog[0].polygon, false);
+		SetEnable2DPolygon(g_aDialog[1].polygon, false);
+		pMessageLog->ReplaceStringW(string.GetHead(),
+			string.GetVectorNum(),
+			KEEP_USING,
+			KEEP_USING_COL,
+			TRUE);
 	}
 
 	if (g_IdxRightStick == -1)
