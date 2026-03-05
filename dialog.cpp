@@ -134,6 +134,7 @@ ID_LOG g_MaxTutorialID;		// チュートリアルログの最大数
 LOGPHASE g_logPhase;		// 現在のログフェーズ
 LPMESSAGELOG g_pLog = NULL;	// メッセージログへのポインタ
 bool g_bIsEndTutorial;		// チュートリアルの終了判定
+bool g_bIsShowAnyDialog;	// 何か一つでもダイアログが表示されているか
 
 //==================================================================================
 // --- 初期化 ---
@@ -146,6 +147,7 @@ void InitDialog(void)
 	g_CurrentID = 0;
 	g_logPhase = LOGPHASE_FIRST;
 	g_bIsEndTutorial = false;
+	g_bIsShowAnyDialog = false;
 
 	// 値をコピー
 	for (int nCntDialog = 0; nCntDialog < DIALOG_NUM; nCntDialog++)
@@ -250,6 +252,7 @@ void SetDialog(void)
 		TRUE);
 
 	g_CurrentID++;
+	g_bIsShowAnyDialog = true;
 }
 
 //==================================================================================
@@ -336,6 +339,8 @@ void TutorialLog(void)
 		&& pPlayer->pos != SHOP_POS)
 	{
 		pPlayer->pos = SHOP_POS;
+		pPlayer++;
+		pPlayer->pos = SHOP_POS;
 	}
 
 	if (GetCommonFade() != FADE_NONE)
@@ -387,6 +392,14 @@ void TutorialLog(void)
 				TRUE);
 		}
 	}
+}
+
+//==================================================================================
+// --- ログの終了判定 ---
+//==================================================================================
+bool IsShowAnyDialog(void)
+{
+	return
 }
 
 //==================================================================================
