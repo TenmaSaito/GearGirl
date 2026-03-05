@@ -149,6 +149,7 @@ void UpdateCamera(void)
 	{
 		g_bCameraDebug = g_bCameraDebug ^ 1;
 	}
+
 	if(g_bCameraDebug)
 		PrintDebugProc("ON\n");
 	else
@@ -159,13 +160,11 @@ void UpdateCamera(void)
 	P_CAMERA	pCamera;
 	int			nActivePlayer = GetActivePlayer();
 
-#ifdef _DEBUG
 	// ƒvƒŒƒCƒ„[”‚ª•Ï‚í‚Á‚½‚ç
 	if (g_nNumEnableCamera != GetNumPlayer())
 	{
 		SetCameraOption();
 	}
-#endif
 
 	//**************************************************************
 	// ‰æ–Ê
@@ -466,10 +465,10 @@ void CameraOrbit(P_CAMERA pCamera)
 
 	//**************************************************************
 	// Šp“x³‹K‰»
-	if (pCamera->rot.x < 0.5f)
-		pCamera->rot.x = 0.5f;
-	else if (2.8f < pCamera->rot.x)
-		pCamera->rot.x = 2.8f;
+	if (pCamera->rot.x < CAMERA_LOWLIM)
+		pCamera->rot.x = CAMERA_LOWLIM;
+	else if (CAMERA_UPLIM < pCamera->rot.x)
+		pCamera->rot.x = CAMERA_UPLIM;
 
 	if (pCamera->rot.y < -D3DX_PI)
 		pCamera->rot.y = D3DX_PI;
