@@ -181,14 +181,24 @@ void UpdateCamera(void)
 	// カメラ動かす処理
 	pCamera = GetCamera();
 
-	// シングルプレイ || 少女アクティブ
-	if (GetActivePlayer() == CAMERATYPE_PLAYER_ONE)
+	// シングルプレイ && ネズミアクティブでない
+	if (GetNumPlayer() == 1 && GetActivePlayer() != CAMERATYPE_PLAYER_TWO)
 	{
 		CameraOrbit(pCamera);		// 回転
+
+		if (GetPlayer()->bDash)
+		{
+			if (pCamera->fViewRadian <= VIEW_RADIAN * 1.5f)
+				pCamera->fViewRadian += 1.0f;
+		}
+		else if (VIEW_RADIAN < pCamera->fViewRadian)
+		{
+			pCamera->fViewRadian -= 1.0f;
+		}
 	}
 	
 	// マルチプレイ || ネズミアクティブ
-	if(GetActivePlayer() == CAMERATYPE_PLAYER_TWO || GetNumPlayer() == 2)
+	if(GetNumPlayer() == 2 || GetActivePlayer() == CAMERATYPE_PLAYER_TWO)
 	{
 		pCamera++;					// 2Pのカメラにする
 		CameraOrbit(pCamera);
@@ -217,8 +227,6 @@ void UpdateCamera(void)
 			}
 		}
 	}
-	pCamera = GetCamera();
-	PrintDebugProc("\nCAMERA rot.y %f\nPLAYER rot,y %f\n", pCamera->rot.y, GetPlayer()->rot.y);
 }
 
 //==============================================================
@@ -512,7 +520,6 @@ void SetCamera(void)
 				// アクティブプレイヤーがネズミなら
 				if (g_nActivePlayer == PLAYERTYPE_MOUSE && nCntCamera != PLAYERTYPE_MOUSE)
 				{
-					fViewRadian = VIEW_RADIAN_MOUSE;
 					continue;
 				}
 			}
@@ -521,7 +528,6 @@ void SetCamera(void)
 		else if (bCameraSwitch == true && nCntCamera != PLAYERTYPE_MOUSE)
 		{// 2P用カメラ設置
 			bCameraSwitch = false;
-			fViewRadian = VIEW_RADIAN_MOUSE;
 			continue;
 		}
 		else if(nCntCamera == PLAYERTYPE_GIRL)
@@ -531,9 +537,6 @@ void SetCamera(void)
 
 		if (pCam->bUse)
 		{
-			// 視野角保存
-			pCam->fViewRadian = fViewRadian;
-
 			//**************************************************************
 			// ビューポートの設定
 			pDevice->SetViewport(&pCam->viewport);
@@ -544,11 +547,11 @@ void SetCamera(void)
 
 			// プロジェクションマトリックスを作成
 			D3DXMatrixPerspectiveFovLH(&pCam->mtxProjection,
-				D3DXToRadian(fViewRadian),					// 視野角
+				D3DXToRadian(pCam->fViewRadian),					// 視野角
 				(float)pCam->viewport.Width / (float)pCam->viewport.Height,	// アスペクト比
 				pCam->fViewMin,								// 最短描画距離
 				pCam->fViewMax);							// 最大描画距離
-
+			PrintDebugProc("\nCamera %d,viewRadian %f", nCntCamera, pCam->fViewRadian);
 			// プロジェクションマトリックスを設定
 			pDevice->SetTransform(D3DTS_PROJECTION, &pCam->mtxProjection);
 
@@ -582,7 +585,7 @@ void SetCamera(void)
 }
 
 //=========================================================================================
-// カメラ設置
+// UIカメラ設置
 //=========================================================================================
 void SetUICamera(vec3 viewTopLeft, vec2 size)
 {
