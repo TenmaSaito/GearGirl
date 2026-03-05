@@ -391,6 +391,8 @@ void TutorialLog(void)
 		if (g_CurrentID >= g_MaxID)
 		{ // ログを流し終わった時、ゲーム開始
 			g_bIsEndTutorial = true;
+			g_bIsShowAnyDialog = false;
+			g_bIsMovableTutorial = false;
 			SetEnable2DPolygon(g_aDialog[0].polygon, false);
 			SetEnable2DPolygon(g_aDialog[1].polygon, false);
 		}
