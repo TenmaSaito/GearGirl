@@ -400,7 +400,7 @@ void UpdatePlayer(void)
 		if (GetJoypadTrigger(0, JOYKEY_LB) == true || GetKeyboardTrigger(DIK_Q) == true)
 		{
 			// 駅の範囲内なら切り替えを行わないようにする
-			if (g_aPlayer[PLAYERTYPE_MOUSE].pos.z <= -770.0f && g_aPlayer[PLAYERTYPE_MOUSE].pos.x <= 700.0f)
+			if (g_aPlayer[PLAYERTYPE_MOUSE].pos.z <= -774.0f && g_aPlayer[PLAYERTYPE_MOUSE].pos.x <= 700.0f)
 			{
 				// ここなら切り替え可能
 			}
@@ -769,24 +769,27 @@ void ActionPlayer(PlayerType nPlayer, Player* pPlayer)
 
 				// CATAPULT
 			case ARMTYPE_CATAPULT:
-				if (pPlayer->state != PLAYERSTATE_THROWWAITING && GetNumPlayer() == 1)
-				{
-					PlaySound(SOUND_LABEL_SE_G_THROW);
-					SetMotionType(MOTIONTYPE_ACTION, true, 10, nPlayer);
-					g_nMotionCounter = 10;
-					g_bShotMouse = true;
-				}
-				else if (pPlayer->state != PLAYERSTATE_THROWWAITING && GetNumPlayer() == 2)
-				{
-					if (g_aPlayer[PLAYERTYPE_MOUSE].pos.x - g_aPlayer[PLAYERTYPE_GIRL].pos.x <= 20.0f
-						&& g_aPlayer[PLAYERTYPE_MOUSE].pos.x - g_aPlayer[PLAYERTYPE_GIRL].pos.x >= -20.0f
-						&& g_aPlayer[PLAYERTYPE_MOUSE].pos.z - g_aPlayer[PLAYERTYPE_GIRL].pos.z <= 20.0f
-						&& g_aPlayer[PLAYERTYPE_MOUSE].pos.z - g_aPlayer[PLAYERTYPE_GIRL].pos.z >= -20.0f)
+				if (pPlayer->pos.x < 700.0f && pPlayer->pos.z < -510.0f)
+				{// 駅のギミック周辺でしか使えないように設定
+					if (pPlayer->state != PLAYERSTATE_THROWWAITING && GetNumPlayer() == 1)
 					{
 						PlaySound(SOUND_LABEL_SE_G_THROW);
 						SetMotionType(MOTIONTYPE_ACTION, true, 10, nPlayer);
 						g_nMotionCounter = 10;
 						g_bShotMouse = true;
+					}
+					else if (pPlayer->state != PLAYERSTATE_THROWWAITING && GetNumPlayer() == 2)
+					{
+						if (g_aPlayer[PLAYERTYPE_MOUSE].pos.x - g_aPlayer[PLAYERTYPE_GIRL].pos.x <= 20.0f
+							&& g_aPlayer[PLAYERTYPE_MOUSE].pos.x - g_aPlayer[PLAYERTYPE_GIRL].pos.x >= -20.0f
+							&& g_aPlayer[PLAYERTYPE_MOUSE].pos.z - g_aPlayer[PLAYERTYPE_GIRL].pos.z <= 20.0f
+							&& g_aPlayer[PLAYERTYPE_MOUSE].pos.z - g_aPlayer[PLAYERTYPE_GIRL].pos.z >= -20.0f)
+						{
+							PlaySound(SOUND_LABEL_SE_G_THROW);
+							SetMotionType(MOTIONTYPE_ACTION, true, 10, nPlayer);
+							g_nMotionCounter = 10;
+							g_bShotMouse = true;
+						}
 					}
 				}
 
@@ -794,6 +797,7 @@ void ActionPlayer(PlayerType nPlayer, Player* pPlayer)
 
 				// CUT
 			case ARMTYPE_CUT:
+
 				SetMotionType(MOTIONTYPE_CUTTING, true, 10, nPlayer);
 				g_nMotionCounter = 8;
 				break;
@@ -1693,11 +1697,11 @@ void RotRepair(PlayerType nPlayer)
 	pPlayer->rot.y += pPlayer->rotDiff.y * PLAYER_INI;
 
 	// もし、現在の角度がπを超えたら
-	if (pPlayer->rot.y > D3DX_PI + Camerarot.y)
+	if (pPlayer->rot.y > D3DX_PI)
 	{
 		pPlayer->rot.y -= D3DX_PI * 2;
 	}
-	else if (pPlayer->rot.y < -D3DX_PI + Camerarot.y)
+	else if (pPlayer->rot.y < -D3DX_PI)
 	{
 		pPlayer->rot.y += D3DX_PI * 2;
 	}
@@ -1767,28 +1771,31 @@ void MouseKeepUp(void)
 // =================================================
 void UpdateArm(void)
 {
-	// アームの切り替え処理
-	if (GetKeyboardTrigger(DIK_9))
+	if (g_aPlayer[PLAYERTYPE_GIRL].state != PLAYERSTATE_THROWWAITING)
 	{
-		int nArm = g_armPlayer;
-		nArm--;
-		if (FAILED(CheckIndex(ARMTYPE_MAX, nArm, 0)))
+		// アームの切り替え処理
+		if (GetKeyboardTrigger(DIK_9))
 		{
-			nArm = ARMTYPE_MAX - 1;
-		}
+			int nArm = g_armPlayer;
+			nArm--;
+			if (FAILED(CheckIndex(ARMTYPE_MAX, nArm, 0)))
+			{
+				nArm = ARMTYPE_MAX - 1;
+			}
 
-		g_armPlayer = (ArmType)nArm;
-	}
-	else if (GetKeyboardTrigger(DIK_0) == true || GetJoypadTrigger(0, JOYKEY_RB) == true)
-	{
-		int nArm = g_armPlayer;
-		nArm++;
-		if (FAILED(CheckIndex(ARMTYPE_MAX, nArm)))
+			g_armPlayer = (ArmType)nArm;
+		}
+		else if (GetKeyboardTrigger(DIK_0) == true || GetJoypadTrigger(0, JOYKEY_RB) == true)
 		{
-			nArm = 0;
-		}
+			int nArm = g_armPlayer;
+			nArm++;
+			if (FAILED(CheckIndex(ARMTYPE_MAX, nArm)))
+			{
+				nArm = 0;
+			}
 
-		g_armPlayer = (ArmType)nArm;
+			g_armPlayer = (ArmType)nArm;
+		}
 	}
 }
 
@@ -1838,6 +1845,7 @@ void ShotMouse(void)
 				pPlayer->state = PLAYERSTATE_THROWWAITING;
 				pCamera->rot.y = pPlayer->rot.y - D3DX_PI;
 
+				// 角度補正
 				if (pCamera->rot.y > D3DX_PI)
 				{
 					pCamera->rot.y -= D3DX_PI * 2.0f;

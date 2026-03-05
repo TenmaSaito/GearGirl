@@ -108,12 +108,6 @@ END_SKYSET
 #------------------------------------------------------------------------------
 # 雲情報
 #------------------------------------------------------------------------------
-#CLOUDSET
-#	TEXTYPE = 1		# テクスチャのインデックス
-#	SIZE = 30		# 半径
-#	HEIGHT = 100
-#	BLOCK  = 15 15 	# 分割数
-#END_CLOUDSET
 
 #------------------------------------------------------------------------------
 # 山情報
@@ -199,13 +193,7 @@ FIELDSET
 	SIZE = 80 55		# 大きさ(Ｘ/Ｚ)
 END_FIELDSET
 
-FIELDSET
-	TEXTYPE = 5			# テクスチャの種類
-	POS = 2150 100.1 -350	# 位置
-	ROT = 0 0 0			# 向き
-	BLOCK = 1 30		# 分割数(Ｘ/Ｚ)
-	SIZE = 80 80		# 大きさ(Ｘ/Ｚ)
-END_FIELDSET
+
 
 #---横-----------------------------------
 FIELDSET
@@ -514,31 +502,6 @@ MODELSET
 	ROT = 0 0 0
 	SHADOW = 0
 END_MODELSET
-
-
-MODELSET
-	TYPE = 5	# [5]桟橋
-	POS = -100 100 -800
-	ROT = 0 0 0
-	SHADOW = 0
-END_MODELSET
-
-
-MODELSET
-	TYPE = 6	# [6]とまり場
-	POS = -200 100 -800
-	ROT = 0 0 0
-	SHADOW = 0
-END_MODELSET
-
-
-MODELSET
-	TYPE = 7	# [7]橋
-	POS = -280 0 -1000
-	ROT = 0 0 0
-	SHADOW = 0
-END_MODELSET
-
 
 #---便利屋------------------------------------
 MODELSET
@@ -1460,27 +1423,6 @@ END_MODELSET
 #---街灯18------------------------------------
 MODELSET
 	TYPE = 12	# [12]街灯
-	POS = 2115 100 610
-	ROT = 0 0 0
-	SHADOW = 0
-END_MODELSET
-
-MODELSET
-	TYPE = 12	# [12]街灯
-	POS = 2115 100 455
-	ROT = 0 0 0
-	SHADOW = 0
-END_MODELSET
-
-MODELSET
-	TYPE = 12	# [12]街灯
-	POS = 2115 100 300
-	ROT = 0 0 0
-	SHADOW = 0
-END_MODELSET
-
-MODELSET
-	TYPE = 12	# [12]街灯
 	POS = 2115 100 -80
 	ROT = 0 0 0
 	SHADOW = 0
@@ -1546,26 +1488,7 @@ END_MODELSET
 #---------------------------------------
 
 #---街灯20------------------------------------
-MODELSET
-	TYPE = 12	# [12]街灯
-	POS = 2185 100 610
-	ROT = 0 0 0
-	SHADOW = 0
-END_MODELSET
 
-MODELSET
-	TYPE = 12	# [12]街灯
-	POS = 2185 100 455
-	ROT = 0 0 0
-	SHADOW = 0
-END_MODELSET
-
-MODELSET
-	TYPE = 12	# [12]街灯
-	POS = 2185 100 300
-	ROT = 0 0 0
-	SHADOW = 0
-END_MODELSET
 
 MODELSET
 	TYPE = 12	# [12]街灯

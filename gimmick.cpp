@@ -106,7 +106,9 @@ GIMMICK_DATA g_aGimmickData[GIMMICKTYPE_MAX] =
 {
 	{"data/Scripts/bigbutton_g.txt", COULD_PLAYER_GIRL, D3DXVECTOR3(535, 100, -630), D3DXVECTOR3(0, 0, 0), 0.0f},
 	{"data/Scripts/smallbutton_g.txt", COULD_PLAYER_MOUSE, D3DXVECTOR3(573, 100, -900), D3DXVECTOR3(0, 0, 0), 0.0f},
-	{"data/Scripts/fallenTree.txt", COULD_PLAYER_GIRL, D3DXVECTOR3(1720, 100, 475), D3DXVECTOR3(0, CParamFloat::HALFPI, 0), 30.0f},
+	{"data/Scripts/fallenTree.txt", COULD_PLAYER_GIRL, D3DXVECTOR3(1695, 100, 460), D3DXVECTOR3(0, CParamFloat::HALFPI, 0), 50.0f},
+	{"data/Scripts/fallenTree.txt", COULD_PLAYER_GIRL, D3DXVECTOR3(1920, 100, 630), D3DXVECTOR3(0, CParamFloat::HALFPI, 0), 30.0f},
+	{"data/Scripts/fallenTree.txt", COULD_PLAYER_GIRL, D3DXVECTOR3(1750, 100, 400), D3DXVECTOR3(0, 0, 0), 30.0f},
 	{"data/Scripts/station_g.txt", COULD_PLAYER_ALL, D3DXVECTOR3(550, 100, -970), D3DXVECTOR3(0, D3DX_PI + CParamFloat::HALFPI, 0), 200.0f },
 	{"data/Scripts/tunnel_g.txt", COULD_PLAYER_ALL, D3DXVECTOR3(1609, 100, -760), D3DXVECTOR3(0, D3DX_PI + CParamFloat::HALFPI, 0), 200.0f },
 };
@@ -222,11 +224,26 @@ void DrawGimmick(void)
 	D3DMATERIAL9 matDef;			// 現在のマテリアル保存用
 	D3DXMATERIAL* pMat;				// マテリアルデータへのポインタ
 
+	/*** アルファテストを有効にする ***/
+	pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);		// アルファテストを有効
+	pDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);	// 基準値よりも大きい場合にZバッファに書き込み
+	pDevice->SetRenderState(D3DRS_ALPHAREF, 60);				// 基準値
+
 	for (int nCntGimmick = 0; nCntGimmick < GIMMICKTYPE_MAX; nCntGimmick++, pGimmick++)
 	{
 		if (pGimmick->bUse == false) continue;
 
 		if ((pGimmick->myType == GIMMICKTYPE_FALLENTREE)
+			& (pGimmick->bClear == true))
+		{
+			continue;
+		}
+		if ((pGimmick->myType == GIMMICKTYPE_FALLENTREE2)
+			& (pGimmick->bClear == true))
+		{
+			continue;
+		}
+		if ((pGimmick->myType == GIMMICKTYPE_FALLENTREE3)
 			& (pGimmick->bClear == true))
 		{
 			continue;
@@ -330,7 +347,14 @@ void DrawGimmick(void)
 
 		// 保存していたマテリアルを戻す
 		pDevice->SetMaterial(&matDef);
+
+
 	}
+
+	/*** アルファテストを無効にする ***/
+	pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);		// アルファテストを無効化
+	pDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);	// 無条件にZバッファに書き込み
+	pDevice->SetRenderState(D3DRS_ALPHAREF, 0);					// 基準値
 
 	EndDevice();
 }
@@ -398,6 +422,14 @@ void CaseMulti(LPGIMMICK pGimmick)
 		{
 			pGimmick->bClear = true;
 		}
+		else if (pGimmick->myType == GIMMICKTYPE_FALLENTREE2 && pPlayer->motionType == MOTIONTYPE_CUTTING)
+		{
+			pGimmick->bClear = true;
+		}
+		else if (pGimmick->myType == GIMMICKTYPE_FALLENTREE3 && pPlayer->motionType == MOTIONTYPE_CUTTING)
+		{
+			pGimmick->bClear = true;
+		}
 
 		bDetection = true;
 	}
@@ -435,6 +467,14 @@ void CaseSolo(LPGIMMICK pGimmick)
 		if (pGimmick->motionType == MOTIONTYPE_ACTION) return;
 
 		if (pGimmick->myType == GIMMICKTYPE_FALLENTREE && pPlayer->motionType == MOTIONTYPE_CUTTING)
+		{
+			pGimmick->bClear = true;
+		}
+		else if (pGimmick->myType == GIMMICKTYPE_FALLENTREE2 && pPlayer->motionType == MOTIONTYPE_CUTTING)
+		{
+			pGimmick->bClear = true;
+		}
+		else if (pGimmick->myType == GIMMICKTYPE_FALLENTREE3 && pPlayer->motionType == MOTIONTYPE_CUTTING)
 		{
 			pGimmick->bClear = true;
 		}
@@ -481,6 +521,16 @@ bool CollisionGimmick(
 					continue;
 				}
 				else if ((nCntModel == GIMMICKTYPE_FALLENTREE)
+					& (g_aGimmick[nCntModel].bClear == true))
+				{
+					continue;
+				}
+				else if ((nCntModel == GIMMICKTYPE_FALLENTREE2)
+					& (g_aGimmick[nCntModel].bClear == true))
+				{
+					continue;
+				}
+				else if ((nCntModel == GIMMICKTYPE_FALLENTREE3)
 					& (g_aGimmick[nCntModel].bClear == true))
 				{
 					continue;
@@ -651,7 +701,8 @@ bool CollisionGimmick(
 						SetMotionType(MOTIONTYPE_ACTION, false, 0, GIMMICKTYPE_BIGBUTTON);
 						ClearGimmick(GIMMICKTYPE_BIGBUTTON);
 					}
-					else if (g_aGimmick[nCntModel].bClear == false && g_aGimmick[nCntModel].myType == GIMMICKTYPE_SMALLBUTTON && GetActivePlayer() == PLAYERTYPE_MOUSE)
+
+					if (g_aGimmick[nCntModel].bClear == false && g_aGimmick[nCntModel].myType == GIMMICKTYPE_SMALLBUTTON && GetActivePlayer() == PLAYERTYPE_MOUSE)
 					{// ちびボタンを押す
 						SetMotionType(MOTIONTYPE_ACTION, false, 0, GIMMICKTYPE_SMALLBUTTON);
 						ClearGimmick(GIMMICKTYPE_SMALLBUTTON);
