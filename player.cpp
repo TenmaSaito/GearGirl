@@ -368,7 +368,7 @@ void UpdatePlayer(void)
 		}
 
 		// アイテムとの当たり判定
-		CollisionItem(pPlayer->pos, PLAYER_RANGE);
+		CollisionItem(pPlayer->pos, PLAYER_RANGE, nCntPlayer);
 
 		// ギミックとの当たり判定
 		if (CollisionGimmick(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move, &g_aPlayer[nCntPlayer], 5.0f, 20.0f - (nCntPlayer * 18.0f)))
@@ -772,30 +772,32 @@ void ActionPlayer(PlayerType nPlayer, Player* pPlayer)
 
 				// CATAPULT
 			case ARMTYPE_CATAPULT:
-				if (pPlayer->pos.x < 700.0f && pPlayer->pos.z < -510.0f)
-				{// 駅のギミック周辺でしか使えないように設定
-					if (pPlayer->state != PLAYERSTATE_THROWWAITING && GetNumPlayer() == 1)
-					{
-						PlaySound(SOUND_LABEL_SE_G_THROW);
-						SetMotionType(MOTIONTYPE_ACTION, true, 10, nPlayer);
-						g_nMotionCounter = 10;
-						g_bShotMouse = true;
-					}
-					else if (pPlayer->state != PLAYERSTATE_THROWWAITING && GetNumPlayer() == 2)
-					{
-						if (g_aPlayer[PLAYERTYPE_MOUSE].pos.x - g_aPlayer[PLAYERTYPE_GIRL].pos.x <= 20.0f
-							&& g_aPlayer[PLAYERTYPE_MOUSE].pos.x - g_aPlayer[PLAYERTYPE_GIRL].pos.x >= -20.0f
-							&& g_aPlayer[PLAYERTYPE_MOUSE].pos.z - g_aPlayer[PLAYERTYPE_GIRL].pos.z <= 20.0f
-							&& g_aPlayer[PLAYERTYPE_MOUSE].pos.z - g_aPlayer[PLAYERTYPE_GIRL].pos.z >= -20.0f)
+				if (IsClearGimmick(GIMMICKTYPE_BIGBUTTON) == true)
+				{
+					if (pPlayer->pos.x < 700.0f && pPlayer->pos.z < -510.0f)
+					{// 駅のギミック周辺でしか使えないように設定
+						if (pPlayer->state != PLAYERSTATE_THROWWAITING && GetNumPlayer() == 1)
 						{
 							PlaySound(SOUND_LABEL_SE_G_THROW);
 							SetMotionType(MOTIONTYPE_ACTION, true, 10, nPlayer);
 							g_nMotionCounter = 10;
 							g_bShotMouse = true;
 						}
+						else if (pPlayer->state != PLAYERSTATE_THROWWAITING && GetNumPlayer() == 2)
+						{
+							if (g_aPlayer[PLAYERTYPE_MOUSE].pos.x - g_aPlayer[PLAYERTYPE_GIRL].pos.x <= 20.0f
+								&& g_aPlayer[PLAYERTYPE_MOUSE].pos.x - g_aPlayer[PLAYERTYPE_GIRL].pos.x >= -20.0f
+								&& g_aPlayer[PLAYERTYPE_MOUSE].pos.z - g_aPlayer[PLAYERTYPE_GIRL].pos.z <= 20.0f
+								&& g_aPlayer[PLAYERTYPE_MOUSE].pos.z - g_aPlayer[PLAYERTYPE_GIRL].pos.z >= -20.0f)
+							{
+								PlaySound(SOUND_LABEL_SE_G_THROW);
+								SetMotionType(MOTIONTYPE_ACTION, true, 10, nPlayer);
+								g_nMotionCounter = 10;
+								g_bShotMouse = true;
+							}
+						}
 					}
 				}
-
 				break;
 
 				// CUT
@@ -807,7 +809,6 @@ void ActionPlayer(PlayerType nPlayer, Player* pPlayer)
 					SetMotionType(MOTIONTYPE_CUTTING, true, 10, nPlayer);
 					g_nMotionCounter = 8;
 				}
-
 				break;
 
 			default:
