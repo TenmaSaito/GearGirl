@@ -25,4 +25,5 @@ void UpdateDialog(void);
 void DrawDialog(void);
 
 void SetDialog(void);
+bool IsEndDialog(void);
 #endif
