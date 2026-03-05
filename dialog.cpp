@@ -270,6 +270,7 @@ void SetDialog(void)
 
 	g_CurrentID++;
 	g_bIsShowAnyDialog = true;
+	g_bIsMovableTutorial = false;
 }
 
 //==================================================================================
@@ -326,6 +327,7 @@ void FirstLog(void)
 		if (g_CurrentID >= g_MaxID)
 		{ // ログを流し終わった時、ゲーム開始
 			g_bIsShowAnyDialog = false;
+			g_bIsMovableTutorial = true;
 		}
 		else
 		{ // ログを進める
