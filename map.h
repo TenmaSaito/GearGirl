@@ -19,7 +19,7 @@
 //**********************************************************************************
 //*** プロトタイプ宣言 ***
 //**********************************************************************************
-void InitMap(D3DXVECTOR3 mid, D3DXVECTOR2 size, float fLength = 100.0f, float zn = 1, float zf = 10000);
+void InitMap(D3DXVECTOR3 mid, D3DXVECTOR2 size, float fLength = 100.0f, float zn = 1, float zf = 20000);
 void UninitMap(void);
 void UpdateMap(void);
 void DrawMap(void);

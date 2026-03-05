@@ -19,6 +19,8 @@
 #include "3Dmodel.h"
 #include "mathUtil.h"
 #include "skybox.h"
+#include "common_fade.h"
+#include "input.h"
 
 // –¼‘O‹óŠÔ‚ÌÈ—ª
 using namespace MyMathUtil;

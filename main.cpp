@@ -13,6 +13,7 @@
 #include "debugproc.h"
 #include "thread.h"
 #include "fade.h"
+#include "common_fade.h"
 #include "sound.h"
 #include "param.h"
 
@@ -406,6 +407,8 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	InitFade(GetMode());
 	InitMode();
 
+	InitCommonFade();
+
 	/*** タイトルBGMをフェードイン ***/
 	FadeSound(SOUND_LABEL_BGM_TITLE);
 
@@ -425,6 +428,9 @@ void Uninit(void)
 
 	// フェードの終了処理
 	UninitFade();
+
+	// 通常フェードの終了処理
+	UninitCommonFade();
 #endif
 	// キーボードの終了処理
 	UninitKeyboard();
@@ -478,6 +484,9 @@ void Update(void)
 	// フェードの更新処理
 	UpdateFade();
 
+	// 通常フェードの更新処理
+	UpdateCommonFade();
+
 	// サウンドの更新処理
 	UpdateSound();
 }
@@ -500,6 +509,9 @@ void Draw(void)
 	{// 描画開始が成功した場合
 #ifdef MODE_ON
 		DrawMode();
+
+		// 通常フェードの描画処理
+		DrawCommonFade();
 
 		// フェードの描画処理
 		DrawFade();
@@ -550,7 +562,7 @@ void Draw(void)
 			{
 				MyMathUtil::GenerateMessageBox(MB_ICONERROR,
 					"error",
-					"Failed Get Error String");
+					"エラー文取得に失敗！");
 			}
 		}
 		else

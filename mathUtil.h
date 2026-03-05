@@ -64,8 +64,18 @@ SetWarning("modeldata.hがインクルードされていません。modeldata関連関数は無効化さ
 #ifndef PARENT
 #define PARENT(...)				: public __VA_ARGS__				// 継承宣言
 #endif
+
+#define CREATE_2DPOLYGON(p) sizeof(VERTEX_2D) * 4, D3DUSAGE_WRITEONLY, FVF_VERTEX_2D, D3DPOOL_MANAGED, &p, NULL	// 2Dフラグまとめ
+#define CREATE_3DPOLYGON(p) sizeof(VERTEX_3D) * 4, D3DUSAGE_WRITEONLY, FVF_VERTEX_3D, D3DPOOL_MANAGED, &p, NULL	// 2Dフラグまとめ
+
 #define USE_UTIL				using namespace MyMathUtil			// MyMathUtilの使用宣言
 #define USE_LIB					using namespace MyLib				// MyLibの使用宣言
+#define CREATE_LITERAL(To, Name, From, val) \
+To operator"" Name(From val)\
+{\
+	return(To)val;\
+}
+
 //----------------------------------------------------------------------------------
 /*** フラグ関連 ***/
 #define END_SHADER				(-1)						// シェーダーの終了コード

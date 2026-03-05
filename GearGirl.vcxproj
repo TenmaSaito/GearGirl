@@ -157,6 +157,7 @@
     <ClCompile Include="billboard.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="CharacterSprite.cpp" />
+    <ClCompile Include="common_fade.cpp" />
     <ClCompile Include="debugproc.cpp" />
     <ClCompile Include="dialog.cpp" />
     <ClCompile Include="effect.cpp" />
@@ -213,6 +214,7 @@
     <ClInclude Include="billboard.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="CharacterSprite.h" />
+    <ClInclude Include="common_fade.h" />
     <ClInclude Include="debugproc.h" />
     <ClInclude Include="dialog.h" />
     <ClInclude Include="effect.h" />

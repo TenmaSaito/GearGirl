@@ -139,7 +139,7 @@ void UpdateUIarm(void)
 	// 頂点バッファをロックし、頂点情報へのポインタを獲得
 	g_pVtxBuffUIarm->Lock(0, 0, (void**)&pVtx, 0);
 
-	if (GetKeyboardTrigger(DIK_9) == true)
+	if (GetKeyboardTrigger(DIK_9) || GetJoypadTrigger(0, JOYKEY_RB))
 	{
 		// テクスチャ座標の設定
 		pVtx[0].tex.x -= UI_TEX_SIZE;

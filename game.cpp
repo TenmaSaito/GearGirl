@@ -9,6 +9,7 @@
 //**********************************************************************************
 #include "camera.h"
 #include "debugproc.h"
+#include "dialog.h"
 #include "effect.h"
 #include "fade.h"
 #include "field.h"
@@ -138,7 +139,10 @@ void InitGame(void)
 	InitParabola();
 
 	/*** マップの初期化 ***/
-	InitMap(D3DXVECTOR3(150.0f, 550.0f, 0.0f), D3DXVECTOR2(256, 256), 500.0f);
+	InitMap(D3DXVECTOR3(150.0f, 550.0f, 0.0f), D3DXVECTOR2(256, 256), 7500.0f);
+
+	/*** ダイアログの初期化 ***/
+	InitDialog();
 
 	//==========================================
 	/*** モデルのスクリプト読み込み ***/
@@ -225,6 +229,9 @@ void UninitGame(void)
 
 	/*** マップの終了 ***/
 	UninitMap();
+
+	/*** ダイアログの終了 ***/
+	UninitDialog();
 }
 
 //==================================================================================
@@ -305,6 +312,9 @@ void UpdateGame(void)
 
 		/*** マップの更新 ***/
 		UpdateMap();
+
+		/*** ダイアログの更新 ***/
+		UpdateDialog();
 
 		if (g_nCounterGame % 60 == 0)
 		{
@@ -409,6 +419,9 @@ void DrawGame(void)
 
 	/*** 2Dポリゴンの描画 ***/
 	Draw2DPolygon();
+
+	/*** ダイアログの描画 ***/
+	DrawDialog();
 
 	/*** UIアイテム描画 ***/
 	DrawUIItem();

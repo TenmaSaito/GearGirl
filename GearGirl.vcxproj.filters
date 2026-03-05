@@ -246,9 +246,6 @@
     <ClCompile Include="MessageLog.cpp">
       <Filter>ソース ファイル\Mode\Tutorial</Filter>
     </ClCompile>
-    <ClCompile Include="dialog.cpp">
-      <Filter>ソース ファイル\Mode\Tutorial</Filter>
-    </ClCompile>
     <ClCompile Include="tLogo.cpp">
       <Filter>ソース ファイル\Mode\Title</Filter>
     </ClCompile>
@@ -257,6 +254,12 @@
     </ClCompile>
     <ClCompile Include="map.cpp">
       <Filter>ソース ファイル\Mode\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="dialog.cpp">
+      <Filter>ソース ファイル\Mode\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="common_fade.cpp">
+      <Filter>ソース ファイル\Main\DirectX</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -401,9 +404,6 @@
     <ClInclude Include="MessageLog.h">
       <Filter>ヘッダー ファイル\Mode\Tutorial</Filter>
     </ClInclude>
-    <ClInclude Include="dialog.h">
-      <Filter>ヘッダー ファイル\Mode\Tutorial</Filter>
-    </ClInclude>
     <ClInclude Include="tLogo.h">
       <Filter>ヘッダー ファイル\Mode\Title</Filter>
     </ClInclude>
@@ -415,6 +415,12 @@
     </ClInclude>
     <ClInclude Include="map.h">
       <Filter>ヘッダー ファイル\Mode\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="dialog.h">
+      <Filter>ヘッダー ファイル\Mode\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="common_fade.h">
+      <Filter>ヘッダー ファイル\Main\DirectX</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

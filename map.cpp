@@ -60,6 +60,9 @@ MapCamera g_mapCamera;		// マップのカメラ
 Map g_map;					// マップの情報
 D3DVIEWPORT9 g_vpDef;		// 基本のビューポート
 
+// ユーザーリテラル演算子
+CREATE_LITERAL(float, NF, unsigned long long, val)
+
 //==================================================================================
 // --- 初期化 ---
 //==================================================================================
@@ -79,6 +82,9 @@ void InitMap(D3DXVECTOR3 mid, D3DXVECTOR2 size, float fLength, float zn, float z
 	g_mapCamera.rot = CParamVector::V3NULL;
 	g_mapCamera.fLength = fLength;
 	g_mapCamera.vecU = VEC_Y(1.0f);
+
+	// カメラの位置をプレイヤーの位置と同期
+	g_mapCamera.posR = V3(1600NF, 0NF, -600NF);
 }
 
 //==================================================================================
@@ -122,9 +128,6 @@ void UpdateMap(void)
 
 	D3DXVECTOR3 rot;
 	rot.y = GetPosToPos(GetPlayer()[Type].pos, GetCamera()[Type].posV);
-
-	// カメラの位置をプレイヤーの位置と同期
-	pMCam->posR = GetPlayer()[Type].pos;
 
 	// 各情報から視点の位置を逆算
 	pMCam->posV.x = pMCam->posR.x + 0.001f;

@@ -150,7 +150,7 @@ void UpdateDialog(void)
 		{
 			if (g_CurrentID >= g_MaxID)
 			{ // ログを流し終わった時、ゲーム開始
-				SetFade(MODE_GAME);
+
 			}
 			else
 			{ // ログを進める
@@ -187,8 +187,6 @@ void UpdateDialog(void)
 					KEEP_USING_COL,
 					TRUE);
 			}
-
-			SetFade(MODE_GAME);
 		}
 	}
 

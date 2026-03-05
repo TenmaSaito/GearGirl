@@ -1,17 +1,17 @@
 //================================================================================================================
 //
-// DirectXのフェード用ヘッダファイル [Fade.h]
+// DirectXの通常フェード用ヘッダファイル [common_fade.h]
 // Author : TENMA
 //
 //================================================================================================================
-#ifndef _FADE_H_
-#define _FADE_H_
+#ifndef _COMMON_FADE_H_
+#define _COMMON_FADE_H_
 
 //**********************************************************************************
 //*** インクルードファイル ***
 //**********************************************************************************
 #include "main.h"
-#include "mode.h"
+#include "fade.h"
 
 //**********************************************************************************
 //*** マクロ定義 ***
@@ -20,30 +20,23 @@
 #define NORMAL_FADE			D3DXCOLOR(0.0f,0.0f,0.0f,0.0f)		// 通常の暗転フェード
 
 //**********************************************************************************
-//*** フェードの種類 ***
-//**********************************************************************************
-typedef enum
-{
-	FADE_NONE = 0,			// フェードなし
-	FADE_IN,				// フェードイン
-	FADE_OUT,				// フェードアウト
-	FADE_MAX
-}FADE;
-
-//**********************************************************************************
 //*** プロトタイプ宣言 ***
 //**********************************************************************************
-void InitFade(MODE modeNext);
-void UninitFade(void);
-void UpdateFade(void);
-void DrawFade(void);
+void InitCommonFade(void);
+void UninitCommonFade(void);
+void UpdateCommonFade(void);
+void DrawCommonFade(void);
 
 /// <summary>
-/// 指定された種類のポリゴンで画面全体をフェードイン,アウトさせる関数です。
+/// モード移行しないただのフェード再生
 /// </summary>
-/// <param name="modeNext">フェードアウト後に移行しているモード</param>
-/// <param name="nCounterFade">フェードの時間</param>
-void SetFade(MODE modeNext, int nCounterFade = NORMAL_FADECOUNT);
+/// <param name="nCounterFadeOut">フェードアウトにかかる時間</param>
+/// <param name="nWaitFadeIn">フェードインするまでの待機時間</param>
+/// <param name="nCounterFadeIn">フェードインにかかる時間</param>
+void SetCommonFade(int nCounterFadeOut = NORMAL_FADECOUNT,
+	int nWaitFadeIn = NORMAL_FADECOUNT,
+	int nCounterFadeIn = NORMAL_FADECOUNT,
+	D3DXCOLOR col = D3DXCOLOR(0, 0, 0, 0));
 
-FADE GetFade(void);
+FADE GetCommonFade(void);
 #endif
