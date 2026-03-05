@@ -45,8 +45,8 @@
 
 //**************************************************************
 // カメラ操作
-#define CAM_2POPRAT		DIK_LCONTROL			// ２Pのカメラを操作
-#define CAMERA_RESETKEY	JOYKEY_X				// カメラをリセットするキー
+#define CAM_RESETJOY	JOYKEY_X				// カメラをリセットするキー
+#define CAM_RESETKEY(n) (n == 0 ?DIK_X:DIK_NUMPAD2)		// カメラをリセットするキー
 
 #define CAM_RESET		DIK_TAB					// カメラ位置角度リセット
 #define CAM_MOVE_UP		DIK_W					// カメラ移動　上
@@ -54,10 +54,10 @@
 #define CAM_MOVE_L		DIK_A					// カメラ移動　左
 #define CAM_MOVE_R		DIK_D					// カメラ移動　右
 
-#define CAM_ORBIT_UP	DIK_T					// カメラ移動回転　上
-#define CAM_ORBIT_DW	DIK_B					// カメラ移動回転　下
-#define CAM_ORBIT_L		DIK_C					// カメラ移動回転　左
-#define CAM_ORBIT_R		DIK_Z					// カメラ移動回転　右
+#define CAM_ORBIT_UP(n)	(n == 0 ?DIK_T:DIK_NUMPAD8)					// カメラ移動回転　上
+#define CAM_ORBIT_DW(n)	(n == 0 ?DIK_B:DIK_NUMPAD5)				// カメラ移動回転　下
+#define CAM_ORBIT_L(n)	(n == 0 ?DIK_C:DIK_NUMPAD3)				// カメラ移動回転　左
+#define CAM_ORBIT_R(n)	(n == 0 ?DIK_Z:DIK_NUMPAD1)				// カメラ移動回転　右
 
 #define CAM_ZOOM_OUT	DIK_R					// ズームアウト
 #define CAM_ZOOM_IN		DIK_V					// ズームイン (+スペース
