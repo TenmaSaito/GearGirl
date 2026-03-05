@@ -220,7 +220,7 @@ void UpdatePlayer(void)
 		// 現在位置の保存
 		pPlayer->posOld = pPlayer->pos;
 
-		if (IsEndDialog() == false)
+		if (IsEndDialog() == true)
 		{
 			// 左スティックを押し込むとダッシュ状態(速度)に
 			if (nCntPlayer == PLAYERTYPE_GIRL && GetJoypadTrigger(0, JOYKEY_LEFT_PUSH) == true)
@@ -235,7 +235,7 @@ void UpdatePlayer(void)
 			}
 
 			if (pPlayer->bDash == false)
-			{
+			{// ダッシュ状態じゃなければ普通の速度
 				pPlayer->fMove = PLAYER_MOVE;
 			}
 
@@ -265,32 +265,31 @@ void UpdatePlayer(void)
 				// 少女にネズミが追従する処理
 				MouseKeepUp();
 			}
-
-			// === 投げモーション以外時は常時再生(投げ待機状態をキープするため) === //
-			if (pPlayer->state != PLAYERSTATE_THROWWAITING)
-			{
-				// モーションの更新
-				UpdateMotion((PlayerType)nCntPlayer);
-			}
-
-			// === ネズミ射出の予測軌跡の描画 === //
-			if (pPlayer->state == PLAYERSTATE_THROWWAITING && nCntPlayer == PLAYERTYPE_GIRL)
-			{
-				// 注視点までのベクトルをだす
-				D3DXVECTOR3 vec = pCamera->posR - pCamera->posV;
-
-				// 出したベクトルを正規化
-				D3DXVec3Normalize(&vec, &vec);
-
-				g_Effectmove.x = vec.x;
-				g_Effectmove.z = vec.z;
-				g_Effectmove.y = 5.5f;
-
-				// エフェクトの描画
-				SetParabola(g_aPlayer[PLAYERTYPE_MOUSE].pos, g_Effectmove, D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f), 2.0f, 2.0f, 1.0f, true);
-			}
 		}
 
+		// === 投げモーション以外時は常時再生(投げ待機状態をキープするため) === //
+		if (pPlayer->state != PLAYERSTATE_THROWWAITING)
+		{
+			// モーションの更新
+			UpdateMotion((PlayerType)nCntPlayer);
+		}
+
+		// === ネズミ射出の予測軌跡の描画 === //
+		if (pPlayer->state == PLAYERSTATE_THROWWAITING && nCntPlayer == PLAYERTYPE_GIRL)
+		{
+			// 注視点までのベクトルをだす
+			D3DXVECTOR3 vec = pCamera->posR - pCamera->posV;
+
+			// 出したベクトルを正規化
+			D3DXVec3Normalize(&vec, &vec);
+
+			g_Effectmove.x = vec.x;
+			g_Effectmove.z = vec.z;
+			g_Effectmove.y = 5.5f;
+
+			// エフェクトの描画
+			SetParabola(g_aPlayer[PLAYERTYPE_MOUSE].pos, g_Effectmove, D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f), 2.0f, 2.0f, 1.0f, true);
+		}
 
 		// === 何もしていない場合(何も入力されていない場合) === //
 		if ((pPlayer->motionType != MOTIONTYPE_ACTION
