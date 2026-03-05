@@ -21,9 +21,10 @@
 #include "param.h"
 
 // 通常インクルード群
-#include "tutorial.h"
+#include "game.h"
 #include "player.h"
 #include "MessageLog.h"
+#include "prompt.h"
 
 USE_PARAM;
 
@@ -96,6 +97,7 @@ void NowLog(void);
 void NextLog(void);
 void FirstLog(void);
 void TutorialLog(void);
+void MovableTutorial(void);
 
 //**********************************************************************************
 //*** グローバル変数 ***
@@ -135,6 +137,9 @@ LOGPHASE g_logPhase;		// 現在のログフェーズ
 LPMESSAGELOG g_pLog = NULL;	// メッセージログへのポインタ
 bool g_bIsEndTutorial;		// チュートリアルの終了判定
 bool g_bIsShowAnyDialog;	// 何か一つでもダイアログが表示されているか
+bool g_bIsMovableTutorial;	// チュートリアルの動ける状態か
+IDX_2DPOLYGON g_IdxLeftStick;	// 左スティックのチュートリアルポリゴン
+IDX_2DPOLYGON g_IdxRightStick;	// 右スティックのチュートリアルポリゴン
 
 //==================================================================================
 // --- 初期化 ---
@@ -148,6 +153,9 @@ void InitDialog(void)
 	g_logPhase = LOGPHASE_FIRST;
 	g_bIsEndTutorial = false;
 	g_bIsShowAnyDialog = false;
+	g_bIsMovableTutorial = false;
+	g_IdxLeftStick = -1;
+	g_IdxRightStick = -1;
 
 	// 値をコピー
 	for (int nCntDialog = 0; nCntDialog < DIALOG_NUM; nCntDialog++)
@@ -185,12 +193,21 @@ void UpdateDialog(void)
 		|| GetJoypadTrigger(1, JOYKEY_START))
 	{ // チュートリアルスキップ
 		g_bIsEndTutorial = true;
+		g_bIsShowAnyDialog = false;
+		g_bIsMovableTutorial = false;
 	}
-	
-	NowLog();
 
-	// メッセージログの更新
-	UpdateMessageLog(&g_pLog, sizeof(g_pLog));
+	if (g_bIsMovableTutorial == true)
+	{
+		MovableTutorial();
+	}
+	else if (g_bIsEndTutorial == false)
+	{
+		NowLog();
+
+		// メッセージログの更新
+		UpdateMessageLog(&g_pLog, sizeof(g_pLog));
+	}
 }
 
 //==================================================================================
@@ -308,8 +325,7 @@ void FirstLog(void)
 	{
 		if (g_CurrentID >= g_MaxID)
 		{ // ログを流し終わった時、ゲーム開始
-			NextLog();
-			SetCommonFade(30, 45, 30);
+			g_bIsShowAnyDialog = false;
 		}
 		else
 		{ // ログを進める
@@ -395,7 +411,34 @@ void TutorialLog(void)
 }
 
 //==================================================================================
-// --- ログの終了判定 ---
+// --- 行動可能なチュートリアル中処理 ---
+//==================================================================================
+void MovableTutorial(void)
+{
+	if (IsDispPrompt(GetIdxShopPrompt()))
+	{
+		// 店前でAもしくはENTERを押したら
+		if (GetKeyboardTrigger(DIK_RETURN)
+			|| GetJoypadTrigger(PLAYERTYPE_GIRL, JOYKEY_A))
+		{ // 移動中チュートリアル終了 -> ログ表示
+			g_bIsMovableTutorial = false;
+			NextLog();
+		}
+	}
+
+	if (g_IdxLeftStick == -1)
+	{
+
+	}
+
+	if (g_IdxRightStick == -1)
+	{
+
+	}
+}
+
+//==================================================================================
+// --- ログの表示判定 ---
 //==================================================================================
 bool IsShowAnyDialog(void)
 {
