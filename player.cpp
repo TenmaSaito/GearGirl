@@ -221,15 +221,15 @@ void UpdatePlayer(void)
 		pPlayer->posOld = pPlayer->pos;
 
 		if (IsEndDialog() == true)
-		{
+		{// ダイアログが表示されている場合
 			// 左スティックを押し込むとダッシュ状態(速度)に
-			if (nCntPlayer == PLAYERTYPE_GIRL && GetJoypadTrigger(0, JOYKEY_LEFT_PUSH) == true)
+			if (pPlayer->motionType == MOTIONTYPE_MOVE && nCntPlayer == PLAYERTYPE_GIRL && GetJoypadTrigger(0, JOYKEY_LEFT_PUSH) == true)
 			{
 				pPlayer->bDash = pPlayer->bDash ^ true;
 				pPlayer->fMove = PLAYER_MOVE * 1.5f;
 			}
-			else if (GetKeyboardTrigger(DIK_L) == true)
-			{// キーボードだとLキー
+			else if (pPlayer->motionType == MOTIONTYPE_MOVE && nCntPlayer == PLAYERTYPE_GIRL && GetKeyboardTrigger(DIK_LSHIFT) == true)
+			{// キーボードだと左shiftキー
 				pPlayer->bDash = pPlayer->bDash ^ true;
 				pPlayer->fMove = PLAYER_MOVE * 1.5f;
 			}
@@ -243,12 +243,6 @@ void UpdatePlayer(void)
 			if (GetNumPlayer() == 2 || GetActivePlayer() == PlayerType(nCntPlayer))
 			{
 				ActionPlayer((PlayerType)nCntPlayer, pPlayer);
-
-				MovePlayer((PlayerType)nCntPlayer);	// 移動に関する処理
-
-				JumpPlayer((PlayerType)nCntPlayer);	// ジャンプに関する処理
-
-				MouseKeepUp();						// 少女にネズミが追従する処理
 			}
 
 			// === 少女操作時のみの処理 === //
@@ -264,6 +258,40 @@ void UpdatePlayer(void)
 			{
 				// 少女にネズミが追従する処理
 				MouseKeepUp();
+			}
+		}
+
+		// === 移動に関する処理 === //
+		if (IsShowAnyDialog() == false)
+		{// 何もダイアログがでいない場合に動ける
+			// === ２人プレイもしくはアクティブなプレイヤーの処理 === //
+			if (GetNumPlayer() == 2 || GetActivePlayer() == PlayerType(nCntPlayer))
+			{
+				MovePlayer((PlayerType)nCntPlayer);	// 移動に関する処理
+
+				JumpPlayer((PlayerType)nCntPlayer);	// ジャンプに関する処理
+
+				MouseKeepUp();						// 少女にネズミが追従する処理
+			}
+		}
+
+		if (IsEndDialog() == false)
+		{
+			if (pPlayer->pos.x > 1520.0f)
+			{
+				pPlayer->pos.x = 1520.0f;
+			}
+			if (pPlayer->pos.x < 1350.0f)
+			{
+				pPlayer->pos.x = 1350.0f;
+			}
+			if (pPlayer->pos.z > -440.0f)
+			{
+				pPlayer->pos.z = -440.0f;
+			}
+			if (pPlayer->pos.z < -1200.0f)
+			{
+				pPlayer->pos.z = -1200.0f;
 			}
 		}
 
@@ -396,35 +424,39 @@ void UpdatePlayer(void)
 	// プロンプトを描画
 	DetectionPrompt(g_aPlayer[PLAYERTYPE_GIRL].pos, 50.0f);
 
-	// 操作する対象を切り替える
-	if (g_nNumPlayer == 1)
-	{// シングルプレイ時
-		if (GetJoypadTrigger(0, JOYKEY_LB) == true || GetKeyboardTrigger(DIK_Q) == true)
-		{
-			// 駅の範囲内なら切り替えを行わないようにする
-			if (g_aPlayer[PLAYERTYPE_MOUSE].pos.z <= -774.0f && g_aPlayer[PLAYERTYPE_MOUSE].pos.x <= 700.0f)
+	// === チュートリアル外での更新 === // 
+	if (IsEndDialog() == true)
+	{
+		// 操作する対象を切り替える
+		if (g_nNumPlayer == 1)
+		{// シングルプレイ時
+			if (GetJoypadTrigger(0, JOYKEY_LB) == true || GetKeyboardTrigger(DIK_Q) == true)
 			{
-				// ここなら切り替え可能
-			}
-			else
-			{
-				if (g_aPlayer[PLAYERTYPE_GIRL].state != PLAYERSTATE_THROWWAITING && g_bShotMouse == false)
+				// 駅の範囲内なら切り替えを行わないようにする
+				if (g_aPlayer[PLAYERTYPE_MOUSE].pos.z <= -774.0f && g_aPlayer[PLAYERTYPE_MOUSE].pos.x <= 700.0f)
 				{
-					if (g_ActivePlayer == 1)
-					{// ネズミ→少女
-						g_ActivePlayer = 0;
-					}
-					else
-					{// 少女→ネズミ
-						g_ActivePlayer = 1;
+					// ここなら切り替え可能
+				}
+				else
+				{
+					if (g_aPlayer[PLAYERTYPE_GIRL].state != PLAYERSTATE_THROWWAITING && g_bShotMouse == false)
+					{
+						if (g_ActivePlayer == 1)
+						{// ネズミ→少女
+							g_ActivePlayer = 0;
+						}
+						else
+						{// 少女→ネズミ
+							g_ActivePlayer = 1;
+						}
 					}
 				}
 			}
 		}
 	}
 
-	// ***************************************************************************
-	// デバッグ処理
+// ***************************************************************************
+// デバッグ処理
 	// デバッグ用のプレイ人数切り替え処理
 	ChangeNumPlayer();
 
@@ -455,7 +487,7 @@ void UpdatePlayer(void)
 		PrintDebugProc("\nPlayer0 : [SPACE] :  JUMP\n");
 		PrintDebugProc("Player1 : [RSHIFT] :  JUMP\n");
 	}
-	// ***************************************************************************
+// ***************************************************************************
 }
 
 // =================================================
@@ -1902,7 +1934,7 @@ void ShotMouse(void)
 				}
 			}
 
-			if (g_nMotionCounter < -67)
+			if (g_nMotionCounter < -75)
 			{// 余韻を持たせて初期化
 				g_bShotMouse = false;
 				g_nMotionCounter = 0;
