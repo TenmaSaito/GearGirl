@@ -41,6 +41,14 @@ using namespace MyMathUtil;
 #define MAX_XMOVE1		(315)		// X軸移動可能領域1
 #define MAX_XMOVE2		(2290)		// X軸移動可能領域2
 #define RHAND_OFFSET	D3DXVECTOR3(0.0f, 0.0f, 0.0f)		// 右手からのオフセット
+#define TUTORIAL_NOW	(IsEndDialog() == false)		// チュートリアル中
+#define GAME_NOW		(IsEndDialog() == true)			// ゲーム本編中
+#define DIAROG_ON		(IsShowAnyDialog() == true)		// ダイアログ表示中
+#define DIAROG_OFF		(IsShowAnyDialog() == false)	// ダイアログ非表示中
+#define ITEM_ON			(IsEnableItemPut() == true)		// アイテム提出画面
+#define ITEM_OFF		(IsEnableItemPut() == false)	// アイテム提出画面でない
+#define ITEMPROMPT_ON	(IsDispPrompt(GetIdxShopPrompt()) == true)	// アイテム提出のプロンプトが表示されている
+#define ITEMPROMPT_OFF	(IsDispPrompt(GetIdxShopPrompt()) == false)	// アイテム提出のプロンプトが表示されていない
 
 // =================================================
 // 平面投影の構造体
@@ -220,25 +228,8 @@ void UpdatePlayer(void)
 		// 現在位置の保存
 		pPlayer->posOld = pPlayer->pos;
 
-		if (IsEndDialog() == true)
-		{// ダイアログが表示されている場合
-			// 左スティックを押し込むとダッシュ状態(速度)に
-			if (pPlayer->motionType == MOTIONTYPE_MOVE && nCntPlayer == PLAYERTYPE_GIRL && GetJoypadTrigger(0, JOYKEY_LEFT_PUSH) == true)
-			{
-				pPlayer->bDash = pPlayer->bDash ^ true;
-				pPlayer->fMove = PLAYER_MOVE * 1.5f;
-			}
-			else if (pPlayer->motionType == MOTIONTYPE_MOVE && nCntPlayer == PLAYERTYPE_GIRL && GetKeyboardTrigger(DIK_LSHIFT) == true)
-			{// キーボードだと左shiftキー
-				pPlayer->bDash = pPlayer->bDash ^ true;
-				pPlayer->fMove = PLAYER_MOVE * 1.5f;
-			}
-
-			if (pPlayer->bDash == false)
-			{// ダッシュ状態じゃなければ普通の速度
-				pPlayer->fMove = PLAYER_MOVE;
-			}
-
+		if (GAME_NOW)
+		{// ゲーム本編中
 			// === ２人プレイもしくはアクティブなプレイヤーの処理 === //
 			if (GetNumPlayer() == 2 || GetActivePlayer() == PlayerType(nCntPlayer))
 			{
@@ -254,20 +245,37 @@ void UpdatePlayer(void)
 				// カタパルトを起動した後の処理
 				ShotMouse();
 			}
-			else if (nCntPlayer == PLAYERTYPE_MOUSE && GetNumPlayer() == 1 && g_bShotMouse == false)
-			{
-				// 少女にネズミが追従する処理
-				MouseKeepUp();
-			}
+			//else if (nCntPlayer == PLAYERTYPE_MOUSE && GetNumPlayer() == 1 && g_bShotMouse == false)
+			//{
+			//	// 少女にネズミが追従する処理
+			//	MouseKeepUp();
+			//}
 		}
 
 		// === 移動に関する処理 === //
-		if (IsShowAnyDialog() == false)
+		if (DIAROG_OFF)
 		{// 何もダイアログがでいない場合に動ける
 			// === ２人プレイもしくはアクティブなプレイヤーの処理 === //
 			if (GetNumPlayer() == 2 || GetActivePlayer() == PlayerType(nCntPlayer))
 			{
 				MovePlayer((PlayerType)nCntPlayer);	// 移動に関する処理
+
+				// 左スティックを押し込むとダッシュ状態(速度)に
+				if (pPlayer->motionType == MOTIONTYPE_MOVE && nCntPlayer == PLAYERTYPE_GIRL && GetJoypadTrigger(0, JOYKEY_LEFT_PUSH) == true)
+				{
+					pPlayer->bDash = pPlayer->bDash ^ true;
+					pPlayer->fMove = PLAYER_MOVE * 1.5f;
+				}
+				else if (pPlayer->motionType == MOTIONTYPE_MOVE && nCntPlayer == PLAYERTYPE_GIRL && GetKeyboardTrigger(DIK_LSHIFT) == true)
+				{// キーボードだと左shiftキー
+					pPlayer->bDash = pPlayer->bDash ^ true;
+					pPlayer->fMove = PLAYER_MOVE * 1.5f;
+				}
+
+				if (pPlayer->bDash == false)
+				{// ダッシュ状態じゃなければ普通の速度
+					pPlayer->fMove = PLAYER_MOVE;
+				}
 
 				JumpPlayer((PlayerType)nCntPlayer);	// ジャンプに関する処理
 
@@ -275,8 +283,8 @@ void UpdatePlayer(void)
 			}
 		}
 
-		if (IsEndDialog() == false)
-		{
+		if (TUTORIAL_NOW)
+		{// チュートリアル中
 			if (pPlayer->pos.x > 1520.0f)
 			{
 				pPlayer->pos.x = 1520.0f;
@@ -394,9 +402,9 @@ void UpdatePlayer(void)
 			pPlayer->bJump = false;
 		}
 
-		if (IsEndDialog() == true)
-		{// ダイアログが表示されている場合
-		// アイテムとの当たり判定
+		if (GAME_NOW)
+		{// ゲーム本編中
+			// アイテムとの当たり判定
 			CollisionItem(pPlayer->pos, PLAYER_RANGE, nCntPlayer);
 		}
 
@@ -427,30 +435,32 @@ void UpdatePlayer(void)
 	// プロンプトを描画
 	DetectionPrompt(g_aPlayer[PLAYERTYPE_GIRL].pos, 50.0f);
 
-	// === チュートリアル外での更新 === // 
-	if (IsEndDialog() == true)
-	{
-		// 操作する対象を切り替える
-		if (g_nNumPlayer == 1)
-		{// シングルプレイ時
-			if (GetJoypadTrigger(0, JOYKEY_LB) == true || GetKeyboardTrigger(DIK_Q) == true)
-			{
-				// 駅の範囲内なら切り替えを行わないようにする
-				if (g_aPlayer[PLAYERTYPE_MOUSE].pos.z <= -774.0f && g_aPlayer[PLAYERTYPE_MOUSE].pos.x <= 700.0f)
+	if (GAME_NOW)
+	{// === チュートリアル外での更新 === // 
+		if (ITEM_OFF)
+		{// 提出する画面じゃないとき
+			// 操作する対象を切り替える
+			if (g_nNumPlayer == 1)
+			{// シングルプレイ時
+				if (GetJoypadTrigger(0, JOYKEY_LB) == true || GetKeyboardTrigger(DIK_Q) == true)
 				{
-					// ここなら切り替え可能
-				}
-				else
-				{
-					if (g_aPlayer[PLAYERTYPE_GIRL].state != PLAYERSTATE_THROWWAITING && g_bShotMouse == false)
+					// 駅の範囲内なら切り替えを行わないようにする
+					if (g_aPlayer[PLAYERTYPE_MOUSE].pos.z <= -774.0f && g_aPlayer[PLAYERTYPE_MOUSE].pos.x <= 700.0f)
 					{
-						if (g_ActivePlayer == 1)
-						{// ネズミ→少女
-							g_ActivePlayer = 0;
-						}
-						else
-						{// 少女→ネズミ
-							g_ActivePlayer = 1;
+						// ここなら切り替え可能
+					}
+					else
+					{
+						if (g_aPlayer[PLAYERTYPE_GIRL].state != PLAYERSTATE_THROWWAITING && g_bShotMouse == false)
+						{
+							if (g_ActivePlayer == 1)
+							{// ネズミ→少女
+								g_ActivePlayer = 0;
+							}
+							else
+							{// 少女→ネズミ
+								g_ActivePlayer = 1;
+							}
 						}
 					}
 				}
@@ -458,9 +468,19 @@ void UpdatePlayer(void)
 		}
 	}
 
-// ***************************************************************************
-// デバッグ処理
-	// デバッグ用のプレイ人数切り替え処理
+	Item* pItem = GetItem();
+
+	for (int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++, pItem++)
+	{
+		if (g_ActivePlayer == 1 && pItem->type == 0)
+		{
+			SetParticle(pItem->pos, D3DXCOLOR_NULL, D3DXVECTOR3(5.0f, 0.0f, 5.0f), D3DXVECTOR3(6.0f, -1.0f, 6.0f), 1, 1.0f, 3, 5, false);
+		}
+	}
+
+	// ***************************************************************************
+	// デバッグ処理
+		// デバッグ用のプレイ人数切り替え処理
 	ChangeNumPlayer();
 
 	// F1キーを押して、デバッグ表示のON/OFFを切り替える
@@ -490,7 +510,7 @@ void UpdatePlayer(void)
 		PrintDebugProc("\nPlayer0 : [SPACE] :  JUMP\n");
 		PrintDebugProc("Player1 : [RSHIFT] :  JUMP\n");
 	}
-// ***************************************************************************
+	// ***************************************************************************
 }
 
 // =================================================
@@ -864,7 +884,7 @@ void MovePlayer(PlayerType nPlayer)
 	// プレイヤー構造体をポインタ化
 	Player* pPlayer = &g_aPlayer[nPlayer];
 
-	if (IsEnableItemPut() == false)
+	if (ITEM_OFF)
 	{
 		// 歩行音再生
 		if (nPlayer == PLAYERTYPE_GIRL)
@@ -1291,7 +1311,7 @@ void JumpPlayer(PlayerType nPlayer)
 	// プレイヤー構造体をポインタ化
 	Player* pPlayer = &g_aPlayer[nPlayer];
 
-	if (IsDispPrompt(GetIdxShopPrompt()) == false)
+	if (ITEMPROMPT_OFF)
 	{
 		if (nPlayer == 0)
 		{// 少女

@@ -94,5 +94,6 @@ void SetItem(vec3 pos, vec3 rot, ITEMTYPE type, bool bReflectGirl = true, bool b
 void CollisionItem(vec3 pos, float fRange, int type);	// 当たり判定
 void EnableItemPut(void);										// アイテム提出フラグを切り替え
 bool IsEnableItemPut(void);
+P_ITEM GetItem(void);				// 先頭アドレス取得
 
 #endif // !_ITEM_H_

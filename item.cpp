@@ -80,7 +80,6 @@ void UpdatePouchItem(void);			// 取得済みのアイテムを更新
 void OnUIitemEnable(P_ITEMQUOTA pQuota, int nMAX);	// 描画の簡略化のための関数わけ
 void PutOut(void);					// 提出できるアイテムを表示
 void SelectItem(void);				// 提出アイテムの選択
-P_ITEM GetItem(void);				// 先頭アドレス取得
 
 //=========================================================================================
 // アイテム初期化
