@@ -41,14 +41,6 @@ using namespace MyMathUtil;
 #define MAX_XMOVE1		(315)		// X軸移動可能領域1
 #define MAX_XMOVE2		(2290)		// X軸移動可能領域2
 #define RHAND_OFFSET	D3DXVECTOR3(0.0f, 0.0f, 0.0f)		// 右手からのオフセット
-#define TUTORIAL_NOW	(IsEndDialog() == false)		// チュートリアル中
-#define GAME_NOW		(IsEndDialog() == true)			// ゲーム本編中
-#define DIAROG_ON		(IsShowAnyDialog() == true)		// ダイアログ表示中
-#define DIAROG_OFF		(IsShowAnyDialog() == false)	// ダイアログ非表示中
-#define ITEM_ON			(IsEnableItemPut() == true)		// アイテム提出画面
-#define ITEM_OFF		(IsEnableItemPut() == false)	// アイテム提出画面でない
-#define ITEMPROMPT_ON	(IsDispPrompt(GetIdxShopPrompt()) == true)	// アイテム提出のプロンプトが表示されている
-#define ITEMPROMPT_OFF	(IsDispPrompt(GetIdxShopPrompt()) == false)	// アイテム提出のプロンプトが表示されていない
 #define COL_RED			D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f)	// 赤色
 #define COL_BLUE		D3DXCOLOR(0.0f, 1.0f, 1.0f, 1.0f)	// 青色
 
@@ -192,6 +184,7 @@ void InitPlayer(void)
 	g_aMovePlayer[0] = false;
 	g_aMovePlayer[1] = false;
 	g_Effectmove = {};
+	g_bShotMouse = false;			// ネズミを発射するフラグ
 
 	if (GetFirstMode() == MODE_GAME)
 	{
@@ -468,58 +461,29 @@ void UpdatePlayer(void)
 				}
 			}
 		}
-	}
 
-	// アイテムの情報を取得
-	Item* pItem = GetItem();
+		// アイテムの情報を取得
+		Item* pItem = GetItem();
 
-	// === ネズミ操作時に、アイテムからパーティクルを出す === //
-	for (int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++, pItem++)
-	{
-		if (pItem->bGet == false)
-		{
-			// 正解パーツ用パーティクル
-			if (g_ActivePlayer == 1 && pItem->type == 0)
-			{
-				SetParticle(pItem->pos, COL_BLUE, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true);
-			}
-			if (g_ActivePlayer == 1 && pItem->type == 1)
-			{
-				SetParticle(pItem->pos, COL_BLUE, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true);
-			}
-			if (g_ActivePlayer == 1 && pItem->type == 2)
-			{
-				SetParticle(pItem->pos, COL_BLUE, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true);
-			}
-			if (g_ActivePlayer == 1 && pItem->type == 3)
-			{
-				SetParticle(pItem->pos, COL_BLUE, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true);
-			}
-			if (g_ActivePlayer == 1 && pItem->type == 4)
-			{
-				SetParticle(pItem->pos, COL_BLUE, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true);
-			}
+		Camera* pCamera = GetCamera();
 
-			// 外れパーツ用パーティクル
-			if (g_ActivePlayer == 1 && pItem->type == 5)
-			{
-				SetParticle(pItem->pos, COL_RED, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true);
-			}
-			if (g_ActivePlayer == 1 && pItem->type == 6)
-			{
-				SetParticle(pItem->pos, COL_RED, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true);
-			}
-			if (g_ActivePlayer == 1 && pItem->type == 7)
-			{
-				SetParticle(pItem->pos, COL_RED, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true);
-			}
-			if (g_ActivePlayer == 1 && pItem->type == 8)
-			{
-				SetParticle(pItem->pos, COL_RED, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true);
-			}
-			if (g_ActivePlayer == 1 && pItem->type == 9)
-			{
-				SetParticle(pItem->pos, COL_RED, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true);
+		if (g_ActivePlayer == PLAYERTYPE_MOUSE)
+		{// ネズミ操作時
+			for (int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++, pItem++)
+			{// アイテムのMAX分回す
+				if (pItem->bGet == false)
+				{// 取得されていないアイテムの場合
+					// === 正解パーツ用パーティクル === //
+					if (pItem->type >= 0 && pItem->type <= 4)
+					{
+						SetParticle(pItem->pos, COL_BLUE, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true);
+					}
+					// === 外れパーツ用パーティクル === //
+					if (pItem->type >= 5 && pItem->type <= 9)
+					{
+						SetParticle(pItem->pos, COL_RED, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true);
+					}
+				}
 			}
 		}
 	}

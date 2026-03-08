@@ -26,6 +26,16 @@
 #define	STICK_DEADAREA	(10000)			// ジョイスティックのデッドエリア
 #define	MODEL_PLAYER	"data\\model.txt"	// モデルを読み込むファイル名
 
+// ゲーム状態
+#define TUTORIAL_NOW	(IsEndDialog() == false)		// チュートリアル中
+#define GAME_NOW		(IsEndDialog() == true)			// ゲーム本編中
+#define DIAROG_ON		(IsShowAnyDialog() == true)		// ダイアログ表示中
+#define DIAROG_OFF		(IsShowAnyDialog() == false)	// ダイアログ非表示中
+#define ITEM_ON			(IsEnableItemPut() == true)		// アイテム提出画面
+#define ITEM_OFF		(IsEnableItemPut() == false)	// アイテム提出画面でない
+#define ITEMPROMPT_ON	(IsDispPrompt(GetIdxShopPrompt()) == true)	// アイテム提出のプロンプトが表示されている
+#define ITEMPROMPT_OFF	(IsDispPrompt(GetIdxShopPrompt()) == false)	// アイテム提出のプロンプトが表示されていない
+
 // =================================================
 // プレイヤータイプ
 typedef enum

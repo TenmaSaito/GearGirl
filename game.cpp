@@ -355,7 +355,7 @@ void DrawGame(void)
 
 	// カメラの数分だけ描画
 	for (int nCntDraw = 0; nCntDraw < GetCameraNum(); nCntDraw++)
-	{		
+	{
 		/*** カメラの設置 ***/
 		SetCamera();
 
@@ -420,7 +420,7 @@ void DrawGame(void)
 	{
 		DrawUIarm();
 	}
-	
+
 	/*** UIメニュー描画 ***/
 	DrawUImenu();
 
