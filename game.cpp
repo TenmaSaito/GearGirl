@@ -136,9 +136,6 @@ void InitGame(void)
 	/*** パーティクルの初期化 ***/
 	InitParticle();
 
-	/*** 放物線の初期化 ***/
-	InitParabola();
-
 	/*** マップの初期化 ***/
 	InitMap(D3DXVECTOR3(150.0f, 550.0f, 0.0f), D3DXVECTOR2(256, 256), 7500.0f);
 
@@ -227,9 +224,6 @@ void UninitGame(void)
 	/*** パーティクルの終了 ***/
 	UninitParticle();
 
-	/*** 放物線の終了 ***/
-	UninitParabola();
-
 	/*** マップの終了 ***/
 	UninitMap();
 
@@ -312,9 +306,6 @@ void UpdateGame(void)
 
 		/*** エフェクトの更新 ***/
 		UpdateEffect();
-
-		/*** 放物線の更新 ***/
-		UpdateParabola();
 
 		/*** マップの更新 ***/
 		UpdateMap();
@@ -401,9 +392,6 @@ void DrawGame(void)
 
 		/*** エフェクトの描画 ***/
 		DrawEffect();
-
-		/*** 放物線の描画 ***/
-		DrawParabola();
 
 		/*** フォグをクリア ***/
 		CleanFog();

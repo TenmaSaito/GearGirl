@@ -329,6 +329,12 @@ void SetEffect(D3DXVECTOR3 pos, D3DXCOLOR col, D3DXVECTOR3 vec, float Width, flo
 			pVtx[2].pos = D3DXVECTOR3(-g_aEffect[nCntEffect].Width * 0.5f, -g_aEffect[nCntEffect].Height, 0.0f);
 			pVtx[3].pos = D3DXVECTOR3(g_aEffect[nCntEffect].Width * 0.5f, -g_aEffect[nCntEffect].Height * 0.5f, 0.0f);
 
+			// êFÇÃìKâû
+			for (int nCntcol = 0; nCntcol < 4; nCntcol++)
+			{
+				pVtx[nCntcol].col = col;
+			}
+
 			break;	// Ç±Ç±Ç≈forï∂Çî≤ÇØÇÈ
 		}
 

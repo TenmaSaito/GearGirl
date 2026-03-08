@@ -49,6 +49,8 @@ using namespace MyMathUtil;
 #define ITEM_OFF		(IsEnableItemPut() == false)	// アイテム提出画面でない
 #define ITEMPROMPT_ON	(IsDispPrompt(GetIdxShopPrompt()) == true)	// アイテム提出のプロンプトが表示されている
 #define ITEMPROMPT_OFF	(IsDispPrompt(GetIdxShopPrompt()) == false)	// アイテム提出のプロンプトが表示されていない
+#define COL_RED			D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f)	// 赤色
+#define COL_BLUE		D3DXCOLOR(0.0f, 1.0f, 1.0f, 1.0f)	// 青色
 
 // =================================================
 // 平面投影の構造体
@@ -468,13 +470,57 @@ void UpdatePlayer(void)
 		}
 	}
 
+	// アイテムの情報を取得
 	Item* pItem = GetItem();
 
+	// === ネズミ操作時に、アイテムからパーティクルを出す === //
 	for (int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++, pItem++)
 	{
-		if (g_ActivePlayer == 1 && pItem->type == 0)
+		if (pItem->bGet == false)
 		{
-			SetParticle(pItem->pos, D3DXCOLOR_NULL, D3DXVECTOR3(5.0f, 0.0f, 5.0f), D3DXVECTOR3(6.0f, -1.0f, 6.0f), 1, 1.0f, 3, 5, false);
+			// 正解パーツ用パーティクル
+			if (g_ActivePlayer == 1 && pItem->type == 0)
+			{
+				SetParticle(pItem->pos, COL_BLUE, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true);
+			}
+			if (g_ActivePlayer == 1 && pItem->type == 1)
+			{
+				SetParticle(pItem->pos, COL_BLUE, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true);
+			}
+			if (g_ActivePlayer == 1 && pItem->type == 2)
+			{
+				SetParticle(pItem->pos, COL_BLUE, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true);
+			}
+			if (g_ActivePlayer == 1 && pItem->type == 3)
+			{
+				SetParticle(pItem->pos, COL_BLUE, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true);
+			}
+			if (g_ActivePlayer == 1 && pItem->type == 4)
+			{
+				SetParticle(pItem->pos, COL_BLUE, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true);
+			}
+
+			// 外れパーツ用パーティクル
+			if (g_ActivePlayer == 1 && pItem->type == 5)
+			{
+				SetParticle(pItem->pos, COL_RED, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true);
+			}
+			if (g_ActivePlayer == 1 && pItem->type == 6)
+			{
+				SetParticle(pItem->pos, COL_RED, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true);
+			}
+			if (g_ActivePlayer == 1 && pItem->type == 7)
+			{
+				SetParticle(pItem->pos, COL_RED, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true);
+			}
+			if (g_ActivePlayer == 1 && pItem->type == 8)
+			{
+				SetParticle(pItem->pos, COL_RED, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true);
+			}
+			if (g_ActivePlayer == 1 && pItem->type == 9)
+			{
+				SetParticle(pItem->pos, COL_RED, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true);
+			}
 		}
 	}
 
