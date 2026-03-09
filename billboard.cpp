@@ -143,10 +143,6 @@ void DrawBillboard(void)
 	// ビューマトリックス取得用
 	D3DXMATRIX mtxView;
 
-	// Zテストを無効にする
-	/*pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
-	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);*/
-
 	for (int nCntBillboard = 0; nCntBillboard < MAX_BILLBOARD; nCntBillboard++)
 	{
 		if (g_aBillboard[nCntBillboard].bUse == true)
@@ -186,10 +182,6 @@ void DrawBillboard(void)
 				2);											// 描画するプリミティブの数
 		}
 	}
-
-	// Zテストを有効にする
-	/*pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
-	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);*/
 }
 
 //================================================================================================================

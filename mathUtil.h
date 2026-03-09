@@ -44,6 +44,9 @@ SetWarning("modeldata.hがインクルードされていません。modeldata関連関数は無効化さ
 #define VEC_X(x)				D3DXVECTOR3(x, 0.0f, 0.0f)			// Xのみ変更
 #define VEC_Y(y)				D3DXVECTOR3(0.0f, y, 0.0f)			// Yのみ変更
 #define VEC_Z(z)				D3DXVECTOR3(0.0f, 0.0f, z)			// Zのみ変更
+#define VEC_XY(x, y)			D3DXVECTOR3(x, y, 0.0f)				// XYを変更
+#define VEC_XZ(x, z)			D3DXVECTOR3(x, 0.0f, z)				// XZを変更
+#define VEC_YZ(y, z)			D3DXVECTOR3(0.0f, y, z)				// YZを変更
 #define InitRot(x, y, z)		RepairedRot(D3DXVECTOR3(x, y, z))	// 修正済み角度
 #define DEF_COL					D3DXCOLOR_NULL						// デフォルトカラー
 #define foreach(type, var, lpArray)		for(type &var : lpArray)	// foreach構文
@@ -64,6 +67,9 @@ SetWarning("modeldata.hがインクルードされていません。modeldata関連関数は無効化さ
 #ifndef PARENT
 #define PARENT(...)				: public __VA_ARGS__				// 継承宣言
 #endif
+#define EXTRACT_YZ(vec)			(D3DXVECTOR3(0, vec.y, vec.z))		// YZ平面に変換
+#define EXTRACT_XZ(vec)			(D3DXVECTOR3(vec.x, 0, vec.z))		// XZ平面に変換
+#define EXTRACT_XY(vec)			(D3DXVECTOR3(vec.x, vec.y, 0))		// XY平面に変換
 
 // 2Dポリゴンのバッファ作成用フラグまとめ
 #define CREATE_2DPOLYGON(p) sizeof(VERTEX_2D) * 4, D3DUSAGE_WRITEONLY, FVF_VERTEX_2D, D3DPOOL_MANAGED, &p, NULL	// 2Dフラグまとめ
@@ -163,7 +169,7 @@ inline type operator--(type &target, int)\
 
 #define USE_UTIL				using namespace MyMathUtil			// MyMathUtilの使用宣言
 #define USE_LIB					using namespace MyLib				// MyLibの使用宣言
-#define CREATE_LITERAL(To, Name, From, val) \
+#define DECLARE_LITERAL(To, Name, From, val) \
 To operator"" Name(From val)\
 {\
 	return(To)val;\

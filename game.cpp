@@ -142,7 +142,7 @@ void InitGame(void)
 	InitParticle();
 
 	/*** マップの初期化 ***/
-	InitMap(D3DXVECTOR3(150.0f, 550.0f, 0.0f), D3DXVECTOR2(256, 256), 7500.0f);
+	InitMap(D3DXVECTOR3(150.0f, 170.0f, 0.0f), D3DXVECTOR2(256, 256), 1045.0f);
 
 	/*** ダイアログの初期化 ***/
 	InitDialog();
@@ -417,12 +417,6 @@ void DrawGame(void)
 	// ビューポートを設定
 	pDevice->SetViewport(&viewport);
 
-	/*** マップの描画 ***/
-	if (IsEndDialog() == true && GetCommonFade() == FADE_NONE)
-	{
-		DrawMap();
-	}
-
 	// VERTEX_2D ============================================
 	/*** Aの描画 ***/
 
@@ -440,6 +434,12 @@ void DrawGame(void)
 
 	/*** UIメニュー描画 ***/
 	DrawUImenu();
+
+	/*** マップの描画 ***/
+	if (IsEndDialog() == true && GetCommonFade() == FADE_NONE && GetActivePlayer() == PLAYERTYPE_GIRL)
+	{
+		DrawMap();
+	}
 
 	/*** 2Dポリゴンの描画 ***/
 	Draw2DPolygon();

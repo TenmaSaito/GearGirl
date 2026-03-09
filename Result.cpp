@@ -27,6 +27,12 @@
 //*** グローバル変数 ***
 //**********************************************************************************
 ENDTYPE g_endType = ENDTYPE_NORMAL;		// エンディングタイプ
+int g_nCounterEnding = 0;				// エンディングカウンター
+
+//**********************************************************************************
+//*** 定数変数 ***
+//**********************************************************************************
+constexpr int c_EndingTime = 240;		// エンディング持続時間
 
 //==================================================================================
 // --- 初期化 ---
@@ -58,6 +64,8 @@ void InitResult(void)
 	default:
 		break;
 	}
+
+	g_nCounterEnding = 0;
 }
 
 //==================================================================================
@@ -79,7 +87,8 @@ void UpdateResult(void)
 	// モード変更
 	if (GetKeyboardTrigger(DIK_RETURN)
 		|| GetJoypadTrigger(0, JOYKEY_A)
-		|| GetJoypadTrigger(0, JOYKEY_START))
+		|| GetJoypadTrigger(0, JOYKEY_START)
+		|| g_nCounterEnding >= c_EndingTime)
 	{
 		if (GetFade() == FADE_NONE)
 		{
@@ -110,6 +119,8 @@ void UpdateResult(void)
 	default:
 		break;
 	}
+
+	g_nCounterEnding++;
 }
 
 //==================================================================================

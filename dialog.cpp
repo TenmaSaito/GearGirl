@@ -355,6 +355,9 @@ void UpdateDialog(void)
 		}
 
 		SetEnableField(g_IdxField, false);
+
+		Destroy2DPolygon(g_IdxLeftStick);
+		Destroy2DPolygon(g_IdxRightStick);
 	}
 
 	if (g_bIsMovableTutorial == true)

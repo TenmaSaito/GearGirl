@@ -131,7 +131,7 @@ void InitItem(void)
 	// 所持アイテムの枠を取得
 	for (int nCntQuota = 0; nCntQuota < ITEMTYPE_MAX; nCntQuota++, pItemQuota++)
 	{
-		pItemQuota->pos = vec3(nCntQuota * SCREEN_WIDTH * 0.2f, SCREEN_HEIGHT * 0.5f, 0.0f);
+		pItemQuota->pos = vec3(nCntQuota * SCREEN_WIDTH * 0.2f, SCREEN_HEIGHT * 0.75f, 0.0f);
 		pItemQuota->col = colX_ZERO;
 		pItemQuota->size = vec2(SCREEN_WIDTH * 0.08f, SCREEN_WIDTH * 0.08f);
 		pItemQuota->nIdxBox = Set2DPolygon(pItemQuota->pos,vec3_ZERO, pItemQuota->size, g_nItemQuotaFlameTex, pItemQuota->col);
@@ -288,7 +288,7 @@ void UpdatePouchItem(void)
 		// 所持アイテム枠の位置を変更
 		for (int nCntQuota = 0; nCntQuota < ITEMTYPE_MAX; nCntQuota++, pItemQuota++)
 		{
-			pItemQuota->pos = vec3(SCREEN_WIDTH * (0.5f - 0.12f * g_nSelectPut) + SCREEN_WIDTH * 0.12f * nCntQuota, SCREEN_HEIGHT * 0.6f, 0.0f);
+			pItemQuota->pos = vec3(SCREEN_WIDTH * (0.5f - 0.12f * g_nSelectPut) + SCREEN_WIDTH * 0.12f * nCntQuota, SCREEN_HEIGHT * 0.75f, 0.0f);
 		//	pItemQuota->pos = vec3(nCntQuota * SCREEN_WIDTH * 0.12f, SCREEN_HEIGHT * 0.5f, 0.0f);
 			SetPosition2DPolygon(pItemQuota->nIdxBox, pItemQuota->pos);
 		}
