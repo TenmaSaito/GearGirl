@@ -42,12 +42,6 @@ void InitTutorial(void)
 
 	// 2Dポリゴンの初期化
 	Init2DPolygon();
-
-	// ダイアログの初期化
-	InitDialog();
-
-	// ダイアログの設置
-	SetDialog();
 }
 
 //==================================================================================
@@ -60,9 +54,6 @@ void UninitTutorial(void)
 
 	// 2Dポリゴンの破棄
 	Uninit2DPolygon();
-
-	// ダイアログの破棄
-	UninitDialog();
 }
 
 //==================================================================================
@@ -72,9 +63,6 @@ void UpdateTutorial(void)
 {
 	// 2Dポリゴンの更新
 	Update2DPolygon();
-
-	// ダイアログの更新
-	UpdateDialog();
 }
 
 //==================================================================================
@@ -82,8 +70,15 @@ void UpdateTutorial(void)
 //==================================================================================
 void DrawTutorial(void)
 {
+	AUTODEVICE9 AD9;
+
+	AD9.pDevice->SetTextureStageState(0, D3DTSS_CONSTANT, D3DXCOLOR(0, 0, 0, 1));
+	AD9.pDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+	AD9.pDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_CONSTANT);
+
 	// 2Dポリゴンの描画
 	Draw2DPolygon();
 
-	DrawDialog();
+	AD9.pDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+	AD9.pDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
 }

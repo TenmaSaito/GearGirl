@@ -962,5 +962,4 @@ namespace MyLib
 	using Integer = CVector<int>;
 	using Floating = CVector<float>;
 }
-
 #endif

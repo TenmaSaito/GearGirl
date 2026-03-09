@@ -25,6 +25,7 @@
 #include "player.h"
 #include "MessageLog.h"
 #include "prompt.h"
+#include "field.h"
 
 USE_PARAM;
 
@@ -49,8 +50,8 @@ typedef int ID_LOG;				// ログの順番
 //**********************************************************************************
 typedef enum
 {
-	LOGTYPE_GIRL,
-	LOGTYPE_OLDMAN,
+	LOGTYPE_GIRL,		// 少女
+	LOGTYPE_OLDMAN,		// お爺さん
 	LOGTYPE_MAX
 } LOGTYPE;
 
@@ -59,17 +60,17 @@ typedef enum
 //**********************************************************************************
 typedef enum
 {
-	LOGPHASE_FIRST,
-	LOGPHASE_TUTORIAL,
+	LOGPHASE_FIRST,		// 開始直後のログ
+	LOGPHASE_TUTORIAL,	// チュートリアル中のログ
 	LOGPHASE_MAX
 } LOGPHASE;
 
 // 列挙型のインクリメント,デクリメント定義
 START_UNABLE
 UNABLE_THISFILE(26812)
+UNABLE_THISFILE(26495)
 ENUM_INCREMENT_STOP(LOGPHASE, LOGPHASE_FIRST, LOGPHASE_MAX)
 ENUM_DECREMENT_STOP(LOGPHASE, LOGPHASE_FIRST, LOGPHASE_MAX)
-END_UNABLE
 
 //**********************************************************************************
 //*** チュートリアルテクスチャの種類 ***
@@ -81,6 +82,7 @@ typedef enum
 	TUTORIAL_TEX_GEAR,				// ギアの画像
 	TUTORIAL_TEX_SCREW,				// ネジの画像
 	TUTORIAL_TEX_UNKNOWN,			// ?の画像
+	TUTORIAL_TEX_ARROW,				// 地面に写るガイド矢印
 	TUTORIAL_TEX_MAX
 } TUTORIAL_TEX;
 
@@ -91,7 +93,7 @@ STRUCT()
 {
 	D3DXVECTOR3 BoxMid;		// ボックスの中心
 	D3DXVECTOR2 BoxSize;	// ボックスのサイズ
-	IDX_TEX tex;			// テクスチャのインデックス
+	IDX_TEXTURE tex;			// テクスチャのインデックス
 	IDX_2DPOLYGON polygon;	// ポリゴンのインデックス
 } Dialog;
 
@@ -139,6 +141,7 @@ void MovableTutorial(void);
 //**********************************************************************************
 //*** グローバル変数 ***
 //**********************************************************************************
+#pragma region 変数宣言
 Dialog g_aDialog[DIALOG_NUM];
 
 // ダイアログの情報
@@ -147,6 +150,8 @@ const Dialog g_aDialogInfo[DIALOG_NUM] =
 	{D3DXVECTOR3(CParamVector::WINMID.x, CParamVector::WINMID.y * 1.75f, 0.0f), D3DXVECTOR2(1280.0f, 300.0f), -1, -1},
 	{D3DXVECTOR3(CParamVector::WINMID.x, CParamVector::WINMID.y * 1.75f, 0.0f), D3DXVECTOR2(1280.0f, 300.0f), -1, -1},
 };
+
+#pragma region テクスチャパスまとめ
 
 // テクスチャパス
 const char *g_apDialogTexture[DIALOG_NUM] =		
@@ -165,7 +170,10 @@ const char *g_apTutorialTexture[TUTORIAL_TEX_MAX] =
 	"data/TEXTURE/Item_Gear.png",
 	"data/TEXTURE/Item_Screw.png",
 	"data/TEXTURE/Item_Unknown.png",
+	"data/TEXTURE/Tutorial_Arrow.png",
 };
+
+#pragma endregion
 
 // アニメーションテクスチャの動く範囲
 const D3DXVECTOR3 g_aMoveTexture[TUTORIAL_TEX_MAX][2] =
@@ -177,7 +185,12 @@ const D3DXVECTOR3 g_aMoveTexture[TUTORIAL_TEX_MAX][2] =
 	{D3DXVECTOR3(300, 200, 0), D3DXVECTOR3(300, 250, 0)},
 	{D3DXVECTOR3(640, 225, 0), D3DXVECTOR3(640, 175, 0)},
 	{D3DXVECTOR3(1000, 225, 0), D3DXVECTOR3(1000, 300, 0)},
+
+	// 終わり
+	{D3DXVECTOR3(1550.0f, 100.9999f, -905.0f), D3DXVECTOR3(1550.0f, 100.9999f, -895.0f)},
 };
+
+#pragma region ログの情報まとめ
 
 // ログの情報
 Log g_apLog[] =		
@@ -196,14 +209,17 @@ Log g_apTutorialLog[] =
 	{L"......分かった。", LOGTYPE_GIRL},
 };
 
+#pragma endregion
+
 // チュートリアル中の情報
 TutorialTex g_aTutorial[] =
 {
-	{D3DXVECTOR3(150, 550, 0), D3DXVECTOR2(150, 150)},
-	{D3DXVECTOR3(1130, 550, 0), D3DXVECTOR2(150, 150)},
-	{D3DXVECTOR3(300, 200, 0), D3DXVECTOR2(150, 150)},
-	{D3DXVECTOR3(640, 225, 0), D3DXVECTOR2(150, 150)},
-	{D3DXVECTOR3(1000, 225, 0), D3DXVECTOR2(150, 150)},
+	{D3DXVECTOR3(150, 550, 0), D3DXVECTOR2(150, 150)},					// 左スティック
+	{D3DXVECTOR3(1130, 550, 0), D3DXVECTOR2(150, 150)},					// 右スティック
+	{D3DXVECTOR3(300, 200, 0), D3DXVECTOR2(150, 150)},					// 歯車
+	{D3DXVECTOR3(640, 225, 0), D3DXVECTOR2(150, 150)},					// ネジ
+	{D3DXVECTOR3(1000, 225, 0), D3DXVECTOR2(150, 150)},					// ？
+	{D3DXVECTOR3(1550.0f, 100.9999f, -900.0f), D3DXVECTOR2(250, 125)},	// 矢印
 };
 
 ID_LOG g_CurrentID = 0;			// 現在のログのID
@@ -215,9 +231,15 @@ bool g_bIsEndTutorial;			// チュートリアルの終了判定
 bool g_bIsShowAnyDialog;		// 何か一つでもダイアログが表示されているか
 bool g_bIsMovableTutorial;		// チュートリアルの動ける状態か
 bool g_bShowMoveTex;			// テクスチャ表示済みか
+bool g_bSKipLog;				// 現在再生中のログをスキップ可能か
 IDX_2DPOLYGON g_IdxLeftStick;	// 左スティックのチュートリアルポリゴン
 IDX_2DPOLYGON g_IdxRightStick;	// 右スティックのチュートリアルポリゴン
+IDX_FIELD g_IdxField;			// フィールドのインデックス
 Tutorial_TexAnim g_aAnimTex[TUTORIAL_TEX_MAX];	// テクスチャのポリゴン情報
+
+#pragma endregion
+
+#pragma region ダイアログの基本処理
 
 //==================================================================================
 // --- 初期化 ---
@@ -233,8 +255,10 @@ void InitDialog(void)
 	g_bIsShowAnyDialog = false;
 	g_bIsMovableTutorial = false;
 	g_bShowMoveTex = false;
+	g_bSKipLog = true;
 	g_IdxLeftStick = -1;
 	g_IdxRightStick = -1;
+	g_IdxField = -1;
 
 	// 値をコピー
 	for (int nCntDialog = 0; nCntDialog < DIALOG_NUM; nCntDialog++)
@@ -254,9 +278,9 @@ void InitDialog(void)
 	// 初期化
 	AutoZeroMemory(g_aAnimTex);
 
-	IDX_TEX tex;
+	IDX_TEXTURE tex;	// テクスチャインデックス一時保存先
 
-	for (int nCntTex = TUTORIAL_TEX_GEAR; nCntTex < TUTORIAL_TEX_MAX; nCntTex++)
+	for (int nCntTex = TUTORIAL_TEX_GEAR; nCntTex < TUTORIAL_TEX_ARROW; nCntTex++)
 	{
 		LoadTexture(g_apTutorialTexture[nCntTex], &tex);
 		g_aAnimTex[nCntTex].poly =
@@ -272,6 +296,26 @@ void InitDialog(void)
 		g_aAnimTex[nCntTex].start = g_aMoveTexture[nCntTex][0];
 		g_aAnimTex[nCntTex].end = g_aMoveTexture[nCntTex][1];
 	}
+
+	// 床
+	// テクスチャ読み込み
+	LoadTexture(g_apTutorialTexture[TUTORIAL_TEX_ARROW], &tex);
+
+	// 設置
+	g_IdxField = SetField(g_aTutorial[TUTORIAL_TEX_ARROW].pos,
+		CParamVector::V3NULL,
+		VEC_Y(CParamFloat::HALFPI),
+		g_aTutorial[TUTORIAL_TEX_ARROW].size.x,
+		g_aTutorial[TUTORIAL_TEX_ARROW].size.y,
+		tex,
+		1,
+		1,
+		D3DCULL_CCW);
+
+	SetEnableField(g_IdxField, false);					// 描画スキップ
+
+	g_aAnimTex[TUTORIAL_TEX_ARROW].start = g_aMoveTexture[TUTORIAL_TEX_ARROW][0];
+	g_aAnimTex[TUTORIAL_TEX_ARROW].end = g_aMoveTexture[TUTORIAL_TEX_ARROW][1];
 }
 
 //==================================================================================
@@ -288,6 +332,8 @@ void UninitDialog(void)
 //==================================================================================
 void UpdateDialog(void)
 {
+	if (g_bIsEndTutorial == true) return;
+
 	Log *pLogInfo = &g_apLog[g_CurrentID];
 	const LPMESSAGELOG pMessageLog = GetMessageLogPointer();
 
@@ -300,10 +346,15 @@ void UpdateDialog(void)
 		g_bIsShowAnyDialog = false;
 		g_bIsMovableTutorial = false;
 
-		for (int nCntTex = TUTORIAL_TEX_GEAR; nCntTex < TUTORIAL_TEX_MAX; nCntTex++)
+		SetEnable2DPolygon(g_aDialog[0].polygon, false);
+		SetEnable2DPolygon(g_aDialog[1].polygon, false);
+
+		for (int nCntTex = TUTORIAL_TEX_GEAR; nCntTex < TUTORIAL_TEX_ARROW; nCntTex++)
 		{
 			SetEnable2DPolygon(g_aAnimTex[nCntTex].poly, false);
 		}
+
+		SetEnableField(g_IdxField, false);
 	}
 
 	if (g_bIsMovableTutorial == true)
@@ -322,7 +373,7 @@ void UpdateDialog(void)
 	{
 		if (g_bShowMoveTex == false)
 		{
-			for (int nCntTex = TUTORIAL_TEX_GEAR; nCntTex < TUTORIAL_TEX_MAX; nCntTex++)
+			for (int nCntTex = TUTORIAL_TEX_GEAR; nCntTex < TUTORIAL_TEX_ARROW; nCntTex++)
 			{
 				SetEnable2DPolygon(g_aAnimTex[nCntTex].poly, true);
 			}
@@ -333,7 +384,7 @@ void UpdateDialog(void)
 		D3DXVECTOR3 pos;
 		D3DXCOLOR col;
 
-		for (int nCntTex = TUTORIAL_TEX_GEAR; nCntTex < TUTORIAL_TEX_MAX; nCntTex++)
+		for (int nCntTex = TUTORIAL_TEX_GEAR; nCntTex < TUTORIAL_TEX_ARROW; nCntTex++)
 		{
 			if (g_aAnimTex[nCntTex - 1].col.a <= 0.75f && nCntTex != TUTORIAL_TEX_GEAR) continue;
 
@@ -362,6 +413,29 @@ void UpdateDialog(void)
 			SetColor2DPolygon(g_aAnimTex[nCntTex].poly, g_aAnimTex[nCntTex].col);
 		}
 	}
+
+	D3DXVECTOR3 pos;
+	D3DXCOLOR col;
+
+	g_aAnimTex[TUTORIAL_TEX_ARROW].s += 0.005f * ((g_aAnimTex[TUTORIAL_TEX_ARROW].bReverse) ? -1 : 1);
+
+	if (g_aAnimTex[TUTORIAL_TEX_ARROW].s <= 0.0f)
+	{
+		g_aAnimTex[TUTORIAL_TEX_ARROW].s = 0.0f;
+		g_aAnimTex[TUTORIAL_TEX_ARROW].bReverse = !g_aAnimTex[TUTORIAL_TEX_ARROW].bReverse;
+	}
+	else if (g_aAnimTex[TUTORIAL_TEX_ARROW].s >= 1.0f)
+	{
+		g_aAnimTex[TUTORIAL_TEX_ARROW].s = 1.0f;
+		g_aAnimTex[TUTORIAL_TEX_ARROW].bReverse = !g_aAnimTex[TUTORIAL_TEX_ARROW].bReverse;
+	}
+
+	USE_UTIL;
+	pos = GetPTPLerp(g_aAnimTex[TUTORIAL_TEX_ARROW].start, g_aAnimTex[TUTORIAL_TEX_ARROW].end, g_aAnimTex[TUTORIAL_TEX_ARROW].s);
+
+	SetPositionField(g_IdxField, pos);
+
+	g_bSKipLog = !g_pLog->IsEndMessageLog();
 }
 
 //==================================================================================
@@ -372,6 +446,8 @@ void DrawDialog(void)
 	// メッセージログの描画
 	DrawMessageLog(&g_pLog, sizeof(g_pLog));
 }
+
+#pragma endregion
 
 //==================================================================================
 // --- 設置 ---
@@ -478,6 +554,13 @@ void FirstLog(void)
 		|| GetJoypadTrigger(0, JOYKEY_A)
 		|| GetJoypadTrigger(1, JOYKEY_A))
 	{
+		if (g_bSKipLog == true)
+		{
+			g_pLog->ImmeString();
+			g_bSKipLog = false;
+			return;
+		}
+
 		if (g_CurrentID >= g_MaxID)
 		{ // ログを流し終わった時、ゲーム開始
 			g_bIsShowAnyDialog = false;
@@ -497,6 +580,8 @@ void FirstLog(void)
 				KEEP_USING,
 				KEEP_USING_COL,
 				TRUE);
+
+			g_bSKipLog = true;
 		}
 	}
 }
@@ -542,6 +627,13 @@ void TutorialLog(void)
 		|| GetJoypadTrigger(0, JOYKEY_A)
 		|| GetJoypadTrigger(1, JOYKEY_A))
 	{
+		if (g_bSKipLog == true)
+		{
+			g_pLog->ImmeString();
+			g_bSKipLog = false;
+			return;
+		}
+
 		if (g_CurrentID >= g_MaxTutorialID)
 		{ // ログを流し終わった時、ゲーム開始
 			g_bIsEndTutorial = true;
@@ -555,6 +647,8 @@ void TutorialLog(void)
 			{
 				SetEnable2DPolygon(g_aAnimTex[nCntTex].poly, false);
 			}
+
+			SetEnableField(g_IdxField, false);
 		}
 		else
 		{ // ログを進める
@@ -570,6 +664,8 @@ void TutorialLog(void)
 				KEEP_USING,
 				KEEP_USING_COL,
 				TRUE);
+
+			g_bSKipLog = true;
 		}
 	}
 }
@@ -595,7 +691,7 @@ void MovableTutorial(void)
 
 	if (g_IdxLeftStick == -1)
 	{
-		IDX_TEX tex;
+		IDX_TEXTURE tex;
 
 		// テクスチャ読み込み
 		LoadTexture(g_apTutorialTexture[0], &tex);
@@ -616,11 +712,13 @@ void MovableTutorial(void)
 			KEEP_USING,
 			KEEP_USING_COL,
 			TRUE);
+
+		SetEnableField(g_IdxField, true);
 	}
 
 	if (g_IdxRightStick == -1)
 	{
-		IDX_TEX tex;
+		IDX_TEXTURE tex;
 
 		// テクスチャ読み込み
 		LoadTexture(g_apTutorialTexture[1], &tex);
@@ -645,3 +743,5 @@ bool IsEndDialog(void)
 {
 	return g_bIsEndTutorial;
 }
+
+END_UNABLE

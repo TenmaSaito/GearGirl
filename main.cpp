@@ -153,7 +153,7 @@ void MessageLoop(LPMSG lpMsg)
 				dwFrameCount = 0;						// フレームカウントをクリア
 			}
 
-			if ((dwCurrentTime - dwExecLastTime) >= (1000 / Constants::CParamInt::FPS))
+			if ((dwCurrentTime - dwExecLastTime) >= (1000 / 60))
 			{//60分の1秒経過
 
 				dwExecLastTime = dwCurrentTime;			//処理開始時刻[現在時刻]を保存
@@ -330,7 +330,7 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	if (FAILED(g_pD3D->CreateDevice(D3DADAPTER_DEFAULT,
 		D3DDEVTYPE_HAL,
 		hWnd,
-		D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_MULTITHREADED,
+		D3DCREATE_HARDWARE_VERTEXPROCESSING,
 		&d3dpp,
 		&g_pD3DDevice)))
 	{
@@ -413,6 +413,12 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	FadeSound(SOUND_LABEL_BGM_TITLE);
 
 #endif // MODE_ON
+
+#if FALSE
+	D3DCAPS9 caps9;
+	g_pD3DDevice->GetDeviceCaps(&caps9);
+	g_pD3DDevice->SetRenderState(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_ALPHA | D3DCOLORWRITEENABLE_RED);
+#endif
 
 	return S_OK;
 }

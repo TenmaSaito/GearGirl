@@ -280,21 +280,21 @@ void UpdatePlayer(void)
 
 		if (TUTORIAL_NOW)
 		{// チュートリアル中
-			if (pPlayer->pos.x > 1520.0f)
+			if(pPlayer->pos.x > 1620.0f)
 			{
-				pPlayer->pos.x = 1520.0f;
+				pPlayer->pos.x = 1620.0f;
 			}
-			if (pPlayer->pos.x < 1350.0f)
+			if (pPlayer->pos.x < 1375.0f)
 			{
-				pPlayer->pos.x = 1350.0f;
+				pPlayer->pos.x = 1375.0f;
 			}
 			if (pPlayer->pos.z > -440.0f)
 			{
 				pPlayer->pos.z = -440.0f;
 			}
-			if (pPlayer->pos.z < -1200.0f)
+			if (pPlayer->pos.z < -1070.0f)
 			{
-				pPlayer->pos.z = -1200.0f;
+				pPlayer->pos.z = -1070.0f;
 			}
 		}
 

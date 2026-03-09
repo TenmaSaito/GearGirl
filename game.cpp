@@ -7,6 +7,7 @@
 //**********************************************************************************
 //*** インクルードファイル ***
 //**********************************************************************************
+#include "billboard.h"
 #include "camera.h"
 #include "common_fade.h"
 #include "debugproc.h"
@@ -73,11 +74,15 @@ ObserveEnding g_obEnding;			// エンディングへの移行状態
 void InitGame(void)
 {
 	/*** Aの初期化 ***/
-
+	
 	//===========================================
 	// 初期化
+
 	/*** カメラの初期化 ***/
 	InitCamera();
+
+	/*** ビルボードの初期化 ***/
+	InitBillboard();
 
 	/*** モデルデータの初期化 ***/
 	InitModelData();
@@ -147,12 +152,15 @@ void InitGame(void)
 	LoadModel();
 
 	g_nCounterGame = 0;
-	IDX_TEX Tex;
+	IDX_TEXTURE Tex;
 	LoadTexture("data/TEXTURE/TestPrompt.png", &Tex);
 	g_nIdxShopPrompt = SetPrompt(D3DXVECTOR3(1463, 116, -455), D3DXVECTOR2(10.0f, 5.0f), Tex, true);
 	SetEnablePrompt(true, g_nIdxShopPrompt);
 
 	SetEnableMap(true);
+
+	LoadTexture("data/TEXTURE/NINGEN01.png", &Tex);
+	SetBillboard(D3DXVECTOR3(1450, 100, -445), 15, 25, Tex);
 
 	SetDialog();
 }
@@ -163,6 +171,9 @@ void InitGame(void)
 void UninitGame(void)
 {
 	/*** Aの終了 ***/
+
+	/*** ビルボードの終了 ***/
+	UninitBillboard();
 
 	/*** カメラの終了 ***/
 	UninitCamera();
@@ -258,6 +269,9 @@ void UpdateGame(void)
 
 		/*** カメラの更新 ***/
 		UpdateCamera();
+
+		/*** ビルボードの更新 ***/
+		UpdateBillboard();
 
 		/*** 3Dモデルの更新 ***/
 		Update3DModel();
@@ -370,6 +384,9 @@ void DrawGame(void)
 
 		/*** モデルの描画 ***/
 		DrawModel();
+
+		/*** ビルボードの描画 ***/
+		DrawBillboard();
 
 		/*** プレイヤーの描画 ***/
 		DrawPlayer();

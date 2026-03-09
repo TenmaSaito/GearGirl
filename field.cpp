@@ -1,9 +1,9 @@
-//================================================================================================================
+//==================================================================================
 //
 // DirectXの床の表示処理 [field.cpp]
-// Author : TENMA
+// Author : TENMA SAITO
 //
-//================================================================================================================
+//==================================================================================
 //**********************************************************************************
 //*** インクルードファイル ***
 //**********************************************************************************
@@ -12,10 +12,11 @@
 #include "mathUtil.h"
 
 using MyMathUtil::CollisionBoxZ;
+USE_UTIL;
 
-//*************************************************************************************************
+//**********************************************************************************
 //*** マクロ定義 ***
-//*************************************************************************************************
+//**********************************************************************************
 #define MAX_FIELD			(128)		// 床の最大数
 #define FIELD_SIZE_X		(1000)		// ポリゴンの基本サイズ - X
 #define FIELD_SIZE_Z		(1000)		// ポリゴンの基本サイズ - Y
@@ -24,37 +25,39 @@ using MyMathUtil::CollisionBoxZ;
 #define FIELD_WDSPD			(0.1f)		// ポリゴンの拡縮スピード
 #define COLLISION_CODE		"FLOOR"		// 床の判定用文字列
 
-//*************************************************************************************************
+//**********************************************************************************
 //*** 床構造体の定義 ***
-//*************************************************************************************************
+//**********************************************************************************
 typedef struct
 {
-	D3DXVECTOR3 pos;							// ポリゴンの位置
-	D3DXVECTOR3 move;							// 移動量
-	D3DXVECTOR3 rot;							// ポリゴンの角度
-	D3DXMATRIX mtxWorld;						// ワールドマトリックス
-	float fWidth;								// ポリゴンの横幅
-	float fDepth;								// ポリゴンの奥行
-	int nXBlock;								// 拡大倍率X
-	int nZBlock;								// 拡大倍率Y
-	int nIndexTexture;							// テクスチャの種類
-	int nCounterAnim;							// アニメーションカウンター
-	int nPatternAnim;							// アニメーションパターン
-	char aCodename[MAX_PATH];					// 判定用名称
-	D3DCULL type;								// カリングタイプ
-	bool bUse;									// 使われているか
+	D3DXVECTOR3 pos;			// ポリゴンの位置
+	D3DXVECTOR3 move;			// 移動量
+	D3DXVECTOR3 rot;			// ポリゴンの角度
+	D3DXCOLOR col;				// ポリゴンの色
+	D3DXMATRIX mtxWorld;		// ワールドマトリックス
+	float fWidth;				// ポリゴンの横幅
+	float fDepth;				// ポリゴンの奥行
+	int nXBlock;				// 拡大倍率X
+	int nZBlock;				// 拡大倍率Y
+	int nIndexTexture;			// テクスチャの種類
+	int nCounterAnim;			// アニメーションカウンター
+	int nPatternAnim;			// アニメーションパターン
+	char aCodename[MAX_PATH];	// 判定用名称
+	D3DCULL type;				// カリングタイプ
+	bool bUse;					// 使われているか
+	bool bEnable;				// 一時休止中か
 }Field;
 
-//*************************************************************************************************
+//**********************************************************************************
 //*** グローバル変数 ***
-//*************************************************************************************************
+//**********************************************************************************
 LPDIRECT3DTEXTURE9		g_pTextureField = NULL;	// テクスチャへのポインタ
 LPDIRECT3DVERTEXBUFFER9 g_pVtxBuffField = NULL;	// 頂点バッファのポインタ
 Field g_aField[MAX_FIELD];
 
-//================================================================================================================
+//==================================================================================
 // --- 床の初期化処理 ---
-//================================================================================================================
+//==================================================================================
 void InitField(void)
 {
 	/*** デバイスの取得 ***/
@@ -76,6 +79,7 @@ void InitField(void)
 		g_aField[nCntField].nCounterAnim = 0;
 		g_aField[nCntField].nPatternAnim = 0;
 		g_aField[nCntField].bUse = false;
+		g_aField[nCntField].bEnable = false;
 	}
 
 	/*** 頂点バッファの生成 ***/
@@ -133,43 +137,40 @@ void InitField(void)
 	g_pVtxBuffField->Unlock();
 }
 
-//================================================================================================================
+//==================================================================================
 // --- 床の終了処理 ---
-//================================================================================================================
+//==================================================================================
 void UninitField(void)
 {
 	/*** テクスチャの破棄 ***/
-	if (g_pTextureField != NULL)
-	{
-		g_pTextureField->Release();
-		g_pTextureField = NULL;
-	}
+	RELEASE(g_pTextureField);
 
 	/*** 頂点バッファの破棄 ***/
-	if (g_pVtxBuffField != NULL)
-	{
-		g_pVtxBuffField->Release();
-		g_pVtxBuffField = NULL;
-	}
+	RELEASE(g_pVtxBuffField);
 }
 
-//================================================================================================================
+//==================================================================================
 // --- 床の更新処理 ---
-//================================================================================================================
+//==================================================================================
 void UpdateField(void)
 {
 	
 }
 
-//================================================================================================================
+//==================================================================================
 // --- 床の描画処理 ---
-//================================================================================================================
+//==================================================================================
 void DrawField(void)
 {
 	/*** デバイスの取得 ***/
 	AUTODEVICE9 pAuto;							// デバイス自動解放システム
 	LPDIRECT3DDEVICE9 pDevice = pAuto.pDevice;	// 自動解放システムを介してデバイスを取得
 	D3DXMATRIX mtxRot, mtxTrans;		// 計算用マトリックス
+
+	// αテスト
+	pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
+	pDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);		// 基準値よりも大きい場合にZバッファに書き込み
+	pDevice->SetRenderState(D3DRS_ALPHAREF, 10);					// 基準値
 
 	/*** 頂点バッファをデータストリームに設定 ***/
 	pDevice->SetStreamSource(0, g_pVtxBuffField, 0, sizeof(VERTEX_3D));
@@ -180,7 +181,7 @@ void DrawField(void)
 	for (int nCntField = 0; nCntField < MAX_FIELD; nCntField++)
 	{
 		// 使われていれば
-		if (g_aField[nCntField].bUse == true)
+		if ((g_aField[nCntField].bUse == true) & (g_aField[nCntField].bEnable == true))
 		{
 			/*** ワールドマトリックスの初期化 ***/
 			D3DXMatrixIdentity(&g_aField[nCntField].mtxWorld);
@@ -213,14 +214,20 @@ void DrawField(void)
 				2);											// 描画するプリミティブの数
 		}
 	}
+
+	// αテスト終了
+	pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+	pDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);	// 基準値よりも大きい場合にZバッファに書き込み
+	pDevice->SetRenderState(D3DRS_ALPHAREF, 0);					// 基準値
 }
 
-//================================================================================================================
+//==================================================================================
 // --- 床の設置処理 ---
-//================================================================================================================
-void SetField(D3DXVECTOR3 pos, D3DXVECTOR3 move, D3DXVECTOR3 rot, float fWidth, float fDepth, int nIndexTexture, int nXblock, int nZblock, D3DCULL type)
+//==================================================================================
+IDX_FIELD SetField(D3DXVECTOR3 pos, D3DXVECTOR3 move, D3DXVECTOR3 rot, float fWidth, float fDepth, int nIndexTexture, int nXblock, int nZblock, D3DCULL type)
 {
-	VERTEX_3D* pVtx;					// 頂点情報へのポインタ
+	VERTEX_3D* pVtx;		// 頂点情報へのポインタ
+	IDX_FIELD Idx = -1;		// 返り値
 
 	/*** 頂点バッファの設定 ***/
 	g_pVtxBuffField->Lock(0, 0, (void**)&pVtx, 0);
@@ -266,6 +273,8 @@ void SetField(D3DXVECTOR3 pos, D3DXVECTOR3 move, D3DXVECTOR3 rot, float fWidth, 
 			pVtx[3].tex = D3DXVECTOR2(1.0f * nXblock, 1.0f * nZblock);
 
 			g_aField[nCntField].bUse = true;		// 使用状態に設定
+			g_aField[nCntField].bEnable = true;		// 有効化
+			Idx = nCntField;	// 返り値を更新
 
 			break;
 		}
@@ -275,42 +284,62 @@ void SetField(D3DXVECTOR3 pos, D3DXVECTOR3 move, D3DXVECTOR3 rot, float fWidth, 
 
 	/*** 頂点バッファの設定を終了 ***/
 	g_pVtxBuffField->Unlock();
+
+	return Idx;
 }
 
-//================================================================================================================
+//==================================================================================
 // --- 床の判定処理(プレイヤーの脱走防止) ---
-//================================================================================================================
+//==================================================================================
 bool CollisionFloor(D3DXVECTOR3 *pPos, D3DXVECTOR3 *pPosOld, D3DXVECTOR3 *pMove, float fHeight)
 {
-	bool bLand = false;
+	return false;
+}
 
-	for (int nCntField = 0; nCntField < MAX_FIELD; nCntField++)
-	{
-		// 使われていれば
-		if (g_aField[nCntField].bUse == true)
-		{
-			D3DXVECTOR4 rect;
-			rect.x = g_aField[nCntField].pos.x - (g_aField[nCntField].fWidth * 0.5f);
-			rect.y = g_aField[nCntField].pos.x + (g_aField[nCntField].fWidth * 0.5f);
-			rect.z = g_aField[nCntField].pos.z - (g_aField[nCntField].fDepth * 0.5f);
-			rect.w = g_aField[nCntField].pos.z + (g_aField[nCntField].fDepth * 0.5f);
+//==================================================================================
+// --- 床の一時停止処理 ---
+//==================================================================================
+void SetEnableField(IDX_FIELD field, bool bEnable)
+{
+	// 有効化を保存
+	g_aField[field].bEnable = bEnable;
+}
 
-			if (CollisionBoxZ(rect, *pPos))
-			{
-				if (pPos->y < g_aField[nCntField].pos.y
-					&& pPosOld->y >= g_aField[nCntField].pos.y)
-				{
-					pPos->y = g_aField[nCntField].pos.y;
-					bLand = true;
-				}
-				else if(pPos->y + fHeight > g_aField[nCntField].pos.y
-					&& pPosOld->y + fHeight <= g_aField[nCntField].pos.y)
-				{
-					pPos->y = g_aField[nCntField].pos.y - fHeight;
-				}
-			}
-		}
-	}
+//==================================================================================
+// --- 床の色変更処理 ---
+//==================================================================================
+void SetColorField(IDX_FIELD field, D3DXCOLOR col)
+{
+	VERTEX_3D *pVtx;		// 頂点情報へのポインタ
 
-	return bLand;
+	// 色を保存
+	g_aField[field].col = col;
+
+	/*** 頂点バッファの設定 ***/
+	g_pVtxBuffField->Lock(0, 0, (void**)&pVtx, 0);
+
+	pVtx += field * 4;
+
+	SetDefaultColor(pVtx, col);
+
+	/*** 頂点バッファの設定を終了 ***/
+	g_pVtxBuffField->Unlock();
+}
+
+//==================================================================================
+// --- 床の移動処理 ---
+//==================================================================================
+void SetPositionField(IDX_FIELD field, D3DXVECTOR3 pos)
+{
+	// 位置を保存
+	g_aField[field].pos = pos;
+}
+
+//==================================================================================
+// --- 床の消去処理 ---
+//==================================================================================
+void DestroyField(IDX_FIELD field)
+{
+	// 未使用に設定
+	g_aField[field].bUse = false;
 }

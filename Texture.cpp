@@ -38,7 +38,7 @@ void InitTexture(void)
 //================================================================================================================
 // --- モデルの読み込み ---
 //================================================================================================================
-HRESULT LoadTexture(_In_ const char *pTexFileName, int *pOutIdx)
+HRESULT LoadTexture(_In_ const char *pTexFileName, IDX_TEXTURE *pOutIdx)
 {
 	/*** デバイスの取得 ***/
 	AUTODEVICE9 pAuto;							// デバイス自動解放システム
@@ -146,7 +146,7 @@ void ResetTexture(void)
 //================================================================================================================
 // --- オブジェクト情報の取得 ---
 //================================================================================================================
-LPDIRECT3DTEXTURE9 GetTexture(_In_ int nType)
+LPDIRECT3DTEXTURE9 GetTexture(_In_ IDX_TEXTURE nType)
 {
 	if (nType < 0 || nType >= MAX_TEXTURE) return NULL;
 	LPTEXTURE_INFO pTexInfo = &g_aTexInfo[nType];

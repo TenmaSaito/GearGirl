@@ -11,6 +11,7 @@
 
 // 汎用インクルード群
 #include "2Dpolygon.h"
+#include "mathUtil.h"
 #include "param.h"
 
 // 通常インクルード群
@@ -33,7 +34,7 @@ STRUCT()
 	D3DXVECTOR3 final;		// 最終位置
 	D3DXVECTOR2 size;		// ポリゴンサイズ
 	D3DXCOLOR inv, white;	// 初期カラー,最終カラ―
-	IDX_TEX tex;			// テクスチャインデックス
+	IDX_TEXTURE tex;			// テクスチャインデックス
 	IDX_2DPOLYGON poly;		// ポリゴンインデックス
 	float s;				// Lerp用変数
 } TLogo, *LPTLOGO, *PTLOGO;
@@ -97,7 +98,7 @@ void DrawTLogo(void)
 //==================================================================================
 // --- 設置 ---
 //==================================================================================
-void SetTLogo(D3DXVECTOR3 origin, D3DXVECTOR3 final, D3DXVECTOR2 size, IDX_TEX tex)
+void SetTLogo(D3DXVECTOR3 origin, D3DXVECTOR3 final, D3DXVECTOR2 size, IDX_TEXTURE tex)
 {
 	LPTLOGO pTLogo = GetTLogo();
 

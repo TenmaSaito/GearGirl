@@ -11,7 +11,7 @@
 //*** インクルードファイル ***
 //**********************************************************************************
 #include "main.h"
-#include "mathUtil.h"
+#include "Texture.h"
 
 //**********************************************************************************
 //*** マクロ定義 ***
@@ -25,5 +25,5 @@ void UninitTLogo(void);
 void UpdateTLogo(void);
 void DrawTLogo(void);
 
-void SetTLogo(D3DXVECTOR3 origin, D3DXVECTOR3 final, D3DXVECTOR2 size, IDX_TEX tex);
+void SetTLogo(D3DXVECTOR3 origin, D3DXVECTOR3 final, D3DXVECTOR2 size, IDX_TEXTURE tex);
 #endif

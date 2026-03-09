@@ -14,8 +14,11 @@
 
 // 汎用インクルード群
 #include "mathUtil.h"
+#include "Texture.h"
 #include "param.h"
+#include "MyCol.h"
 
+USE_UTIL;
 USE_PARAM;
 
 // 通常インクルード群
@@ -36,6 +39,19 @@ typedef TCamera MapCamera;
 typedef MapCamera *LPMAPCAMERA, *PMAPCAMERA;
 
 //**********************************************************************************
+//*** マップ上のアイコンの種類 ***
+//**********************************************************************************
+typedef enum
+{
+	MAPICONTYPE_SHOP = 0,		// 店のアイコン
+	MAPICONTYPE_SBUTTON,		// 小さなボタン
+	MAPICONTYPE_LBUTTON,		// 大きなボタン
+	MAPICONTYPE_TREE,			// 倒木エリア
+	MAPICONTYPE_FOUNTAIN,		// 噴水
+	MAPICONTYPE_MAX	
+} MAPICONTYPE;
+
+//**********************************************************************************
 //*** マップ構造体 ***
 //**********************************************************************************
 STRUCT()
@@ -46,6 +62,31 @@ STRUCT()
 } Map;
 
 //**********************************************************************************
+//*** マップアイコン構造体 ***
+//**********************************************************************************
+STRUCT()
+{
+	LPDIRECT3DVERTEXBUFFER9 pVtx;	// 頂点バッファへのポインタ
+	IDX_TEXTURE tex;				// テクスチャインデックス
+	D3DXVECTOR3 pos;				// 位置
+	D3DXVECTOR2 size;				// サイズ
+	D3DXCOLOR col;					// 色
+	float s;						// Lerp変換用変数
+	bool bReverse;					// Lerp反転
+} MapIcon;
+
+//**********************************************************************************
+//*** プレイヤーアイコン構造体 ***
+//**********************************************************************************
+STRUCT(PlayerIcon) PARENT(MapIcon)
+{
+	LPDIRECT3DVERTEXBUFFER9 pVtxArrow;	// 頂点バッファへのポインタ
+	IDX_TEXTURE texArrow;	// テクスチャインデックス
+	D3DXVECTOR3 rotArrow;	// 矢印の向き
+	D3DXVECTOR2 sizeArrow;	// 矢印の大きさ
+} PlayerIcon;
+
+//**********************************************************************************
 //*** プロトタイプ宣言 ***
 //**********************************************************************************
 D3DVIEWPORT9 CalcViewPort(V3 posMid, V2 size);
@@ -53,15 +94,61 @@ LPMAPCAMERA GetMapCamera(void);
 void SetMapCamera(void);
 void EndMapCamera(void);
 
+void InitIcon(void);
+void UninitIcon(void);
+void UpdateIcon(void);
+void DrawIcon(void);
+
 //**********************************************************************************
 //*** グローバル変数 ***
 //**********************************************************************************
 MapCamera g_mapCamera;		// マップのカメラ
 Map g_map;					// マップの情報
 D3DVIEWPORT9 g_vpDef;		// 基本のビューポート
+const MapCamera MiniMap =	// ミニマップの基本情報
+{
+	{},
+	{},
+	{},
+	D3DXVECTOR3(1770, 3575, -580),	// 視点
+	D3DXVECTOR3(1770, 0, -580),		// 注視点
+	D3DXVECTOR3(0, 1, 0),			// 上方向ベクトル
+	D3DXVECTOR3(0, 0, 0),			// 角度
+	3575,							// 距離
+	45,								// 視野角
+	1,								// 最短
+	20000,							// 最長距離
+	0
+};
 
-// ユーザーリテラル演算子
-CREATE_LITERAL(float, NF, unsigned long long, val)
+MapIcon g_aMapIcon[MAPICONTYPE_MAX];		// マップアイコンの情報
+PlayerIcon g_aPlayerIcon[PLAYERTYPE_MAX];	// プレイヤーアイコンの情報
+
+// マップアイコンのテクスチャパス
+const char *g_apMapIconTexture[MAPICONTYPE_MAX] =
+{
+	// 店のアイコン
+	"data/TEXTURE/.png",
+
+	// ギミックアイコン(共通でも可)
+	"data/TEXTURE/.png",
+	"data/TEXTURE/.png",
+	"data/TEXTURE/.png",
+	"data/TEXTURE/.png",
+};
+
+// プレイヤーアイコンのテクスチャパス
+const char *g_apPlayerIconTexture[PLAYERTYPE_MAX] =
+{
+	// 少女のアイコン
+	"data/TEXTURE/GirlIcon.png",
+
+	// ネズミのアイコン
+	"data/TEXTURE/MouseIcon.png",
+};
+
+// 矢印のアイコン
+const char *g_pArrowIconTexture = "data/TEXTURE/ArrowIcon.png";
 
 //==================================================================================
 // --- 初期化 ---
@@ -75,16 +162,12 @@ void InitMap(D3DXVECTOR3 mid, D3DXVECTOR2 size, float fLength, float zn, float z
 	AutoZeroMemory(g_map);
 	AutoZeroMemory(g_mapCamera);
 
+	g_mapCamera = MiniMap;
 	g_mapCamera.vp = CalcViewPort(mid, size);
 	g_mapCamera.fN = zn;
 	g_mapCamera.fF = zf;
 	g_mapCamera.fAngle = DEFAULT_ANGLE;
 	g_mapCamera.rot = CParamVector::V3NULL;
-	g_mapCamera.fLength = fLength;
-	g_mapCamera.vecU = VEC_Y(1.0f);
-
-	// カメラの位置をプレイヤーの位置と同期
-	g_mapCamera.posR = V3(1600NF, 0NF, -600NF);
 }
 
 //==================================================================================
@@ -115,6 +198,27 @@ void UpdateMap(void)
 		g_mapCamera.fLength -= 1.0f;
 	}
 
+	if (GetKeyboardPress(DIK_UP))
+	{
+		g_mapCamera.posR.z += 10.0f;
+		g_mapCamera.posV.z += 10.0f;
+	}
+	else if (GetKeyboardPress(DIK_DOWN))
+	{
+		g_mapCamera.posR.z -= 10.0f;
+		g_mapCamera.posV.z -= 10.0f;
+	}
+	else if (GetKeyboardPress(DIK_LEFT))
+	{
+		g_mapCamera.posR.x -= 10.0f;
+		g_mapCamera.posV.x -= 10.0f;
+	}
+	else if (GetKeyboardPress(DIK_RIGHT))
+	{
+		g_mapCamera.posR.x += 10.0f;
+		g_mapCamera.posV.x += 10.0f;
+	}
+
 	// マップカメラの取得
 	LPMAPCAMERA pMCam = GetMapCamera();
 
@@ -125,9 +229,6 @@ void UpdateMap(void)
 	{
 		Type = (PlayerType)GetActivePlayer();
 	}
-
-	D3DXVECTOR3 rot;
-	rot.y = GetPosToPos(GetPlayer()[Type].pos, GetCamera()[Type].posV);
 
 	// 各情報から視点の位置を逆算
 	pMCam->posV.x = pMCam->posR.x + 0.001f;
@@ -252,4 +353,101 @@ void EndMapCamera(void)
 
 	// ビューポート設定
 	Auto.pDevice->SetViewport(&g_vpDef);
+}
+
+//==================================================================================
+// --- アイコンの初期化 ---
+//==================================================================================
+void InitIcon(void)
+{
+	// デバイスの取得
+	AUTODEVICE9 AD9;		// デバイスの自動解放用変数
+	MapIcon *pMIcon = &g_aMapIcon[0];
+	PlayerIcon *pPIcon = &g_aPlayerIcon[0];
+	IDX_TEXTURE tex;
+	VERTEX_3D *pVtx;
+
+	// アイコンの作成
+	for (int nCntIcon = 0; nCntIcon < MAPICONTYPE_MAX; nCntIcon++, pMIcon++)
+	{
+		// バッファ作成
+		AD9.pDevice->CreateVertexBuffer(CREATE_3DPOLYGON(pMIcon->pVtx));
+
+		// 頂点設定
+		pMIcon->pVtx->Lock(0, 0, (void**)&pVtx, 0);
+
+		// 各種設定
+		SetPolygonSize(pVtx, pMIcon->size, false);		// 頂点座標設定
+		SetPolygonNormal(pVtx, D3DXVECTOR3(0, 1, 0));	// 法線設定
+		SetDefaultColor(pVtx);							// 頂点カラー設定
+		SetDefaultTexture(pVtx);						// テクスチャ座標設定
+
+		// 頂点設定終了
+		pMIcon->pVtx->Unlock();
+
+		// テクスチャ読み込み
+		LoadTexture(g_apMapIconTexture[nCntIcon], &tex);
+	}
+
+	// プレイヤーアイコン及び矢印アイコンの作成
+	for (int nCntIcon = 0; nCntIcon < PLAYERTYPE_MAX; nCntIcon++, pPIcon++)
+	{
+		// バッファ作成
+		AD9.pDevice->CreateVertexBuffer(CREATE_3DPOLYGON(pPIcon->pVtx));
+		AD9.pDevice->CreateVertexBuffer(CREATE_3DPOLYGON(pPIcon->pVtxArrow));
+
+		// ******** プレイヤーアイコン ********
+		// 頂点設定
+		pPIcon->pVtx->Lock(0, 0, (void**)&pVtx, 0);
+
+		// 各種設定
+		SetPolygonSize(pVtx, pPIcon->size, false);		// 頂点座標設定
+		SetPolygonNormal(pVtx, D3DXVECTOR3(0, 1, 0));	// 法線設定
+		SetDefaultColor(pVtx);							// 頂点カラー設定
+		SetDefaultTexture(pVtx);						// テクスチャ座標設定
+
+		// 頂点設定終了
+		pPIcon->pVtx->Unlock();
+
+		// ******** 矢印アイコン ********
+		// 頂点設定
+		pPIcon->pVtxArrow->Lock(0, 0, (void**)&pVtx, 0);
+
+		// 各種設定
+		SetPolygonSize(pVtx, pPIcon->sizeArrow, false);	// 頂点座標設定
+		SetPolygonNormal(pVtx, D3DXVECTOR3(0, 1, 0));	// 法線設定
+		SetDefaultColor(pVtx);							// 頂点カラー設定
+		SetDefaultTexture(pVtx);						// テクスチャ座標設定
+
+		// 頂点設定終了
+		pPIcon->pVtxArrow->Unlock();
+
+		// テクスチャ読み込み
+		LoadTexture(g_apPlayerIconTexture[nCntIcon], &tex);
+		LoadTexture(g_pArrowIconTexture, &tex);
+	}
+}
+
+//==================================================================================
+// --- アイコンの終了 ---
+//==================================================================================
+void UninitIcon(void)
+{
+
+}
+
+//==================================================================================
+// --- アイコンの更新 ---
+//==================================================================================
+void UpdateIcon(void)
+{
+
+}
+
+//==================================================================================
+// --- アイコンの描画 ---
+//==================================================================================
+void DrawIcon(void)
+{
+
 }

@@ -233,6 +233,7 @@
     <ClInclude Include="map.h" />
     <ClInclude Include="mathUtil.h" />
     <ClInclude Include="MessageLog.h" />
+    <ClInclude Include="MyCol.h" />
     <ClInclude Include="normalend.h" />
     <ClInclude Include="parabola.h" />
     <ClInclude Include="particle.h" />

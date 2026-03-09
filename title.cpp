@@ -95,7 +95,7 @@ void InitTitle(void)
 	SetSkybox(SKYBOX::NORMAL);
 
 	// ロゴテクスチャの読み込み
-	IDX_TEX tex;
+	IDX_TEXTURE tex;
 	LoadTexture(LOGOTEX_PATH, &tex);
 
 	// ロゴの設置

@@ -422,6 +422,9 @@
     <ClInclude Include="common_fade.h">
       <Filter>ヘッダー ファイル\Main\DirectX</Filter>
     </ClInclude>
+    <ClInclude Include="MyCol.h">
+      <Filter>ヘッダー ファイル\Main\System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

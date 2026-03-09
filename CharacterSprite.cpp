@@ -27,7 +27,7 @@ STRUCT()
 {
 	D3DXVECTOR3 SpriteMid;	// 立ち絵中心
 	D3DXVECTOR2 SpriteSize;	// 立ち絵のサイズ
-	IDX_TEX tex;			// テクスチャのインデックス
+	IDX_TEXTURE tex;			// テクスチャのインデックス
 	IDX_2DPOLYGON polygon;	// ポリゴンのインデックス
 } Sprite;
 

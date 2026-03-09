@@ -180,7 +180,6 @@ To operator"" Name(From val)\
 using V2 = D3DXVECTOR2;
 using V3 = D3DXVECTOR3;
 using COL = D3DXCOLOR;
-using IDX_TEX = int;
 using SHADER_PATH = char[MAX_PATH];
 using TECHNIQUE_NAME = const char*;
 using float2 = float[2];
@@ -554,7 +553,7 @@ namespace MyMathUtil
 		return mtx1 * mtx2;
 	}
 
-	// --- every ---//
+	// --- EVERY ---//
 	// ”»’è
 	template <typename T>
 	inline bool IsArray(T* pArray, int num, T Compare)

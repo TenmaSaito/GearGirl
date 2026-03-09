@@ -281,6 +281,12 @@ public:
 	/// <param name="nSize">配列の大きさ</param>
 	/// <returns>正誤判定</returns>
 	bool CompairArray(int* pArray, int nTarget, int nSize);
+
+	/// <summary>
+	/// ログの終了判定
+	/// </summary>
+	/// <returns>終了判定</returns>
+	bool IsEndMessageLog(void);
 } MessageLog;
 
 typedef MessageLog *LPMESSAGELOG, *PMESSAGELOG;

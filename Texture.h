@@ -19,7 +19,12 @@
 #define ERROR_TEXTURE		(-1)			// テクスチャ読み込み失敗時の値
 
 //*************************************************************************************************
-//*** モデル情報構造体の定義 ***
+//*** 型宣言 ***
+//*************************************************************************************************
+typedef int IDX_TEXTURE;					// テクスチャインデックス
+
+//*************************************************************************************************
+//*** テクスチャ情報構造体の定義 ***
 //*************************************************************************************************
 typedef struct TEXTURE_INFO
 {
@@ -38,6 +43,6 @@ void InitTexture(void);
 void UninitTexture(void);
 void ResetTexture(void);
 
-HRESULT LoadTexture(_In_ const char* pTexFileName, int *pOutIdx);
-LPDIRECT3DTEXTURE9 GetTexture(_In_ int nType);
+HRESULT LoadTexture(_In_ const char* pTexFileName, IDX_TEXTURE *pOutIdx);
+LPDIRECT3DTEXTURE9 GetTexture(_In_ IDX_TEXTURE nType);
 #endif
