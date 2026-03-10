@@ -261,6 +261,9 @@
     <ClCompile Include="common_fade.cpp">
       <Filter>ソース ファイル\Main\DirectX</Filter>
     </ClCompile>
+    <ClCompile Include="lineEffect.cpp">
+      <Filter>ソース ファイル\Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h">
@@ -424,6 +427,9 @@
     </ClInclude>
     <ClInclude Include="MyCol.h">
       <Filter>ヘッダー ファイル\Main\System</Filter>
+    </ClInclude>
+    <ClInclude Include="lineEffect.h">
+      <Filter>ヘッダー ファイル\Object</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

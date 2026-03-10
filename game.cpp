@@ -21,6 +21,7 @@
 #include "input.h"
 #include "item.h"
 #include "light.h"
+#include "lineEffect.h"
 #include "mathUtil.h"
 #include "map.h"
 #include "mesh.h"
@@ -138,6 +139,9 @@ void InitGame(void)
 	/*** エフェクトの初期化 ***/
 	InitEffect();
 
+	/*** ラインエフェクトの初期化 ***/
+	InitLineEffect();
+
 	/*** パーティクルの初期化 ***/
 	InitParticle();
 
@@ -232,6 +236,9 @@ void UninitGame(void)
 	/*** エフェクトの終了 ***/
 	UninitEffect();
 
+	/*** ラインエフェクトの終了 ***/
+	UninitLineEffect();
+
 	/*** パーティクルの終了 ***/
 	UninitParticle();
 
@@ -320,6 +327,9 @@ void UpdateGame(void)
 
 		/*** エフェクトの更新 ***/
 		UpdateEffect();
+
+		/*** ラインエフェクトの更新 ***/
+		UpdateLineEffect();
 
 		/*** マップの更新 ***/
 		UpdateMap();
@@ -410,6 +420,9 @@ void DrawGame(void)
 		/*** エフェクトの描画 ***/
 		DrawEffect();
 
+		/*** ラインエフェクトの描画 ***/
+		DrawLineEffect();
+
 		/*** フォグをクリア ***/
 		CleanFog();
 	}
@@ -451,7 +464,10 @@ void DrawGame(void)
 	}
 
 	/*** UIアイテム描画 ***/
-	DrawUIItem();
+	if (g_bPause == false)
+	{
+		DrawUIItem();
+	}
 
 	//ポーズ状態がONの時
 	if (g_bPause == true)

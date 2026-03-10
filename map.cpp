@@ -28,6 +28,7 @@ USE_PARAM;
 #include "player.h"
 #include "field.h"
 #include "UImenu.h"
+#include "dialog.h"
 
 //**********************************************************************************
 //*** マクロ定義 ***
@@ -207,7 +208,7 @@ void InitMap(D3DXVECTOR3 mid, D3DXVECTOR2 size, float fLength, float zn, float z
 {
 	// 自作ユーティリティ使用宣言
 	USE_UTIL;
-
+	
 	// 初期化
 	AutoZeroMemory(g_map);
 	AutoZeroMemory(g_mapCamera);
@@ -248,6 +249,11 @@ void UpdateMap(void)
 
 	// マップカメラの取得
 	LPMAPCAMERA pMCam = GetMapCamera();
+
+	if (g_map.bEnable == true && IsEndDialog())
+	{
+		SetEnable2DPolygon(g_IdxUIMap, true);
+	}
 
 	if (GetEnableUImenu() == true)
 	{
@@ -330,7 +336,6 @@ void DrawMap(void)
 void SetEnableMap(bool bEnable)
 {
 	g_map.bEnable = bEnable;
-	SetEnable2DPolygon(g_IdxUIMap, true);
 }
 
 //==================================================================================
@@ -515,13 +520,13 @@ void UninitIcon(void)
 	PlayerIcon *pPIcon = &g_aPlayerIcon[0];
 
 	/*** マップアイコン解放 ***/
-	for (int nCntRelease = 0; nCntRelease < MAPICONTYPE_MAX; nCntRelease++)
+	for (int nCntRelease = 0; nCntRelease < MAPICONTYPE_MAX; nCntRelease++, pMIcon++)
 	{
 		RELEASE(pMIcon->pVtx);
 	}
 
 	/*** プレイヤーアイコン解放 ***/
-	for (int nCntRelease = 0; nCntRelease < PLAYERTYPE_MAX; nCntRelease++)
+	for (int nCntRelease = 0; nCntRelease < PLAYERTYPE_MAX; nCntRelease++, pPIcon++)
 	{
 		RELEASE(pPIcon->pVtx);
 		RELEASE(pPIcon->pVtxArrow);

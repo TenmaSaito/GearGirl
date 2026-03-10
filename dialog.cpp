@@ -156,8 +156,8 @@ const Dialog g_aDialogInfo[DIALOG_NUM] =
 // テクスチャパス
 const char *g_apDialogTexture[DIALOG_NUM] =		
 {
-	"data/TEXTURE/tutorial_frame.png",
-	"data/TEXTURE/tutorial_frame.png",
+	"data/TEXTURE/girl_frame.png",
+	"data/TEXTURE/man_frame.png",
 };
 
 // チュートリアル中のテクスチャ

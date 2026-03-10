@@ -171,6 +171,7 @@
     <ClCompile Include="item.cpp" />
     <ClCompile Include="judgeEnd.cpp" />
     <ClCompile Include="light.cpp" />
+    <ClCompile Include="lineEffect.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="map.cpp" />
     <ClCompile Include="mathUtil.cpp" />
@@ -229,6 +230,7 @@
     <ClInclude Include="item.h" />
     <ClInclude Include="judgeEnd.h" />
     <ClInclude Include="light.h" />
+    <ClInclude Include="lineEffect.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="map.h" />
     <ClInclude Include="mathUtil.h" />
