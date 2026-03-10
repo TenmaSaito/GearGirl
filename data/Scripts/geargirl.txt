@@ -35,6 +35,8 @@ MODEL_FILENAME = data/MODEL/character/07_hand_R.x		# [16]手R
 MODEL_FILENAME = data/MODEL/character/05_upperArm_catapult.x	# [17]カタパルト二の腕
 MODEL_FILENAME = data/MODEL/character/06_foreArm_catapult.x		# [18]カタパルト前腕
 MODEL_FILENAME = data/MODEL/character/07_hand_catapult.x		# [19]カタパルト手
+MODEL_FILENAME = data/MODEL/character/05_upperArm_chainsaw.x	# [20]カタパルト二の腕
+MODEL_FILENAME = data/MODEL/character/06_foreArm_chainsaw.x		# [21]カタパルト前腕
 
 #------------------------------------------------------------------------------
 # キャラクター情報
@@ -184,6 +186,21 @@ CHARACTERSET
 		POS = -2.6 0.4 0.0
 		ROT = 0.0 0.0 0.0
 	END_PARTSSET
+	
+	
+	PARTSSET
+		INDEX = 20					# カタパルト二の腕L
+		PARENT = 1					# 胸
+		POS = -1.4 2.0 0.6
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+	
+		PARTSSET
+		INDEX = 21					# カタパルト前腕
+		PARENT = 17					# カタパルト二の腕L
+		POS = -2.4 0.0 0.0
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
 END_CHARACTERSET
 
 #------------------------------------------------------------------------------
@@ -297,6 +314,16 @@ MOTIONSET
 			POS = 0.00 0.00 0.00
 			ROT = 0.00 0.00 0.00
 		END_KEY
+		
+		KEY	# ----- [ 11 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 0.00 0.00 1.54
+		END_KEY
+		
+		KEY	# ----- [ 12 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 0.00 0.00 0.00
+		END_KEY
 	END_KEYSET
 END_MOTIONSET
 
@@ -379,32 +406,32 @@ MOTIONSET
 			ROT = 0.00 0.00 0.00
 		END_KEY
 		
-		KEY	# ----- [ 11 ] -----
+		KEY	# ----- [ 17 ] -----
 			POS = 0.00 0.00 0.00
 			ROT = -0.28 0.00 1.48
 		END_KEY
 
-		KEY	# ----- [ 12 ] -----
+		KEY	# ----- [ 18 ] -----
 			POS = 0.00 0.00 0.00
 			ROT = 0.00 -0.41 0.00
 		END_KEY
 
-		KEY	# ----- [ 13 ] -----
+		KEY	# ----- [ 19 ] -----
 			POS = 0.00 0.00 0.00
 			ROT = 0.00 0.00 0.00
 		END_KEY
 		
-		KEY	# ----- [ 11 ] -----
+		KEY	# ----- [ 20 ] -----
 			POS = 0.00 0.00 0.00
 			ROT = -0.28 0.00 1.48
 		END_KEY
 
-		KEY	# ----- [ 12 ] -----
+		KEY	# ----- [ 21 ] -----
 			POS = 0.00 0.00 0.00
 			ROT = 0.00 -0.41 0.00
 		END_KEY
 
-		KEY	# ----- [ 13 ] -----
+		KEY	# ----- [ 22 ] -----
 			POS = 0.00 0.00 0.00
 			ROT = 0.00 0.00 0.00
 		END_KEY
