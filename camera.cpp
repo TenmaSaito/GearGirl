@@ -328,7 +328,7 @@ void CameraFollow(void)
 			break;
 
 		case CAMERATYPE_PLAYER_TWO:
-			pCamera->posRDest.y = pPlayer->pos.y + 5.0f;	// 頭の高さに追従
+			pCamera->posRDest.y = pPlayer->pos.y + 2.0f;			// 頭の高さに追従
 			fCameraFactor += 0.1f;							// ネズミは追従速度を上げる
 
 			// カメラ切り替え時の処理
