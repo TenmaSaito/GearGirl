@@ -8,21 +8,21 @@
 // インクルード
 #include "item.h"
 
-#include "game.h"
+#include "2Dpolygon.h"
 #include "camera.h"
 #include "debugproc.h"
-#include "input.h"
-#include "mathUtil.h"
-#include "Texture.h"
-#include "2Dpolygon.h"
-#include "UImenu.h"
-#include "judgeEnd.h"
-#include "camera.h"
 #include "fade.h"
+#include "game.h"
+#include "input.h"
+#include "judgeEnd.h"
+#include "mathUtil.h"
 #include "mesh.h"
 #include "particle.h"
-#include "prompt.h"
 #include "player.h"
+#include "prompt.h"
+#include "Texture.h"
+#include "timer.h"
+#include "UImenu.h"
 
 using  namespace MyMathUtil;
 
@@ -50,6 +50,7 @@ POINTER(ItemQuota, P_ITEMQUOTA);
 bool			g_bOnDebugItem = false;				// デバッグ中
 int				g_nSetItemNum = 0;					// 設置済みのアイテム数
 int				g_nSelectPut = -1;					// 提出時のカーソル
+int				g_nChoisePut = -1;					// 選択中のカーソル
 int				g_nItemQuotaFlameTex = -1;			// アイテム欄のフレームのテクスチャ番号
 bool			g_bPutOut = false;					// アイテムを提出するときtrue
 Item			g_aItem[MAX_ITEM];					// アイテム情報
@@ -103,6 +104,7 @@ void InitItem(void)
 
 	g_bPutOut = false;		// アイテムを提出状態ではない
 	g_nSelectPut = -1;		// 提出時のカーソル
+	g_nChoisePut = -1;
 	LoadTexture("data\\TEXTURE\\flame.png", & g_nItemQuotaFlameTex);
 
 	// アイテム情報読込
@@ -120,11 +122,33 @@ void InitItem(void)
 	// その他のUIを取得
 	for (int nCntUI = 0; nCntUI < PUTOUTUI_MAX; nCntUI++, pUI++)
 	{
-		pUI->pos = vec3_ZERO;
-		pUI->col = colX_ZERO;
-		pUI->size = vec2(SCREEN_WIDTH * 0.1f, SCREEN_WIDTH * 0.08f);
+		if (nCntUI == 0)
+		{// 背景
+			pUI->pos = vec3(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.4f, 0.0f);
+			pUI->size = vec2(SCREEN_WIDTH, SCREEN_HEIGHT * 0.8f);
+			pUI->col = colX(0.5f, 0.5f, 0.5f, 0.3f);
+		}
+		else if (nCntUI == 1)
+		{// 決定
+			pUI->pos = vec3(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.7f, 0.0f);
+			pUI->size = vec2(SCREEN_WIDTH * 0.15f, SCREEN_WIDTH * 0.06f);
+			pUI->col = colX(1.0f, 1.0f, 1.0f, 0.8f);
+		}
+		else if (nCntUI == 2)
+		{// 解除
+			pUI->pos = vec3(SCREEN_WIDTH * 0.3f, SCREEN_HEIGHT * 0.7f, 0.0f);
+			pUI->size = vec2(SCREEN_WIDTH * 0.1f, SCREEN_WIDTH * 0.04f);
+			pUI->col = colX(1.0f, 1.0f, 1.0f, 0.8f);
+		}
+		else
+		{// やめる
+			pUI->pos = vec3(SCREEN_WIDTH * 0.15f, SCREEN_HEIGHT * 0.7f, 0.0f);
+			pUI->size = vec2(SCREEN_WIDTH * 0.1f, SCREEN_WIDTH * 0.04f);
+			pUI->col = colX(1.0f, 1.0f, 1.0f, 0.8f);
+		}
 		pUI->nType = nUITex[nCntUI];
 		pUI->nIdxBox = Set2DPolygon(pUI->pos, vec3_ZERO, pUI->size, pUI->nType, pUI->col);
+		SetEnable2DPolygon(pUI->nIdxBox, false);
 		pUI->bUse = false;
 	}
 
@@ -135,6 +159,7 @@ void InitItem(void)
 		pItemQuota->col = colX_ZERO;
 		pItemQuota->size = vec2(SCREEN_WIDTH * 0.08f, SCREEN_WIDTH * 0.08f);
 		pItemQuota->nIdxBox = Set2DPolygon(pItemQuota->pos,vec3_ZERO, pItemQuota->size, g_nItemQuotaFlameTex, pItemQuota->col);
+		SetEnable2DPolygon(pItemQuota->nIdxBox, false);
 		pItemQuota->nType = -1;
 		pItemQuota->bUse = false;
 	}
@@ -146,6 +171,7 @@ void InitItem(void)
 		pPutQuota->col = colX_ZERO;
 		pPutQuota->size = vec2(SCREEN_WIDTH * 0.05f, SCREEN_WIDTH * 0.05f);
 		pPutQuota->nIdxBox = Set2DPolygon(pPutQuota->pos, vec3_ZERO, pPutQuota->size, -1, pPutQuota->col);
+		SetEnable2DPolygon(pPutQuota->nIdxBox, false);
 		pPutQuota->nType = -1;
 		pPutQuota->bUse = false;
 		g_aPutOut[nCntQuota] = ITEMTYPE_SPRING_FALSE;
@@ -192,10 +218,10 @@ void UpdateItem(void)
 	// ポーチアイテム更新
 	UpdatePouchItem();
 
-	// 提出判定
+	// 便利屋判定
 	if (IsDispPrompt(GetIdxShopPrompt()))
 	{
-		if (GetKeyboardTrigger(DIK_RETURN) || GetJoypadTrigger(PLAYERTYPE_GIRL, JOYKEY_A))
+		if (GetKeyboardTrigger(DIK_RETURN) || GetKeyboardTrigger(DIK_F) || GetKeyboardTrigger(DIK_SPACE) || GetJoypadTrigger(PLAYERTYPE_GIRL, JOYKEY_A))
 		{
 			g_bPutOut = true;
 		}
@@ -261,6 +287,8 @@ void UpdatePouchItem(void)
 		PutOut();		// 取得済みアイテム表示
 
 		SelectItem();	// 選んだアイテム表示
+
+		AddTimer(1);	// タイマー停止
 	}
 	else
 	{// 提出フラグが消えたら
@@ -289,32 +317,38 @@ void UpdatePouchItem(void)
 		for (int nCntQuota = 0; nCntQuota < ITEMTYPE_MAX; nCntQuota++, pItemQuota++)
 		{
 			pItemQuota->pos = vec3(SCREEN_WIDTH * (0.5f - 0.12f * g_nSelectPut) + SCREEN_WIDTH * 0.12f * nCntQuota, SCREEN_HEIGHT * 0.75f, 0.0f);
-		//	pItemQuota->pos = vec3(nCntQuota * SCREEN_WIDTH * 0.12f, SCREEN_HEIGHT * 0.5f, 0.0f);
 			SetPosition2DPolygon(pItemQuota->nIdxBox, pItemQuota->pos);
 		}
 
-		// 選択した分を初期化
+		// 選択した分を初期化・透明化
 		for (int nCntQuota = 0; nCntQuota < NUM_PUTOUTITEM; nCntQuota++, pPutQuota++)
 		{
-			SetColor2DPolygon(pPutQuota->nIdxBox, colX(0.8f, 0.8f, 0.8f, 0.0f));	// 消す
+			SetEnable2DPolygon(pPutQuota->nIdxBox, false);	// 消す
 			pPutQuota->nType = -1;
 			pPutQuota->nSave = -1;
 			pPutQuota->bUse = false;
 		}
 
+		// UIの透明化
+		P_ITEMQUOTA pUI = &g_aPutOutUI[0];
+		for (int nCntUI = 0; nCntUI < PUTOUTUI_MAX; nCntUI++, pUI++)
+			SetEnable2DPolygon(pUI->nIdxBox, false);
+
 		// アイテムポーチを元に戻す
 		P_ITEMQUOTA pItemQuota = &g_aItemQuota[0];		// ポインタを先頭に戻す
 		if (GetEnableUImenu())
 		{
-			// UI表示中、色をつける
+			// メニュー表示中、色をつける
+			// アイテム欄
 			for (int nCntQuota = 0; nCntQuota < ITEMTYPE_MAX; nCntQuota++, pItemQuota++)
 				SetColor2DPolygon(pItemQuota->nIdxBox, colX(1.0f,1.0f,1.0f,0.3f));
+
 		}
 		else
 		{
 			// UI非表示中、透明にする
 			for (int nCntQuota = 0; nCntQuota < ITEMTYPE_MAX; nCntQuota++, pItemQuota++)
-				SetColor2DPolygon(pItemQuota->nIdxBox, colX_ZERO);
+				SetEnable2DPolygon(pItemQuota->nIdxBox, false);
 		}
 	}
 }
@@ -485,12 +519,6 @@ void CollisionItem(vec3 pos, float fRange, int type)
 	{
 		if (pItem->bUse && pItem->bGet == false)
 		{
-			// 見えていないプレイヤーがあたっても取得できないように
-			if (pItem->bGirl == false && (PlayerType)type == PLAYERTYPE_GIRL)
-				continue;
-			if (pItem->bMouse == false && (PlayerType)type == PLAYERTYPE_MOUSE)
-				continue;
-
 			// 距離の計算
 			float fDistX = SQUARE(pItem->pos.x - pos.x);
 			float fDistY = SQUARE(pItem->pos.y - pos.y);
@@ -500,6 +528,12 @@ void CollisionItem(vec3 pos, float fRange, int type)
 			// 距離計算
 			if (fDist <= pItem->fRange + fRange)
 			{
+				// 見えていないプレイヤーがあたっても取得できないように
+				if (pItem->bGirl == false && (PlayerType)type == PLAYERTYPE_GIRL)
+					continue;
+				if (pItem->bMouse == false && (PlayerType)type == PLAYERTYPE_MOUSE)
+					continue;
+
 				// アイテム欄の空き状況を取得
 				for (int nCntQuota = 0; nCntQuota < ITEMTYPE_MAX; nCntQuota++,pItemQuota++)
 				{
@@ -527,16 +561,18 @@ void CollisionItem(vec3 pos, float fRange, int type)
 void PutOut(void)
 {
 	P_ITEMQUOTA pItemQuota = &g_aItemQuota[0];
-	P_ITEMQUOTA pUI = &g_aPutOutUI[0];
-
+	
+	//*********************************************************
+	// 提出アイテム欄
 	for (int nCntQuota = 0; nCntQuota < ITEMTYPE_MAX; nCntQuota++, pItemQuota++)
 	{
+		SetEnable2DPolygon(pItemQuota->nIdxBox, true); // 描画
 		// 位置を更新
 		pItemQuota->pos = vec3(SCREEN_WIDTH * (0.5f - 0.2f * g_nSelectPut) + SCREEN_WIDTH * 0.2f * nCntQuota, SCREEN_HEIGHT * 0.6f, 0.0f);
 		SetPosition2DPolygon(pItemQuota->nIdxBox, pItemQuota->pos);
 
 		// アイテム欄
-		if (nCntQuota == g_nSelectPut)
+		if (nCntQuota == g_nSelectPut && g_nChoisePut < 0)
 		{// 選択中なら
 			pItemQuota->size = vec2(SCREEN_WIDTH * 0.1f, SCREEN_WIDTH * 0.1f);
 			SetSize2DPolygon(pItemQuota->nIdxBox, pItemQuota->size);					// 少し拡大
@@ -562,79 +598,146 @@ void PutOut(void)
 		}
 	}
 
-	// アイテム以外を選択している場合
-	if (g_nSelectPut <= -1)
-	{// 選択リセット
-		pUI->size = vec2();
-		SetSize2DPolygon(pUI->nIdxBox,pUI->size);
-	}
-	else if (ITEMTYPE_MAX <= g_nSelectPut)
-	{// 決定
-
-	}
-
 	// アイテムを選ぶ
-	if (GetKeyboardTrigger(DIK_D) || GetKeyboardTrigger(DIK_RIGHT)
+	if (GetKeyboardRepeat(DIK_D) || GetKeyboardRepeat(DIK_RIGHT)
 		|| GetJoypadRepeat(0,JOYKEY_RIGHT) || GetJoypadRepeat(0,JOYKEY_LEFT_STICK_RIGHT))
 	{
-		g_nSelectPut++;
-		if (ITEMTYPE_MAX - 1 < g_nSelectPut)
+		// カーソルが上段にいたら
+		if (-1 < g_nChoisePut && g_nChoisePut < NUM_PUTOUTITEM)
 		{
-			g_nSelectPut = 0;
+			g_nChoisePut++;
+			if (NUM_PUTOUTITEM <= g_nChoisePut)
+			{
+				g_nChoisePut = NUM_PUTOUTITEM - 1;
+			}
+		}
+		else if (g_nChoisePut < 0)
+		{// カーソルが中段なら
+			g_nSelectPut++;
+			if (ITEMTYPE_MAX - 1 < g_nSelectPut)
+			{
+				g_nSelectPut = 0;
+			}
+		}
+		else
+		{// カーソルが下段なら
+			g_nChoisePut--;
+			if (g_nChoisePut < NUM_PUTOUTITEM)
+				g_nChoisePut = NUM_PUTOUTITEM;
 		}
 	}
-	if (GetKeyboardTrigger(DIK_A) || GetKeyboardTrigger(DIK_LEFT)
+	if (GetKeyboardRepeat(DIK_A) || GetKeyboardRepeat(DIK_LEFT)
 		|| GetJoypadRepeat(0, JOYKEY_LEFT) || GetJoypadRepeat(0, JOYKEY_LEFT_STICK_LEFT))
 	{
-		g_nSelectPut--;
-		if (g_nSelectPut < 0)
+		// カーソルが上段にいたら
+		if (-1 < g_nChoisePut && g_nChoisePut < NUM_PUTOUTITEM)
 		{
-			g_nSelectPut = ITEMTYPE_MAX - 1;
+			g_nChoisePut--;
+			if (g_nChoisePut < 0)
+			{
+				g_nChoisePut = 0;
+			}
+		}
+		else if(g_nChoisePut < 0)
+		{// カーソルが中段なら
+			g_nSelectPut--;
+			if (g_nSelectPut < 0)
+			{
+				g_nSelectPut = ITEMTYPE_MAX - 1;
+			}
+		}
+		else
+		{// カーソルが下段なら
+			g_nChoisePut++;
+			if (NUM_PUTOUTITEM + 2 < g_nChoisePut)
+				g_nChoisePut = NUM_PUTOUTITEM + 2;
 		}
 	}
 
 	// 取り消し・提出ボタン
-	if (GetKeyboardTrigger(DIK_S) || GetKeyboardTrigger(DIK_DOWN)
-		|| GetJoypadRepeat(0, JOYKEY_DOWN) || GetJoypadRepeat(0, JOYKEY_LEFT_STICK_DOWN))
-	{
-			g_nSelectPut = -1;
-	}
-
-	if (GetKeyboardTrigger(DIK_W) || GetKeyboardTrigger(DIK_UP)
+	if (GetKeyboardRepeat(DIK_W) || GetKeyboardRepeat(DIK_UP)
 		|| GetJoypadRepeat(0, JOYKEY_UP) || GetJoypadRepeat(0, JOYKEY_LEFT_STICK_UP))
 	{
-			g_nSelectPut = ITEMTYPE_MAX;
+		if (NUM_PUTOUTITEM <= g_nChoisePut)
+			g_nChoisePut = -1;
+		else if(g_nChoisePut == -1)
+			g_nChoisePut = 2;
 	}
-	PrintDebugProc("\nSelect : %d\n", g_nSelectPut);
+	if (GetKeyboardRepeat(DIK_S) || GetKeyboardRepeat(DIK_DOWN)
+		|| GetJoypadRepeat(0, JOYKEY_DOWN) || GetJoypadRepeat(0, JOYKEY_LEFT_STICK_DOWN))
+	{
+		if(g_nChoisePut < 0)
+			g_nChoisePut = NUM_PUTOUTITEM;
+		else if (g_nChoisePut < NUM_PUTOUTITEM)
+			g_nChoisePut = -1;
+	}
+
+	PrintDebugProc("\nSelect : %d", g_nSelectPut);
+	PrintDebugProc("\nChoisePut : %d\n", g_nChoisePut);
 }
 
 //=========================================================================================
 // アイテム選択
 void SelectItem(void)
 {
-	P_ITEMQUOTA pItemQuota = &g_aItemQuota[0];
 	P_ITEMQUOTA pPutQuota = &g_aPutQuota[0];
 	P_ITEMQUOTA pUI = &g_aPutOutUI[0];
 
-	// 選択中のアイテムを表示
+	//*********************************************************
+	// 所持アイテム欄
 	for (int nCntQuota = 0; nCntQuota < NUM_PUTOUTITEM; nCntQuota++, pPutQuota++)
 	{
+		SetEnable2DPolygon(pPutQuota->nIdxBox, true);	// 描画
+
 		// 位置を更新
 		pPutQuota->pos = vec3(SCREEN_WIDTH / NUM_PUTOUTITEM * (nCntQuota + 0.5f), SCREEN_HEIGHT * 0.4f, 0.0f);
 		SetPosition2DPolygon(pPutQuota->nIdxBox, pPutQuota->pos);
 
+		// 選択中なら
+		if (nCntQuota == g_nChoisePut)
+			pPutQuota->size = vec2(SCREEN_WIDTH * 0.08f, SCREEN_WIDTH * 0.08f);
+		else
+			pPutQuota->size = vec2(SCREEN_WIDTH * 0.05f, SCREEN_WIDTH * 0.05f);
+		SetSize2DPolygon(pPutQuota->nIdxBox, pPutQuota->size);
+
 		if (pPutQuota->bUse)
 		{// 選ばれたアイテムの枠
-			// 未確定の枠
-			SetColor2DPolygon(pPutQuota->nIdxBox, colX(0.8f, 0.8f, 0.8f, 0.8f));	// 枠を明るく
+			pPutQuota->col = colX(0.8f, 0.8f, 0.8f, 0.8f);// 枠を明るく
+		}
+		else
+		{// 未確定の枠
+			pPutQuota->col = colX(0.6f, 0.6f, 0.6f, 0.8f);	// 枠を暗く
+		}
+		SetColor2DPolygon(pPutQuota->nIdxBox, pPutQuota->col);	
+	}
+
+	//*********************************************************
+	// 各UI
+	for (int nCntUI = 0; nCntUI < PUTOUTUI_MAX; nCntUI++, pUI++)
+	{
+			//pUI->size = vec2(150.0f, 150.0f);
+			//SetSize2DPolygon(pUI->nIdxBox, pUI->size);
+
+			//pUI->pos = vec3(400, SCREEN_HEIGHT * 0.8f, 0.0f);
+			//SetPosition2DPolygon(pUI->nIdxBox, pUI->pos);
+
+			//pUI->col = colX(1.0f, 1.0f, 1.0f, 1.0f);
+			//pUI->col = colX(1.0f, 1.0f, 1.0f, 1.0f);
+		if (g_nChoisePut - PUTOUTUI_MAX == nCntUI && nCntUI != 0)
+		{
+			SetSize2DPolygon(pUI->nIdxBox, vec2(pUI->size.x * 1.2f, pUI->size.y * 1.2f));
+			SetColor2DPolygon(pUI->nIdxBox, colX(1.0f, 1.0f, 1.0f, 1.0f));
 		}
 		else
 		{
-			// 未確定の枠
-			SetColor2DPolygon(pPutQuota->nIdxBox, colX(0.6f, 0.6f, 0.6f, 0.8f));	// 枠を暗く
+			SetSize2DPolygon(pUI->nIdxBox, pUI->size);
+			SetColor2DPolygon(pUI->nIdxBox, pUI->col);
 		}
+
+		SetEnable2DPolygon(pUI->nIdxBox, true);
 	}
 
+	//*********************************************************
 	// 決定処理
 	if (GetKeyboardTrigger(DIK_RETURN) || GetJoypadTrigger(0,JOYKEY_A))
 	{
@@ -648,6 +751,7 @@ void SelectItem(void)
 				{
 					if (g_aPutQuota[nCnt].nSave == g_nSelectPut)
 					{// すでに決定しているアイテムなら拒否
+						// 選択中ですよ！
 						break;
 					}
 					// 入れていない枠に
@@ -678,10 +782,13 @@ void SelectItem(void)
 			if (GetFade() != FADE_NONE) return; // フェード中なら無視
 
 			JudgmentEnding(&g_aPutOut[0],5);
-			SetFade(MODE_RESULT);
+
+			if (GetTimer() <= 10)
+				SetFade(MODE_RESULT);
 		}
 	}
 
+	//*********************************************************
 	// 取り消し
 	if (GetKeyboardTrigger(DIK_BACK))
 	{
