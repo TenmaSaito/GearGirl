@@ -33,6 +33,7 @@ typedef struct
 	int nCntEffect;				// 一フレームに発生するエフェクトの数
 	bool bUse;					// 使用中フラグ
 	bool bGravity;				// エフェクトの自由落下の有無
+	bool bVisible;				// 限定的に見えるものか
 } Particle;
 
 //*************************************************************************************************
@@ -94,10 +95,16 @@ void UpdateParticle(void)
 			col = pParticle->col;
 			nLife = rand() % 100;
 
-			SetEffect(pos, col, move, pParticle->fRadiusEffect, pParticle->fRadiusEffect, fSpeed, nLife, pParticle->bGravity);
+			if (nLife > 30)
+			{
+				nLife = 30;
+			}
+
+			SetEffect(pos, col, move, pParticle->fRadiusEffect, pParticle->fRadiusEffect, fSpeed, nLife, pParticle->bGravity, pParticle->bVisible);
 		}
 
 		pParticle->nLife--;
+
 		if (pParticle->nLife <= 0)
 		{
 			pParticle->bUse = false;
@@ -108,7 +115,7 @@ void UpdateParticle(void)
 //================================================================================================================
 // --- パーティクルの設定処理 ---
 //================================================================================================================
-void SetParticle(D3DXVECTOR3 pos, D3DXCOLOR col, D3DXVECTOR3 vecMin, D3DXVECTOR3 vecMax, int nRadius, float fRadiusEffect, int nLife, int nFrameEffect, bool bUseGravity)
+void SetParticle(D3DXVECTOR3 pos, D3DXCOLOR col, D3DXVECTOR3 vecMin, D3DXVECTOR3 vecMax, int nRadius, float fRadiusEffect, int nLife, int nFrameEffect, bool bUseGravity, bool bVisible)
 {
 	Particle *pParticle = &g_aParticle[0];
 
@@ -127,6 +134,7 @@ void SetParticle(D3DXVECTOR3 pos, D3DXCOLOR col, D3DXVECTOR3 vecMin, D3DXVECTOR3
 			pParticle->nCntEffect = nFrameEffect;
 			pParticle->bUse = true;
 			pParticle->bGravity = bUseGravity;
+			pParticle->bVisible = bVisible;
 			break;
 		}
 	}

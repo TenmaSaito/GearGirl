@@ -24,7 +24,7 @@ void UninitEffect(void);
 void UpdateEffect(void);
 void DrawEffect(void);
 
-void SetEffect(D3DXVECTOR3 pos, D3DXCOLOR col, D3DXVECTOR3 vec, float Width, float Height, float speed, int nLife, bool bUseGravity = false);
+void SetEffect(D3DXVECTOR3 pos, D3DXCOLOR col, D3DXVECTOR3 vec, float Width, float Height, float speed, int nLife, bool bUseGravity = false, bool bVisible = false);
 void SetParabola(D3DXVECTOR3 pos, D3DXVECTOR3 move, D3DXCOLOR col, float Width, float Height, float speed, bool bUseGravity);
 
 #endif

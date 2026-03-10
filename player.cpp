@@ -11,6 +11,7 @@
 #include "debugproc.h"
 #include "dialog.h"
 #include "effect.h"
+#include "endomacro.h"
 #include "game.h"
 #include "gimmick.h"
 #include "input.h"
@@ -280,7 +281,7 @@ void UpdatePlayer(void)
 
 		if (TUTORIAL_NOW)
 		{// チュートリアル中
-			if(pPlayer->pos.x > 1620.0f)
+			if (pPlayer->pos.x > 1620.0f)
 			{
 				pPlayer->pos.x = 1620.0f;
 			}
@@ -309,17 +310,17 @@ void UpdatePlayer(void)
 		if (pPlayer->state == PLAYERSTATE_THROWWAITING && nCntPlayer == PLAYERTYPE_GIRL)
 		{
 			// 注視点までのベクトルをだす
-			D3DXVECTOR3 vec = pCamera->posR - pCamera->posV;
+			//D3DXVECTOR3 vec = pCamera->posR - pCamera->posV;
 
-			// 出したベクトルを正規化
-			D3DXVec3Normalize(&vec, &vec);
+			//// 出したベクトルを正規化
+			//D3DXVec3Normalize(&vec, &vec);
 
-			g_Effectmove.x = vec.x;
-			g_Effectmove.z = vec.z;
-			g_Effectmove.y = 5.5f;
+			//g_Effectmove.x = vec.x;
+			//g_Effectmove.z = vec.z;
+			//g_Effectmove.y = vec.y;
 
 			// エフェクトの描画
-			SetParabola(g_aPlayer[PLAYERTYPE_MOUSE].pos, g_Effectmove, D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f), 2.0f, 2.0f, 1.0f, true);
+			//SetParabola(g_aPlayer[PLAYERTYPE_MOUSE].pos, vec, D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f), 2.0f, 2.0f, 1.0f, true);
 		}
 
 		// === 何もしていない場合(何も入力されていない場合) === //
@@ -465,23 +466,38 @@ void UpdatePlayer(void)
 		// アイテムの情報を取得
 		Item* pItem = GetItem();
 
-		Camera* pCamera = GetCamera();
-
-		if (g_ActivePlayer == PLAYERTYPE_MOUSE)
+		if (g_ActivePlayer == PLAYERTYPE_MOUSE || GetNumPlayer() == 2)
 		{// ネズミ操作時
-			for (int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++, pItem++)
+			for (int nCntItem = 0; nCntItem < ITEMTYPE_MAX; nCntItem++, pItem++)
 			{// アイテムのMAX分回す
 				if (pItem->bGet == false)
-				{// 取得されていないアイテムの場合
+				{// 取得されていないアイテムの場合	
+
+					// 距離の計算
+					float fDistX = SQUARE(pItem->pos.x - pMouse->pos.x);
+					float fDistY = SQUARE(pItem->pos.y - pMouse->pos.y);
+					float fDistZ = SQUARE(pItem->pos.z - pMouse->pos.z);
+
+					float fDist = sqrtf(__ABSOLUTE(SQUARE(pItem->pos.x - pMouse->pos.x) + SQUARE(pItem->pos.y - pMouse->pos.y) + SQUARE(pItem->pos.z - pMouse->pos.z)));
+
+					if (fDist > 200.0f)
+					{
+						fDist = 200.0f;
+					}
+
+					// 値を0~1にスケール(正規)化
+					float fCol = (fDist - 0.0f) / 200.0f;
+
 					// === 正解パーツ用パーティクル === //
 					if (pItem->type >= 0 && pItem->type <= 4)
 					{
-						SetParticle(pItem->pos, COL_BLUE, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true);
+						//SetParticle(pItem->pos, MyMathUtil::GetColLerp(D3DXCOLOR(COL_BLUE), D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f), fCol), D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 1, 3, true, true);
+						SetEffect(pItem->pos, MyMathUtil::GetColLerp(D3DXCOLOR(COL_BLUE), D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f), fCol), D3DXVECTOR3(50.0f, 50.0f, 50.0f), 50.0f, 50.0f, 10.0f, 3, true, true);
 					}
 					// === 外れパーツ用パーティクル === //
 					if (pItem->type >= 5 && pItem->type <= 9)
 					{
-						SetParticle(pItem->pos, COL_RED, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true);
+						SetParticle(pItem->pos, COL_RED, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true, true);
 					}
 				}
 			}
@@ -1907,6 +1923,15 @@ void ShotMouse(void)
 			D3DXVec3TransformCoord(&pMouse->pos, &offset, &pPlayer->PartsInfo.aParts[19].mtxWorld);
 		}
 
+		// 注視点までのベクトルをだす
+		D3DXVECTOR3 vec = pCamera->posR - pCamera->posV;
+
+		// 出したベクトルを正規化
+		D3DXVec3Normalize(&vec, &vec);
+		PrintDebugProc("vec %~3f", vec.x, vec.y, vec.z);
+
+		SetParabola(pMouse->pos, vec, COL_RED, 2.0f, 2.0f, 3.0f, true);
+
 		if (pPlayer->state != PLAYERSTATE_THROWWAITING)
 		{
 			g_nMotionCounter--;
@@ -1930,13 +1955,6 @@ void ShotMouse(void)
 					pCamera->rot.y += D3DX_PI * 2.0f;
 				}
 			}
-
-			// 注視点までのベクトルをだす
-			D3DXVECTOR3 vec = pCamera->posR - pCamera->posV;
-
-			// 出したベクトルを正規化
-			D3DXVec3Normalize(&vec, &vec);
-			PrintDebugProc("vec %~3f", vec.x, vec.y, vec.z);
 
 			if (GetKeyboardTrigger(DIK_RETURN) == true || GetJoypadTrigger(0, JOYKEY_B) == true)
 			{
@@ -1965,7 +1983,7 @@ void ShotMouse(void)
 				}
 			}
 
-			if (g_nMotionCounter < -75)
+			if (g_nMotionCounter < -85)
 			{// 余韻を持たせて初期化
 				g_bShotMouse = false;
 				g_nMotionCounter = 0;

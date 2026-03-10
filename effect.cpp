@@ -10,7 +10,9 @@
 #include"main.h"
 #include"camera.h"
 #include"effect.h"
+#include"field.h"
 #include"player.h"
+#include"vector_def.h"
 
 //*************************************************************************************************
 //*** マクロ定義 ***
@@ -34,6 +36,7 @@ typedef struct
 	D3DXVECTOR3 move;	// 移動量
 	int nCounter;		// 処理を行いたい回数用のカウンター
 	int nType;			// 普通のエフェクトか放物線か
+	bool bVisible;		// ネズミにしか見えないやつかどうか
 
 	D3DXMATRIX mtxWorld; // ワールドマトリックス
 }Effect;
@@ -44,6 +47,8 @@ typedef struct
 LPDIRECT3DTEXTURE9 g_pTextureEffect = NULL;	// テクスチャへのポインタ
 LPDIRECT3DVERTEXBUFFER9 g_pVtxBuffEffect = NULL;	// 頂点バッファへのポインタ
 Effect g_aEffect[MAX_EFFECT];	// エフェクトの情報
+int g_aIdxZTest[MAX_EFFECT] = {};
+int g_nIdxEffect = 0;
 
 //================================================================================================================
 // --- エフェクトの初期化処理 ---
@@ -115,6 +120,11 @@ void InitEffect(void)
 	// 頂点バッファをアンロックする
 	g_pVtxBuffEffect->Unlock();
 
+	// 初期化
+	g_aIdxZTest[MAX_EFFECT] = {};
+
+	IDX_FIELD nIdxEffect = SetField(, VECNULL, );
+
 	EndDevice();
 }
 
@@ -146,6 +156,8 @@ void UpdateEffect(void)
 	// プレイヤー情報を取得
 	Player* pPlayer = GetPlayer();
 
+	Camera* pCamera = GetCamera();;
+
 	int nCntEffect;
 	VERTEX_3D* pVtx;
 
@@ -156,9 +168,18 @@ void UpdateEffect(void)
 	{
 		if (g_aEffect[nCntEffect].bUse == true)
 		{// 弾が使用されている
+			if (g_aEffect[nCntEffect].nType == 1)
+			{
+				D3DXVECTOR3 VecParabola = pCamera->posR - pCamera->posV;
 
-			g_aEffect[nCntEffect].move.x += g_aEffect[nCntEffect].vec.x;
-			g_aEffect[nCntEffect].move.z += g_aEffect[nCntEffect].vec.z;
+				D3DXVec3Normalize(&VecParabola, &VecParabola);
+
+				g_aEffect[nCntEffect].move.x += VecParabola.x * 1.0f;
+				//g_aEffect[nCntEffect].move.y += VecParabola.y * 25.0f;
+				g_aEffect[nCntEffect].move.z += VecParabola.z * 1.0f;
+
+
+			}
 
 			if (g_aEffect[nCntEffect].bGravity == true)
 			{
@@ -219,6 +240,8 @@ void DrawEffect(void)
 {
 	int nCntEffect;
 
+	g_nIdxEffect = 0;
+
 	D3DXMATRIX mtxTrans;		// 計算用マトリックス
 	D3DXMATRIX mtxView;			// ビューマトリックスの取得用
 
@@ -250,33 +273,82 @@ void DrawEffect(void)
 		if (g_aEffect[nCntEffect].bUse == true)
 		{// 弾が使用されている
 
+			if (g_aEffect[nCntEffect].bVisible == true)
+			{// Zテストを有効にしたいものは、インデックスを渡してスキップ
+				g_aIdxZTest[g_nIdxEffect] = nCntEffect;
+				g_nIdxEffect++;
+
+				continue;
+			}
+
+			if (g_aEffect[nCntEffect].bVisible == false || (g_aEffect[nCntEffect].bVisible == true && GetReadyCamera() == CAMERATYPE_PLAYER_TWO))
+			{// 全員が見える奴と、ネズミ限定の奴を描画
+				/*** ワールドマトリックスの初期化 ***/
+				D3DXMatrixIdentity(&g_aEffect[nCntEffect].mtxWorld);
+
+				/*** カメラのビューマトリックスを取得 ***/
+				pDevice->GetTransform(D3DTS_VIEW, &mtxView);
+
+				/*** マトリックスの逆行列を求める (※ 位置を反映する前に必ず行うこと！) ***/
+				D3DXMatrixInverse(&g_aEffect[nCntEffect].mtxWorld, NULL, &mtxView);
+
+				/** 逆行列によって入ってしまった位置情報を初期化 **/
+				g_aEffect[nCntEffect].mtxWorld._41 = 0.0f;
+				g_aEffect[nCntEffect].mtxWorld._42 = 0.0f;
+				g_aEffect[nCntEffect].mtxWorld._43 = 0.0f;
+
+				/*** 位置を反映 (※ 向きを反映したのちに行うこと！) ***/
+				D3DXMatrixTranslation(&mtxTrans,
+					g_aEffect[nCntEffect].pos.x,
+					g_aEffect[nCntEffect].pos.y,
+					g_aEffect[nCntEffect].pos.z);
+
+				D3DXMatrixMultiply(&g_aEffect[nCntEffect].mtxWorld, &g_aEffect[nCntEffect].mtxWorld, &mtxTrans);
+
+				/*** ワールドマトリックスの設定 ***/
+				pDevice->SetTransform(D3DTS_WORLD, &g_aEffect[nCntEffect].mtxWorld);
+
+				// ポリゴン描写
+				pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, nCntEffect * 4, 2);
+			}
+		}
+	}
+
+	/*** Zテストを無効にする ***/
+	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
+	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+
+	for (int nCntZTest = 0; nCntZTest < g_nIdxEffect; nCntZTest++)
+	{
+		if (g_aEffect[g_aIdxZTest[nCntZTest]].bVisible == false || (g_aEffect[g_aIdxZTest[nCntZTest]].bVisible == true && GetReadyCamera() == CAMERATYPE_PLAYER_TWO))
+		{// 全員が見える奴と、ネズミ限定の奴を描画
 			/*** ワールドマトリックスの初期化 ***/
-			D3DXMatrixIdentity(&g_aEffect[nCntEffect].mtxWorld);
+			D3DXMatrixIdentity(&g_aEffect[g_aIdxZTest[nCntZTest]].mtxWorld);
 
 			/*** カメラのビューマトリックスを取得 ***/
 			pDevice->GetTransform(D3DTS_VIEW, &mtxView);
 
 			/*** マトリックスの逆行列を求める (※ 位置を反映する前に必ず行うこと！) ***/
-			D3DXMatrixInverse(&g_aEffect[nCntEffect].mtxWorld, NULL, &mtxView);
+			D3DXMatrixInverse(&g_aEffect[g_aIdxZTest[nCntZTest]].mtxWorld, NULL, &mtxView);
 
 			/** 逆行列によって入ってしまった位置情報を初期化 **/
-			g_aEffect[nCntEffect].mtxWorld._41 = 0.0f;
-			g_aEffect[nCntEffect].mtxWorld._42 = 0.0f;
-			g_aEffect[nCntEffect].mtxWorld._43 = 0.0f;
+			g_aEffect[g_aIdxZTest[nCntZTest]].mtxWorld._41 = 0.0f;
+			g_aEffect[g_aIdxZTest[nCntZTest]].mtxWorld._42 = 0.0f;
+			g_aEffect[g_aIdxZTest[nCntZTest]].mtxWorld._43 = 0.0f;
 
 			/*** 位置を反映 (※ 向きを反映したのちに行うこと！) ***/
 			D3DXMatrixTranslation(&mtxTrans,
-				g_aEffect[nCntEffect].pos.x,
-				g_aEffect[nCntEffect].pos.y,
-				g_aEffect[nCntEffect].pos.z);
+				g_aEffect[g_aIdxZTest[nCntZTest]].pos.x,
+				g_aEffect[g_aIdxZTest[nCntZTest]].pos.y,
+				g_aEffect[g_aIdxZTest[nCntZTest]].pos.z);
 
-			D3DXMatrixMultiply(&g_aEffect[nCntEffect].mtxWorld, &g_aEffect[nCntEffect].mtxWorld, &mtxTrans);
+			D3DXMatrixMultiply(&g_aEffect[g_aIdxZTest[nCntZTest]].mtxWorld, &g_aEffect[g_aIdxZTest[nCntZTest]].mtxWorld, &mtxTrans);
 
 			/*** ワールドマトリックスの設定 ***/
-			pDevice->SetTransform(D3DTS_WORLD, &g_aEffect[nCntEffect].mtxWorld);
+			pDevice->SetTransform(D3DTS_WORLD, &g_aEffect[g_aIdxZTest[nCntZTest]].mtxWorld);
 
 			// ポリゴン描写
-			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, nCntEffect * 4, 2);
+			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, nCntZTest * 4, 2);
 		}
 	}
 
@@ -295,7 +367,7 @@ void DrawEffect(void)
 //================================================================================================================
 // --- エフェクトの設定処理 ---
 //================================================================================================================
-void SetEffect(D3DXVECTOR3 pos, D3DXCOLOR col, D3DXVECTOR3 vec, float Width, float Height, float speed, int nLife, bool bUseGravity)
+void SetEffect(D3DXVECTOR3 pos, D3DXCOLOR col, D3DXVECTOR3 vec, float Width, float Height, float speed, int nLife, bool bUseGravity, bool bVisible)
 {
 	int nCntEffect;
 	VERTEX_3D* pVtx;
@@ -320,6 +392,7 @@ void SetEffect(D3DXVECTOR3 pos, D3DXCOLOR col, D3DXVECTOR3 vec, float Width, flo
 			g_aEffect[nCntEffect].bUse = true;	// 使用している状態にする
 			g_aEffect[nCntEffect].bGravity = bUseGravity;
 			g_aEffect[nCntEffect].nType = 0;
+			g_aEffect[nCntEffect].bVisible = bVisible;	// 限定的に見えるやつか
 
 			g_aEffect[nCntEffect].pos = pos;
 
@@ -364,39 +437,39 @@ void SetParabola(D3DXVECTOR3 pos, D3DXVECTOR3 move, D3DXCOLOR col, float Width, 
 		{// 放物線未使用
 
 			// === 引数を各変数に代入 === //
-			g_aEffect[nCntEffect].move = move;		// 移動量
+			//g_aEffect[nCntEffect].move = {};		// 移動量	
+			g_aEffect[nCntEffect].pos = pos;	// 位置を代入
+			g_aEffect[nCntEffect].posOri = pos;	// 発射位置を代入
 			g_aEffect[nCntEffect].Width = Width;	// 幅
 			g_aEffect[nCntEffect].Height = Height;	// 高さ
 			g_aEffect[nCntEffect].nLife = 120;		// 寿命の設定
 			g_aEffect[nCntEffect].bUse = true;		// 使用状態に
-			g_aEffect[nCntEffect].bGravity = bUseGravity;	// 重力をかけるかどうか
+			g_aEffect[nCntEffect].bGravity = true;	// 重力をかけるかどうか
 			g_aEffect[nCntEffect].nCounter = 0;
 			g_aEffect[nCntEffect].nType = 1;
+			g_aEffect[nCntEffect].bVisible = false;
+			g_aEffect[nCntEffect].vec = move;
 
 			for (int nCnt = 0; nCnt < 4; nCnt++)
 			{// 色を設定
 				pVtx[nCnt].col = col;
 			}
 
-			D3DXVECTOR3 vec = move;
+			D3DXVECTOR3 VecY = pCamera->posR - pCamera->posV;
 
-			// 出したベクトルを正規化
-			D3DXVec3Normalize(&vec, &vec);
+			D3DXVec3Normalize(&VecY, &VecY);
 
-			g_aEffect[nCntEffect].vec.x = vec.x * speed;
-			g_aEffect[nCntEffect].vec.z = vec.z * speed;
+			g_aEffect[nCntEffect].move.y = VecY.y * 25.0f;
 
-			// 出したベクトルを正規化
-			D3DXVec3Normalize(&g_aEffect[nCntEffect].vec, &g_aEffect[nCntEffect].vec);
-
-			g_aEffect[nCntEffect].pos = pos;	// 位置を代入
-			g_aEffect[nCntEffect].posOri = pos;	// 発射位置を代入
+			if (g_aEffect[nCntEffect].move.y < 5.5f)
+			{
+				g_aEffect[nCntEffect].move.y = 5.5f;
+			}
 
 			break;
 		}
 		pVtx += 4;
 	}
-
 
 	// 頂点バッファをアンロックする
 	g_pVtxBuffEffect->Unlock();

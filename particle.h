@@ -19,5 +19,5 @@ void InitParticle(void);
 void UninitParticle(void);
 void UpdateParticle(void);
 
-void SetParticle(D3DXVECTOR3 pos, D3DXCOLOR col, D3DXVECTOR3 vecMin, D3DXVECTOR3 vecMax, int nRadius, float fRadiusEffect, int nLife, int nFrameEffect, bool bUseGravity);
+void SetParticle(D3DXVECTOR3 pos, D3DXCOLOR col, D3DXVECTOR3 vecMin, D3DXVECTOR3 vecMax, int nRadius, float fRadiusEffect, int nLife, int nFrameEffect, bool bUseGravity, bool bVisible);
 #endif
