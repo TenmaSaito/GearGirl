@@ -12,7 +12,7 @@
 #include"effect.h"
 #include"field.h"
 #include"player.h"
-#include"vector_def.h"
+#include"vector_defs.h"
 
 //*************************************************************************************************
 //*** É}ÉNÉçíËã` ***
