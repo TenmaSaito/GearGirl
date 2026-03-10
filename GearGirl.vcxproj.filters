@@ -431,6 +431,12 @@
     <ClInclude Include="lineEffect.h">
       <Filter>ヘッダー ファイル\Object</Filter>
     </ClInclude>
+    <ClInclude Include="Vector_defs.h">
+      <Filter>ヘッダー ファイル\Main\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Conditional_defs.h">
+      <Filter>ヘッダー ファイル\Main\System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

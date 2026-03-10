@@ -13,6 +13,9 @@
 #include "main.h"
 #include "param.h"
 #include "MyLib.h"
+#include "Vector_defs.h"
+#include "Conditional_defs.h"
+#include "MyCol.h"
 #include <time.h>
 
 using namespace Constants;
@@ -38,47 +41,9 @@ SetWarning("modeldata.hがインクルードされていません。modeldata関連関数は無効化さ
 #define RECT_NULL				(RECT{0, 0, 0, 0})					// RECT初期化
 #define INT_VECTOR3_NULL		(MyMathUtil::INT_VECTOR3{ 0, 0, 0 })	// INT_VECTOR3初期化
 #define INT_VECTOR2_NULL		(MyMathUtil::INT_VECTOR2{ 0, 0 })		// INT_VECTOR2初期化
-#define D3DCOLOR_NULL			(D3DCOLOR_RGBA(255, 255, 255, 255)) // D3DCOLOR_NULL
 #define INT_INFINITY			(0x7FFFFFFF)						// int型の最大(signed intの最大値)
 #define InitRot(x, y, z)		RepairedRot(D3DXVECTOR3(x, y, z))	// 修正済み角度
-#define DEF_COL					D3DXCOLOR_NULL						// デフォルトカラー
 #define foreach(type, var, lpArray)		for(type &var : lpArray)	// foreach構文
-#define CMP_SUCCESS(cmp)		(cmp == 0)			// strcmp,strncmpでの成功判定
-#define CMP_FAILED(cmp)			(cmp != 0)			// strcmp,strncmpでの失敗判定
-#define STR_SUCCESS(str)		(str != NULL)		// strstrでの成功判定
-#define STR_FAILED(str)			(str == NULL)		// strstrでの失敗判定
-#define C_SUCCEED(a, b)			CMP_SUCCESS(strcmp(a, b))			// strcmp省略版
-#define C_FAILED(a, b)			CMP_FAILED(strcmp(a, b))			// strcmp省略版
-#define ST_SUCCEED(a, b)		STR_SUCCESS(strstr(a, b))			// strstr省略版
-#define ST_FAILED(a, b)			STR_FAILED(strstr(a, b))			// strstr省略版
-#ifndef STRUCT
-#define STRUCT(...)				typedef struct __VA_ARGS__			// STRUCT宣言
-#endif
-#ifndef ENUM
-#define ENUM(...)				typedef enum __VA_ARGS__			// ENUM宣言
-#endif
-#ifndef PARENT
-#define PARENT(...)				: public __VA_ARGS__				// 継承宣言
-#endif
-
-// Vector関連
-#define VECNULL					D3DXVECTOR3(0.0f,0.0f,0.0f)			// 省略版vectorNull
-
-#define EXTRACT_YZ(vec)			(D3DXVECTOR3(0, vec.y, vec.z))		// YZ平面に変換
-#define EXTRACT_XZ(vec)			(D3DXVECTOR3(vec.x, 0, vec.z))		// XZ平面に変換
-#define EXTRACT_XY(vec)			(D3DXVECTOR3(vec.x, vec.y, 0))		// XY平面に変換
-
-#define CONVERSION_X(vec, x)	(D3DXVECTOR3(x, vec.y, vec.z))		// X要素のみ変換
-#define CONVERSION_Y(vec, y)	(D3DXVECTOR3(vec.x, y, vec.z))		// Y要素のみ変換
-#define CONVERSION_Z(vec, z)	(D3DXVECTOR3(vec.x, vec.y, z))		// Z要素のみ変換
-
-#define VEC_X(x)				CONVERSION_X(VECNULL, x)			// Xのみ変更
-#define VEC_Y(y)				CONVERSION_Y(VECNULL, y)			// Yのみ変更
-#define VEC_Z(z)				CONVERSION_Z(VECNULL, z)			// Zのみ変更
-
-#define VEC_XY(x, y)			D3DXVECTOR3(x, y, 0.0f)				// XYを変更
-#define VEC_XZ(x, z)			D3DXVECTOR3(x, 0.0f, z)				// XZを変更
-#define VEC_YZ(y, z)			D3DXVECTOR3(0.0f, y, z)				// YZを変更
 
 // 2Dポリゴンのバッファ作成用フラグまとめ
 #define CREATE_2DPOLYGON(p) sizeof(VERTEX_2D) * 4, D3DUSAGE_WRITEONLY, FVF_VERTEX_2D, D3DPOOL_MANAGED, &p, NULL	// 2Dフラグまとめ

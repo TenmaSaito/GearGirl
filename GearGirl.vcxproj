@@ -216,6 +216,7 @@
     <ClInclude Include="camera.h" />
     <ClInclude Include="CharacterSprite.h" />
     <ClInclude Include="common_fade.h" />
+    <ClInclude Include="Conditional_defs.h" />
     <ClInclude Include="debugproc.h" />
     <ClInclude Include="dialog.h" />
     <ClInclude Include="effect.h" />
@@ -262,6 +263,7 @@
     <ClInclude Include="title.h" />
     <ClInclude Include="modeldata.h" />
     <ClInclude Include="UIarm.h" />
+    <ClInclude Include="Vector_defs.h" />
     <ClInclude Include="wall.h" />
     <ClInclude Include="MyLib.h" />
   </ItemGroup>
