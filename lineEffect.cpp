@@ -7,12 +7,15 @@
 //**********************************************************************************
 //*** インクルードファイル ***
 //**********************************************************************************
-#include"main.h"
-#include"camera.h"
-#include"lineEffect.h"
+#include "lineEffect.h"
 
+#include "player.h"
+#include "camera.h"
 #include "mathUtil.h"
+#include "MyInline.inl"
+#include "param.h"
 
+USE_PARAM;
 USE_UTIL;
 
 //**********************************************************************************
@@ -178,6 +181,9 @@ void DrawLineEffect(void)
 	// テクスチャの設定
 	pDevice->SetTexture(0, g_pTextureLineEffect);
 
+	// 両面描画
+	pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+
 	// αブレンディングを加算合計に設定
 	pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
 	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
@@ -197,8 +203,8 @@ void DrawLineEffect(void)
 			/*** 向きを反映 (※ 位置を反映する前に必ず行うこと！) ***/
 			D3DXMatrixRotationYawPitchRoll(&mtxRot,
 				pEffect->rot.y,		// Y軸回転
-				pEffect->rot.x,		// X軸回転
-				pEffect->rot.z);	// Z軸回転
+				0,		// X軸回転
+				0);		// Z軸回転
 
 			D3DXMatrixMultiply(&pEffect->mtxWorld, &pEffect->mtxWorld, &mtxRot);
 
@@ -226,6 +232,9 @@ void DrawLineEffect(void)
 	// Zテストを再設定
 	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, true);
 	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
+
+	// 両面描画
+	pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
 }
 
 //==================================================================================
@@ -247,16 +256,19 @@ void SetLineEffect(D3DXVECTOR3 pos, D3DXCOLOR col, UNUSEDROLL D3DXVECTOR3 rot, f
 			D3DXVECTOR3 vecNor, vec;
 
 			// 角度からベクトルへの変換
-			vec.x = pos.x - sinf(rot.y) * sinf(rot.x) * speed;
-			vec.y = pos.y - cosf(rot.x) * speed;
-			vec.z = pos.z - cosf(rot.y) * sinf(rot.x) * speed;
+			vec.x = pos.x + sinf(rot.y) * sinf(rot.x) * 10;
+			vec.y = pos.y + cosf(rot.x) * 10;
+			vec.z = pos.z + cosf(rot.y) * sinf(rot.x) * 10;
+
+			vec = vec - pos;
 
 			// ベクトルの正規化
 			D3DXVec3Normalize(&vecNor, &vec);
 
 			// 頂点項目の設定
 			pEffect->pos = pos;
-			pEffect->rot = CONVERSION_Y(rot, RepairRot(rot.y + D3DX_HALFPI));
+			pEffect->vec = vecNor;
+			pEffect->rot = CONVERSION_XY(rot, rot.x, RepairRot(rot.y + D3DX_HALFPI));
 			pEffect->col = col;
 			pEffect->fSpeed = speed;
 			pEffect->nLife = nLife;
@@ -265,7 +277,7 @@ void SetLineEffect(D3DXVECTOR3 pos, D3DXCOLOR col, UNUSEDROLL D3DXVECTOR3 rot, f
 			// 頂点座標の設定
 			pVtx[0].pos = D3DXVECTOR3(-Width * 0.5f, Height * 0.5f, 0.0f);
 			pVtx[1].pos = D3DXVECTOR3(Width * 0.5f, Height * 0.5f, 0.0f);
-			pVtx[2].pos = D3DXVECTOR3(-Width * 0.5f, -Height, 0.0f);
+			pVtx[2].pos = D3DXVECTOR3(-Width * 0.5f, -Height * 0.5f, 0.0f);
 			pVtx[3].pos = D3DXVECTOR3(Width * 0.5f, -Height * 0.5f, 0.0f);
 
 			// 色の適応

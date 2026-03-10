@@ -646,7 +646,7 @@ void TutorialLog(void)
 			SetEnable2DPolygon(g_aDialog[1].polygon, false);
 			SetCommonFade(40, 40, 30);
 
-			for (int nCntTex = TUTORIAL_TEX_GEAR; nCntTex < TUTORIAL_TEX_MAX; nCntTex++)
+			for (int nCntTex = TUTORIAL_TEX_GEAR; nCntTex < TUTORIAL_TEX_ARROW; nCntTex++)
 			{
 				SetEnable2DPolygon(g_aAnimTex[nCntTex].poly, false);
 			}
