@@ -44,6 +44,7 @@ SetWarning("modeldata.hがインクルードされていません。modeldata関連関数は無効化さ
 #define INT_INFINITY			(0x7FFFFFFF)						// int型の最大(signed intの最大値)
 #define InitRot(x, y, z)		RepairedRot(D3DXVECTOR3(x, y, z))	// 修正済み角度
 #define foreach(type, var, lpArray)		for(type &var : lpArray)	// foreach構文
+#define for_skip				continue							// skip
 
 // 2Dポリゴンのバッファ作成用フラグまとめ
 #define CREATE_2DPOLYGON(p) sizeof(VERTEX_2D) * 4, D3DUSAGE_WRITEONLY, FVF_VERTEX_2D, D3DPOOL_MANAGED, &p, NULL	// 2Dフラグまとめ

@@ -12,6 +12,7 @@
 #include "Texture.h"
 #include "mathUtil.h"
 #include "param.h"
+#include "lineEffect.h"
 
 using namespace Constants;
 
