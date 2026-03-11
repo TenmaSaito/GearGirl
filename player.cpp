@@ -323,18 +323,10 @@ void UpdatePlayer(void)
 		// === ネズミ射出の予測軌跡の描画 === //
 		if (pPlayer->state == PLAYERSTATE_THROWWAITING && nCntPlayer == PLAYERTYPE_GIRL)
 		{
-			// 注視点までのベクトルをだす
-			D3DXVECTOR3 vec = pCamera->posR - pCamera->posV;
-
-			// 出したベクトルを正規化
-			D3DXVec3Normalize(&vec, &vec);
-
-			g_Effectmove.x = vec.x;
-			g_Effectmove.z = vec.z;
-			g_Effectmove.y = vec.y;
+			D3DXVECTOR3 ParabolaVec = GetParabolaVec();
 
 			// エフェクトの描画
-			SetParabola(g_aPlayer[PLAYERTYPE_MOUSE].pos, vec, D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f), 2.0f, 2.0f, 1.0f, true);
+			SetParabola(g_aPlayer[PLAYERTYPE_MOUSE].pos, ParabolaVec, D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f), 2.0f, 2.0f, 1.0f, true);
 		}
 
 		// === 何もしていない場合(何も入力されていない場合) === //
@@ -1945,6 +1937,9 @@ void ShotMouse(void)
 		// カメラの情報を取得
 		Camera* pCamera = GetCamera();
 
+		// 放物線用のベクトルを取得
+		D3DXVECTOR3 ShotParabolaVec = GetParabolaVec();
+
 		if (pPlayer->state == PLAYERSTATE_THROWWAITING)
 		{// プレイヤーの投げる向きをカメラとそろえる
 			pPlayer->rot.y = pCamera->rot.y + D3DX_PI;
@@ -1954,14 +1949,7 @@ void ShotMouse(void)
 			D3DXVec3TransformCoord(&pMouse->pos, &offset, &pPlayer->PartsInfo.aParts[19].mtxWorld);
 		}
 
-		// 注視点までのベクトルをだす
-		D3DXVECTOR3 vec = pCamera->posRDest - pCamera->posV;
-
-		// 出したベクトルを正規化
-		D3DXVec3Normalize(&vec, &vec);
-		PrintDebugProc("vec %~3f", vec.x, vec.y, vec.z);
-
-		// SetParabola(pMouse->pos, vec, COL_RED, 2.0f, 2.0f, 1.0f, true);
+		//PrintDebugProc("vec %~3f", vec.x, vec.y, vec.z);
 
 		if (pPlayer->state != PLAYERSTATE_THROWWAITING)
 		{
@@ -1998,14 +1986,14 @@ void ShotMouse(void)
 			if (pPlayer->state == PLAYERSTATE_NEUTRAL)
 			{
 				// ネズミを飛ばす
-				pMouse->move.x += vec.x * 1.0f;
-				pMouse->move.z += vec.z * 1.0f;
+				pMouse->move.x += ShotParabolaVec.x * 1.5f;
+				pMouse->move.z += ShotParabolaVec.z * 1.5f;
 
 				if (g_nMotionCounter == -5)
 				{// Y軸移動は1Fのみ
 					// 投げる手の位置に移動
 					D3DXVec3TransformCoord(&pMouse->pos, &offset, &pPlayer->PartsInfo.aParts[19].mtxWorld);
-					pMouse->move.y = vec.y * 55.0f;
+					pMouse->move.y = ShotParabolaVec.y * 35.0f;
 					// 下限
 					if (pMouse->move.y < 5.5f)
 					{

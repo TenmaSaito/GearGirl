@@ -53,6 +53,7 @@ Effect g_aEffect[MAX_EFFECT];		// エフェクトの情報
 int g_aIdxZTest[MAX_EFFECT] = {};	// Zテストを無効にするエフェクト全体のインデックスを保管する
 int g_nIdxEffect = 0;				// 保管したZテスト向こうのエフェクトのインデックスを保管する
 IDX_FIELD g_nIdxEffectField;		// フィールドのインデックス保存用
+D3DXVECTOR3 g_ParabolaVec;			// 放物線を出すときに使用するベクトル
 
 //================================================================================================================
 // --- エフェクトの初期化処理 ---
@@ -163,8 +164,6 @@ void UpdateEffect(void)
 	Player* pPlayer = GetPlayer();
 	Player* pMouse = GetPlayer() + 1;
 
-	Camera* pCamera = GetCamera();;
-
 	Gimmick* pGimmick = GetGimmick() + 5;
 
 	int nCntEffect;
@@ -181,12 +180,8 @@ void UpdateEffect(void)
 
 			if (g_aEffect[nCntEffect].nType == 1)
 			{
-				D3DXVECTOR3 VecParabola = pCamera->posRDest - pCamera->posV;
-
-				D3DXVec3Normalize(&VecParabola, &VecParabola);
-
-				g_aEffect[nCntEffect].move.x += VecParabola.x * 1.0f;
-				g_aEffect[nCntEffect].move.z += VecParabola.z * 1.0f;
+				g_aEffect[nCntEffect].move.x += g_ParabolaVec.x * 1.5f;
+				g_aEffect[nCntEffect].move.z += g_ParabolaVec.z * 1.5f;
 
 				// === マップの限界値まで行った時に、各移動量を0にする === //
 				if (g_aEffect[nCntEffect].pos.z <= MAX_ZMOVE1)
@@ -214,7 +209,7 @@ void UpdateEffect(void)
 
 			if (g_aEffect[nCntEffect].bGravity == true)
 			{
-				g_aEffect[nCntEffect].move.y += GRAVITY *1.1f;
+				g_aEffect[nCntEffect].move.y += GRAVITY;
 			}
 
 			//弾の位置更新
@@ -461,10 +456,16 @@ void SetEffect(D3DXVECTOR3 pos, D3DXCOLOR col, D3DXVECTOR3 vec, float Width, flo
 // =================================================
 void SetParabola(D3DXVECTOR3 pos, D3DXVECTOR3 move, D3DXCOLOR col, float Width, float Height, float speed, bool bUseGravity)
 {
-	Player* pPlayer = GetPlayer();
+	// カメラの情報を取得
 	Camera* pCamera = GetCamera();
 
 	VERTEX_3D* pVtx;
+
+	// 射出ベクトルを求める
+	g_ParabolaVec = pCamera->posR - pCamera->posV;
+
+	// 正規化
+	D3DXVec3Normalize(&g_ParabolaVec, &g_ParabolaVec);
 
 	// 頂点バッファをロックして、頂点情報へのポインタを取得
 	g_pVtxBuffEffect->Lock(0, 0, (void**)&pVtx, 0);
@@ -486,14 +487,14 @@ void SetParabola(D3DXVECTOR3 pos, D3DXVECTOR3 move, D3DXCOLOR col, float Width, 
 			g_aEffect[nCntEffect].nCounter = 0;
 			g_aEffect[nCntEffect].nType = 1;
 			g_aEffect[nCntEffect].bVisible = false;
-			g_aEffect[nCntEffect].vec = move;
+			g_aEffect[nCntEffect].vec = g_ParabolaVec;
 
 			for (int nCnt = 0; nCnt < 4; nCnt++)
 			{// 色を設定
 				pVtx[nCnt].col = col;
 			}
 
-			g_aEffect[nCntEffect].move.y = move.y * 35.0f;
+			g_aEffect[nCntEffect].move.y = g_ParabolaVec.y * 35.0f;
 
 			if (g_aEffect[nCntEffect].move.y < 5.5f)
 			{
@@ -515,4 +516,12 @@ void SetParabola(D3DXVECTOR3 pos, D3DXVECTOR3 move, D3DXCOLOR col, float Width, 
 int GetIdxEffectField(void)
 {
 	return g_nIdxEffectField;
+}
+
+// =================================================
+// 放物線用のベクトルを渡す
+// =================================================
+D3DXVECTOR3 GetParabolaVec(void)
+{
+	return g_ParabolaVec;
 }
