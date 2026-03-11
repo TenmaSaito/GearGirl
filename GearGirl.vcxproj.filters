@@ -264,6 +264,9 @@
     <ClCompile Include="lineEffect.cpp">
       <Filter>ソース ファイル\Object</Filter>
     </ClCompile>
+    <ClCompile Include="meshOrbit.cpp">
+      <Filter>ソース ファイル\Object\Mesh</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h">
@@ -436,6 +439,9 @@
     </ClInclude>
     <ClInclude Include="Conditional_defs.h">
       <Filter>ヘッダー ファイル\Main\System</Filter>
+    </ClInclude>
+    <ClInclude Include="meshOrbit.h">
+      <Filter>ヘッダー ファイル\Object</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
