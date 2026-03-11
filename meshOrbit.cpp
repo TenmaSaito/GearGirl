@@ -29,6 +29,7 @@ typedef struct
 	LPDIRECT3DINDEXBUFFER9 pIdxBuff;	// インデックスバッファ
 	D3DXMATRIX *pMtxParent;				// 親マトリックスへのポインタ
 	IDX_TEXTURE tex;					// テクスチャインデックス
+	ORBEFFECT effect;					// エフェクトタイプ
 	int nNumVertices;					// オービットのメッシュ数
 	bool bUse;							// 使用状況
 	bool bEnable;						// 描画状態
@@ -42,6 +43,7 @@ typedef MeshOrbit *LPMESHORBIT;
 LPMESHORBIT GetOrbit(IDX_MESHORBIT Idx = 0);
 void AddOrbit(LPMESHORBIT pOrbit);
 void SlideOrbit(D3DXVECTOR3 *pOrbitPos, size_t orbitSize);
+void UpdateVertices(LPMESHORBIT pOrbit);
 
 //**********************************************************************************
 //*** グローバル変数 ***
@@ -87,7 +89,6 @@ void DrawMeshOrbit(void)
 	// デバイス取得
 	AUTODEVICE9 AD9;
 	LPDIRECT3DDEVICE9 pDevice = AD9.pDevice;
-	VERTEX_3D* pVtx;
 	LPMESHORBIT pOrbit = GetOrbit();
 
 	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
@@ -109,15 +110,8 @@ void DrawMeshOrbit(void)
 		D3DXVec3TransformCoord(&pOrbit->aPos[0], &pOrbit->aPosOffset[0], pOrbit->pMtxParent);
 		D3DXVec3TransformCoord(&pOrbit->aPos[1], &pOrbit->aPosOffset[1], pOrbit->pMtxParent);
 
-		pOrbit->pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
-
-		for (int nCntVtx = 0; nCntVtx < pOrbit->nNumVertices; nCntVtx++)
-		{
-			pVtx->pos = pOrbit->aPos[nCntVtx];
-			pVtx++;
-		}
-
-		pOrbit->pVtxBuff->Unlock();
+		// 頂点更新
+		UpdateVertices(pOrbit);
 
 		D3DXMATRIX mtxWorld;
 
@@ -228,7 +222,7 @@ IDX_MESHORBIT SetOrbit(D3DXVECTOR3 offset0, D3DXVECTOR3 offset1, D3DXMATRIX* pMt
 		pOrbit->aPosOffset[1] = offset1;
 
 		// 位置をオフセットに適用
-		for (int nCntVertices = 0; nCntVertices < nNumVertices; nCntVertices++)
+		for (UINT nCntVertices = 0; nCntVertices < nNumVertices; nCntVertices++)
 		{
 			pOrbit->aPos[nCntVertices] = offset0;
 
@@ -264,7 +258,7 @@ void SetColorOrbit(IDX_MESHORBIT IdxMeshOrbit, D3DXCOLOR col)
 
 	// 色を設定
 	pOrbit->pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
-
+	
 	for (int nCntVtx = 0; nCntVtx < pOrbit->nNumVertices; nCntVtx++, pVtx++)
 	{
 		pVtx->col = col;
@@ -352,6 +346,73 @@ void DestroyOrbit(IDX_MESHORBIT IdxMeshOrbit)
 	// 未使用状態に設定
 	pOrbit->bUse = false;
 	pOrbit->bEnable = false;
+}
+
+//==================================================================================
+// --- オービットエフェクトの設定 ---
+//==================================================================================
+void SetEffectOrbit(IDX_MESHORBIT IdxMeshOrbit, ORBEFFECT Type)
+{
+	LPMESHORBIT pOrbit = GetOrbit(IdxMeshOrbit);
+	if (pOrbit == NULL) return;
+	if (!pOrbit->bUse) return;
+
+	// エフェクトタイプを保存
+	pOrbit->effect = Type;
+}
+
+//==================================================================================
+// --- 座標更新 ---
+//==================================================================================
+void UpdateVertices(LPMESHORBIT pOrbit)
+{
+	if (!pOrbit) return;
+
+	VERTEX_3D *pVtx;
+
+	switch (pOrbit->effect)
+	{
+	case ORBEFFECT_NONE:		// 無し
+	{
+		pOrbit->pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+
+		for (int nCntVtx = 0; nCntVtx < pOrbit->nNumVertices; nCntVtx++)
+		{
+			pVtx->pos = pOrbit->aPos[nCntVtx];
+			pVtx++;
+		}
+
+		pOrbit->pVtxBuff->Unlock();
+
+		break;
+	}
+
+	case ORBEFFECT_SMALLER:		// 縮小化
+	{
+		float fLength = 1.0f;
+
+		pOrbit->pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+
+		for (int nCntVtx = 0; nCntVtx < pOrbit->nNumVertices; nCntVtx++)
+		{
+			pVtx->pos = pOrbit->aPos[nCntVtx] * fLength;
+			pVtx++;
+
+			if ((nCntVtx % 2) / 2 == 0) fLength *= 0.5f;
+			else if ((nCntVtx - pOrbit->nNumVertices) <= 2) fLength = 0;
+		}
+
+		pOrbit->pVtxBuff->Unlock();
+
+		break;
+	}
+
+	case ORBEFFECT_BIGGER:		// 拡大
+	{
+		break;
+	}
+
+	}
 }
 
 //==================================================================================

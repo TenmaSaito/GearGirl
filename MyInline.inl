@@ -123,6 +123,7 @@ namespace MyInl
 				: 0.0f);
 	}
 
+	// Šp“xC³
 	__forceinline float RepairRot(float fRot)
 	{
 		return (fRot > D3DX_PI) ? fRot -= D3DX_PI * 2.0f :

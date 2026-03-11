@@ -15,7 +15,7 @@
 //*** マクロ定義 ***
 //**********************************************************************************
 #define PATH_GEAR		"data/TEXTURE/menugear.png"			// テクスチャパス
-#define DEF_MENU_POS	D3DXVECTOR3(0, SCREEN_HEIGHT, 0)	// 初期位置
+#define DEF_MENU_POS	D3DXVECTOR3(SCREEN_WIDTH * 0.07f, SCREEN_HEIGHT * 0.87f, 0)	// 初期位置
 #define DEF_MENU_SIZE	D3DXVECTOR2(100, 100)				// デフォルトサイズ
 #define OPEN_SIZE		(DEF_MENU_SIZE * 5)					// 拡大後のサイズ
 
@@ -576,4 +576,12 @@ void CalcWorldMatrixFromParent(LPDIRECT3DDEVICE9 pDevice,
 		/*** ワールドマトリックスの設定 ***/
 		pDevice->SetTransform(D3DTS_WORLD, mtxWorld);
 	}
+}
+
+//==================================================================================
+// --- 位置取得 ---
+//==================================================================================
+D3DXVECTOR3 GetPositionUImenu(void)
+{
+	return g_menu.pos;
 }

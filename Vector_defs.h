@@ -48,4 +48,9 @@
 #define ADDITION_YZ(vec, elem)		(D3DXVECTOR3(vec.x, vec.y + elem, vec.z + elem))			// YZÇ…ì¡íËÇÃílÇâ¡éZ
 #define ADDITION_XYZ(vec, elem)		(D3DXVECTOR3(vec.x + elem, vec.y + elem, vec.z + elem))		// ì¡íËÇÃílÇâ¡éZ
 
+#define HIVECTOR3(vec)				(D3DXVECTOR4(vec, 0.0f))			// D3DXVECTOR4Ç…è∏äiïœä∑
+#define HIVECTOR2(vec)				(D3DXVECTOR3(vec.x, vec.y, 0.0f))	// D3DXVECTOR3Ç…è∏äiïœä∑
+#define LOVECTOR3(vec)				(D3DXVECTOR3(vec.x, vec.y, vec.z))	// D3DXVECTOR3Ç…ç~äiïœä∑
+#define LOVECTOR2(vec)				(D3DXVECTOR2(vec.x, vec.y))			// D3DXVECTOR2Ç…ç~äiïœä∑
+
 #endif // !_VECTOR_DEFS_H_

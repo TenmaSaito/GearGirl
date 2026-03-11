@@ -14,6 +14,7 @@
 #include"gimmick.h"
 #include"player.h"
 #include"vector_defs.h"
+#include "Conditional_defs.h"
 
 //*************************************************************************************************
 //*** É}ÉNÉçíËã` ***

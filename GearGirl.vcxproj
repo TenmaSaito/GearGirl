@@ -207,6 +207,7 @@
     <ClCompile Include="title.cpp" />
     <ClCompile Include="modeldata.cpp" />
     <ClCompile Include="UIarm.cpp" />
+    <ClCompile Include="UIplayer.cpp" />
     <ClCompile Include="wall.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -265,6 +266,7 @@
     <ClInclude Include="title.h" />
     <ClInclude Include="modeldata.h" />
     <ClInclude Include="UIarm.h" />
+    <ClInclude Include="UIplayer.h" />
     <ClInclude Include="Vector_defs.h" />
     <ClInclude Include="wall.h" />
     <ClInclude Include="MyLib.h" />

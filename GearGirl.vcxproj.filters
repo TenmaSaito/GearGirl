@@ -267,6 +267,9 @@
     <ClCompile Include="meshOrbit.cpp">
       <Filter>ソース ファイル\Object\Mesh</Filter>
     </ClCompile>
+    <ClCompile Include="UIplayer.cpp">
+      <Filter>ソース ファイル\Mode\Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h">
@@ -442,6 +445,9 @@
     </ClInclude>
     <ClInclude Include="meshOrbit.h">
       <Filter>ヘッダー ファイル\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="UIplayer.h">
+      <Filter>ヘッダー ファイル\Mode\Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

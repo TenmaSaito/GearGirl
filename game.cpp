@@ -40,6 +40,7 @@
 #include "timer.h"
 #include "UIarm.h"
 #include "UImenu.h"
+#include "UIplayer.h"
 #include "2Dpolygon.h"
 #include "3Dmodel.h"
 
@@ -136,6 +137,9 @@ void InitGame(void)
 
 	/*** UIメニュー初期化 ***/
 	InitUImenu();
+
+	/*** UIプレイヤー初期化 ***/
+	InitUIplayer();
 
 	/*** ギミックの初期化 ***/
 	InitGimmick();
@@ -237,6 +241,9 @@ void UninitGame(void)
 	/*** UIメニュー終了 ***/
 	UninitUImenu();
 
+	/*** UIプレイヤー終了 ***/
+	UninitUIplayer();
+
 	/*** ギミックの終了 ***/
 	UninitGimmick();
 
@@ -328,6 +335,9 @@ void UpdateGame(void)
 
 		/*** UIメニュー更新 ***/
 		UpdateUImenu();
+
+		/*** UIプレイヤーの更新 ***/
+		UpdateUIplayer();
 
 		/*** ギミックの更新 ***/
 		UpdateGimmick();
@@ -458,8 +468,17 @@ void DrawGame(void)
 		DrawUIarm();
 	}
 
-	/*** UIメニュー描画 ***/
-	DrawUImenu();
+	if (g_bPause == false)
+	{
+		/*** UIプレイヤーの描画 ***/
+		DrawUIplayer();
+	}
+
+	if (g_bPause == false)
+	{
+		/*** UIメニュー描画 ***/
+		DrawUImenu();
+	}
 
 	/*** マップの描画 ***/
 	if (IsEndDialog() == true && GetCommonFade() == FADE_NONE && GetActivePlayer() == PLAYERTYPE_GIRL)

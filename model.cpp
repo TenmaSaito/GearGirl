@@ -1052,9 +1052,10 @@ bool CollisionModel
 				if (bCollision[0] == true
 					&& bCollision[1] == true
 					&& bCollision[2] == true
-					&& bCollision[3] == true)
+					&& bCollision[3] == true
+					&& pPosOld->y >= pObject->pos.y + pObjInfo->vtxMax.y)
 				{
-					pPos->y = pObject->pos.y + pObjInfo->vtxMax.y;
+					pPos->y = pObject->pos.y + pObjInfo->vtxMax.y + 0.01f;
 					bLand = true;
 					pMove->y = 0.0f;
 				}

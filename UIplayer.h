@@ -1,11 +1,11 @@
 //==================================================================================
 //
-// DirectXのMenuのUI表示処理 [UImenu.h]
+// DirectXのplayerのUI表示処理 [UIplayer.h]
 // Author : TENMA
 //
 //==================================================================================
-#ifndef _UIMENU_H_		// IncludeGuard
-#define _UIMENU_H_
+#ifndef _UIPLAYER_H_		// IncludeGuard
+#define _UIPLAYER_H_
 
 //**********************************************************************************
 //*** インクルードファイル ***
@@ -19,12 +19,11 @@
 //**********************************************************************************
 //*** プロトタイプ宣言 ***
 //**********************************************************************************
-void InitUImenu(void);
-void UninitUImenu(void);
-void UpdateUImenu(void);
-void DrawUImenu(void);
+void InitUIplayer(void);
+void UninitUIplayer(void);
+void UpdateUIplayer(void);
+void DrawUIplayer(void);
 
-void SetEnableUImenu(bool bDisp, int nIdxUImenu);
-bool GetEnableUImenu(void);
-D3DXVECTOR3 GetPositionUImenu(void);
+void SetEnableUIplayer(bool bDisp);
+bool GetEnableUIplayer(void);
 #endif

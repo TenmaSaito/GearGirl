@@ -79,7 +79,7 @@ void Draw2DPolygon(void)
 
 	for (int nCntPoly = 0; nCntPoly < MAX_POLYGON; nCntPoly++, p2DPoly++)
 	{
-		if ((p2DPoly->bUse & true) & (p2DPoly->bDisp & true))
+		if (p2DPoly->bUse & p2DPoly->bDisp)
 		{
 			/*** 頂点バッファをデータストリームに設定 ***/
 			pDevice->SetStreamSource(0, p2DPoly->pVtxBuff, 0, sizeof(VERTEX_2D));
