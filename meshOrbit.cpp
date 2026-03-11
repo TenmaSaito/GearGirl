@@ -255,6 +255,7 @@ void SetColorOrbit(IDX_MESHORBIT IdxMeshOrbit, D3DXCOLOR col)
 {
 	LPMESHORBIT pOrbit = GetOrbit(IdxMeshOrbit);
 	if (pOrbit == NULL) return;
+	if (!pOrbit->bUse) return;
 
 	VERTEX_3D *pVtx;
 
@@ -276,6 +277,7 @@ void SetTextureOrbit(IDX_MESHORBIT IdxMeshOrbit, IDX_TEXTURE tex)
 {
 	LPMESHORBIT pOrbit = GetOrbit(IdxMeshOrbit);
 	if (pOrbit == NULL) return;
+	if (!pOrbit->bUse) return;
 
 	// テクスチャインデックスを保存
 	pOrbit->tex = tex;
@@ -288,6 +290,7 @@ void SetEnableOrbit(IDX_MESHORBIT IdxMeshOrbit, bool bEnable)
 {
 	LPMESHORBIT pOrbit = GetOrbit(IdxMeshOrbit);
 	if (pOrbit == NULL) return;
+	if (!pOrbit->bUse) return;
 
 	// 設定を保存
 	pOrbit->bEnable = bEnable;
@@ -300,6 +303,7 @@ void SetOffSetOrbit(IDX_MESHORBIT IdxMeshOrbit, D3DXVECTOR3 offset0, D3DXVECTOR3
 {
 	LPMESHORBIT pOrbit = GetOrbit(IdxMeshOrbit);
 	if (pOrbit == NULL) return;
+	if (!pOrbit->bUse) return;
 
 	// オフセットを保存
 	pOrbit->aPosOffset[0] = offset0;
@@ -313,6 +317,7 @@ void SetParentOrbit(IDX_MESHORBIT IdxMeshOrbit, D3DXMATRIX* pMtx)
 {
 	LPMESHORBIT pOrbit = GetOrbit(IdxMeshOrbit);
 	if (pOrbit == NULL) return;
+	if (!pOrbit->bUse) return;
 
 	// 親マトリックスへのポインタを保存
 	pOrbit->pMtxParent = pMtx;
@@ -325,6 +330,7 @@ void DestroyOrbit(IDX_MESHORBIT IdxMeshOrbit)
 {
 	LPMESHORBIT pOrbit = GetOrbit(IdxMeshOrbit);
 	if (pOrbit == NULL) return;
+	if (!pOrbit->bUse) return;
 
 	// バッファを解放
 	RELEASE(pOrbit->pVtxBuff);
@@ -341,7 +347,6 @@ void DestroyOrbit(IDX_MESHORBIT IdxMeshOrbit)
 LPMESHORBIT GetOrbit(IDX_MESHORBIT Idx)
 {
 	if (FAILED(CheckIndex(MAX_ORBIT, Idx))) return NULL;	// インデックス外
-	if (!g_aOrbit[Idx].bUse) return NULL;					// 未使用
 
 	return &g_aOrbit[Idx];
 }

@@ -12,7 +12,6 @@
 //*** インクルードファイル ***
 //**********************************************************************************
 #include <math.h>
-#include "d3dx9math.h"
 #include "Vector_defs.h"
 
 //==================================================================================
@@ -141,7 +140,7 @@ namespace MyInl
 	}
 
 	// ランダムな角度の取得
-	D3DXVECTOR3 GetRandomRadian(void)
+	__forceinline D3DXVECTOR3 GetRandomRadian(void)
 	{
 		return D3DXVECTOR3(
 			RepairRot((FLOAT)(rand() % 628 - 314) * 0.01f),
@@ -206,7 +205,7 @@ struct NAND
 //==================================================================================
 // --- NAND計算 1 ---
 //==================================================================================
-NAND operator *(bool a, Intermediary)
+inline NAND operator *(bool a, Intermediary)
 {
 	return NAND(a);
 }
@@ -214,7 +213,7 @@ NAND operator *(bool a, Intermediary)
 //==================================================================================
 // --- NAND計算 2 ---
 //==================================================================================
-bool operator *(NAND b, bool a)
+inline bool operator *(NAND b, bool a)
 {
 	return (!(b.nand & a));
 }

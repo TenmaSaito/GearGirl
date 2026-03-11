@@ -25,6 +25,7 @@
 #include "mathUtil.h"
 #include "map.h"
 #include "mesh.h"
+#include "meshOrbit.h"
 #include "model.h"
 #include "modeldata.h"
 #include "motion.h"
@@ -105,6 +106,9 @@ void InitGame(void)
 
 	/*** メッシュの初期化 ***/
 	InitMesh();
+
+	/*** メッシュオービットの初期化 ***/
+	InitMeshOrbit();
 
 	/*** モデルの初期化 ***/
 	InitModel();
@@ -203,6 +207,9 @@ void UninitGame(void)
 	/*** メッシュの終了 ***/
 	UninitMesh();
 
+	/*** メッシュオービットの終了 ***/
+	UninitMeshOrbit();
+
 	/*** モデルの終了 ***/
 	UninitModel();
 
@@ -291,6 +298,9 @@ void UpdateGame(void)
 
 		/*** メッシュの更新 ***/
 		UpdateMesh();
+
+		/*** メッシュオービットの更新 ***/
+		UpdateMeshOrbit();
 
 		/*** モデルの更新 ***/
 		UpdateModel();
@@ -410,6 +420,9 @@ void DrawGame(void)
 
 		/*** メッシュの描画 ***/
 		DrawMesh();
+
+		/*** メッシュオービットの描画 ***/
+		DrawMeshOrbit();
 
 		/*** ギミックの描画 ***/
 		DrawGimmick();
