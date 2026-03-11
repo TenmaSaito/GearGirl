@@ -11,72 +11,13 @@
 #include "gimmick.h"
 #include "motion.h"
 #include "modeldata.h"
-#include "mathUtil.h"
 #include "param.h"
 #include "prompt.h"
 #include "Texture.h"
 
-// 自作ユーティリティ使用宣言
-USE_UTIL;
-
-// パラメータ使用宣言
-USE_PARAM;
-
 //**********************************************************************************
 //*** マクロ定義 ***
 //**********************************************************************************
-
-//**********************************************************************************
-//*** ギミッククリア可能なプレイヤータイプ ***
-//**********************************************************************************
-typedef enum
-{
-	COULD_PLAYER_GIRL = 0,
-	COULD_PLAYER_MOUSE,
-	COULD_PLAYER_ALL,
-	COULD_PLAYER_MAX
-} COULD_PLAYER;
-
-//**********************************************************************************
-//*** ギミック構造体 ***
-//**********************************************************************************
-START_UNABLE
-UNABLE_THISFILE(26495)
-typedef struct
-{
-	D3DXVECTOR3 pos;		// 中心位置
-	D3DXVECTOR3 rot;		// ギミック全体の向き
-	D3DXMATRIX mtxWorld;	// ワールドマトリックス
-	PARTS_INFO parts;		// ギミックパーツ
-	COULD_PLAYER could;		// クリア可能なプレイヤータイプ
-	GIMMICKTYPE myType;		// 自身のギミックの種類
-	float fRadius;			// 検知半径
-	int nCounter;			// 汎用カウンター
-	int nIdxPrompt;			// プロンプトのインデックス
-	bool bUse;				// 使用状況
-	bool bClear;			// クリアしたか
-
-	// モーション関連
-	MOTION_INFO aMotionInfo[MOTIONTYPE_MAX];	// クリア時モーション
-	int nNumMotion;			// 現在のモーションの総数
-	bool bLoop;				// ループするかどうか
-	int nNumKey;			// 現在のモーションのキーの総数
-	int nKey;				// 現在のモーションの現在のキーNo.
-	int nCounterMotion;		// 現在のモーションのカウンター
-	bool bFinishMotion;		// 現在のモーションが終了したかどうか
-	MOTIONTYPE motionType;	// モーションタイプ
-
-	// モーションブレンド関連
-	bool bBlendMotion;			// ブレンドモーションするかどうか
-	MOTIONTYPE motionTypeBlend;	// ブレンドモーションの種類
-	bool bLoopMotionBlend;		// ブレンドモーションがループするか
-	int nNumKeyBlend;			// ブレンドモーションの総キー数
-	int nKeyBlend;				// ブレンドモーションの現在のキーNo.
-	int nCounterMotionBlend;	// ブレンドモーションのカウンター
-	int nFrameBlend;			// ブレンドフレーム数
-	int nCounterBlend;			// ブレンドカウンター
-}Gimmick, * LPGIMMICK;
-END_UNABLE
 
 //**********************************************************************************
 //*** ギミッククリア構造体 ***
@@ -1029,4 +970,12 @@ void UpdateMotion(GIMMICKTYPE type)
 			SetMotionType(pGimmick->motionTypeBlend, false, 20, type);
 		}
 	}
+}
+
+//================================================================================================================
+// --- ギミック情報の譲渡 ---
+//================================================================================================================
+Gimmick *GetGimmick(void)
+{
+	return &g_aGimmick[0];
 }

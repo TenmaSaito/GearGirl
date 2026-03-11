@@ -36,6 +36,16 @@
 #define ITEMPROMPT_ON	(IsDispPrompt(GetIdxShopPrompt()) == true)	// アイテム提出のプロンプトが表示されている
 #define ITEMPROMPT_OFF	(IsDispPrompt(GetIdxShopPrompt()) == false)	// アイテム提出のプロンプトが表示されていない
 
+// 要素の設定
+#define COL_RED			D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f)	// 赤色
+#define COL_BLUE		D3DXCOLOR(0.0f, 1.0f, 1.0f, 1.0f)	// 青色
+
+// ゲームの設定
+#define MAX_ZMOVE1		(-1590)		// Z軸移動可能領域1
+#define MAX_ZMOVE2		(990)		// Z軸移動可能領域2
+#define MAX_XMOVE1		(315)		// X軸移動可能領域1
+#define MAX_XMOVE2		(2290)		// X軸移動可能領域2
+
 // =================================================
 // プレイヤータイプ
 typedef enum

@@ -12,6 +12,7 @@
 #include "dialog.h"
 #include "effect.h"
 #include "endomacro.h"
+#include "field.h"
 #include "game.h"
 #include "gimmick.h"
 #include "input.h"
@@ -37,13 +38,7 @@ using namespace MyMathUtil;
 #define PLAYER_RANGE	(20.0f)		// プレイヤーとアイテムとの当たり判定の距離
 #define START_ARMTYPE	(14)		// アームの開始配列番号
 #define MAX_PARTS		(17)		// 少女の全パーツ数
-#define MAX_ZMOVE1		(-1590)		// Z軸移動可能領域1
-#define MAX_ZMOVE2		(990)		// Z軸移動可能領域2
-#define MAX_XMOVE1		(315)		// X軸移動可能領域1
-#define MAX_XMOVE2		(2290)		// X軸移動可能領域2
 #define RHAND_OFFSET	D3DXVECTOR3(0.0f, 0.0f, 0.0f)		// 右手からのオフセット
-#define COL_RED			D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f)	// 赤色
-#define COL_BLUE		D3DXCOLOR(0.0f, 1.0f, 1.0f, 1.0f)	// 青色
 
 // =================================================
 // 平面投影の構造体
@@ -364,9 +359,18 @@ void UpdatePlayer(void)
 		// 移動量の更新
 		pPlayer->pos += pPlayer->move;
 
-		// 慣性を掛ける
-		pPlayer->move.x += (0.0f - pPlayer->move.x) * (PLAYER_INI * 1.5f);
-		pPlayer->move.z += (0.0f - pPlayer->move.z) * (PLAYER_INI * 1.5f);
+		if (pMouse->pos.y > 110.0 && pMouse->bJump == false)
+		{
+			// 慣性を掛ける
+			pPlayer->move.x += (0.0f - pPlayer->move.x) * (PLAYER_INI * 1.2f);
+			pPlayer->move.z += (0.0f - pPlayer->move.z) * (PLAYER_INI * 1.2f);
+		}
+		else
+		{
+			// 慣性を掛ける
+			pPlayer->move.x += (0.0f - pPlayer->move.x) * (PLAYER_INI * 1.5f);
+			pPlayer->move.z += (0.0f - pPlayer->move.z) * (PLAYER_INI * 1.5f);
+		}
 
 		// 地面に沈んだ時
 		if (pPlayer->pos.y < 100.0f)
@@ -379,6 +383,12 @@ void UpdatePlayer(void)
 			{// 着地モーション
 				SetMotionType(MOTIONTYPE_LANDING, true, 15, (PlayerType)nCntPlayer);
 				pPlayer->bUseLandMotion = true;
+			}
+
+			if (nCntPlayer == PLAYERTYPE_MOUSE)
+			{// 着地時に予想着地点を消す
+				int nIdxfield = GetIdxEffectField();
+				SetEnableField(nIdxfield, false);
 			}
 
 			pPlayer->bJump = false;
@@ -395,6 +405,11 @@ void UpdatePlayer(void)
 				pPlayer->bUseLandMotion = true;
 			}
 
+			if (nCntPlayer == PLAYERTYPE_MOUSE)
+			{// 着地時に予想着地点を消す
+				int nIdxfield = GetIdxEffectField();
+				SetEnableField(nIdxfield, false);
+			}
 			pPlayer->bJump = false;
 		}
 
@@ -413,6 +428,12 @@ void UpdatePlayer(void)
 			{// 着地モーション
 				SetMotionType(MOTIONTYPE_LANDING, true, 15, (PlayerType)nCntPlayer);
 				pPlayer->bUseLandMotion = true;
+			}
+
+			if (nCntPlayer == PLAYERTYPE_MOUSE)
+			{// 着地時に予想着地点を消す
+				int nIdxfield = GetIdxEffectField();
+				SetEnableField(nIdxfield, false);
 			}
 
 			pPlayer->bJump = false;
@@ -1974,7 +1995,7 @@ void ShotMouse(void)
 				{// Y軸移動は1Fのみ
 					// 投げる手の位置に移動
 					D3DXVec3TransformCoord(&pMouse->pos, &offset, &pPlayer->PartsInfo.aParts[19].mtxWorld);
-					pMouse->move.y = vec.y * 25.0f;
+					pMouse->move.y = vec.y * 55.0f;
 					// 下限
 					if (pMouse->move.y < 5.5f)
 					{
