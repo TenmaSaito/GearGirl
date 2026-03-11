@@ -180,7 +180,7 @@ void UpdateEffect(void)
 
 			if (g_aEffect[nCntEffect].nType == 1)
 			{
-				D3DXVECTOR3 VecParabola = pCamera->posR - pCamera->posV;
+				D3DXVECTOR3 VecParabola = pCamera->posRDest - pCamera->posV;
 
 				D3DXVec3Normalize(&VecParabola, &VecParabola);
 
@@ -213,7 +213,7 @@ void UpdateEffect(void)
 
 			if (g_aEffect[nCntEffect].bGravity == true)
 			{
-				g_aEffect[nCntEffect].move.y += GRAVITY;
+				g_aEffect[nCntEffect].move.y += GRAVITY *1.1f;
 			}
 
 			//弾の位置更新
@@ -479,7 +479,7 @@ void SetParabola(D3DXVECTOR3 pos, D3DXVECTOR3 move, D3DXCOLOR col, float Width, 
 			g_aEffect[nCntEffect].posOri = pos;	// 発射位置を代入
 			g_aEffect[nCntEffect].Width = Width;	// 幅
 			g_aEffect[nCntEffect].Height = Height;	// 高さ
-			g_aEffect[nCntEffect].nLife = 100;		// 寿命の設定
+			g_aEffect[nCntEffect].nLife = 180;		// 寿命の設定
 			g_aEffect[nCntEffect].bUse = true;		// 使用状態に
 			g_aEffect[nCntEffect].bGravity = true;	// 重力をかけるかどうか
 			g_aEffect[nCntEffect].nCounter = 0;
@@ -492,11 +492,7 @@ void SetParabola(D3DXVECTOR3 pos, D3DXVECTOR3 move, D3DXCOLOR col, float Width, 
 				pVtx[nCnt].col = col;
 			}
 
-			D3DXVECTOR3 VecY = pCamera->posR - pCamera->posV;
-
-			D3DXVec3Normalize(&VecY, &VecY);
-
-			g_aEffect[nCntEffect].move.y = VecY.y * 5.0f;
+			g_aEffect[nCntEffect].move.y = move.y * 35.0f;
 
 			if (g_aEffect[nCntEffect].move.y < 5.5f)
 			{

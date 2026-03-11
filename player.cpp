@@ -18,6 +18,7 @@
 #include "input.h"
 #include "item.h"
 #include "mesh.h"
+#include "meshorbit.h"
 #include "mode.h"
 #include "model.h"
 #include "modeldata.h"
@@ -83,6 +84,7 @@ bool g_aMovePlayer[PLAYERTYPE_MAX];	// プレイヤーが動いているか
 int	g_nMotionCounter = 0;			// モーションカウンター
 bool g_bShotMouse = false;			// ネズミを発射するフラグ
 D3DXVECTOR3 g_Effectmove = {};
+IDX_MESHORBIT g_nIdxOrbit = -1;	// メッシュオービットのインデックス
 
 // =================================================
 // 初期化処理
@@ -187,6 +189,9 @@ void InitPlayer(void)
 		g_nNumPlayer = 1;
 	}
 
+	g_nIdxOrbit = SetOrbit(D3DXVECTOR3(1.0f, 0.0f, 0.0f), D3DXVECTOR3(10.0f, 0.0f, 0.0f), &g_aPlayer[PLAYERTYPE_GIRL].mtxWorld, 2);
+	SetEnableOrbit(g_nIdxOrbit, false);
+
 	// デバイスの破棄
 	EndDevice();
 }
@@ -256,6 +261,7 @@ void UpdatePlayer(void)
 				{
 					pPlayer->bDash = pPlayer->bDash ^ true;
 					pPlayer->fMove = PLAYER_MOVE * 1.5f;
+					SetEnableOrbit(g_nIdxOrbit, true);
 				}
 				else if (pPlayer->motionType == MOTIONTYPE_MOVE && nCntPlayer == PLAYERTYPE_GIRL && GetKeyboardTrigger(DIK_LSHIFT) == true)
 				{// キーボードだと左shiftキー
@@ -305,17 +311,17 @@ void UpdatePlayer(void)
 		if (pPlayer->state == PLAYERSTATE_THROWWAITING && nCntPlayer == PLAYERTYPE_GIRL)
 		{
 			// 注視点までのベクトルをだす
-			//D3DXVECTOR3 vec = pCamera->posR - pCamera->posV;
+			D3DXVECTOR3 vec = pCamera->posR - pCamera->posV;
 
-			//// 出したベクトルを正規化
-			//D3DXVec3Normalize(&vec, &vec);
+			// 出したベクトルを正規化
+			D3DXVec3Normalize(&vec, &vec);
 
-			//g_Effectmove.x = vec.x;
-			//g_Effectmove.z = vec.z;
-			//g_Effectmove.y = vec.y;
+			g_Effectmove.x = vec.x;
+			g_Effectmove.z = vec.z;
+			g_Effectmove.y = vec.y;
 
 			// エフェクトの描画
-			//SetParabola(g_aPlayer[PLAYERTYPE_MOUSE].pos, vec, D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f), 2.0f, 2.0f, 1.0f, true);
+			SetParabola(g_aPlayer[PLAYERTYPE_MOUSE].pos, vec, D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f), 2.0f, 2.0f, 1.0f, true);
 		}
 
 		// === 何もしていない場合(何も入力されていない場合) === //
@@ -359,18 +365,9 @@ void UpdatePlayer(void)
 		// 移動量の更新
 		pPlayer->pos += pPlayer->move;
 
-		if (pMouse->pos.y > 110.0 && pMouse->bJump == false)
-		{
-			// 慣性を掛ける
-			pPlayer->move.x += (0.0f - pPlayer->move.x) * (PLAYER_INI * 1.2f);
-			pPlayer->move.z += (0.0f - pPlayer->move.z) * (PLAYER_INI * 1.2f);
-		}
-		else
-		{
-			// 慣性を掛ける
-			pPlayer->move.x += (0.0f - pPlayer->move.x) * (PLAYER_INI * 1.5f);
-			pPlayer->move.z += (0.0f - pPlayer->move.z) * (PLAYER_INI * 1.5f);
-		}
+		// 慣性を掛ける
+		pPlayer->move.x += (0.0f - pPlayer->move.x) * (PLAYER_INI * 1.5f);
+		pPlayer->move.z += (0.0f - pPlayer->move.z) * (PLAYER_INI * 1.5f);
 
 		// 地面に沈んだ時
 		if (pPlayer->pos.y < 100.0f)
@@ -1945,13 +1942,13 @@ void ShotMouse(void)
 		}
 
 		// 注視点までのベクトルをだす
-		D3DXVECTOR3 vec = pCamera->posR - pCamera->posV;
+		D3DXVECTOR3 vec = pCamera->posRDest - pCamera->posV;
 
 		// 出したベクトルを正規化
 		D3DXVec3Normalize(&vec, &vec);
 		PrintDebugProc("vec %~3f", vec.x, vec.y, vec.z);
 
-		SetParabola(pMouse->pos, vec, COL_RED, 2.0f, 2.0f, 3.0f, true);
+		// SetParabola(pMouse->pos, vec, COL_RED, 2.0f, 2.0f, 1.0f, true);
 
 		if (pPlayer->state != PLAYERSTATE_THROWWAITING)
 		{
@@ -2004,7 +2001,7 @@ void ShotMouse(void)
 				}
 			}
 
-			if (g_nMotionCounter < -85)
+			if (g_nMotionCounter < -75)
 			{// 余韻を持たせて初期化
 				g_bShotMouse = false;
 				g_nMotionCounter = 0;
