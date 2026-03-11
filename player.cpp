@@ -84,7 +84,8 @@ bool g_aMovePlayer[PLAYERTYPE_MAX];	// プレイヤーが動いているか
 int	g_nMotionCounter = 0;			// モーションカウンター
 bool g_bShotMouse = false;			// ネズミを発射するフラグ
 D3DXVECTOR3 g_Effectmove = {};
-IDX_MESHORBIT g_nIdxOrbit = -1;	// メッシュオービットのインデックス
+IDX_MESHORBIT g_nIdxOrbit = -1;		// メッシュオービットのインデックス
+IDX_MESHORBIT g_nIdxOrbitSub = -1;	// サブメッシュオービットのインデックス
 
 // =================================================
 // 初期化処理
@@ -189,8 +190,11 @@ void InitPlayer(void)
 		g_nNumPlayer = 1;
 	}
 
-	g_nIdxOrbit = SetOrbit(D3DXVECTOR3(1.0f, 0.0f, 0.0f), D3DXVECTOR3(10.0f, 0.0f, 0.0f), &g_aPlayer[PLAYERTYPE_GIRL].mtxWorld, 2);
+	g_nIdxOrbit = SetOrbit(D3DXVECTOR3(0.0f, -10.0f, 0.0f), D3DXVECTOR3(0.0f, 10.0f, 0.0f), &g_aPlayer[PLAYERTYPE_GIRL].PartsInfo.aParts[0].mtxWorld, 20);
 	SetEnableOrbit(g_nIdxOrbit, false);
+
+	g_nIdxOrbitSub = SetOrbit(D3DXVECTOR3(-10.0f, 0.0f, 0.0f), D3DXVECTOR3(10.0f, 0.0f, 0.0f), &g_aPlayer[PLAYERTYPE_GIRL].PartsInfo.aParts[0].mtxWorld, 20);
+	SetEnableOrbit(g_nIdxOrbitSub, false);
 
 	// デバイスの破棄
 	EndDevice();
@@ -262,16 +266,25 @@ void UpdatePlayer(void)
 					pPlayer->bDash = pPlayer->bDash ^ true;
 					pPlayer->fMove = PLAYER_MOVE * 1.5f;
 					SetEnableOrbit(g_nIdxOrbit, true);
+					SetOffSetOrbit(g_nIdxOrbit, D3DXVECTOR3(0.0f, -10.0f, 0.0f), D3DXVECTOR3(0.0f, 10.0f, 0.0f));
+					SetEnableOrbit(g_nIdxOrbitSub, true);
+					SetOffSetOrbit(g_nIdxOrbitSub, D3DXVECTOR3(-10.0f, 0.0f, 0.0f), D3DXVECTOR3(10.0f, 0.0f, 0.0f));
 				}
 				else if (pPlayer->motionType == MOTIONTYPE_MOVE && nCntPlayer == PLAYERTYPE_GIRL && GetKeyboardTrigger(DIK_LSHIFT) == true)
 				{// キーボードだと左shiftキー
 					pPlayer->bDash = pPlayer->bDash ^ true;
 					pPlayer->fMove = PLAYER_MOVE * 1.5f;
+					SetEnableOrbit(g_nIdxOrbit, true);
+					SetOffSetOrbit(g_nIdxOrbit, D3DXVECTOR3(0.0f, -10.0f, 0.0f), D3DXVECTOR3(0.0f, 10.0f, 0.0f));
+					SetEnableOrbit(g_nIdxOrbitSub, true);
+					SetOffSetOrbit(g_nIdxOrbitSub, D3DXVECTOR3(-10.0f, 0.0f, 0.0f), D3DXVECTOR3(10.0f, 0.0f, 0.0f));
 				}
 
 				if (pPlayer->bDash == false)
 				{// ダッシュ状態じゃなければ普通の速度
 					pPlayer->fMove = PLAYER_MOVE;
+					SetEnableOrbit(g_nIdxOrbit, false);
+					SetEnableOrbit(g_nIdxOrbitSub, false);
 				}
 
 				JumpPlayer((PlayerType)nCntPlayer);	// ジャンプに関する処理

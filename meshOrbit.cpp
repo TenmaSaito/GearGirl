@@ -228,18 +228,21 @@ IDX_MESHORBIT SetOrbit(D3DXVECTOR3 offset0, D3DXVECTOR3 offset1, D3DXMATRIX* pMt
 		pOrbit->aPosOffset[1] = offset1;
 
 		// 位置をオフセットに適用
-		for (int nCntOrbit = 0; nCntOrbit < nNumVertices; nCntOrbit++)
+		for (int nCntVertices = 0; nCntVertices < nNumVertices; nCntVertices++)
 		{
-			pOrbit->aPos[nCntOrbit] = offset0;
+			pOrbit->aPos[nCntVertices] = offset0;
 
-			nCntOrbit++;
+			nCntVertices++;
 
-			pOrbit->aPos[nCntOrbit] = offset1;
+			pOrbit->aPos[nCntVertices] = offset1;
 		}
 
 		// 親マトリックスを保存
 		pOrbit->pMtxParent = pMtx;
 		pOrbit->bUse = true;
+
+		// バッファ生成
+		AddOrbit(pOrbit);
 
 		nError = nCntOrbit;		// 設定に成功したインデックスを保存
 		break;
@@ -308,6 +311,16 @@ void SetOffSetOrbit(IDX_MESHORBIT IdxMeshOrbit, D3DXVECTOR3 offset0, D3DXVECTOR3
 	// オフセットを保存
 	pOrbit->aPosOffset[0] = offset0;
 	pOrbit->aPosOffset[1] = offset1;
+
+	// 位置をオフセットに適用
+	for (int nCntVertices = 0; nCntVertices < pOrbit->nNumVertices; nCntVertices++)
+	{
+		pOrbit->aPos[nCntVertices] = offset0;
+
+		nCntVertices++;
+
+		pOrbit->aPos[nCntVertices] = offset1;
+	}
 }
 
 //==================================================================================

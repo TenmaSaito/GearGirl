@@ -170,6 +170,10 @@ namespace MyInl
 		function(args...);
 	}
 
+
+	template<typename Return, typename Func, typename... Args>
+	Return (*FunctionPointer[50])(Args...);
+
 	template<typename Return, typename Func, typename... Args>
 	Return SetFunction_(Func function, Args... args)
 	{
