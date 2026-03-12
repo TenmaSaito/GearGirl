@@ -358,18 +358,18 @@ void CaseMulti(LPGIMMICK pGimmick)
 	Player* pPlayer = GetPlayer();
 	bool bDetection = false;
 
-	if (IsDetection(pGimmick->pos, pGimmick[PLAYERTYPE_GIRL].pos, pGimmick->fRadius)
+	if (IsDetection(pGimmick->pos, pPlayer[PLAYERTYPE_GIRL].pos, pGimmick->fRadius)
 		&& (pGimmick->could == COULD_PLAYER_GIRL || pGimmick->could == COULD_PLAYER_ALL))
 	{ // 少女の判定
-		if (pGimmick->myType == GIMMICKTYPE_FALLENTREE && pPlayer->motionType == MOTIONTYPE_CUTTING)
+		if (pGimmick->myType == GIMMICKTYPE_FALLENTREE && pPlayer->motionType == MOTIONTYPE_CUTTING && pPlayer->nKey == 3)
 		{
 			pGimmick->bClear = true;
 		}
-		else if (pGimmick->myType == GIMMICKTYPE_FALLENTREE2 && pPlayer->motionType == MOTIONTYPE_CUTTING)
+		else if (pGimmick->myType == GIMMICKTYPE_FALLENTREE2 && pPlayer->motionType == MOTIONTYPE_CUTTING && pPlayer->nKey == 3)
 		{
 			pGimmick->bClear = true;
 		}
-		else if (pGimmick->myType == GIMMICKTYPE_FALLENTREE3 && pPlayer->motionType == MOTIONTYPE_CUTTING)
+		else if (pGimmick->myType == GIMMICKTYPE_FALLENTREE3 && pPlayer->motionType == MOTIONTYPE_CUTTING && pPlayer->nKey == 3)
 		{
 			pGimmick->bClear = true;
 		}
@@ -377,13 +377,13 @@ void CaseMulti(LPGIMMICK pGimmick)
 		bDetection = true;
 	}
 
-	if (IsDetection(pGimmick->pos, pGimmick[PLAYERTYPE_MOUSE].pos, pGimmick->fRadius)
+	if (IsDetection(pGimmick->pos, pPlayer[PLAYERTYPE_MOUSE].pos, pGimmick->fRadius)
 		&& (pGimmick->could == COULD_PLAYER_MOUSE || pGimmick->could == COULD_PLAYER_ALL))
 	{ // ネズミの判定
-		bDetection = true;
+		//bDetection = true;
 	}
 
-	if (bDetection == true)
+	if (bDetection == true && pGimmick->bClear == false)
 	{ // どちらかが半径に入った場合
 		SetEnablePrompt(true, pGimmick->nIdxPrompt);
 	}
@@ -409,15 +409,15 @@ void CaseSolo(LPGIMMICK pGimmick)
 	{ // 操作中プレイヤーの判定
 		if (pGimmick->motionType == MOTIONTYPE_ACTION) return;
 
-		if (pGimmick->myType == GIMMICKTYPE_FALLENTREE && pPlayer->motionType == MOTIONTYPE_CUTTING)
+		if (pGimmick->myType == GIMMICKTYPE_FALLENTREE && pPlayer->motionType == MOTIONTYPE_CUTTING && pPlayer->nKey == 3)
 		{
 			pGimmick->bClear = true;
 		}
-		else if (pGimmick->myType == GIMMICKTYPE_FALLENTREE2 && pPlayer->motionType == MOTIONTYPE_CUTTING)
+		else if (pGimmick->myType == GIMMICKTYPE_FALLENTREE2 && pPlayer->motionType == MOTIONTYPE_CUTTING && pPlayer->nKey == 3)
 		{
 			pGimmick->bClear = true;
 		}
-		else if (pGimmick->myType == GIMMICKTYPE_FALLENTREE3 && pPlayer->motionType == MOTIONTYPE_CUTTING)
+		else if (pGimmick->myType == GIMMICKTYPE_FALLENTREE3 && pPlayer->motionType == MOTIONTYPE_CUTTING && pPlayer->nKey == 3)
 		{
 			pGimmick->bClear = true;
 		}
@@ -425,7 +425,7 @@ void CaseSolo(LPGIMMICK pGimmick)
 		bDetection = true;
 	}
 
-	if (bDetection == true)
+	if (bDetection == true && pGimmick->bClear == false)
 	{ // 半径に入った場合
 		SetEnablePrompt(true, pGimmick->nIdxPrompt);
 	}
