@@ -480,7 +480,7 @@ void UpdatePlayer(void)
 					// 駅の範囲内なら切り替えを行わないようにする
 					if (g_aPlayer[PLAYERTYPE_MOUSE].pos.z <= -774.0f && g_aPlayer[PLAYERTYPE_MOUSE].pos.x <= 700.0f)
 					{
-						// ここなら切り替え可能
+						// 駅のガラス張りのところでは切り替え不可
 					}
 					else
 					{
@@ -511,31 +511,32 @@ void UpdatePlayer(void)
 				{// 取得されていないアイテムの場合	
 
 					// 距離の計算
-					float fDistX = SQUARE(pItem->pos.x - pMouse->pos.x);
-					float fDistY = SQUARE(pItem->pos.y - pMouse->pos.y);
-					float fDistZ = SQUARE(pItem->pos.z - pMouse->pos.z);
+					pItem->Dist.x = SQUARE(pItem->pos.x - pMouse->pos.x);
+					pItem->Dist.y = SQUARE(pItem->pos.y - pMouse->pos.y);
+					pItem->Dist.z = SQUARE(pItem->pos.z - pMouse->pos.z);
 
-					float fDist = sqrtf(__ABSOLUTE(SQUARE(pItem->pos.x - pMouse->pos.x) + SQUARE(pItem->pos.y - pMouse->pos.y) + SQUARE(pItem->pos.z - pMouse->pos.z)));
+					pItem->fDistance = sqrtf(__ABSOLUTE(pItem->Dist.x + pItem->Dist.z));
 
-					if (fDist > 200.0f)
+					if (pItem->fDistance > 200.0f)
 					{
-						fDist = 200.0f;
+						pItem->fDistance = 200.0f;
 					}
 
 					// 値を0~1にスケール(正規)化
-					float fCol = (fDist - 0.0f) / 200.0f;
+					pItem->fCol = pItem->fDistance / 200.0f;
 
 					// === 正解パーツ用パーティクル === //
 					if (pItem->type >= 0 && pItem->type <= 4)
 					{
 						//SetParticle(pItem->pos, MyMathUtil::GetColLerp(D3DXCOLOR(COL_BLUE), D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f), fCol), D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 1, 3, true, true);
-						SetEffect(pItem->pos, MyMathUtil::GetColLerp(D3DXCOLOR(COL_BLUE), D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f), fCol), D3DXVECTOR3(50.0f, 50.0f, 50.0f), 50.0f, 50.0f, 10.0f, 3, true, true);
+						SetEffect(pItem->pos, MyMathUtil::GetColLerp(D3DXCOLOR(COL_BLUE), D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f), pItem->fCol), D3DXVECTOR3(5.0f, 5.0f, 5.0f), 20.0f, 20.0f, 10.0f, 3, true, true);
 					}
 					// === 外れパーツ用パーティクル === //
 					if (pItem->type >= 5 && pItem->type <= 9)
 					{
 						SetParticle(pItem->pos, COL_RED, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true, true);
 					}
+
 				}
 			}
 		}
@@ -2023,10 +2024,15 @@ void ShotMouse(void)
 					{
 						pMouse->move.y = 5.5f;
 					}
+					// 上限
+					else if (pMouse->move.y > 7.5f)
+					{
+						pMouse->move.y = 7.5f;
+					}
 				}
 			}
 
-			if (g_nMotionCounter < -75)
+			if (pMouse->pos.y < 110.0f && g_nMotionCounter < -10)
 			{// 余韻を持たせて初期化
 				g_bShotMouse = false;
 				g_nMotionCounter = 0;

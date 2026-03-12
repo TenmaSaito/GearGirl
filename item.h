@@ -79,6 +79,9 @@ typedef struct Item
 	int				nIdxModel;			// モデルデータのインデックス
 	D3DXMATRIX		mtxWorld;			// ワールドマトリックス
 	int				nIdxQuota;			// 表示用の枠のインデックス
+	D3DXVECTOR3		Dist;				// プレイヤーとアイテムの距離計算用
+	float			fDistance;			// 計算結果
+	float			fCol;				// 距離による色の変化用
 }Item;
 POINTER(Item, P_ITEM);
 

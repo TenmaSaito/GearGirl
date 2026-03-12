@@ -496,9 +496,15 @@ void SetParabola(D3DXVECTOR3 pos, D3DXVECTOR3 move, D3DXCOLOR col, float Width, 
 
 			g_aEffect[nCntEffect].move.y = g_ParabolaVec.y * 35.0f;
 
+			// ‰ºŒÀ
 			if (g_aEffect[nCntEffect].move.y < 5.5f)
 			{
 				g_aEffect[nCntEffect].move.y = 5.5f;
+			}
+			// ãŒÀ
+			else if(g_aEffect[nCntEffect].move.y > 7.5f)
+			{
+				g_aEffect[nCntEffect].move.y = 7.5f;
 			}
 
 			break;
