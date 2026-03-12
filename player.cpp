@@ -265,19 +265,33 @@ void UpdatePlayer(void)
 				{
 					pPlayer->bDash = pPlayer->bDash ^ true;
 					pPlayer->fMove = PLAYER_MOVE * 1.5f;
+
+					// ダッシュ時に軌跡を出す
 					SetEnableOrbit(g_nIdxOrbit, true);
 					SetOffSetOrbit(g_nIdxOrbit, D3DXVECTOR3(0.0f, -10.0f, 0.0f), D3DXVECTOR3(0.0f, 10.0f, 0.0f));
 					SetEnableOrbit(g_nIdxOrbitSub, true);
 					SetOffSetOrbit(g_nIdxOrbitSub, D3DXVECTOR3(-10.0f, 0.0f, 0.0f), D3DXVECTOR3(10.0f, 0.0f, 0.0f));
+
+					if (pPlayer->bDash == true)
+					{
+						PlaySound(SOUND_LABEL_SE_G_DASH);
+					}
 				}
 				else if (pPlayer->motionType == MOTIONTYPE_MOVE && nCntPlayer == PLAYERTYPE_GIRL && GetKeyboardTrigger(DIK_LSHIFT) == true)
 				{// キーボードだと左shiftキー
 					pPlayer->bDash = pPlayer->bDash ^ true;
 					pPlayer->fMove = PLAYER_MOVE * 1.5f;
+
+					// ダッシュ時に軌跡を出す
 					SetEnableOrbit(g_nIdxOrbit, true);
 					SetOffSetOrbit(g_nIdxOrbit, D3DXVECTOR3(0.0f, -10.0f, 0.0f), D3DXVECTOR3(0.0f, 10.0f, 0.0f));
 					SetEnableOrbit(g_nIdxOrbitSub, true);
 					SetOffSetOrbit(g_nIdxOrbitSub, D3DXVECTOR3(-10.0f, 0.0f, 0.0f), D3DXVECTOR3(10.0f, 0.0f, 0.0f));
+
+					if (pPlayer->bDash == true)
+					{
+						PlaySound(SOUND_LABEL_SE_G_DASH);
+					}
 				}
 
 				if (pPlayer->bDash == false)
@@ -938,14 +952,24 @@ void MovePlayer(PlayerType nPlayer)
 		// 歩行音再生
 		if (nPlayer == PLAYERTYPE_GIRL)
 		{ // 主人公
-			if (!IsPlayingSound(SOUND_LABEL_SE_G_MOVE)
+			if (!IsPlayingSound(SOUND_LABEL_SE_G_MOVE) && !IsPlayingSound(SOUND_LABEL_SE_G_MOVEDASH)
 				&& pPlayer->motionType == MOTIONTYPE_MOVE)
 			{
-				PlaySound(SOUND_LABEL_SE_G_MOVE);
+				if (pPlayer->bDash == false)
+				{// 非ダッシュ時、ダッシュ音を止めて歩き効果音
+					StopSound(SOUND_LABEL_SE_G_MOVEDASH);
+					PlaySound(SOUND_LABEL_SE_G_MOVE);
+				}
+				else
+				{// ダッシュ時、歩き効果音を止めてダッシュ音
+					StopSound(SOUND_LABEL_SE_G_MOVE);
+					PlaySound(SOUND_LABEL_SE_G_MOVEDASH);
+				}
 			}
 			else if (pPlayer->motionType != MOTIONTYPE_MOVE)
-			{
+			{// 移動しなくなったら、どちらも停止
 				StopSound(SOUND_LABEL_SE_G_MOVE);
+				StopSound(SOUND_LABEL_SE_G_MOVEDASH);
 			}
 		}
 		else

@@ -37,12 +37,18 @@ typedef enum
 	SOUND_LABEL_SE_T_ENTER,			// タイトル画面での決定音
 	SOUND_LABEL_SE_T_CANCEL,		// タイトル画面での取消音
 	SOUND_LABEL_SE_G_MOVE,			// 移動音
+	SOUND_LABEL_SE_G_MOVEDASH,		// 移動音(ダッシュ時)
 	SOUND_LABEL_SE_G_MOUSEMOVE,		// マウスの移動音
 	SOUND_LABEL_SE_G_JUMP,			// 跳躍音
 	SOUND_LABEL_SE_G_MOUSEJUMP,		// マウスの跳躍音
 	SOUND_LABEL_SE_G_LANDING,		// 着地音
 	SOUND_LABEL_SE_G_MOUSELANDING,	// マウスの着地音
 	SOUND_LABEL_SE_G_THROW,			// 投擲音
+	SOUND_LABEL_SE_G_THROWPOINT,	// 射出方向切り替え音
+	SOUND_LABEL_SE_G_ARMSWITCH,		// アーム切り替え音
+	SOUND_LABEL_SE_G_DASH,			// ダッシュ時の風の音
+	SOUND_LABEL_SE_G_FALLENTREE,	// 木を切った後の消滅音
+	SOUND_LABEL_SE_G_DIAROG,		// ダイアログ表示の音
 	SOUND_LABEL_MAX,
 } SOUND_LABEL;
 
