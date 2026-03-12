@@ -272,7 +272,8 @@ void UpdateGame(void)
 	if ((GetKeyboardTrigger(DIK_P) == true
 		|| GetDualInput(JOYKEY_START, DUAL_JOYPAD | DUAL_OR | DUAL_TRIGGER,
 			JOYKEY_START, DUAL_JOYPAD | DUAL_DUAL | DUAL_TRIGGER))
-		&& g_obEnding.bAlreadyEnd == false)
+		&& g_obEnding.bAlreadyEnd == false
+		&& IsEnableItemPut() == false)
 	{
 		g_bPause = g_bPause ? false : true;
 	}
