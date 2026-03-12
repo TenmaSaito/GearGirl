@@ -457,12 +457,6 @@ void DrawGame(void)
 	// VERTEX_2D ============================================
 	/*** Aの描画 ***/
 
-	/*** タイマーの描画 ***/
-	if (IsEndDialog() == true && GetCommonFade() == FADE_NONE)
-	{
-		DrawTimer();
-	}
-
 	/*** UIアームの描画 ***/
 	if (IsEndDialog() == true && GetCommonFade() == FADE_NONE)
 	{
@@ -500,6 +494,12 @@ void DrawGame(void)
 	if (g_bPause == false)
 	{
 		DrawUIItem();
+	}
+
+	/*** タイマーの描画 ***/
+	if (IsEndDialog() == true && GetCommonFade() == FADE_NONE)
+	{
+		DrawTimer();
 	}
 
 	//ポーズ状態がONの時

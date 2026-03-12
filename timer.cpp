@@ -16,7 +16,7 @@
 //*************************************************************************************************
 //*** マクロ定義 ***
 //*************************************************************************************************
-#define NUM_PLACE   (5)          // 5枚
+#define NUM_PLACE   (6)          // 5枚
 #define Timer_POSX  (540.0f)
 #define Timer_POSY  (25.0f)
 #define Timer_SIZEX (50.0f)
@@ -27,6 +27,11 @@
 #define COLON_SIZEY (60.0f)
 #define COLON_SHIFT (-20.0f)
 
+// フレームのサイズ
+#define FRAME_SIZEX (50.0f)
+#define FRAME_SIZEY (70.0f)
+#define FRAME_SHIFT (-20.0f)
+
 #define TIMER_LIMIT_MIN   (4)   // 4分(仮)
 #define FPS               (60)
 #define TIMER_LIMIT_FRAME (TIMER_LIMIT_MIN * 60 * FPS)
@@ -35,6 +40,7 @@
 //*** グローバル変数 ***
 //**********************************************************************************
 LPDIRECT3DTEXTURE9 g_pTextureTimer = NULL;        // 数字テクスチャ
+LPDIRECT3DTEXTURE9 g_pTextureFrame = NULL;        // フレームテクスチャ
 LPDIRECT3DTEXTURE9 g_pTextureColon = NULL;        // コロンテクスチャ
 LPDIRECT3DVERTEXBUFFER9 g_pVtxBuffTimer = NULL;
 
@@ -55,10 +61,13 @@ void InitTimer(bool bRanking)
     LPDIRECT3DDEVICE9 pDevice = Auto.pDevice;	// 自動解放システムを介してデバイスを取得
 
     // 数字テクスチャ
-    D3DXCreateTextureFromFile(pDevice, "DATA\\TEXTURE\\number003.png", &g_pTextureTimer);
+    D3DXCreateTextureFromFile(pDevice, "DATA\\TEXTURE\\number000.png", &g_pTextureTimer);
 
     // コロンテクスチャ
     D3DXCreateTextureFromFile(pDevice, "DATA\\TEXTURE\\colon.png", &g_pTextureColon);
+
+    // フレームテクスチャ
+    D3DXCreateTextureFromFile(pDevice, "DATA\\TEXTURE\\timerframe.png", &g_pTextureFrame);
 
     pDevice->CreateVertexBuffer(sizeof(VERTEX_2D) * 4 * NUM_PLACE,
         D3DUSAGE_WRITEONLY,
@@ -78,7 +87,7 @@ void InitTimer(bool bRanking)
         if (bRanking == false)
         {
             float x = Timer_POSX + (nCntNumber * Timer_SIZEX);
-            if (nCntNumber >= 3) x += COLON_SHIFT;
+            if (nCntNumber >= 3 && nCntNumber != 5) x += COLON_SHIFT;
 
             if (nCntNumber == 2)
             {
@@ -89,6 +98,13 @@ void InitTimer(bool bRanking)
                 pVtx[1].pos = D3DXVECTOR3(cx + COLON_SIZEX, Timer_POSY, 0.0f);
                 pVtx[2].pos = D3DXVECTOR3(cx, Timer_POSY + COLON_SIZEY, 0.0f);
                 pVtx[3].pos = D3DXVECTOR3(cx + COLON_SIZEX, Timer_POSY + COLON_SIZEY, 0.0f);
+            }
+            else if (nCntNumber == 5)
+            {// フレームの位置
+                pVtx[0].pos = D3DXVECTOR3(Timer_POSX - 40.0f, Timer_POSY - 10.0f, 0.0f);
+                pVtx[1].pos = D3DXVECTOR3(820, Timer_POSY - 10.0f, 0.1f);
+                pVtx[2].pos = D3DXVECTOR3(Timer_POSX - 40.0f, Timer_POSY + FRAME_SIZEY, 0.0f);
+                pVtx[3].pos = D3DXVECTOR3(820, Timer_POSY + FRAME_SIZEY, 0.0f);
             }
             else
             {
@@ -143,8 +159,8 @@ void InitTimer(bool bRanking)
             pVtx[3].col = D3DCOLOR_RGBA(255, 255, 255, 255);
         }
 
-        if (nCntNumber == 2)
-        {
+        if (nCntNumber == 2 || nCntNumber == 5)
+        {// コロンとフレームは別処理
             pVtx[0].tex = D3DXVECTOR2(0.0f, 0.0f);
             pVtx[1].tex = D3DXVECTOR2(1.0f, 0.0f);
             pVtx[2].tex = D3DXVECTOR2(0.0f, 1.0f);
@@ -187,6 +203,13 @@ void UninitTimer(void)
         g_pTextureColon = NULL;
     }
 
+    // フレームテクスチャ破棄
+    if (g_pTextureFrame != NULL)
+    {
+        g_pTextureFrame->Release();
+        g_pTextureFrame = NULL;
+    }
+
     if (g_pVtxBuffTimer != NULL)
     {
         g_pVtxBuffTimer->Release();
@@ -227,6 +250,7 @@ void UpdateTimer(void)
         aTexU[2] = 0; // コロン
         aTexU[3] = (sec / 10) % 10;
         aTexU[4] = (sec % 10);
+        aTexU[5] = 0; // フレーム
 
         //===========================
         // 頂点更新
@@ -237,7 +261,7 @@ void UpdateTimer(void)
         for (int nCntNumber = 0; nCntNumber < NUM_PLACE; nCntNumber++)
         {
             // ---------- 数字更新 ----------
-            if (nCntNumber != 2)
+            if (nCntNumber != 2 && nCntNumber != 5)
             {
                 pVtx[0].tex = D3DXVECTOR2(aTexU[nCntNumber] * 0.1f, 0.0f);
                 pVtx[1].tex = D3DXVECTOR2((aTexU[nCntNumber] + 1) * 0.1f, 0.0f);
@@ -248,15 +272,15 @@ void UpdateTimer(void)
             // ---------- 色制御 ----------
             D3DCOLOR col;
 
-            // ===== コロンは常に固定色 =====
-            if (nCntNumber == 2)
+            // ===== コロン・フレームは常に固定色 =====
+            if (nCntNumber == 2 || nCntNumber == 5)
             {
                 col = D3DCOLOR_RGBA(255, 255, 255, 255);   // 常に白
             }
             else
             {
                 // ===== 数字だけ時間で変化 =====
-                col = D3DCOLOR_RGBA(255, 255, 255, 255);
+                col = D3DCOLOR_RGBA(0, 0, 0, 255);
 
                 if (totalSec < 60)
                     col = D3DCOLOR_RGBA(255, 255, 0, 255);
@@ -281,7 +305,7 @@ void UpdateTimer(void)
             // ---------- コロン点滅 ----------
             if (nCntNumber == 2 && g_bColonVisible == false)
             {
-                col = D3DCOLOR_RGBA(0, 0, 0, 0);           // 非表示
+                //col = D3DCOLOR_RGBA(0, 0, 0, 0);           // 非表示
             }
 
             pVtx[0].col = col;
@@ -317,12 +341,21 @@ void DrawTimer(void)
     pDevice->SetStreamSource(0, g_pVtxBuffTimer, 0, sizeof(VERTEX_2D));
     pDevice->SetFVF(FVF_VERTEX_2D);
 
+    /*** アルファテストを有効にする ***/
+    pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);		// アルファテストを有効
+    pDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);	// 基準値よりも大きい場合にZバッファに書き込み
+    pDevice->SetRenderState(D3DRS_ALPHAREF, 60);				// 基準値
+
     for (int nCntNumber = 0; nCntNumber < NUM_PLACE; nCntNumber++)
     {
         // コロンだけテクスチャを差し替える
         if (nCntNumber == 2)
         {
             pDevice->SetTexture(0, g_pTextureColon);
+        }
+        else if (nCntNumber == 5)
+        {// フレーム用のテクスチャに
+            pDevice->SetTexture(0, g_pTextureFrame);
         }
         else
         {
@@ -331,6 +364,12 @@ void DrawTimer(void)
 
         pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, nCntNumber * 4, 2);
     }
+
+    /*** アルファテストを無効にする ***/
+    pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);		// アルファテストを無効化
+    pDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);	// 無条件にZバッファに書き込み
+    pDevice->SetRenderState(D3DRS_ALPHAREF, 0);					// 基準値
+
 }
 
 //===========================================================
@@ -352,13 +391,14 @@ void SetTimer(int nElapsedFrame)
     aTexU[2] = 0; // コロン
     aTexU[3] = (sec / 10) % 10;
     aTexU[4] = (sec % 10);
+    aTexU[5] = 0; // フレーム
 
     VERTEX_2D* pVtx;
     g_pVtxBuffTimer->Lock(0, 0, (void**)&pVtx, 0);
 
     for (int nCntNumber = 0; nCntNumber < NUM_PLACE; nCntNumber++)
     {
-        if (nCntNumber != 2)
+        if (nCntNumber != 2 && nCntNumber != 5)
         {
             pVtx[0].tex = D3DXVECTOR2(aTexU[nCntNumber] * 0.1f, 0.0f);
             pVtx[1].tex = D3DXVECTOR2((aTexU[nCntNumber] + 1) * 0.1f, 0.0f);
@@ -391,13 +431,14 @@ void AddTimer(int nValue)
     aTexU[2] = 0; // コロン
     aTexU[3] = (sec / 10) % 10;
     aTexU[4] = (sec % 10);
+    aTexU[5] = 0; // フレーム
 
     VERTEX_2D* pVtx;
     g_pVtxBuffTimer->Lock(0, 0, (void**)&pVtx, 0);
 
     for (int nCntNumber = 0; nCntNumber < NUM_PLACE; nCntNumber++)
     {
-        if (nCntNumber != 2)
+        if (nCntNumber != 2 && nCntNumber != 5)
         {
             pVtx[0].tex = D3DXVECTOR2(aTexU[nCntNumber] * 0.1f, 0.0f);
             pVtx[1].tex = D3DXVECTOR2((aTexU[nCntNumber] + 1) * 0.1f, 0.0f);
