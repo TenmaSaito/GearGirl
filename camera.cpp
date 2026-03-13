@@ -522,15 +522,18 @@ void SetCamera(void)
 		{// 設置するカメラが一つなら
 			if (GetNumPlayer() == 1)
 			{// プレイヤー数が1人なら
-				if (g_nActivePlayer == PLAYERTYPE_MOUSE && nCntCamera != PLAYERTYPE_MOUSE)
-				{// アクティブプレイヤーがネズミなら
-					continue;
+				if (pCam->bFocusMode == false)
+				{
+					if (g_nActivePlayer == PLAYERTYPE_MOUSE && nCntCamera != PLAYERTYPE_MOUSE)
+					{// アクティブプレイヤーがネズミならセットしない
+						continue;
+					}
 				}
 			}
 		}
 		// 二つ設置する場合
 		else if (bCameraSwitch == true && nCntCamera != PLAYERTYPE_MOUSE)
-		{// 2P用カメラ設置
+		{// 2P用カメラ設置しない
 			bCameraSwitch = false;
 			continue;
 		}
