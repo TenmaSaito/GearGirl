@@ -87,6 +87,7 @@ bool g_bShotMouse = false;			// ネズミを発射するフラグ
 D3DXVECTOR3 g_Effectmove = {};
 IDX_MESHORBIT g_nIdxOrbit = -1;		// メッシュオービットのインデックス
 IDX_MESHORBIT g_nIdxOrbitSub = -1;	// サブメッシュオービットのインデックス
+int g_nKeepUpCounter = 0;			// 一定時間指定の距離に戻れない時に回すカウンター
 
 // =================================================
 // 初期化処理
@@ -493,7 +494,7 @@ void UpdatePlayer(void)
 				if (GetJoypadTrigger(0, JOYKEY_LB) == true || GetKeyboardTrigger(DIK_Q) == true)
 				{
 					// 駅の範囲内なら切り替えを行わないようにする
-					if (g_aPlayer[PLAYERTYPE_MOUSE].pos.z <= -774.0f && g_aPlayer[PLAYERTYPE_MOUSE].pos.x <= 700.0f && pGimmick->bClear == false)
+					if (g_aPlayer[PLAYERTYPE_MOUSE].pos.z <= -774.0f && g_aPlayer[PLAYERTYPE_MOUSE].pos.x <= 700.0f)
 					{
 						// 駅のガラス張りのところでは切り替え不可
 					}
@@ -1925,6 +1926,8 @@ void MouseKeepUp(void)
 
 		if (5 < fPlayerDist)
 		{
+			g_nKeepUpCounter++;
+
 			// ネズミがいてほしい座標
 			D3DXVECTOR3 mousePosDest = D3DXVECTOR3(pGirl->pos.x + (sinf(pGirl->rot.y) * 5), pGirl->pos.y, pGirl->pos.z + (cosf(pGirl->rot.y) * 5));
 
@@ -1935,6 +1938,16 @@ void MouseKeepUp(void)
 			pMouse->rot.y = atan2f(pMouse->posOld.x - pMouse->pos.x, pMouse->posOld.z - pMouse->pos.z);
 
 			CheckMotionMove(PLAYERTYPE_MOUSE, &g_aPlayer[PLAYERTYPE_MOUSE]);
+
+			if (g_nKeepUpCounter >= 300)
+			{// 5秒間で追いつけなかった場合、強制移動
+				//pMouse->pos = pGirl->pos;
+				g_nKeepUpCounter = 0;	// リセット
+			}
+		}
+		else
+		{
+			g_nKeepUpCounter = 0;	// リセット
 		}
 	}
 }
