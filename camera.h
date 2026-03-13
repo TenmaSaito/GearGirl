@@ -125,7 +125,7 @@ void CameraReset(void);													// カメラリセット
 void FogEnable(CameraType type, bool bEnable = true, D3DXCOLOR col = colX_ZERO, float fStart = 0.0f, float fEnd = 0.0f);
 																		// 霧を有効化
 void CleanFog(void);													// 霧を削除
-void Focus(CameraType type, bool bEnable = false);						// フォーカスモードのオンオフ
-void Focus(CameraType type, vec3 pos);									// フォーカス位置設定
+void Focus(bool bEnable = false);						// フォーカスモードのオンオフ
+void Focus(vec3 pos);									// フォーカス位置設定
 
 #endif// !_CAMERA_H_
