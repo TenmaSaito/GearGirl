@@ -50,11 +50,14 @@ namespace MyInl
 		return x * x;
 	}
 
+#pragma warning(push)
+#pragma warning(disable : 4244)
 	// üŒ`•âŠÔ
 	__forceinline int Lerp(int start, int end, float s)
 	{
 		return start + ((end - start) * s);
 	}
+#pragma warning(pop)
 
 	// ã‰º”»’è
 	__forceinline int Step(int y, int x)

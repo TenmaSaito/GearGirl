@@ -250,7 +250,13 @@ void UpdateMap(void)
 	// マップカメラの取得
 	LPMAPCAMERA pMCam = GetMapCamera();
 
-	if (g_map.bEnable == true && IsEndDialog())
+	if (GetActivePlayer() == PLAYERTYPE_MOUSE)
+	{
+		SetEnable2DPolygon(g_IdxUIMap, false);
+		return;
+	}
+
+	if (g_map.bEnable == true && IsEndDialog() && UIMENU_OFF)
 	{
 		SetEnable2DPolygon(g_IdxUIMap, true);
 	}

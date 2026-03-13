@@ -270,6 +270,9 @@
     <ClCompile Include="UIplayer.cpp">
       <Filter>ソース ファイル\Mode\Game</Filter>
     </ClCompile>
+    <ClCompile Include="UIcollect.cpp">
+      <Filter>ソース ファイル\Mode\Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h">
@@ -447,6 +450,9 @@
       <Filter>ヘッダー ファイル\Object</Filter>
     </ClInclude>
     <ClInclude Include="UIplayer.h">
+      <Filter>ヘッダー ファイル\Mode\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="UIcollect.h">
       <Filter>ヘッダー ファイル\Mode\Game</Filter>
     </ClInclude>
   </ItemGroup>

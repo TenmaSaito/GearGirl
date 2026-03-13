@@ -41,6 +41,7 @@
 #include "UIarm.h"
 #include "UImenu.h"
 #include "UIplayer.h"
+#include "UIcollect.h"
 #include "2Dpolygon.h"
 #include "3Dmodel.h"
 
@@ -141,6 +142,9 @@ void InitGame(void)
 	/*** UIプレイヤー初期化 ***/
 	InitUIplayer();
 
+	/*** UIコレクト初期化 ***/
+	InitUIcollect();
+
 	/*** ギミックの初期化 ***/
 	InitGimmick();
 
@@ -154,7 +158,7 @@ void InitGame(void)
 	InitParticle();
 
 	/*** マップの初期化 ***/
-	InitMap(D3DXVECTOR3(150.0f, 170.0f, 0.0f), D3DXVECTOR2(256, 256), 1045.0f);
+	InitMap(D3DXVECTOR3(150, 150, 0.0f), D3DXVECTOR2(180, 180), 1045.0f);
 
 	/*** ダイアログの初期化 ***/
 	InitDialog();
@@ -243,6 +247,9 @@ void UninitGame(void)
 
 	/*** UIプレイヤー終了 ***/
 	UninitUIplayer();
+
+	/*** UIコレクト終了 ***/
+	UninitUIcollect();
 
 	/*** ギミックの終了 ***/
 	UninitGimmick();
@@ -340,6 +347,9 @@ void UpdateGame(void)
 
 		/*** UIプレイヤーの更新 ***/
 		UpdateUIplayer();
+
+		/*** UIコレクトの更新 ***/
+		UpdateUIcollect();
 
 		/*** ギミックの更新 ***/
 		UpdateGimmick();
@@ -459,7 +469,9 @@ void DrawGame(void)
 	/*** Aの描画 ***/
 
 	/*** UIアームの描画 ***/
-	if (IsEndDialog() == true && GetCommonFade() == FADE_NONE)
+	if (IsEndDialog() == true 
+		&& GetCommonFade() == FADE_NONE
+		&& g_bPause == false)
 	{
 		DrawUIarm();
 	}
@@ -470,20 +482,28 @@ void DrawGame(void)
 		DrawUIplayer();
 	}
 
-	if (g_bPause == false)
+	if (g_bPause == false
+		&& IsEnableItemPut() == false)
 	{
 		/*** UIメニュー描画 ***/
 		DrawUImenu();
 	}
 
 	/*** マップの描画 ***/
-	if (IsEndDialog() == true && GetCommonFade() == FADE_NONE && GetActivePlayer() == PLAYERTYPE_GIRL)
+	if (IsEndDialog() == true
+		&& GetCommonFade() == FADE_NONE 
+		&& GetActivePlayer() == PLAYERTYPE_GIRL
+		&& g_bPause == false
+		&& IsEnableItemPut() == false)
 	{
 		DrawMap();
 	}
 
-	/*** 2Dポリゴンの描画 ***/
-	Draw2DPolygon();
+	if (g_bPause == false)
+	{
+		/*** 2Dポリゴンの描画 ***/
+		Draw2DPolygon();
+	}
 
 	if (IsEndDialog() == false)
 	{
@@ -497,8 +517,18 @@ void DrawGame(void)
 		DrawUIItem();
 	}
 
+	/*** UIアイテム描画 ***/
+	if (IsEndDialog() == true 
+		&& g_bPause == false
+		&& IsEnableItemPut() == false)
+	{
+		/*** UIコレクトの更新 ***/
+		DrawUIcollect();
+	}
+
 	/*** タイマーの描画 ***/
-	if (IsEndDialog() == true && GetCommonFade() == FADE_NONE)
+	if (IsEndDialog() == true
+		&& GetCommonFade() == FADE_NONE)
 	{
 		DrawTimer();
 	}

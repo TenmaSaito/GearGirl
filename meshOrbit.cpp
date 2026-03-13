@@ -91,6 +91,8 @@ void DrawMeshOrbit(void)
 	LPDIRECT3DDEVICE9 pDevice = AD9.pDevice;
 	LPMESHORBIT pOrbit = GetOrbit();
 
+	SetEnableZFunction(pDevice, false);
+
 	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 	pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 
@@ -143,6 +145,8 @@ void DrawMeshOrbit(void)
 
 	pDevice->SetRenderState(D3DRS_LIGHTING, true);
 	pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
+
+	SetEnableZFunction(pDevice, true);
 }
 
 //==================================================================================

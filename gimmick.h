@@ -27,7 +27,7 @@ USE_PARAM;
 //**********************************************************************************
 //*** ギミックタイプ ***
 //**********************************************************************************
-ENUM()
+typedef enum
 {
 	GIMMICKTYPE_BIGBUTTON = 0,	// でかボタン
 	GIMMICKTYPE_SMALLBUTTON,	// ちびボタン
@@ -36,6 +36,7 @@ ENUM()
 	GIMMICKTYPE_FALLENTREE3,	// 倒木
 	GIMMICKTYPE_CLOSEDDOOR,		// 閉まっている扉
 	GIMMICKTYPE_TUNNEL,			// トンネル
+	GIMMICKTYPE_STATUE,			// 噴水前の銅像
 	GIMMICKTYPE_MAX
 }GIMMICKTYPE;
 

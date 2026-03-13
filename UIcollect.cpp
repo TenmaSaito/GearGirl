@@ -1,26 +1,27 @@
 //==================================================================================
 //
-// DirectXのPlayerのUI表示処理 [UIplayer.cpp]
+// DirectXの目的及び回収数のUI表示処理 [UIcollect.cpp]
 // Author : TENMA
 //
 //==================================================================================
 //**********************************************************************************
 //*** インクルードファイル ***
 //**********************************************************************************
-#include "UIplayer.h"
+#include "UIcollect.h"
 
 #include "Texture.h"
 #include "mathUtil.h"
 
 #include "UImenu.h"
-#include "player.h"
 
 //**********************************************************************************
 //*** マクロ定義 ***
 //**********************************************************************************
-#define PATH_MOUSE		"data/TEXTURE/PlayerIcon_Mouse.png"	// ネズミのテクスチャパス
-#define PATH_GIRL		"data/TEXTURE/PlayerIcon_Girl.png"	// 少女のテクスチャパス
-#define DEF_UI_SIZE		(D3DXVECTOR2(130, 130))				// ポリゴンの基本サイズ
+#if FALSE
+#define DRAW_NUM		2		// 二つとも描画
+#else
+#define DRAW_NUM		1		// 片方のみ描画
+#endif
 
 //**********************************************************************************
 //*** プロンプト構造体 ***
@@ -31,61 +32,67 @@ typedef struct
 	D3DXVECTOR3 pos;					// 位置
 	D3DXVECTOR3 rot;					// 角度
 	D3DXVECTOR2 size;					// サイズ
-	IDX_TEXTURE texMouse;				// ネズミのテクスチャインデックス
-	IDX_TEXTURE texGirl;				// 少女のテクスチャインデックス
-	float s;							// Lerp変換用
-	float fAngle;						// 回転用
+	IDX_TEXTURE texInfo;				// 目標のテクスチャインデックス
+	IDX_TEXTURE texNum;					// 現在の数のテクスチャインデックス
 	bool bUse;							// 使用状況
 	bool bEnable;						// UIとして描画するか
-} UIplayer, * LPUIPLAYER;
+} UIcollect, * LPUICOLLECT;
 
 //**********************************************************************************
 //*** プロトタイプ宣言 ***
 //**********************************************************************************
 
 //**********************************************************************************
+//*** 定数変数 ***
+//**********************************************************************************
+const D3DXVECTOR3 g_posMiddleCollectUI = D3DXVECTOR3(1050, 60, 0);		// UIの中心座標
+const D3DXVECTOR2 g_sizeCollectUI = D3DXVECTOR2(450, 100);				// ポリゴンの基本サイズ
+const char *g_aCollectUITexture[2] =
+{
+	"data/TEXTURE/GameInfo.png",		// 目標のテクスチャパス
+	"data/TEXTURE/Collected.png",		// 現在のテクスチャパス
+};
+
+//**********************************************************************************
 //*** グローバル変数 ***
 //**********************************************************************************
-UIplayer g_playerUI;
+UIcollect g_collectUI;
 
 //==================================================================================
 // --- 初期化 ---
 //==================================================================================
-void InitUIplayer(void)
+void InitUIcollect(void)
 {
-	LPUIPLAYER pUIPlayer = &g_playerUI;
+	LPUICOLLECT pUICollect = &g_collectUI;
 
-	ZeroMemory(&g_playerUI, sizeof(g_playerUI));
+	ZeroMemory(&g_collectUI, sizeof(g_collectUI));
 
 	// 初期設定
-	pUIPlayer->pos = GetPositionUImenu();
-	pUIPlayer->size = DEF_UI_SIZE;
-	pUIPlayer->s = 0.001f;
+	pUICollect->pos = g_posMiddleCollectUI;
+	pUICollect->size = g_sizeCollectUI;
 
 	/*** デバイスの取得 ***/
 	AUTODEVICE9 Auto;							// デバイス自動解放システム
 	LPDIRECT3DDEVICE9 pDevice = Auto.pDevice;	// 自動解放システムを介してデバイスを取得
 
 	// 頂点生成
-	pDevice->CreateVertexBuffer(CREATE_2DPOLYGON(pUIPlayer->pVtxBuff));
+	pDevice->CreateVertexBuffer(CREATE_2DPOLYGON(pUICollect->pVtxBuff));
 
 	// テクスチャの読み込み
-	if (FAILED(LoadTexture(PATH_MOUSE, &pUIPlayer->texMouse)))
+	if (FAILED(LoadTexture(g_aCollectUITexture[0], &pUICollect->texInfo)))
 	{
 		OutputDebugString(TEXT("テクスチャの読み込みに失敗しました......"));
-		return;
 	}
 
-	if (FAILED(LoadTexture(PATH_GIRL, &pUIPlayer->texGirl)))
+	if (FAILED(LoadTexture(g_aCollectUITexture[1], &pUICollect->texNum)))
 	{
 		OutputDebugString(TEXT("テクスチャの読み込みに失敗しました......"));
-		return;
 	}
 
-	VERTEX_2D* pVtx = nullptr;
+	VERTEX_2D *pVtx = nullptr;
 
 	// 頂点設定
-	pUIPlayer->pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+	pUICollect->pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 	if (pVtx == nullptr)
 	{
 		OutputDebugString(TEXT("頂点バッファへのアクセスに失敗しました？！"));
@@ -93,7 +100,7 @@ void InitUIplayer(void)
 	}
 
 	// 頂点位置を設定
-	MyMathUtil::SetPolygonPos(pVtx, pUIPlayer->pos, pUIPlayer->size);
+	MyMathUtil::SetPolygonPos(pVtx, pUICollect->pos, pUICollect->size);
 
 	// 座標変換用値を設定
 	MyMathUtil::SetPolygonRHW(pVtx);
@@ -104,72 +111,66 @@ void InitUIplayer(void)
 	// ポリゴンテクスチャを設定
 	MyMathUtil::SetDefaultTexture(pVtx);
 
-	pUIPlayer->pVtxBuff->Unlock();
+	pUICollect->pVtxBuff->Unlock();
 
-	pUIPlayer->bUse = true;
+	pUICollect->bUse = true;
+	pUICollect->bEnable = true;
 }
 
 //==================================================================================
 // --- 終了 ---
 //==================================================================================
-void UninitUIplayer(void)
+void UninitUIcollect(void)
 {
-	LPUIPLAYER pUIPlayer = &g_playerUI;
+	LPUICOLLECT pUICollect = &g_collectUI;
 
-	RELEASE(pUIPlayer->pVtxBuff);
+	RELEASE(pUICollect->pVtxBuff);
 }
 
 //==================================================================================
 // --- 更新 ---
 //==================================================================================
-void UpdateUIplayer(void)
+void UpdateUIcollect(void)
 {
-	LPUIPLAYER pUIPlayer = &g_playerUI;
+	LPUICOLLECT pUICollect = &g_collectUI;
 
-	if (GetEnableUImenu() == true && pUIPlayer->bEnable == true)
+	if (GetEnableUImenu() == true && pUICollect->bEnable == true)
 	{
-		pUIPlayer->bEnable = false;
+		pUICollect->bEnable = false;
 	}
-	else if (GetEnableUImenu() == false && pUIPlayer->bEnable == false)
+	else if (GetEnableUImenu() == false && pUICollect->bEnable == false)
 	{
-		pUIPlayer->bEnable = true;
+		pUICollect->bEnable = true;
 	}
 }
 
 //==================================================================================
 // --- 描画 ---
 //==================================================================================
-void DrawUIplayer(void)
+void DrawUIcollect(void)
 {
 	/*** デバイスの取得 ***/
 	AUTODEVICE9 pAuto;							// デバイス自動解放システム
 	LPDIRECT3DDEVICE9 pDevice = pAuto.pDevice;	// 自動解放システムを介してデバイスを取得
-	LPUIPLAYER pUIPlayer = &g_playerUI;
+	LPUICOLLECT pUICollect = &g_collectUI;
 
-	if (pUIPlayer->bUse == true)
+	if (pUICollect->bUse == true)
 	{
 		/*** アルファテストを有効にする ***/
 		pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);		// アルファテストを有効
 		pDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);	// 基準値よりも大きい場合にZバッファに書き込み
 		pDevice->SetRenderState(D3DRS_ALPHAREF, 60);				// 基準値
 
-		if (pUIPlayer->bUse & pUIPlayer->bEnable)
+		if (pUICollect->bUse & pUICollect->bEnable)
 		{
 			/*** 頂点バッファをデータストリームに設定 ***/
-			pDevice->SetStreamSource(0, pUIPlayer->pVtxBuff, 0, sizeof(VERTEX_2D));
+			pDevice->SetStreamSource(0, pUICollect->pVtxBuff, 0, sizeof(VERTEX_2D));
 
 			/*** 頂点フォーマットの設定 ***/
 			pDevice->SetFVF(FVF_VERTEX_2D);
 
-			/*** 現在のプレイヤーのテクスチャの設定 ***/
-			if (GetActivePlayer() == PLAYERTYPE_GIRL)
-			{
-				pDevice->SetTexture(0, GetTexture(pUIPlayer->texGirl));
-			}
-			else
-			{
-				pDevice->SetTexture(0, GetTexture(pUIPlayer->texMouse));
-			}
+			/*** テクスチャの設定 ***/
+			pDevice->SetTexture(0, GetTexture(pUICollect->texInfo));
 
 			/*** ポリゴンの描画 ***/
 			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP,		// プリミティブの種類
@@ -187,19 +188,19 @@ void DrawUIplayer(void)
 //==================================================================================
 // --- メニュー画面のオンオフ ---
 //==================================================================================
-void SetEnableUIplayer(bool bDisp)
+void SetEnableUIcollect(bool bDisp)
 {
-	LPUIPLAYER pUIPlayer = &g_playerUI;
+	LPUICOLLECT pUICollect = &g_collectUI;
 
-	pUIPlayer->bEnable = bDisp;
+	pUICollect->bEnable = bDisp;
 }
 
 //==================================================================================
 // --- メニュー画面のオンオフ取得 ---
 //==================================================================================
-bool GetEnableUIplayer(void)
+bool GetEnableUIcollect(void)
 {
-	LPUIPLAYER pUIPlayer = &g_playerUI;
+	LPUICOLLECT pUICollect = &g_collectUI;
 
-	return pUIPlayer->bEnable;
+	return pUICollect->bEnable;
 }

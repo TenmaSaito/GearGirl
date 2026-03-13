@@ -40,6 +40,16 @@ void InitTexture(void)
 //================================================================================================================
 HRESULT LoadTexture(_In_ const char *pTexFileName, IDX_TEXTURE *pOutIdx)
 {
+	if (pTexFileName == NULL)
+	{ // NULLCHECK
+		GenerateMessageBox(MB_ICONERROR,
+			"TextureLoadError",
+			"パスが指定されていません！NULLです！",
+			pTexFileName);
+
+		return E_FAIL;
+	}
+
 	/*** デバイスの取得 ***/
 	AUTODEVICE9 pAuto;							// デバイス自動解放システム
 	LPDIRECT3DDEVICE9 pDevice = pAuto.pDevice;	// 自動解放システムを介してデバイスを取得
@@ -83,7 +93,7 @@ HRESULT LoadTexture(_In_ const char *pTexFileName, IDX_TEXTURE *pOutIdx)
 			// デバイスリセット時用変数に保存
 			strcpy(&g_aResetFileNameTexture[nCntTexture][0], pTexFileName);
 
-			if (FAILED(hr))
+			if (FAILED(hr) || pTexInfo->pTexture == NULL)
 			{ // 読み込み失敗時
 				GenerateMessageBox(MB_ICONERROR,
 					"TextureLoadError",

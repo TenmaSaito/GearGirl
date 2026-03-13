@@ -47,6 +47,12 @@ SetWarning("modeldata.hがインクルードされていません。modeldata関連関数は無効化さ
 #define foreach(type, var, lpArray)		for(type &var : lpArray)	// foreach構文
 #define for_skip				continue							// skip
 
+#ifdef _DEBUG
+#define DEBUG_FUNC(func)		func		// DEBUG時使用関数
+#elif NDEBUG
+#define DEBUG_FUNC(func)					// Release時
+#endif
+
 // 2Dポリゴンのバッファ作成用フラグまとめ
 #define CREATE_2DPOLYGON(p) sizeof(VERTEX_2D) * 4, D3DUSAGE_WRITEONLY, FVF_VERTEX_2D, D3DPOOL_MANAGED, &p, NULL	// 2Dフラグまとめ
 
@@ -566,16 +572,16 @@ namespace MyMathUtil
 
 	// 自動初期化
 	template<typename ElemType>
-	void *AutoZeroMemory(ElemType& Elem)
+	ElemType *AutoZeroMemory(ElemType& Elem)
 	{
-		return ZeroMemory(&Elem, sizeof(ElemType));
+		return (ElemType*)ZeroMemory(&Elem, sizeof(ElemType));
 	}
 
 	// 自動初期化(配列対応型)
 	template <typename ElemType, size_t N>
-	void* AutoZeroMemory(ElemType(&Elem)[N])
+	ElemType *AutoZeroMemory(ElemType(&Elem)[N])
 	{
-		return ZeroMemory(Elem, sizeof(ElemType) * N);
+		return (ElemType*)ZeroMemory(Elem, sizeof(ElemType) * N);
 	}
 
 	bool SaveDataForHeap(const void *pData, size_t size, UINT ID);

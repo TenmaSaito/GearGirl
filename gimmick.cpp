@@ -13,7 +13,9 @@
 #include "modeldata.h"
 #include "param.h"
 #include "prompt.h"
+#include "particle.h"
 #include "Texture.h"
+#include "item.h"
 
 //**********************************************************************************
 //*** マクロ定義 ***
@@ -29,7 +31,18 @@ STRUCT()
 	D3DXVECTOR3 posDefault;		// デフォルト位置
 	D3DXVECTOR3 rotDefault;		// デフォルト角度
 	float fRadius;				// 当たり判定の半径
-}GIMMICK_DATA;
+} GIMMICK_DATA;
+
+//**********************************************************************************
+//*** アイテム出現構造体 ***
+//**********************************************************************************
+STRUCT()
+{
+	D3DXVECTOR3 pos;	// 位置
+	D3DXVECTOR3 move;	// 加速度
+	int nIdxItem;		// 出現するアイテム番号
+	bool bSpawned;		// 出現済み判定
+} ItemSpawn;
 
 //**********************************************************************************
 //*** プロトタイプ宣言 ***
@@ -38,6 +51,27 @@ void CaseMulti(LPGIMMICK pGimmick);
 void CaseSolo(LPGIMMICK pGimmick);
 void SetMotionType(MOTIONTYPE, bool bBlend, int nFrameBlend, GIMMICKTYPE);
 void UpdateMotion(GIMMICKTYPE);
+void SpawnItem(void);
+void UpdateSpawnItem(void);
+
+//**********************************************************************************
+//*** 定数変数 ***
+//**********************************************************************************
+const int g_nNumSpawnItem = 2;							// 噴水ギミッククリア時に出現するアイテム数
+const int g_aIdxItem[g_nNumSpawnItem] = { 1, 9 };		// 出現するアイテム番号
+const float g_fResistPow = 0.05f;						// 加速度の減速係数
+const D3DXVECTOR3 g_aMoveSpawn[g_nNumSpawnItem] =		// 出現後のアイテムの加速度
+{
+	D3DXVECTOR3(20.0f, 40.0f, 10.0f),
+	D3DXVECTOR3(5.0f, 40.0f, 16.0f),
+};
+
+const D3DXVECTOR3 g_posSpawn = D3DXVECTOR3(1000, 105, 110);			// 出現開始位置
+const D3DXVECTOR3 g_aVecParticle[2] =								// パーティクルの上下限ベクトル
+{
+	D3DXVECTOR3(100, 100, 100),
+	D3DXVECTOR3(-100, 0, -100),
+};
 
 //**********************************************************************************
 //*** グローバル変数 ***
@@ -52,7 +86,10 @@ GIMMICK_DATA g_aGimmickData[GIMMICKTYPE_MAX] =
 	{"data/Scripts/fallenTree.txt", COULD_PLAYER_GIRL, D3DXVECTOR3(1750, 100, 400), D3DXVECTOR3(0, 0, 0), 30.0f},
 	{"data/Scripts/station_g.txt", COULD_PLAYER_ALL, D3DXVECTOR3(550, 100, -970), D3DXVECTOR3(0, D3DX_PI + CParamFloat::HALFPI, 0), 200.0f },
 	{"data/Scripts/tunnel_g.txt", COULD_PLAYER_ALL, D3DXVECTOR3(1609, 10000, -760), D3DXVECTOR3(0, D3DX_PI + CParamFloat::HALFPI, 0), 200.0f },
+	{"data/Scripts/statue_g.txt", COULD_PLAYER_GIRL, D3DXVECTOR3(1100, 100, 110), D3DXVECTOR3(0, CParamFloat::HALFPI, 0), 25.0f },
 };
+
+ItemSpawn g_aItemSpawn[g_nNumSpawnItem];	// 出現アイテム情報
 
 //==================================================================================
 // --- 初期化 ---
@@ -109,6 +146,15 @@ void InitGimmick(void)
 			}
 		}
 	}
+
+	// 初期化
+	AutoZeroMemory(g_aItemSpawn);
+
+	// インデックスを保存
+	for (int nCntSpawn = 0; nCntSpawn < g_nNumSpawnItem; nCntSpawn++)
+	{
+		g_aItemSpawn[nCntSpawn].nIdxItem = g_aIdxItem[nCntSpawn];
+	}
 }
 
 //==================================================================================
@@ -125,6 +171,7 @@ void UninitGimmick(void)
 void UpdateGimmick(void)
 {
 	LPGIMMICK pGimmick = &g_aGimmick[0];
+	ItemSpawn *pItemSpawn = &g_aItemSpawn[0];
 
 	// もし更新すべき何かがあるならここで更新
 	for (int nCntGimmick = 0; nCntGimmick < GIMMICKTYPE_MAX; nCntGimmick++, pGimmick++)
@@ -148,6 +195,16 @@ void UpdateGimmick(void)
 			pGimmick->bClear = true;
 			SetMotionType(MOTIONTYPE_ACTION, false, 0, GIMMICKTYPE_CLOSEDDOOR);
 		}
+
+		if (pTarget->bClear == true
+			&& pTarget->myType == GIMMICKTYPE_STATUE
+			&& pTarget->bFinishMotion == true
+			&& pItemSpawn->bSpawned == false)
+		{
+			SpawnItem();
+		}
+
+		UpdateSpawnItem();
 
 		UpdateMotion(pGimmick->myType);
 
@@ -269,9 +326,8 @@ void DrawGimmick(void)
 
 			LPMODELDATA pModelData = GetModelData(pGimmick->parts.aParts[nCntModel].nIdxModel);
 			if (pModelData != NULL)
-			{
-				// パーツの描画	
-					// マテリアルデータへのポインタを取得
+			{ // パーツの描画	
+				// マテリアルデータへのポインタを取得
 				pMat = (D3DXMATERIAL*)pModelData->pBuffMat->GetBufferPointer();
 
 				for (int nCntMat = 0; nCntMat < (int)pModelData->dwNumMat; nCntMat++)
@@ -290,8 +346,6 @@ void DrawGimmick(void)
 
 		// 保存していたマテリアルを戻す
 		pDevice->SetMaterial(&matDef);
-
-
 	}
 
 	/*** アルファテストを無効にする ***/
@@ -374,6 +428,12 @@ void CaseMulti(LPGIMMICK pGimmick)
 			pGimmick->bClear = true;
 		}
 
+		if (pGimmick->myType == GIMMICKTYPE_STATUE && pPlayer->motionType == MOTIONTYPE_ACTION && pPlayer->Armtype == ARMTYPE_NORMAL)
+		{
+			pGimmick->bClear = true;
+			SetMotionType(MOTIONTYPE_ACTION, false, 0, GIMMICKTYPE_STATUE);
+		}
+
 		bDetection = true;
 	}
 
@@ -420,6 +480,12 @@ void CaseSolo(LPGIMMICK pGimmick)
 		else if (pGimmick->myType == GIMMICKTYPE_FALLENTREE3 && pPlayer->motionType == MOTIONTYPE_CUTTING && pPlayer->nKey == 3)
 		{
 			pGimmick->bClear = true;
+		}
+
+		if (pGimmick->myType == GIMMICKTYPE_STATUE && pPlayer->motionType == MOTIONTYPE_ACTION && pPlayer->Armtype == ARMTYPE_NORMAL)
+		{
+			pGimmick->bClear = true;
+			SetMotionType(MOTIONTYPE_ACTION, false, 0, GIMMICKTYPE_STATUE);
 		}
 
 		bDetection = true;
@@ -978,4 +1044,57 @@ void UpdateMotion(GIMMICKTYPE type)
 Gimmick *GetGimmick(void)
 {
 	return &g_aGimmick[0];
+}
+
+//================================================================================================================
+// --- アイテムの出現処理 ---
+//================================================================================================================
+void SpawnItem(void)
+{
+	ItemSpawn *pItemSpawn = &g_aItemSpawn[0];
+
+	for (int nCntUpdate = 0; nCntUpdate < g_nNumSpawnItem; nCntUpdate++, pItemSpawn++)
+	{
+		pItemSpawn->bSpawned = true;	// 出現状態に変更
+		pItemSpawn->pos = g_posSpawn;	// 出現位置を設定
+
+		// 各加速度を設定
+		pItemSpawn->move = g_aMoveSpawn[nCntUpdate];
+
+		// 噴水パーティクルを設置
+		SetParticle(CONVERSION_Y(g_posSpawn, g_posSpawn.y + 10.0f), CParamColor::BLUE, g_aVecParticle[1], g_aVecParticle[0],
+			1, 3.0f, 5, 5, true);
+	}
+}
+
+//================================================================================================================
+// --- 出現後のアイテム更新処理 ---
+//================================================================================================================
+void UpdateSpawnItem(void)
+{
+	ItemSpawn *pItemSpawn = &g_aItemSpawn[0];
+
+	for (int nCntUpdate = 0; nCntUpdate < g_nNumSpawnItem; nCntUpdate++, pItemSpawn++)
+	{
+		if (!pItemSpawn->bSpawned || pItemSpawn->pos.y <= 120.0f) continue;
+
+		P_ITEM pItem = &GetItem()[pItemSpawn->nIdxItem];
+
+		pItemSpawn->pos += pItemSpawn->move;		// 位置を更新
+		pItem->pos = pItemSpawn->pos;
+
+		// 加速度を減速
+		pItemSpawn->move.x += (0.0f - pItemSpawn->move.x) * g_fResistPow;
+		pItemSpawn->move.z += (0.0f - pItemSpawn->move.z) * g_fResistPow;
+
+		// 重力を適用
+		pItemSpawn->move.y += GRAVITY;
+
+		// 地面判定
+		if (pItemSpawn->move.y <= 120.0f)
+		{
+			pItemSpawn->pos.y = 120.0f;
+			pItemSpawn->move = VECNULL;
+		}
+	}
 }

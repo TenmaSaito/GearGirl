@@ -252,7 +252,6 @@ void SetSize2DPolygon(IDX_2DPOLYGON nId2DPolygon, D3DXVECTOR2 size)
 
 	/*** 頂点バッファの設定を終了 ***/
 	p2DPoly->pVtxBuff->Unlock();
-
 }
 
 //================================================================================================================
