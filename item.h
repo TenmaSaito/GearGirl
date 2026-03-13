@@ -56,7 +56,7 @@ typedef enum
 //==============================================================
 typedef struct ItemInfo
 {
-	const char* pModelFile;			// ファイル名
+	const char* pFile;				// ファイル名
 	int			nNumGet;			// モデルを読み込めたかの判定が入る
 
 }ItemInfo;
