@@ -284,6 +284,7 @@ void UpdateGame(void)
 		//ポーズの更新処理
 		UpdatePause();
 	}
+
 	//ポーズ状態がOFFの時
 	else
 	{

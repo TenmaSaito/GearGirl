@@ -341,8 +341,10 @@ void UpdatePouchItem(void)
 			// メニュー表示中、色をつける
 			// アイテム欄
 			for (int nCntQuota = 0; nCntQuota < ITEMTYPE_MAX; nCntQuota++, pItemQuota++)
-				SetColor2DPolygon(pItemQuota->nIdxBox, colX(1.0f,1.0f,1.0f,0.3f));
-
+			{
+				SetColor2DPolygon(pItemQuota->nIdxBox, colX(1.0f, 1.0f, 1.0f, 0.3f));
+				SetEnable2DPolygon(pItemQuota->nIdxBox, true);
+			}
 		}
 		else
 		{

@@ -13,6 +13,7 @@
 #include "main.h"
 #include "param.h"
 #include "MyLib.h"
+#include "MyInline.inl"
 #include "Vector_defs.h"
 #include "Conditional_defs.h"
 #include "MyCol.h"
