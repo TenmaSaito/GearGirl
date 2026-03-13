@@ -28,10 +28,10 @@
 #define CAMERA_1P_ROT			vec3(1.8f, 0.0f, 0.0f)	// 少女のカメラの角度
 #define CAMERA_2P_ROT			vec3(1.6f, 0.0f, 0.0f)	// ネズミのカメラの角度
 #define CAMERA_MOVE				(10.0f)					// カメラの移動速度
-#define CAMERA_SPIN_X			(0.015f)				// カメラの水平回転速度
-#define CAMERA_SPIN_Y			(0.01f)					// カメラの垂直回転速度
+#define CAMERA_SPIN_X			(0.05f)					// カメラの水平回転速度
+#define CAMERA_SPIN_Y			(0.015f)					// カメラの垂直回転速度
 #define CAMERA_FOLLOW_FACTOR	(0.15f)					// カメラが追従移動する時の補正
-#define CAMERA_ROTET_FACTOR		(0.01f)					// カメラが追従回転する時の補正
+#define CAMERA_ROTET_FACTOR		(0.1f)					// カメラが追従回転する時の補正
 #define CAMERA_PLAYER_FRONT		(50.0f)					// 注視点をプレイヤーより少し先にする
 #define CAMERA_PLFR_DEADZONE	(0.01f)					// これ以上速度があればカメラを動かす
 #define SETCAMERAPOS_COUNTER	(30)					// カメラ切り替え時このフレーム以内に元の位置に戻る
@@ -83,6 +83,7 @@ typedef struct Camera
 	D3DXVECTOR3 posR;					// 注視点
 	D3DXVECTOR3 posRDest;				// 目的の注視点
 	D3DXVECTOR3 rot;					// 向き
+	D3DXVECTOR3 rotDest;				// 向けたい方向
 	float		fDist;					// 視点と注視点の距離
 	float		fViewMin;				// 最小描画距離
 	float		fViewMax;				// 最大描画距離
@@ -97,6 +98,7 @@ typedef struct Camera
 	float		fStart;					// 霧の開始距離
 	float		fEnd;					// 霧の終着距離
 
+	bool		bCamRotation;			// リセットで自動回転中か
 	bool		bFocusMode;				// フォーカスモード
 	bool		bAoutRot;				// 自動で回り込み
 	int			nCntAoutRot;			// 自動で回り込むまでのカウンタ

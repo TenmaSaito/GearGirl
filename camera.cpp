@@ -55,6 +55,8 @@ void InitCamera(void)
 		pCamera->posR = PLAYER_POSDEF;							// 注視点
 		pCamera->posRDest = PLAYER_POSDEF;						// 目的の注視点
 		pCamera->vecU = vec3(0.0f, 1.0f, 0.0f);					// 上方向ベクトル
+		pCamera->rot = vec3_ZERO;								// 方向
+		pCamera->rotDest = vec3_ZERO;							// 方向
 
 		switch (nCntCamera)
 		{
@@ -745,8 +747,45 @@ void CameraReset(void)
 				pPlayer++;
 			}
 
-			fPlayerRot = pPlayer->rot.y - D3DX_PI;
-			pCamera->rot.y = fPlayerRot;
+			pCamera->rotDest.y = pPlayer->rot.y - D3DX_PI;
+			pCamera->bCamRotation = true;
+		}
+		
+		if(pCamera->bCamRotation)
+		{
+			float fRotMove = (pCamera->rotDest.y - pCamera->rot.y);	// 変化させる角度(目的値と現在値の差)
+
+			//**************************************************************
+			// 回転方向正規化
+			if (0 < fRotMove)
+			{
+				if (D3DX_PI < fRotMove)
+				{
+					fRotMove -= D3DX_PI * 2;
+				}
+			}
+			else if (fRotMove < 0)
+			{
+				if (fRotMove < -D3DX_PI)
+				{
+					fRotMove += D3DX_PI * 2;
+				}
+			}
+			// 補正しカメラを回転
+			pCamera->rot.y += fRotMove * CAMERA_ROTET_FACTOR;
+
+			//**************************************************************
+			// 異常な角度(X_PIを超える)値を修正
+			if (pCamera->rot.y < -D3DX_PI)
+				pCamera->rot.y += D3DX_PI * 2;
+			else if (pCamera->rot.y > D3DX_PI)
+				pCamera->rot.y += -D3DX_PI * 2;
+
+			// ある程度近づいたらオフ
+			if (pCamera->rotDest.y - 0.1f <= pCamera->rot.y && pCamera->rot.y <= pCamera->rotDest.y + 0.1f)
+			{
+				pCamera->bCamRotation = false;
+			}
 		}
 	}
 }
