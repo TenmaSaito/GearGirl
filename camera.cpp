@@ -23,13 +23,13 @@ CameraType	g_readyCamera;				// 直近でセットしたカメラ
 
 //**************************************************************
 // プロトタイプ宣言
-void SetCameraOption(void);					// カメラ設定
-void NearCameraIntegration(void);			// 2P時近ければカメラ統合
-void CameraChange(void);					// カメラを変更
-void CameraFollow(void);					// プレイヤーに追従移動
-void CameraRotation(P_CAMERA pCamera);		// プレイヤーと同じ向きに回転
-void CameraOrbit(void);							// カメラ回転処理
-void CameraMove(void);						// カメラ移動（ポーズ中のみ
+void SetCameraOption(void);				// カメラ設定
+void NearCameraIntegration(void);		// 2P時近ければカメラ統合
+void CameraChange(void);				// カメラを変更
+void CameraFollow(void);				// プレイヤーに追従移動
+void CameraRotation(P_CAMERA pCamera);	// プレイヤーと同じ向きに回転
+void CameraOrbit(void);					// カメラ回転処理
+void CameraMove(void);					// カメラ移動（ポーズ中のみ
 
 //=========================================================================================
 // カメラ初期化
@@ -51,31 +51,31 @@ void InitCamera(void)
 	{
 		// カメラ座標等
 		pCamera->bUse = true;
-		pCamera->posV = vec3 CAMERA_V_DEFPOS;							// 視点
-		pCamera->posR = PLAYER_POSDEF;									// 注視点
-		pCamera->posRDest = PLAYER_POSDEF;								// 目的の注視点
-		pCamera->vecU = vec3(0.0f, 1.0f, 0.0f);							// 上方向ベクトル
+		pCamera->posV = vec3 CAMERA_V_DEFPOS;					// 視点
+		pCamera->posR = PLAYER_POSDEF;							// 注視点
+		pCamera->posRDest = PLAYER_POSDEF;						// 目的の注視点
+		pCamera->vecU = vec3(0.0f, 1.0f, 0.0f);					// 上方向ベクトル
 
 		switch (nCntCamera)
 		{
 		case CAMERATYPE_PLAYER_ONE:	// 1P用のカメラ設定
-			pCamera->rot = CAMERA_1P_ROT;								// カメラの角度
-			pCamera->fDist = CAMERA_1P_DISTANS;							// 視点と注視点の距離
-			pCamera->fViewMin = VIEW_1P_MINDEPTH;						// 最小描画距離
-			pCamera->fViewMax = VIEW_1P_MAXDEPTH;						// 最大描画距離
+			pCamera->rot = CAMERA_1P_ROT;						// カメラの角度
+			pCamera->fDist = CAMERA_1P_DISTANS;					// 視点と注視点の距離
+			pCamera->fViewMin = VIEW_1P_MINDEPTH;				// 最小描画距離
+			pCamera->fViewMax = VIEW_1P_MAXDEPTH;				// 最大描画距離
 			pCamera->type = CAMERATYPE_PLAYER_ONE;
 			break;
 
 		case CAMERATYPE_PLAYER_TWO:	// 2P用のカメラ設定
 			pCamera->rot = CAMERA_2P_ROT;
 			pCamera->fDist = CAMERA_2P_DISTANS;
-			pCamera->fViewMin = VIEW_2P_MINDEPTH;						// 最小描画距離
-			pCamera->fViewMax = VIEW_2P_MAXDEPTH;						// 最大描画距離
+			pCamera->fViewMin = VIEW_2P_MINDEPTH;				// 最小描画距離
+			pCamera->fViewMax = VIEW_2P_MAXDEPTH;				// 最大描画距離
 			pCamera->type = CAMERATYPE_PLAYER_TWO;
 			break;
 		default:// その他のカメラ設定
-			pCamera->rot = CAMERA_1P_ROT;								// カメラの角度
-			pCamera->fDist = CAMERA_1P_DISTANS;							// 視点と注視点の距離
+			pCamera->rot = CAMERA_1P_ROT;						// カメラの角度
+			pCamera->fDist = CAMERA_1P_DISTANS;					// 視点と注視点の距離
 			pCamera->bUse = false;
 			break;
 		}
@@ -90,8 +90,9 @@ void InitCamera(void)
 		pCamera->viewport.MinZ = 0.0f;									
 		pCamera->viewport.MaxZ = 1.0f;
 
-		pCamera->nCntAoutRot = 0;										// 自動で回り込み ONにするまでのカウンタ
-		pCamera->bAoutRot = false;										//		〃		  OFF
+		pCamera->nCntAoutRot = 0;								// 自動で回り込み ONにするまでのカウンタ
+		pCamera->bAoutRot = false;								//		〃		  OFF
+		pCamera->bFocusMode = false;							// フォーカス	　OFF
 	}
 
 	// 画面分割設定
@@ -181,26 +182,21 @@ void UpdateCamera(void)
 	// カメラ動かす処理
 	pCamera = GetCamera();
 
-	// シングルプレイ && ネズミアクティブでない
-	if (GetNumPlayer() == 1 && GetActivePlayer() != CAMERATYPE_PLAYER_TWO)
+	// シングルプレイ && 少女アクティブ
+	if (GetNumPlayer() == 1 && GetActivePlayer() == PLAYERTYPE_GIRL)
 	{
+		// ダッシュ中
 		if (GetPlayer()->bDash)
 		{
 			if (pCamera->fViewRadian <= VIEW_RADIAN * 1.5f)
-				pCamera->fViewRadian += 1.0f;
+				pCamera->fViewRadian += 1.0f;		// 視野角広げ
 		}
 		else if (VIEW_RADIAN < pCamera->fViewRadian)
-		{
-			pCamera->fViewRadian -= 1.0f;
+		{// ダッシュ解除後
+			pCamera->fViewRadian -= 1.0f;			// 視野角狭め
 		}
 	}
 	
-	// マルチプレイ || ネズミアクティブ
-	if(GetNumPlayer() == 2 || GetActivePlayer() == CAMERATYPE_PLAYER_TWO)
-	{
-		pCamera++;					// 2Pのカメラにする
-	}
-
 	// 共有部
 	CameraOrbit();					// カメラ回転
 	CameraFollow();					// 追従
@@ -209,6 +205,7 @@ void UpdateCamera(void)
 	//**************************************************************
 	// 注視点から視点を求める
 	pCamera = GetCamera();
+	Player* pPl = GetPlayer();
 	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCamera++)
 	{
 		if (pCamera->bUse)
@@ -222,6 +219,10 @@ void UpdateCamera(void)
 				PrintDebugProc("\nCAMERA %d\nposV : %d %d %d\nposR : %d %d %d\n", nCntCamera, (int)pCamera->posV.x, (int)pCamera->posV.y, (int)pCamera->posV.z, (int)pCamera->posR.x, (int)pCamera->posR.y, (int)pCamera->posR.z);
 				PrintDebugProc("rot  : %~3f\ndist ： %d\n", pCamera->rot.x, pCamera->rot.y, pCamera->rot.z, (int)pCamera->fDist);
 				PrintDebugProc("視野角: %d\n", (int)pCamera->fViewRadian);
+
+				PrintDebugProc("Player%d pos   :%~3f\n", nCntCamera, pPl->pos.x, pPl->pos.y, pPl->pos.z);
+				PrintDebugProc("Player%d posOld:%~3f\n", nCntCamera, pPl->posOld.x, pPl->posOld.y, pPl->posOld.z);
+				pPl++;
 			}
 		}
 	}
@@ -294,61 +295,64 @@ void CameraFollow(void)
 	float fPlayerFront;							// プレイヤーより前
 	float fPlayerMoveRot;						// プレイヤーが移動している方向
 	float fCameraFactor = CAMERA_FOLLOW_FACTOR;	// カメラ追従速度倍率
-	vec3  stick;
+	vec3  stick = vec3_ZERO;
 
 	for (int nPlayer = 0; nPlayer < MAX_PLAYER; nPlayer++, pCamera++, pPlayer++)
 	{
 		//**************************************************************
 		// プレイヤーに追従
-		if (CAMERA_PLFR_DEADZONE < SQUARE(pPlayer->move.x) + SQUARE(pPlayer->move.z)
-			|| (CAMERA_PLFR_DEADZONE < SQUARE(pPlayer->pos.x - pPlayer->posOld.x) + SQUARE(pPlayer->pos.z - pPlayer->posOld.z)))
-		{// カメラを少し先へ
-			GetJoypadLeftStick(nPlayer, &stick);
-			fPlayerFront = pCamera->fDist * 0.2f;
-			fPlayerMoveRot = atan2f(-pPlayer->move.x, -pPlayer->move.z);
-
-			pCamera->posRDest.x = pPlayer->pos.x - fPlayerFront * sinf(fPlayerMoveRot);
-			pCamera->posRDest.z = pPlayer->pos.z - fPlayerFront * cosf(fPlayerMoveRot);
-		}
-
-		//**************************************************************
-		// キャラクターに応じて調整
-		switch (nPlayer)
+		if (pCamera->bFocusMode == false)
 		{
-		case CAMERATYPE_PLAYER_ONE:
-			pCamera->posRDest.y = pPlayer->pos.y + 15.0f; // 頭の高さに追従
+			if (CAMERA_PLFR_DEADZONE < SQUARE(pPlayer->move.x) + SQUARE(pPlayer->move.z)
+				|| (CAMERA_PLFR_DEADZONE < SQUARE(pPlayer->pos.x - pPlayer->posOld.x) + SQUARE(pPlayer->pos.z - pPlayer->posOld.z)))
+			{// カメラを少し先へ
+				GetJoypadLeftStick(nPlayer, &stick);
+				fPlayerFront = pCamera->fDist * 0.2f;
+				fPlayerMoveRot = atan2f(-pPlayer->move.x, -pPlayer->move.z);
 
-			// カメラ切り替え時の処理
-			if (0 < g_nSetCameraPosCounter)
-			{
-				pCamera->rot.x += (CAMERA_1P_ROT.x - pCamera->rot.x) * g_nSetCameraPosCounter / SETCAMERAPOS_COUNTER;	// 向きを戻す
-				pCamera->fDist += (CAMERA_1P_DISTANS - pCamera->fDist) * g_nSetCameraPosCounter / SETCAMERAPOS_COUNTER;	// 距離を戻す
-				g_nSetCameraPosCounter--;
+				pCamera->posRDest.x = pPlayer->pos.x - fPlayerFront * sinf(fPlayerMoveRot);
+				pCamera->posRDest.z = pPlayer->pos.z - fPlayerFront * cosf(fPlayerMoveRot);
 			}
-			break;
 
-		case CAMERATYPE_PLAYER_TWO:
-			pCamera->posRDest.y = pPlayer->pos.y + 2.0f;			// 頭の高さに追従
-			fCameraFactor += 0.1f;							// ネズミは追従速度を上げる
-
-			// カメラ切り替え時の処理
-			if (0 < g_nSetCameraPosCounter)
+			//**************************************************************
+			// キャラクターに応じて調整
+			switch (nPlayer)
 			{
-				pCamera->rot.x += (CAMERA_2P_ROT.x - pCamera->rot.x) * g_nSetCameraPosCounter / SETCAMERAPOS_COUNTER;	 // 向きを戻す
-				pCamera->fDist += (CAMERA_2P_DISTANS - pCamera->fDist) * g_nSetCameraPosCounter / SETCAMERAPOS_COUNTER;	 // 距離を戻す
-				g_nSetCameraPosCounter--;
-			}
-			break;
+			case CAMERATYPE_PLAYER_ONE:
+				pCamera->posRDest.y = pPlayer->pos.y + 15.0f; // 頭の高さに追従
 
-		default:
-			break;
+				// カメラ切り替え時の処理
+				if (0 < g_nSetCameraPosCounter)
+				{
+					pCamera->rot.x += (CAMERA_1P_ROT.x - pCamera->rot.x) * g_nSetCameraPosCounter / SETCAMERAPOS_COUNTER;	// 向きを戻す
+					pCamera->fDist += (CAMERA_1P_DISTANS - pCamera->fDist) * g_nSetCameraPosCounter / SETCAMERAPOS_COUNTER;	// 距離を戻す
+					g_nSetCameraPosCounter--;
+				}
+				break;
+
+			case CAMERATYPE_PLAYER_TWO:
+				pCamera->posRDest.y = pPlayer->pos.y + 2.0f;			// 頭の高さに追従
+				fCameraFactor += 0.1f;							// ネズミは追従速度を上げる
+
+				// カメラ切り替え時の処理
+				if (0 < g_nSetCameraPosCounter)
+				{
+					pCamera->rot.x += (CAMERA_2P_ROT.x - pCamera->rot.x) * g_nSetCameraPosCounter / SETCAMERAPOS_COUNTER;	 // 向きを戻す
+					pCamera->fDist += (CAMERA_2P_DISTANS - pCamera->fDist) * g_nSetCameraPosCounter / SETCAMERAPOS_COUNTER;	 // 距離を戻す
+					g_nSetCameraPosCounter--;
+				}
+				break;
+
+			default:
+				break;
+			}
+
+			//**************************************************************
+			// カメラの位置を補正
+			pCamera->posR.x += (pCamera->posRDest.x - pCamera->posR.x) * fCameraFactor;
+			pCamera->posR.y += (pCamera->posRDest.y - pCamera->posR.y) * fCameraFactor;
+			pCamera->posR.z += (pCamera->posRDest.z - pCamera->posR.z) * fCameraFactor;
 		}
-
-		//**************************************************************
-		// カメラの位置を補正
-		pCamera->posR.x += (pCamera->posRDest.x - pCamera->posR.x) * fCameraFactor;
-		pCamera->posR.y += (pCamera->posRDest.y - pCamera->posR.y) * fCameraFactor;
-		pCamera->posR.z += (pCamera->posRDest.z - pCamera->posR.z) * fCameraFactor;
 	}
 }
 
@@ -553,7 +557,6 @@ void SetCamera(void)
 				(float)pCam->viewport.Width / (float)pCam->viewport.Height,	// アスペクト比
 				pCam->fViewMin,								// 最短描画距離
 				pCam->fViewMax);							// 最大描画距離
-			PrintDebugProc("\nCamera %d,viewRadian %f", nCntCamera, pCam->fViewRadian);
 			// プロジェクションマトリックスを設定
 			pDevice->SetTransform(D3DTS_PROJECTION, &pCam->mtxProjection);
 
@@ -791,4 +794,27 @@ void CleanFog(void)
 	pDevice->SetRenderState(D3DRS_FOGENABLE, FALSE);
 	
 	EndDevice();
+}
+
+//=========================================================================================
+// フォーカスモードのオンオフ
+//=========================================================================================
+void Focus(CameraType type, bool bEnable)
+{
+	g_aCamera[type].bFocusMode = bEnable;
+}
+
+//=========================================================================================
+// フォーカス位置設定
+//=========================================================================================
+void Focus(CameraType type, vec3 pos)
+{
+	P_CAMERA pCam = &g_aCamera[type];
+
+	if (pCam->bFocusMode)
+	{
+		pCam->posR.x = pos.x;
+		pCam->posR.y = pos.y;
+		pCam->posR.z = pos.z;
+	}
 }

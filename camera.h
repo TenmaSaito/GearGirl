@@ -97,6 +97,7 @@ typedef struct Camera
 	float		fStart;					// 霧の開始距離
 	float		fEnd;					// 霧の終着距離
 
+	bool		bFocusMode;				// フォーカスモード
 	bool		bAoutRot;				// 自動で回り込み
 	int			nCntAoutRot;			// 自動で回り込むまでのカウンタ
 	float		fPlayerFront;			// プレイヤーより少し前
@@ -124,6 +125,7 @@ void CameraReset(void);													// カメラリセット
 void FogEnable(CameraType type, bool bEnable = true, D3DXCOLOR col = colX_ZERO, float fStart = 0.0f, float fEnd = 0.0f);
 																		// 霧を有効化
 void CleanFog(void);													// 霧を削除
-void Focus(vec3 pos); // フォーカス
+void Focus(CameraType type, bool bEnable = false);						// フォーカスモードのオンオフ
+void Focus(CameraType type, vec3 pos);									// フォーカス位置設定
 
 #endif// !_CAMERA_H_
