@@ -179,13 +179,13 @@ const D3DXVECTOR2 g_UIMapSize = D3DXVECTOR2(200, 85);
 const char *g_apMapIconTexture[MAPICONTYPE_MAX] =
 {
 	// 店のアイコン
-	"data/TEXTURE/.png",
+	"data/TEXTURE/shopicon_blackbg.png",
 
 	// ギミックアイコン(共通でも可)
-	"data/TEXTURE/.png",
-	"data/TEXTURE/.png",
-	"data/TEXTURE/.png",
-	"data/TEXTURE/.png",
+	"data/TEXTURE/gimmickicon.png",
+	"data/TEXTURE/gimmickicon.png",
+	"data/TEXTURE/gimmickicon.png",
+	"data/TEXTURE/gimmickicon.png",
 };
 
 // プレイヤーアイコンのテクスチャパス
@@ -460,11 +460,13 @@ void InitIcon(void)
 		SetDefaultColor(pVtx);							// 頂点カラー設定
 		SetDefaultTexture(pVtx);						// テクスチャ座標設定
 
+		pMIcon->rot.y = -D3DX_HALFPI;
+
 		// 頂点設定終了
 		pMIcon->pVtx->Unlock();
 
 		// テクスチャ読み込み
-		LoadTexture(g_apMapIconTexture[nCntIcon], &tex);
+		LoadTexture(g_apMapIconTexture[nCntIcon], &pMIcon->tex);
 	}
 
 	// プレイヤーアイコン及び矢印アイコンの作成

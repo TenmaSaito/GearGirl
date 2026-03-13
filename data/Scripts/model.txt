@@ -3193,7 +3193,7 @@ ITEMSET
 END_ITEMSET
 
 ITEMSET
-	ITEMTYPE = 4				# [4]軸(シャフト)
+	ITEMTYPE = 4				# [4]ぜんまい
 	POS = 2090.0 140.0 470.0	# 位置
 	ROT = 0 0 0					# 角度
 	VISIBLE = 0					# 可視状態
