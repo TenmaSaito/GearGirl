@@ -35,6 +35,8 @@
 #define ITEM_OFF		(IsEnableItemPut() == false)	// アイテム提出画面でない
 #define ITEMPROMPT_ON	(IsDispPrompt(GetIdxShopPrompt()) == true)	// アイテム提出のプロンプトが表示されている
 #define ITEMPROMPT_OFF	(IsDispPrompt(GetIdxShopPrompt()) == false)	// アイテム提出のプロンプトが表示されていない
+#define UIMENU_ON		(GetEnableUImenu() == true)		// アイテムUI表示中
+#define UIMENU_OFF		(GetEnableUImenu() == false)	// アイテムUI非表示中
 
 // 要素の設定
 #define COL_RED			D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f)	// 赤色

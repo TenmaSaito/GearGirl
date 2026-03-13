@@ -4,8 +4,8 @@
 // Author : Shu Tanaka
 // 
 // =================================================
-#include<stdio.h>
-#include<d3dx9math.h>
+#include <stdio.h>
+#include <d3dx9math.h>
 #include "main.h"
 #include "camera.h"
 #include "debugproc.h"
@@ -29,6 +29,7 @@
 #include "prompt.h"
 #include "sound.h"
 #include "titleselect.h"
+#include "UImenu.h"
 #include "MathUtil.h"
 #include "wall.h"
 
@@ -253,7 +254,7 @@ void UpdatePlayer(void)
 		}
 
 		// === 移動に関する処理 === //
-		if (DIAROG_OFF)
+		if (DIAROG_OFF & UIMENU_OFF)
 		{// 何もダイアログがでいない場合に動ける
 			// === ２人プレイもしくはアクティブなプレイヤーの処理 === //
 			if (GetNumPlayer() == 2 || GetActivePlayer() == PlayerType(nCntPlayer))
@@ -470,7 +471,7 @@ void UpdatePlayer(void)
 
 	if (GAME_NOW)
 	{// === チュートリアル外での更新 === // 
-		if (ITEM_OFF)
+		if (ITEM_OFF & UIMENU_OFF)
 		{// 提出する画面じゃないとき
 			// 操作する対象を切り替える
 			if (g_nNumPlayer == 1)
