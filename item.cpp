@@ -754,9 +754,7 @@ void SelectItem(void)
 					if (GetFade() != FADE_NONE) return; // フェード中なら無視
 
 					JudgmentEnding(&g_aPutOut[0], 5);
-
-					if (GetTimer() <= 10)
-						SetFade(MODE_RESULT);
+					SetFade(MODE_RESULT);
 
 					break;
 
