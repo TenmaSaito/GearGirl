@@ -191,6 +191,7 @@ void InitPlayer(void)
 		g_nNumPlayer = 1;
 	}
 
+	// === メッシュオービットのインデックスを返り値でもらう === //
 	g_nIdxOrbit = SetOrbit(D3DXVECTOR3(0.0f, -10.0f, 0.0f), D3DXVECTOR3(0.0f, 10.0f, 0.0f), &g_aPlayer[PLAYERTYPE_GIRL].PartsInfo.aParts[0].mtxWorld, 20);
 	SetEnableOrbit(g_nIdxOrbit, false);
 
@@ -218,7 +219,11 @@ void UpdatePlayer(void)
 	Player* pPlayer = &g_aPlayer[0];
 	Player* pMouse = &g_aPlayer[1];
 
+	// カメラの情報を取得
 	Camera* pCamera = GetCamera();
+
+	// 駅のギミック情報を取得
+	Gimmick* pGimmick = GetGimmick() + 5;
 
 	pPlayer->bUseLandMotion = false;
 
@@ -226,7 +231,7 @@ void UpdatePlayer(void)
 	{
 		g_aMovePlayer[nCntPlayer] = false;
 
-		// 現在位置の保存
+		// === 現在位置の保存 === //
 		pPlayer->posOld = pPlayer->pos;
 
 		if (GAME_NOW)
@@ -246,11 +251,6 @@ void UpdatePlayer(void)
 				// カタパルトを起動した後の処理
 				ShotMouse();
 			}
-			//else if (nCntPlayer == PLAYERTYPE_MOUSE && GetNumPlayer() == 1 && g_bShotMouse == false)
-			//{
-			//	// 少女にネズミが追従する処理
-			//	MouseKeepUp();
-			//}
 		}
 
 		// === 移動に関する処理 === //
@@ -309,7 +309,7 @@ void UpdatePlayer(void)
 		}
 
 		if (TUTORIAL_NOW)
-		{// チュートリアル中
+		{// チュートリアル中、特別な移動制限をかける
 			if (pPlayer->pos.x > 1620.0f)
 			{
 				pPlayer->pos.x = 1620.0f;
@@ -361,7 +361,7 @@ void UpdatePlayer(void)
 			pPlayer->bDash = false;
 		}
 
-		// 重力をかけ続ける
+		// === 重力をかけ続ける === //
 		pPlayer->move.y += GRAVITY;
 
 		// === マップの限界値まで行った時に、各移動量を0にする === //
@@ -382,14 +382,23 @@ void UpdatePlayer(void)
 			pPlayer->pos.x = MAX_XMOVE2;
 		}
 
-		// 移動量の更新
+		// === 駅のガラスの裏にいかないようにする === //
+		if (pPlayer->pos.x <= 700.0f)
+		{
+			if (pPlayer->pos.z <= -1160.0f)
+			{
+				pPlayer->pos.z = -1160.0f;
+			}
+		}
+
+		// === 移動量の更新 === //
 		pPlayer->pos += pPlayer->move;
 
-		// 慣性を掛ける
+		// === 慣性を掛ける === //
 		pPlayer->move.x += (0.0f - pPlayer->move.x) * (PLAYER_INI * 1.5f);
 		pPlayer->move.z += (0.0f - pPlayer->move.z) * (PLAYER_INI * 1.5f);
 
-		// 地面に沈んだ時
+		// === 地面に沈んだ時 === //
 		if (pPlayer->pos.y < 100.0f)
 		{
 			pPlayer->pos.y = 100.0f;
@@ -411,7 +420,7 @@ void UpdatePlayer(void)
 			pPlayer->bJump = false;
 		}
 
-		// モデルとの当たり判定
+		// === モデルとの当たり判定 === //
 		if (CollisionModel(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move, 5, 50))
 		{
 			if (pPlayer->bJump == true
@@ -436,7 +445,7 @@ void UpdatePlayer(void)
 			CollisionItem(pPlayer->pos, PLAYER_RANGE, nCntPlayer);
 		}
 
-		// ギミックとの当たり判定
+		// === ギミックとの当たり判定 === //
 		if (CollisionGimmick(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move, &g_aPlayer[nCntPlayer], 5.0f, 20.0f - (nCntPlayer * 18.0f)))
 		{
 			if (pPlayer->bJump == true
@@ -456,7 +465,7 @@ void UpdatePlayer(void)
 			pPlayer->bJump = false;
 		}
 
-		// 壁との当たり判定
+		// === 壁との当たり判定 === //
 		CollisionWall(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move);
 
 		// デバッグ表示
@@ -466,7 +475,7 @@ void UpdatePlayer(void)
 		}
 	}
 
-	// プロンプトを描画
+	// === プロンプトを描画 === //
 	DetectionPrompt(g_aPlayer[PLAYERTYPE_GIRL].pos, 50.0f);
 
 	if (GAME_NOW)
@@ -479,7 +488,7 @@ void UpdatePlayer(void)
 				if (GetJoypadTrigger(0, JOYKEY_LB) == true || GetKeyboardTrigger(DIK_Q) == true)
 				{
 					// 駅の範囲内なら切り替えを行わないようにする
-					if (g_aPlayer[PLAYERTYPE_MOUSE].pos.z <= -774.0f && g_aPlayer[PLAYERTYPE_MOUSE].pos.x <= 700.0f)
+					if (g_aPlayer[PLAYERTYPE_MOUSE].pos.z <= -774.0f && g_aPlayer[PLAYERTYPE_MOUSE].pos.x <= 700.0f && pGimmick->bClear == false)
 					{
 						// 駅のガラス張りのところでは切り替え不可
 					}
@@ -501,14 +510,14 @@ void UpdatePlayer(void)
 			}
 		}
 
-		// アイテムの情報を取得
+		// === アイテムの情報を取得 === //
 		Item* pItem = GetItem();
 
 		if (g_ActivePlayer == PLAYERTYPE_MOUSE || GetNumPlayer() == 2)
 		{// ネズミ操作時
-			for (int nCntItem = 0; nCntItem < ITEMTYPE_MAX; nCntItem++, pItem++)
+			for (int nCntItem = 0; nCntItem < 4; nCntItem++, pItem++)
 			{// アイテムのMAX分回す
-				if (pItem->bGet == false)
+				if (pItem->bGet == false && pItem->bUse == true)
 				{// 取得されていないアイテムの場合	
 
 					// 距離の計算
@@ -516,33 +525,51 @@ void UpdatePlayer(void)
 					pItem->Dist.y = SQUARE(pItem->pos.y - pMouse->pos.y);
 					pItem->Dist.z = SQUARE(pItem->pos.z - pMouse->pos.z);
 
+					// 距離の絶対値を算出
 					pItem->fDistance = sqrtf(__ABSOLUTE(pItem->Dist.x + pItem->Dist.z));
 
-					if (pItem->fDistance > 200.0f)
+					if (pItem->fDistance >= 200.0f)
 					{
 						pItem->fDistance = 200.0f;
 					}
 
-					// 値を0~1にスケール(正規)化
+					// === 値を0~1にスケール(正規)化 === //
 					pItem->fCol = pItem->fDistance / 200.0f;
 
-					// === 正解パーツ用パーティクル === //
-					if (pItem->type >= 0 && pItem->type <= 4)
-					{
-						//SetParticle(pItem->pos, MyMathUtil::GetColLerp(D3DXCOLOR(COL_BLUE), D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f), fCol), D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 1, 3, true, true);
-						SetEffect(pItem->pos, MyMathUtil::GetColLerp(D3DXCOLOR(COL_BLUE), D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f), pItem->fCol), D3DXVECTOR3(5.0f, 5.0f, 5.0f), 20.0f, 20.0f, 10.0f, 3, true, true);
+					if (pItem->fCol < 0.4)
+					{// 近いと青色に
+						// === 正解パーツ用パーティクル === //
+						if (pItem->type >= 0 && pItem->type <= 4)
+						{
+							//SetParticle(pItem->pos, MyMathUtil::GetColLerp(D3DXCOLOR(COL_BLUE), D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f), fCol), D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 1, 3, true, true);
+							//SetEffect(pItem->pos, MyMathUtil::GetColLerp(D3DXCOLOR(COL_BLUE), D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f), pItem->fCol), D3DXVECTOR3(5.0f, 5.0f, 5.0f), 20.0f, 20.0f, 10.0f, 3, true, true);
+							SetEffect(pItem->pos, COL_BLUE, D3DXVECTOR3(5.0f, 5.0f, 5.0f), 20.0f, 20.0f, 10.0f, 3, true, true);
+						}
+						// === 外れパーツ用パーティクル === //
+						if (pItem->type >= 5 && pItem->type <= 9)
+						{
+							SetParticle(pItem->pos, COL_RED, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true, true);
+						}
 					}
-					// === 外れパーツ用パーティクル === //
-					if (pItem->type >= 5 && pItem->type <= 9)
-					{
-						SetParticle(pItem->pos, COL_RED, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true, true);
+					else
+					{// 遠いと白に
+						// === 正解パーツ用パーティクル === //
+						if (pItem->type >= 0 && pItem->type <= 4)
+						{
+							//SetEffect(pItem->pos, MyMathUtil::GetColLerp(D3DXCOLOR(COL_BLUE), D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f), pItem->fCol), D3DXVECTOR3(5.0f, 5.0f, 5.0f), 20.0f, 20.0f, 10.0f, 3, true, true);
+							SetEffect(pItem->pos, DEF_COL, D3DXVECTOR3(5.0f, 5.0f, 5.0f), 20.0f, 20.0f, 10.0f, 3, true, true);
+						}
+						// === 外れパーツ用パーティクル === //
+						if (pItem->type >= 5 && pItem->type <= 9)
+						{
+							SetParticle(pItem->pos, DEF_COL, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true, true);
+						}
 					}
-
 				}
 			}
 		}
 	}
-
+#ifdef _DEBUG
 	// ***************************************************************************
 	// デバッグ処理
 		// デバッグ用のプレイ人数切り替え処理
@@ -576,6 +603,7 @@ void UpdatePlayer(void)
 		PrintDebugProc("Player1 : [RSHIFT] :  JUMP\n");
 	}
 	// ***************************************************************************
+#endif
 }
 
 // =================================================
@@ -1974,8 +2002,6 @@ void ShotMouse(void)
 			// 手にくっつける
 			D3DXVec3TransformCoord(&pMouse->pos, &offset, &pPlayer->PartsInfo.aParts[19].mtxWorld);
 		}
-
-		//PrintDebugProc("vec %~3f", vec.x, vec.y, vec.z);
 
 		if (pPlayer->state != PLAYERSTATE_THROWWAITING)
 		{
