@@ -24,7 +24,7 @@ CameraType	g_readyCamera;				// 直近でセットしたカメラ
 //**************************************************************
 // プロトタイプ宣言
 void SetCameraOption(void);				// カメラ設定
-void NearCameraIntegration(void);		// 2P時近ければカメラ統合
+void CameraIntegration(void);			// 2P時近ければカメラ統合
 void CameraChange(void);				// カメラを変更
 void CameraFollow(void);				// プレイヤーに追従移動
 void CameraRotation(P_CAMERA pCamera);	// プレイヤーと同じ向きに回転
@@ -171,7 +171,7 @@ void UpdateCamera(void)
 	// 画面	
 	if (GetNumPlayer() == 2)
 	{// ２人プレイ時
-		NearCameraIntegration();		// 近ければ結合
+		CameraIntegration();		// 近ければ結合
 	}
 	else if (g_nActivePlayer != nActivePlayer)
 	{// 操作キャラが変わったら
@@ -229,8 +229,8 @@ void UpdateCamera(void)
 }
 
 //==============================================================
-// 2Pプレイ時プレイヤーが近ければカメラを統合
-void NearCameraIntegration(void)
+// カメラを統合
+void CameraIntegration(void)
 {
 	//**************************************************************
 	// 変数宣言
@@ -241,7 +241,7 @@ void NearCameraIntegration(void)
 	vec3		playerDist = pGirl->pos - pMouse->pos;
 
 	// 一定距離近づいたら
-	if (SQUARE(playerDist.x) + SQUARE(playerDist.y) + SQUARE(playerDist.z) < 1000)
+	if (SQUARE(playerDist.x) + SQUARE(playerDist.y) + SQUARE(playerDist.z) < 1000 || pCamera->bFocusMode)
 	{
 		for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCamera++)
 		{
@@ -518,14 +518,12 @@ void SetCamera(void)
 
 	for (int nCntCamera = 0; nCntCamera < MAX_CAMERA; nCntCamera++, pCam++)
 	{
-		// 設置するカメラが一つなら
 		if (g_nNumEnableCamera == 1)
-		{
+		{// 設置するカメラが一つなら
 			if (GetNumPlayer() == 1)
-			{
-				// アクティブプレイヤーがネズミなら
+			{// プレイヤー数が1人なら
 				if (g_nActivePlayer == PLAYERTYPE_MOUSE && nCntCamera != PLAYERTYPE_MOUSE)
-				{
+				{// アクティブプレイヤーがネズミなら
 					continue;
 				}
 			}
@@ -799,17 +797,17 @@ void CleanFog(void)
 //=========================================================================================
 // フォーカスモードのオンオフ
 //=========================================================================================
-void Focus(CameraType type, bool bEnable)
+void Focus(bool bEnable)
 {
-	g_aCamera[type].bFocusMode = bEnable;
+	g_aCamera[0].bFocusMode = bEnable;
 }
 
 //=========================================================================================
 // フォーカス位置設定
 //=========================================================================================
-void Focus(CameraType type, vec3 pos)
+void Focus(vec3 pos)
 {
-	P_CAMERA pCam = &g_aCamera[type];
+	P_CAMERA pCam = &g_aCamera[0];
 
 	if (pCam->bFocusMode)
 	{
