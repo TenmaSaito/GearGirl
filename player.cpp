@@ -252,13 +252,6 @@ void UpdatePlayer(void)
 				ShotMouse();
 
 			}
-
-			// === 少女操作時のねずみの処理 === //
-			if (GetActivePlayer() == PLAYERTYPE_GIRL && nCntPlayer == PLAYERTYPE_MOUSE)
-			{
-				// 少女にネズミが追従する処理
-				MouseKeepUp();
-			}
 		}
 
 		// === 移動に関する処理 === //
@@ -309,8 +302,14 @@ void UpdatePlayer(void)
 					SetEnableOrbit(g_nIdxOrbit, false);
 					SetEnableOrbit(g_nIdxOrbitSub, false);
 				}
-
 				JumpPlayer((PlayerType)nCntPlayer);	// ジャンプに関する処理
+			}
+
+			// === 少女操作時のねずみの処理 === //
+			if (GetActivePlayer() == PLAYERTYPE_GIRL && nCntPlayer == PLAYERTYPE_MOUSE)
+			{
+				// 少女にネズミが追従する処理
+				MouseKeepUp();
 			}
 		}
 
