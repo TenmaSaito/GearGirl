@@ -73,6 +73,13 @@ ItemInfo		g_aItemInfo[ITEMTYPE_MAX] =
 	{"data\\MODEL\\Item\\ShaftCurv.x",-1},			// [8] 少しい曲がった軸
 	{"data\\MODEL\\Item\\GearLarge.x",-1},			// [9] ゆがんだぜんまい
 };
+ItemInfo		g_aItemUIInfo[PUTOUTUI_MAX] =
+{
+	{NULL,-1},
+	{"data\\TEXTURE\\putout.png",-1},
+	{"data\\TEXTURE\\cancel.png",-1},
+	{"data\\TEXTURE\\close.png",-1},
+};
 
 //**************************************************************
 // プロトタイプ宣言
@@ -90,17 +97,9 @@ void InitItem(void)
 	//**************************************************************
 	// 変数宣言
 	P_ITEM		pItem = GetItem();
-	P_ITEMINFO	pItemInfo = &g_aItemInfo[0];
 	P_ITEMQUOTA pItemQuota = &g_aItemQuota[0];
 	P_ITEMQUOTA pPutQuota = &g_aPutQuota[0];
 	P_ITEMQUOTA pUI = &g_aPutOutUI[0];
-	int			nUITex[PUTOUTUI_MAX] =
-	{
-		-1,// PUTOUT_BG
-		-1,// PUTOUT_ITEMBOX
-		-1,// PUTOUT_ENTRYBOX
-		-1,// PUTOUT_ENTER
-	};
 
 	g_bPutOut = false;		// アイテムを提出状態ではない
 	g_nSelectPut = -1;		// 提出時のカーソル
@@ -108,8 +107,17 @@ void InitItem(void)
 	LoadTexture("data\\TEXTURE\\flame.png", & g_nItemQuotaFlameTex);
 
 	// アイテム情報読込
+	P_ITEMINFO	pItemInfo = &g_aItemInfo[0];
 	for (int nCntItem = 0; nCntItem < ITEMTYPE_MAX; nCntItem++, pItemInfo++)
-		LoadModelData(pItemInfo->pModelFile, &pItemInfo->nNumGet);
+		LoadModelData(pItemInfo->pFile, &pItemInfo->nNumGet);
+
+	// UIテクスチャ読込
+	P_ITEMINFO pItemUI = &g_aItemUIInfo[0];
+	for (int nCntUI = 0; nCntUI < PUTOUTUI_MAX; nCntUI++, pItemUI++)
+	{
+		if (pItemUI->pFile)
+			LoadTexture(pItemUI->pFile, &pItemUI->nNumGet);
+	}
 
 	// アイテム配置初期化
 	for (int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++, pItem++)
@@ -146,7 +154,7 @@ void InitItem(void)
 			pUI->size = vec2(SCREEN_WIDTH * 0.1f, SCREEN_WIDTH * 0.04f);
 			pUI->col = colX(1.0f, 1.0f, 1.0f, 0.8f);
 		}
-		pUI->nType = nUITex[nCntUI];
+		pUI->nType = g_aItemUIInfo[nCntUI].nNumGet;
 		pUI->nIdxBox = Set2DPolygon(pUI->pos, vec3_ZERO, pUI->size, pUI->nType, pUI->col);
 		SetEnable2DPolygon(pUI->nIdxBox, false);
 		pUI->bUse = false;
@@ -212,12 +220,6 @@ void UninitItem(void)
 //=========================================================================================
 void UpdateItem(void)
 {
-	// マップアイテム更新
-	UpdateMapItem();
-
-	// ポーチアイテム更新
-	UpdatePouchItem();
-
 	// 便利屋判定
 	if (IsDispPrompt(GetIdxShopPrompt()))
 	{
@@ -231,12 +233,21 @@ void UpdateItem(void)
 			g_bPutOut = false;
 		}
 		if (g_bPutOut == false)
+		{// 提出がオフになったら初期化
 			g_nSelectPut = 0;
+			g_nChoisePut = -1;
+		}
 	}
-	else if(g_bOnDebugItem == false)
-	{
+	else if (g_bOnDebugItem == false)
+	{// デバッグ用
 		g_bPutOut = false;
 	}
+
+	// マップアイテム更新
+	UpdateMapItem();
+
+	// ポーチアイテム更新
+	UpdatePouchItem();
 
 #ifdef _DEBUG
 	if (GetKeyboardTrigger(DIK_F3))
@@ -341,10 +352,7 @@ void UpdatePouchItem(void)
 			// メニュー表示中、色をつける
 			// アイテム欄
 			for (int nCntQuota = 0; nCntQuota < ITEMTYPE_MAX; nCntQuota++, pItemQuota++)
-			{
 				SetColor2DPolygon(pItemQuota->nIdxBox, colX(1.0f, 1.0f, 1.0f, 0.3f));
-				SetEnable2DPolygon(pItemQuota->nIdxBox, true);
-			}
 		}
 		else
 		{
@@ -429,8 +437,8 @@ void DrawUIItem(void)
 	// 提出処理
 	if (g_bPutOut)
 	{
-		 OnUIitemEnable(&g_aPutQuota[0], NUM_PUTOUTITEM);
-		 OnUIitemEnable(&g_aItemQuota[0], ITEMTYPE_MAX);
+		OnUIitemEnable(&g_aPutQuota[0], NUM_PUTOUTITEM);
+		OnUIitemEnable(&g_aItemQuota[0], ITEMTYPE_MAX);
 	}
 	// 所持アイテムの確認
 	else if (GetEnableUImenu())
@@ -448,7 +456,7 @@ void OnUIitemEnable(P_ITEMQUOTA pQuota, int nMAX)
 	PMODELDATA			pModel;						// モデルデータへのポインタ
 	LPDIRECT3DDEVICE9	pDevice = GetDevice();		// デバイスへのポインタ
 	D3DMATERIAL9		matDef;						// 現在のマテリアル保存用
-	D3DXMATERIAL*		pMat;						// マテリアルデータへのポインタ
+	D3DXMATERIAL* pMat;						// マテリアルデータへのポインタ
 	vec3				pos = vec3_ZERO, rot = vec3_ZERO;
 
 	SetEnableZFunction(pDevice, true);
@@ -456,7 +464,7 @@ void OnUIitemEnable(P_ITEMQUOTA pQuota, int nMAX)
 	for (int nCntQuota = 0; nCntQuota < nMAX; nCntQuota++, pQuota++)
 	{
 		if (pQuota->bUse)
-		{			
+		{
 			// カメラ設置
 			SetUiCameraCenter(pQuota->pos, vec2(100.0f, 100.0f));
 
@@ -483,7 +491,7 @@ void OnUIitemEnable(P_ITEMQUOTA pQuota, int nMAX)
 			//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 			// 現在のマテリアルを取得
 			pDevice->GetMaterial(&matDef);
-			
+
 			// マテリアルデータへのポインタを取得
 			pMat = (D3DXMATERIAL*)pModel->pBuffMat->GetBufferPointer();
 
@@ -537,7 +545,7 @@ void CollisionItem(vec3 pos, float fRange, int type)
 					continue;
 
 				// アイテム欄の空き状況を取得
-				for (int nCntQuota = 0; nCntQuota < ITEMTYPE_MAX; nCntQuota++,pItemQuota++)
+				for (int nCntQuota = 0; nCntQuota < ITEMTYPE_MAX; nCntQuota++, pItemQuota++)
 				{
 					if (pItemQuota->bUse == false)
 					{
@@ -563,7 +571,7 @@ void CollisionItem(vec3 pos, float fRange, int type)
 void PutOut(void)
 {
 	P_ITEMQUOTA pItemQuota = &g_aItemQuota[0];
-	
+
 	//*********************************************************
 	// 提出アイテム欄
 	for (int nCntQuota = 0; nCntQuota < ITEMTYPE_MAX; nCntQuota++, pItemQuota++)
@@ -578,7 +586,7 @@ void PutOut(void)
 		{// 選択中なら
 			pItemQuota->size = vec2(SCREEN_WIDTH * 0.1f, SCREEN_WIDTH * 0.1f);
 			SetSize2DPolygon(pItemQuota->nIdxBox, pItemQuota->size);					// 少し拡大
-			
+
 			if (pItemQuota->bUse)
 			{// アイテムが登録されている
 				SetColor2DPolygon(pItemQuota->nIdxBox, colX(1.0f, 0.8f, 0.8f, 0.5f));	// 枠を赤	
@@ -588,7 +596,7 @@ void PutOut(void)
 		{// 選択されていない
 			pItemQuota->size = vec2(SCREEN_WIDTH * 0.08f, SCREEN_WIDTH * 0.08f);
 			SetSize2DPolygon(pItemQuota->nIdxBox, pItemQuota->size);					// 元の大きさ
-			
+
 			if (pItemQuota->bUse)
 			{//	アイテムあり
 				SetColor2DPolygon(pItemQuota->nIdxBox, colX(0.8f, 0.8f, 0.8f, 0.5f));	// 枠を明るく			
@@ -600,9 +608,9 @@ void PutOut(void)
 		}
 	}
 
-	// アイテムを選ぶ
+	// カーソル左右移動
 	if (GetKeyboardRepeat(DIK_D) || GetKeyboardRepeat(DIK_RIGHT)
-		|| GetJoypadRepeat(0,JOYKEY_RIGHT) || GetJoypadRepeat(0,JOYKEY_LEFT_STICK_RIGHT))
+		|| GetJoypadRepeat(0, JOYKEY_RIGHT) || GetJoypadRepeat(0, JOYKEY_LEFT_STICK_RIGHT))
 	{
 		// カーソルが上段にいたら
 		if (-1 < g_nChoisePut && g_nChoisePut < NUM_PUTOUTITEM)
@@ -640,7 +648,7 @@ void PutOut(void)
 				g_nChoisePut = 0;
 			}
 		}
-		else if(g_nChoisePut < 0)
+		else if (g_nChoisePut < 0)
 		{// カーソルが中段なら
 			g_nSelectPut--;
 			if (g_nSelectPut < 0)
@@ -656,19 +664,19 @@ void PutOut(void)
 		}
 	}
 
-	// 取り消し・提出ボタン
+	// カーソル上下移動
 	if (GetKeyboardRepeat(DIK_W) || GetKeyboardRepeat(DIK_UP)
 		|| GetJoypadRepeat(0, JOYKEY_UP) || GetJoypadRepeat(0, JOYKEY_LEFT_STICK_UP))
 	{
 		if (NUM_PUTOUTITEM <= g_nChoisePut)
 			g_nChoisePut = -1;
-		else if(g_nChoisePut == -1)
+		else if (g_nChoisePut == -1)
 			g_nChoisePut = 2;
 	}
 	if (GetKeyboardRepeat(DIK_S) || GetKeyboardRepeat(DIK_DOWN)
 		|| GetJoypadRepeat(0, JOYKEY_DOWN) || GetJoypadRepeat(0, JOYKEY_LEFT_STICK_DOWN))
 	{
-		if(g_nChoisePut < 0)
+		if (g_nChoisePut < 0)
 			g_nChoisePut = NUM_PUTOUTITEM;
 		else if (g_nChoisePut < NUM_PUTOUTITEM)
 			g_nChoisePut = -1;
@@ -710,28 +718,20 @@ void SelectItem(void)
 		{// 未確定の枠
 			pPutQuota->col = colX(0.6f, 0.6f, 0.6f, 0.8f);	// 枠を暗く
 		}
-		SetColor2DPolygon(pPutQuota->nIdxBox, pPutQuota->col);	
+		SetColor2DPolygon(pPutQuota->nIdxBox, pPutQuota->col);
 	}
 
 	//*********************************************************
-	// 各UI
+	// 各UI（下段
 	for (int nCntUI = 0; nCntUI < PUTOUTUI_MAX; nCntUI++, pUI++)
 	{
-			//pUI->size = vec2(150.0f, 150.0f);
-			//SetSize2DPolygon(pUI->nIdxBox, pUI->size);
-
-			//pUI->pos = vec3(400, SCREEN_HEIGHT * 0.8f, 0.0f);
-			//SetPosition2DPolygon(pUI->nIdxBox, pUI->pos);
-
-			//pUI->col = colX(1.0f, 1.0f, 1.0f, 1.0f);
-			//pUI->col = colX(1.0f, 1.0f, 1.0f, 1.0f);
 		if (g_nChoisePut - PUTOUTUI_MAX == nCntUI && nCntUI != 0)
-		{
+		{// 選択されている場合
 			SetSize2DPolygon(pUI->nIdxBox, vec2(pUI->size.x * 1.2f, pUI->size.y * 1.2f));
 			SetColor2DPolygon(pUI->nIdxBox, colX(1.0f, 1.0f, 1.0f, 1.0f));
 		}
 		else
-		{
+		{// それ以外
 			SetSize2DPolygon(pUI->nIdxBox, pUI->size);
 			SetColor2DPolygon(pUI->nIdxBox, pUI->col);
 		}
@@ -741,11 +741,52 @@ void SelectItem(void)
 
 	//*********************************************************
 	// 決定処理
-	if (GetKeyboardTrigger(DIK_RETURN) || GetJoypadTrigger(0,JOYKEY_A))
+	if (GetKeyboardTrigger(DIK_RETURN) || GetJoypadTrigger(0, JOYKEY_A))
 	{
-		// アイテム枠なら
-		if (-1 < g_nSelectPut && g_nSelectPut < ITEMTYPE_MAX)
+		// 上下のメニューが選択されていたら
+		if (g_nChoisePut != -1)
 		{
+			if (PUTOUTUI_MAX < g_nChoisePut)
+			{// 下段
+				switch (g_nChoisePut - PUTOUTUI_MAX)
+				{
+				case 1:// 提出
+					if (GetFade() != FADE_NONE) return; // フェード中なら無視
+
+					JudgmentEnding(&g_aPutOut[0], 5);
+
+					if (GetTimer() <= 10)
+						SetFade(MODE_RESULT);
+
+					break;
+
+				case 2:// 取り消し
+					pPutQuota = &g_aPutQuota[0];
+
+					for (int nCntQuota = 0; nCntQuota < NUM_PUTOUTITEM; nCntQuota++, pPutQuota++)
+					{
+						pPutQuota->nType = -1;
+						pPutQuota->nSave = -1;
+						pPutQuota->bUse = false;
+					}
+
+					break;
+
+				case 3:// やめる
+					g_bPutOut = false;
+					break;
+
+				default:
+					break;
+				}
+			}
+			else
+			{// 上段
+
+			}
+		}
+		else if (-1 < g_nSelectPut && g_nSelectPut < ITEMTYPE_MAX)
+		{// アイテム枠なら
 			// アイテムが入っていたら
 			if (g_aItemQuota[g_nSelectPut].bUse == true)
 			{
@@ -770,20 +811,12 @@ void SelectItem(void)
 		}
 		else if (g_nSelectPut < 0)
 		{// 選択取り消し
-			pPutQuota = &g_aPutQuota[0];
-
-			for (int nCntQuota = 0; nCntQuota < NUM_PUTOUTITEM; nCntQuota++, pPutQuota++)
-			{
-				pPutQuota->nType = -1;
-				pPutQuota->nSave = -1;
-				pPutQuota->bUse = false;
-			}
 		}
 		else
 		{// それら以外を選択していたら決定と同じ処理
 			if (GetFade() != FADE_NONE) return; // フェード中なら無視
 
-			JudgmentEnding(&g_aPutOut[0],5);
+			JudgmentEnding(&g_aPutOut[0], 5);
 
 			if (GetTimer() <= 10)
 				SetFade(MODE_RESULT);
