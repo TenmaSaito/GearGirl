@@ -98,7 +98,7 @@ int JudgmentEnding(ITEMTYPE *pIn, UINT size)
 	{
 		result = ENDTYPE_BAD;
 		SetEndingType(result);
-		return g_nScoreJudge;
+		return ENDTYPE_BAD;
 	}
 
 	int nCountTrue = 0;
@@ -117,7 +117,7 @@ int JudgmentEnding(ITEMTYPE *pIn, UINT size)
 				{
 					result = ENDTYPE_BAD;
 					SetEndingType(result);
-					return g_nScoreJudge;
+					return ENDTYPE_BAD;
 				}
 			}
 		}
@@ -128,18 +128,18 @@ int JudgmentEnding(ITEMTYPE *pIn, UINT size)
 	{
 		result = ENDTYPE_HAPPY;
 		SetEndingType(result);
-		return g_nScoreJudge;
+		return ENDTYPE_HAPPY;
 	}
 	else
 	{
 		result = ENDTYPE_NORMAL;
 		SetEndingType(result);
-		return g_nScoreJudge;
+		return ENDTYPE_NORMAL;
 	}
 
 	// —áŠO
 	result = ENDTYPE_BAD;
 	SetEndingType(result);
 
-	return g_nScoreJudge;
+	return ENDTYPE_BAD;
 }
