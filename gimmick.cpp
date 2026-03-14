@@ -48,6 +48,17 @@ STRUCT()
 } ItemSpawn;
 
 //**********************************************************************************
+//*** ギミックチュートリアルの列挙型 ***
+//**********************************************************************************
+typedef enum
+{
+	TUTORIALTYPE_CATAPALT = 0,
+	TUTORIALTYPE_CHAINSAW,
+	TUTORIALTYPE_VALVE,
+	TUTORIALTYPE_MAX
+}TUTORIALTYPE;
+
+//**********************************************************************************
 //*** プロトタイプ宣言 ***
 //**********************************************************************************
 void CaseMulti(LPGIMMICK pGimmick);
@@ -95,6 +106,8 @@ GIMMICK_DATA g_aGimmickData[GIMMICKTYPE_MAX] =
 ItemSpawn g_aItemSpawn[g_nNumSpawnItem];	// 出現アイテム情報
 IDX_TEXTURE g_nIdxTexTutorial[3];			// チュートリアル1枚絵用のインデックス
 bool g_bAnyTex;								// いずれかのテクスチャが表示されているか
+bool g_bDispTutorialChainsaw;				// 1度でもチェンソーチュートリアルテクスチャを表示したかどうか
+bool g_bDispTutorialvalve;					// 1度でもバルブチュートリアルテクスチャを表示したかどうか
 
 //==================================================================================
 // --- 初期化 ---
@@ -155,6 +168,9 @@ void InitGimmick(void)
 	// 初期化
 	AutoZeroMemory(g_aItemSpawn);
 
+	g_bDispTutorialChainsaw = false;
+	g_bDispTutorialvalve = false;
+
 	// インデックスを保存
 	for (int nCntSpawn = 0; nCntSpawn < g_nNumSpawnItem; nCntSpawn++)
 	{
@@ -166,11 +182,15 @@ void InitGimmick(void)
 
 	LoadTexture("data/TEXTURE/catapalttutorial.png", &TexTutorial);
 	g_nIdxTexTutorial[0] = Set2DPolygon(POS_TUTORIAL, VECNULL, D3DXVECTOR2(900.0f, 610.0f), TexTutorial, DEF_COL);
-	SetEnable2DPolygon(g_nIdxTexTutorial[0], false);
+	SetEnable2DPolygon(g_nIdxTexTutorial[TUTORIALTYPE_CATAPALT], false);
 
 	LoadTexture("data/TEXTURE/chainsawtutorial.png", &TexTutorial);
 	g_nIdxTexTutorial[1] = Set2DPolygon(POS_TUTORIAL, VECNULL, D3DXVECTOR2(900.0f, 610.0f), TexTutorial, DEF_COL);
-	SetEnable2DPolygon(g_nIdxTexTutorial[1], false);
+	SetEnable2DPolygon(g_nIdxTexTutorial[TUTORIALTYPE_CHAINSAW], false);
+
+	//LoadTexture("data/TEXTURE/VALVEtutorial.png", &TexTutorial);
+	//g_nIdxTexTutorial[1] = Set2DPolygon(POS_TUTORIAL, VECNULL, D3DXVECTOR2(900.0f, 610.0f), TexTutorial, DEF_COL);
+	//SetEnable2DPolygon(g_nIdxTexTutorial[TUTORIALTYPE_VALVE], false);
 }
 
 //==================================================================================
@@ -227,13 +247,31 @@ void UpdateGimmick(void)
 		pGimmick->nCounter++;		// カウンター増加
 	}
 
+	// プレイヤーの情報を取得
+	Player* pPlayer = GetPlayer();
+
+	if (g_bDispTutorialChainsaw == false)
+	{
+		if (IsDetection(g_aGimmick[GIMMICKTYPE_FALLENTREE].pos, pPlayer->pos, 700.0f) == true)
+		{// 一定距離以内でパーティクルを出す
+			SetParticle(D3DXVECTOR3(1655, 110, 460), COL_RED, D3DXVECTOR3(0.0f, 100.0f, 0.0f), D3DXVECTOR3(3.0f, 200.0f, 3.0f), 5, 2.0f, 2, 20, false, false);
+		}
+	}
+	if (g_bDispTutorialvalve == false)
+	{
+		if (IsDetection(g_aGimmick[GIMMICKTYPE_STATUE].pos, pPlayer->pos, 700.0f) == true)
+		{// 一定距離以内でパーティクルを出す
+			SetParticle(D3DXVECTOR3(1120, 110, 110), COL_RED, D3DXVECTOR3(0.0f, 100.0f, 0.0f), D3DXVECTOR3(3.0f, 200.0f, 3.0f), 5, 2.0f, 2, 20, false, false);
+		}
+	}
+
 	// === チュートリアルを非表示に === //
 	if (g_bAnyTex == true)
 	{
 		if (GetKeyboardTrigger(DIK_RETURN) == true || GetJoypadTrigger(0, JOYKEY_A) == true)
 		{
 			g_bAnyTex = false;
-			for (int nCnt = 0; nCnt < 3; nCnt++)
+			for (int nCnt = 0; nCnt < TUTORIALTYPE_MAX; nCnt++)
 			{// すべてのチュートリアルを非表示に
 				SetEnable2DPolygon(g_nIdxTexTutorial[nCnt], false);
 			}
@@ -444,6 +482,7 @@ void CaseMulti(LPGIMMICK pGimmick)
 	if (IsDetection(pGimmick->pos, pPlayer[PLAYERTYPE_GIRL].pos, pGimmick->fRadius)
 		&& (pGimmick->could == COULD_PLAYER_GIRL || pGimmick->could == COULD_PLAYER_ALL))
 	{ // 少女の判定
+		// === 倒木の判定処理 === //
 		if (pGimmick->myType == GIMMICKTYPE_FALLENTREE && pPlayer->motionType == MOTIONTYPE_CUTTING && pPlayer->nKey == 3)
 		{
 			pGimmick->bClear = true;
@@ -457,10 +496,25 @@ void CaseMulti(LPGIMMICK pGimmick)
 			pGimmick->bClear = true;
 		}
 
+		// === バルブの判定処理 === //
 		if (pGimmick->myType == GIMMICKTYPE_STATUE && pPlayer->motionType == MOTIONTYPE_ACTION && pPlayer->Armtype == ARMTYPE_NORMAL)
 		{
 			pGimmick->bClear = true;
 			SetMotionType(MOTIONTYPE_ACTION, false, 0, GIMMICKTYPE_STATUE);
+		}
+
+		// === チュートリアル表示処理 === //
+		// チェンソーのチュートリアルをまだ表示していなければだす
+		if ((pGimmick->myType == GIMMICKTYPE_FALLENTREE || pGimmick->myType == GIMMICKTYPE_FALLENTREE2 || pGimmick->myType == GIMMICKTYPE_FALLENTREE3) && g_bDispTutorialChainsaw == false)
+		{
+			SetEnable2DPolygon(g_nIdxTexTutorial[1], true);
+			g_bDispTutorialChainsaw = true;	// 表示済みに
+		}
+		// バルブのチュートリアルをまだ表示していなければだす
+		if (pGimmick->myType == GIMMICKTYPE_STATUE && g_bDispTutorialvalve == false)
+		{
+			SetEnable2DPolygon(g_nIdxTexTutorial[TUTORIALTYPE_VALVE], true);
+			g_bDispTutorialvalve = true;	// 表示済みに
 		}
 
 		bDetection = true;
@@ -496,6 +550,7 @@ void CaseSolo(LPGIMMICK pGimmick)
 	if (IsDetection(pGimmick->pos, pPlayer[type].pos, pGimmick->fRadius)
 		&& (pGimmick->could == type || pGimmick->could == COULD_PLAYER_ALL))
 	{ // 操作中プレイヤーの判定
+		// === 倒木の判定処理 === //
 		if (pGimmick->motionType == MOTIONTYPE_ACTION) return;
 
 		if (pGimmick->myType == GIMMICKTYPE_FALLENTREE && pPlayer->motionType == MOTIONTYPE_CUTTING && pPlayer->nKey == 3)
@@ -511,10 +566,27 @@ void CaseSolo(LPGIMMICK pGimmick)
 			pGimmick->bClear = true;
 		}
 
+		// === バルブの判定処理 === //
 		if (pGimmick->myType == GIMMICKTYPE_STATUE && pPlayer->motionType == MOTIONTYPE_ACTION && pPlayer->Armtype == ARMTYPE_NORMAL)
 		{
 			pGimmick->bClear = true;
 			SetMotionType(MOTIONTYPE_ACTION, false, 0, GIMMICKTYPE_STATUE);
+		}
+
+		// === チュートリアル表示処理 === //
+		// チェンソーのチュートリアルをまだ表示していなければだす
+		if ((pGimmick->myType == GIMMICKTYPE_FALLENTREE || pGimmick->myType == GIMMICKTYPE_FALLENTREE2 || pGimmick->myType == GIMMICKTYPE_FALLENTREE3) && g_bDispTutorialChainsaw == false)
+		{
+			SetEnable2DPolygon(g_nIdxTexTutorial[1], true);
+			g_bDispTutorialChainsaw = true;	// 表示済みに
+			g_bAnyTex = true;	// チュートリアル表示中
+		}
+		// バルブのチュートリアルをまだ表示していなければだす
+		if (pGimmick->myType == GIMMICKTYPE_STATUE && g_bDispTutorialvalve == false)
+		{
+			SetEnable2DPolygon(g_nIdxTexTutorial[TUTORIALTYPE_VALVE], true);
+			g_bDispTutorialvalve = true;	// 表示済みに
+			g_bAnyTex = true;	// チュートリアル表示中
 		}
 
 		bDetection = true;

@@ -15,12 +15,11 @@
 #define	MAX_PART		(6)		// パーツの最大数
 #define	MAX_PLAYER		(2)		// プレイヤーの最大数
 #define PLAYER_POSDEF	D3DXVECTOR3(1400.0f, 100.0f, -1000.0f) // プレイヤーの初期位置
-#define	PLAYER_MOVE		(0.7f)	// プレイヤーの移動速度
+#define	PLAYER_MOVE		(0.6f)	// プレイヤーの移動速度
 #define	PLAYER_ROTMOVE	(0.3f)	// プレイヤーの回転速度
 #define	PLAYER_INI		(0.2f)	// プレイヤーの慣性
 #define	PLAYER_LIM		(50.0f)	// プレイヤーの移動制限
-#define	ATTACK_MOVE		(1.0f)	// 突進の移動速度
-#define	JUMP_FORCE		(2.1f)	// ジャンプ力
+#define	JUMP_FORCE		(2.4f)	// ジャンプ力
 
 #define	GRAVITY			(-0.14f)			// 重力
 #define	STICK_DEADAREA	(10000)			// ジョイスティックのデッドエリア

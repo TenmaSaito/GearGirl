@@ -431,22 +431,25 @@ void UpdatePlayer(void)
 		}
 
 		// === モデルとの当たり判定 === //
-		if (CollisionModel(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move, 5, 50))
-		{
-			if (pPlayer->bJump == true
-				&& pPlayer->motionType != MOTIONTYPE_LANDING
-				&& pPlayer->motionTypeBlend != MOTIONTYPE_LANDING)
-			{// 着地モーション
-				SetMotionType(MOTIONTYPE_LANDING, true, 15, (PlayerType)nCntPlayer);
-				pPlayer->bUseLandMotion = true;
-			}
+		if (nCntPlayer == PLAYERTYPE_GIRL || (nCntPlayer == PLAYERTYPE_MOUSE && GetActivePlayer() == PLAYERTYPE_MOUSE))
+		{// 少女に対してと、ネズミは操作しているときのみ
+			if (CollisionModel(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move, 5, 50))
+			{
+				if (pPlayer->bJump == true
+					&& pPlayer->motionType != MOTIONTYPE_LANDING
+					&& pPlayer->motionTypeBlend != MOTIONTYPE_LANDING)
+				{// 着地モーション
+					SetMotionType(MOTIONTYPE_LANDING, true, 15, (PlayerType)nCntPlayer);
+					pPlayer->bUseLandMotion = true;
+				}
 
-			if (nCntPlayer == PLAYERTYPE_MOUSE)
-			{// 着地時に予想着地点を消す
-				int nIdxfield = GetIdxEffectField();
-				SetEnableField(nIdxfield, false);
+				if (nCntPlayer == PLAYERTYPE_MOUSE)
+				{// 着地時に予想着地点を消す
+					int nIdxfield = GetIdxEffectField();
+					SetEnableField(nIdxfield, false);
+				}
+				pPlayer->bJump = false;
 			}
-			pPlayer->bJump = false;
 		}
 
 		if (GAME_NOW)
@@ -456,23 +459,26 @@ void UpdatePlayer(void)
 		}
 
 		// === ギミックとの当たり判定 === //
-		if (CollisionGimmick(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move, &g_aPlayer[nCntPlayer], 5.0f, 20.0f - (nCntPlayer * 18.0f)))
-		{
-			if (pPlayer->bJump == true
-				&& pPlayer->motionType != MOTIONTYPE_LANDING
-				&& pPlayer->motionTypeBlend != MOTIONTYPE_LANDING)
-			{// 着地モーション
-				SetMotionType(MOTIONTYPE_LANDING, true, 15, (PlayerType)nCntPlayer);
-				pPlayer->bUseLandMotion = true;
-			}
+		if (nCntPlayer == PLAYERTYPE_GIRL || (nCntPlayer == PLAYERTYPE_MOUSE && GetActivePlayer() == PLAYERTYPE_MOUSE))
+		{// 少女に対してと、ネズミは操作しているときのみ
+			if (CollisionGimmick(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move, &g_aPlayer[nCntPlayer], 5.0f, 20.0f - (nCntPlayer * 18.0f)))
+			{
+				if (pPlayer->bJump == true
+					&& pPlayer->motionType != MOTIONTYPE_LANDING
+					&& pPlayer->motionTypeBlend != MOTIONTYPE_LANDING)
+				{// 着地モーション
+					SetMotionType(MOTIONTYPE_LANDING, true, 15, (PlayerType)nCntPlayer);
+					pPlayer->bUseLandMotion = true;
+				}
 
-			if (nCntPlayer == PLAYERTYPE_MOUSE)
-			{// 着地時に予想着地点を消す
-				int nIdxfield = GetIdxEffectField();
-				SetEnableField(nIdxfield, false);
-			}
+				if (nCntPlayer == PLAYERTYPE_MOUSE)
+				{// 着地時に予想着地点を消す
+					int nIdxfield = GetIdxEffectField();
+					SetEnableField(nIdxfield, false);
+				}
 
-			pPlayer->bJump = false;
+				pPlayer->bJump = false;
+			}
 		}
 
 		// === 壁との当たり判定 === //
