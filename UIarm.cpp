@@ -14,16 +14,23 @@
 #define UI_ARM_SIZE			100			// UIの縦サイズ
 #define UI_DRAW_START_X		1110.0f		// UIの描画始めX
 #define UI_SPACE			200.0f		// UIのX間の距離
-#define UI_TEX_SIZE			0.5f		// テクスチャのサイズ
+#define UI_TEX_SIZE			0.25f		// テクスチャのサイズ
+
+// =================================================
+// アームUIの構造体
+typedef struct
+{
+	D3DXVECTOR3				pos;					// UIアームの位置
+	D3DXVECTOR3				move;					// UIアームの移動量
+}ArmUI;
 
 //=========================================================
 // グローバル変数
 //=========================================================
 LPDIRECT3DTEXTURE9		g_pTextureUIarm = {};		// テクスチャへのポインタ
 LPDIRECT3DVERTEXBUFFER9	g_pVtxBuffUIarm = NULL;		// 頂点バッファへのポインタ
-D3DXVECTOR3				g_UIarmPos;					// UIアームの位置
-D3DXVECTOR3				g_UIarmMove;				// UIアームの移動量
 int g_nDirectionPlayer;								// プレイ方法　// 0:1人 * 1:2人
+ArmUI g_ArmUI;
 
 //=========================================================
 // UIアームの初期化処理
@@ -37,7 +44,7 @@ void InitUIarm(void)
 
 	//-------------------------------------
 	// テクスチャの読み込み
-	D3DXCreateTextureFromFile(pDevice, "data\\TEXTURE\\arm_tex.jpg", &g_pTextureUIarm);
+	D3DXCreateTextureFromFile(pDevice, "data\\TEXTURE\\armui.png", &g_pTextureUIarm);
 
 	//-------------------------------------
 	// 頂点バッファの作成
@@ -50,8 +57,8 @@ void InitUIarm(void)
 
 	//-------------------------------------
 	// 初期化
-	g_UIarmPos = D3DXVECTOR3(UI_DRAW_START_X, 570.0f, 0.0f);
-	g_UIarmMove = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	g_ArmUI.pos = D3DXVECTOR3(UI_DRAW_START_X, 570.0f, 0.0f);
+	g_ArmUI.move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	g_nDirectionPlayer = 0;
 	
 	//-------------------------------------
@@ -59,18 +66,10 @@ void InitUIarm(void)
 	g_pVtxBuffUIarm->Lock(0, 0, (void**)&pVtx, 0);
 
 	//位置の設定
-	pVtx[0].pos.x = g_UIarmPos.x;
-	pVtx[1].pos.x = g_UIarmPos.x + UI_ARM_SIZE;
-	pVtx[2].pos.x = g_UIarmPos.x;
-	pVtx[3].pos.x = g_UIarmPos.x + UI_ARM_SIZE;
-	pVtx[0].pos.y = g_UIarmPos.y;
-	pVtx[1].pos.y = g_UIarmPos.y;
-	pVtx[2].pos.y = g_UIarmPos.y + UI_ARM_SIZE;
-	pVtx[3].pos.y = g_UIarmPos.y + UI_ARM_SIZE;
-	pVtx[0].pos.z = 0.0f;
-	pVtx[1].pos.z = 0.0f;
-	pVtx[2].pos.z = 0.0f;
-	pVtx[3].pos.z = 0.0f;
+	pVtx[0].pos = D3DXVECTOR3(g_ArmUI.pos.x, g_ArmUI.pos.y, 0.0f);
+	pVtx[1].pos = D3DXVECTOR3(g_ArmUI.pos.x + UI_ARM_SIZE, g_ArmUI.pos.y, 0.0f);
+	pVtx[2].pos = D3DXVECTOR3(g_ArmUI.pos.x, g_ArmUI.pos.y + UI_ARM_SIZE, 0.0f);
+	pVtx[3].pos = D3DXVECTOR3(g_ArmUI.pos.x + UI_ARM_SIZE, g_ArmUI.pos.y + UI_ARM_SIZE, 0.0f);
 
 	// rhwの設定
 	pVtx[0].rhw = 1.0f;
@@ -128,11 +127,11 @@ void UpdateUIarm(void)
 
 	if (g_nDirectionPlayer == 0)
 	{
-		g_UIarmPos.x = UI_DRAW_START_X;
+		g_ArmUI.pos.x = UI_DRAW_START_X;
 	}
 	else if (g_nDirectionPlayer == 1)
 	{
-		g_UIarmPos.x = 500.0f;
+		g_ArmUI.pos.x = 500.0f;
 	}
 
 	//-------------------------------------
@@ -154,6 +153,22 @@ void UpdateUIarm(void)
 		pVtx[1].tex.x += UI_TEX_SIZE;
 		pVtx[2].tex.x += UI_TEX_SIZE;
 		pVtx[3].tex.x += UI_TEX_SIZE;
+	}
+
+	// === 最初に戻す === //
+	if (pVtx[0].tex.x == UI_TEX_SIZE * 3)
+	{
+		pVtx[0].tex = D3DXVECTOR2(0.0f, 0.0f);
+		pVtx[1].tex = D3DXVECTOR2(UI_TEX_SIZE, 0.0f);
+		pVtx[2].tex = D3DXVECTOR2(0.0f, 1.0f);
+		pVtx[3].tex = D3DXVECTOR2(UI_TEX_SIZE, 1.0f);
+	}
+	else if (pVtx[1].tex.x == 0.0f)
+	{
+		pVtx[0].tex = D3DXVECTOR2(0.0f, 0.0f);
+		pVtx[1].tex = D3DXVECTOR2(UI_TEX_SIZE, 0.0f);
+		pVtx[2].tex = D3DXVECTOR2(0.0f, 1.0f);
+		pVtx[3].tex = D3DXVECTOR2(UI_TEX_SIZE, 1.0f);
 	}
 
 	//-------------------------------------

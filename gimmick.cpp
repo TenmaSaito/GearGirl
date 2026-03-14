@@ -171,7 +171,7 @@ void UninitGimmick(void)
 void UpdateGimmick(void)
 {
 	LPGIMMICK pGimmick = &g_aGimmick[0];
-	ItemSpawn *pItemSpawn = &g_aItemSpawn[0];
+	ItemSpawn* pItemSpawn = &g_aItemSpawn[0];
 
 	// もし更新すべき何かがあるならここで更新
 	for (int nCntGimmick = 0; nCntGimmick < GIMMICKTYPE_MAX; nCntGimmick++, pGimmick++)
@@ -692,17 +692,34 @@ bool CollisionGimmick(
 					&& bCollision[2] == true
 					&& bCollision[3] == true)
 				{// 上の当たり判定
-					if (pPos->y + fHeight >= pObject->pos.y + offset.y + pObjInfo->mtxMin.y
-						&& pPosOld->y + fHeight <= pObject->pos.y + offset.y + pObjInfo->mtxMin.y)
-					{
-						pPos->y = pObject->pos.y + offset.y + pObjInfo->mtxMin.y - fHeight;
+					if (g_aGimmick[nCntModel].myType != GIMMICKTYPE_BIGBUTTON && g_aGimmick[nCntModel].myType != GIMMICKTYPE_SMALLBUTTON)
+					{// ボタン以外の判定
+						if (pPos->y + fHeight >= pObject->pos.y + offset.y + pObjInfo->mtxMin.y
+							&& pPosOld->y + fHeight <= pObject->pos.y + offset.y + pObjInfo->mtxMin.y)
+						{
+							pPos->y = pObject->pos.y + offset.y + pObjInfo->mtxMin.y - fHeight;
+						}
+						else if (pPos->y <= pObject->pos.y + offset.y + pObjInfo->mtxMax.y
+							&& pPosOld->y >= pObject->pos.y + offset.y + pObjInfo->mtxMax.y)
+						{
+							pPos->y = pObject->pos.y + offset.y + pObjInfo->mtxMax.y;
+							bLand = true;
+							pMove->y = 0.0f;
+						}
 					}
-					else if (pPos->y <= pObject->pos.y + offset.y + pObjInfo->mtxMax.y
-						&& pPosOld->y >= pObject->pos.y + offset.y + pObjInfo->mtxMax.y)
-					{
-						pPos->y = pObject->pos.y + offset.y + pObjInfo->mtxMax.y;
-						bLand = true;
-						pMove->y = 0.0f;
+					else
+					{// ボタンの判定
+						if (pPos->y + fHeight >= pObject->pos.y + offset.y + pObjInfo->mtxMin.y
+							&& pPosOld->y + fHeight <= pObject->pos.y + offset.y + pObjInfo->mtxMin.y)
+						{
+							pPos->y = pObject->pos.y + offset.y + pObjInfo->mtxMin.y - fHeight;
+						}
+						else if (pPos->y <= pObject->pos.y + offset.y + pObjInfo->mtxMax.y)
+						{
+							pPos->y = pObject->pos.y + offset.y + pObjInfo->mtxMax.y;
+							bLand = true;
+							pMove->y = 0.0f;
+						}
 					}
 
 					if (g_aGimmick[nCntModel].bClear == false && g_aGimmick[nCntModel].myType == GIMMICKTYPE_BIGBUTTON && GetActivePlayer() == PLAYERTYPE_GIRL)
@@ -1041,7 +1058,7 @@ void UpdateMotion(GIMMICKTYPE type)
 //================================================================================================================
 // --- ギミック情報の譲渡 ---
 //================================================================================================================
-Gimmick *GetGimmick(void)
+Gimmick* GetGimmick(void)
 {
 	return &g_aGimmick[0];
 }
@@ -1051,7 +1068,7 @@ Gimmick *GetGimmick(void)
 //================================================================================================================
 void SpawnItem(void)
 {
-	ItemSpawn *pItemSpawn = &g_aItemSpawn[0];
+	ItemSpawn* pItemSpawn = &g_aItemSpawn[0];
 
 	for (int nCntUpdate = 0; nCntUpdate < g_nNumSpawnItem; nCntUpdate++, pItemSpawn++)
 	{
@@ -1072,7 +1089,7 @@ void SpawnItem(void)
 //================================================================================================================
 void UpdateSpawnItem(void)
 {
-	ItemSpawn *pItemSpawn = &g_aItemSpawn[0];
+	ItemSpawn* pItemSpawn = &g_aItemSpawn[0];
 
 	for (int nCntUpdate = 0; nCntUpdate < g_nNumSpawnItem; nCntUpdate++, pItemSpawn++)
 	{
