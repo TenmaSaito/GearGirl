@@ -110,5 +110,6 @@ bool CollisionGimmick(D3DXVECTOR3 *pPos,
 	float fRadius,
 	float fHeight);
 Gimmick* GetGimmick(void);	// ギミック情報の譲渡
+bool IsTutorialreveal(void);	// チュートリアルが表示されているかどうか
 
 #endif	// !_GIMMICK_H_

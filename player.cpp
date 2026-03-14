@@ -345,6 +345,10 @@ void UpdatePlayer(void)
 		if (pPlayer->state == PLAYERSTATE_THROWWAITING && nCntPlayer == PLAYERTYPE_GIRL)
 		{
 			D3DXVECTOR3 ParabolaVec = GetParabolaVec();
+			D3DXVECTOR3 offset = RHAND_OFFSET;
+
+			// 手にくっつけて、放物線の場所を確定させた位置から描画
+			D3DXVec3TransformCoord(&g_aPlayer[PLAYERTYPE_MOUSE].pos, &offset, &pPlayer->PartsInfo.aParts[19].mtxWorld);
 
 			// エフェクトの描画
 			SetParabola(g_aPlayer[PLAYERTYPE_MOUSE].pos, ParabolaVec, D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f), 2.0f, 2.0f, 1.0f, true);

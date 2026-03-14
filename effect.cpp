@@ -128,8 +128,8 @@ void InitEffect(void)
 	// 初期化
 	g_aIdxZTest[MAX_EFFECT] = {};
 
-
-	g_nIdxEffectField = SetField(VECNULL, VECNULL, VECNULL, 10, 10, NULL, 1, 1, D3DCULL_NONE);
+	// 着地点に資格ポリゴンを表示するためにインデックスを取得
+	g_nIdxEffectField = SetField(VECNULL, VECNULL, VECNULL, 20, 20, NULL, 1, 1, D3DCULL_NONE);
 	SetEnableField(g_nIdxEffectField, false);
 
 	EndDevice();
@@ -245,10 +245,20 @@ void UpdateEffect(void)
 				{
 					g_aEffect[nCntEffect].pos.y = 100.5f;
 
-					// 着地点にフィールドを設置
-					SetPositionField(g_nIdxEffectField, g_aEffect[nCntEffect].pos);
-					SetColorField(g_nIdxEffectField, COL_RED);
-					SetEnableField(g_nIdxEffectField, true);
+
+					if (g_aEffect[nCntEffect].pos.z <= -774.0f && g_aEffect[nCntEffect].pos.x <= 700.0f)
+					{// 駅のガラス張りのところは線路の上を考慮した位置に表示
+						SetPositionField(g_nIdxEffectField, D3DXVECTOR3(g_aEffect[nCntEffect].pos.x, g_aEffect[nCntEffect].pos.y + 2.0f, g_aEffect[nCntEffect].pos.z));
+						SetColorField(g_nIdxEffectField, COL_RED);
+						SetEnableField(g_nIdxEffectField, true);
+					}
+					else
+					{// 道等のY軸が基準値のところに表示する場合
+						// 着地点にフィールドを設置
+						SetPositionField(g_nIdxEffectField, g_aEffect[nCntEffect].pos);
+						SetColorField(g_nIdxEffectField, COL_RED);
+						SetEnableField(g_nIdxEffectField, true);
+					}
 
 					g_aEffect[nCntEffect].bUse = false;
 				}
@@ -504,7 +514,7 @@ void SetParabola(D3DXVECTOR3 pos, D3DXVECTOR3 move, D3DXCOLOR col, float Width, 
 				g_aEffect[nCntEffect].move.y = 5.5f;
 			}
 			// 上限
-			else if(g_aEffect[nCntEffect].move.y > 7.5f)
+			else if (g_aEffect[nCntEffect].move.y > 7.5f)
 			{
 				g_aEffect[nCntEffect].move.y = 7.5f;
 			}

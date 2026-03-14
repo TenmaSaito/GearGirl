@@ -16,10 +16,13 @@
 #include "particle.h"
 #include "Texture.h"
 #include "item.h"
+#include "input.h"
+#include "2Dpolygon.h"
 
 //**********************************************************************************
 //*** マクロ定義 ***
 //**********************************************************************************
+#define POS_TUTORIAL	D3DXVECTOR3(SCREEN_WIDTH / 2, 400.0f, 0.0f)	// チュートリアル1枚絵を出す位置
 
 //**********************************************************************************
 //*** ギミッククリア構造体 ***
@@ -90,6 +93,8 @@ GIMMICK_DATA g_aGimmickData[GIMMICKTYPE_MAX] =
 };
 
 ItemSpawn g_aItemSpawn[g_nNumSpawnItem];	// 出現アイテム情報
+IDX_TEXTURE g_nIdxTexTutorial[3];			// チュートリアル1枚絵用のインデックス
+bool g_bAnyTex;								// いずれかのテクスチャが表示されているか
 
 //==================================================================================
 // --- 初期化 ---
@@ -155,6 +160,17 @@ void InitGimmick(void)
 	{
 		g_aItemSpawn[nCntSpawn].nIdxItem = g_aIdxItem[nCntSpawn];
 	}
+
+	// === チュートリアルの2Dポリゴンのインデックスを取得 === //
+	int TexTutorial;
+
+	LoadTexture("data/TEXTURE/catapalttutorial.png", &TexTutorial);
+	g_nIdxTexTutorial[0] = Set2DPolygon(POS_TUTORIAL, VECNULL, D3DXVECTOR2(900.0f, 610.0f), TexTutorial, DEF_COL);
+	SetEnable2DPolygon(g_nIdxTexTutorial[0], false);
+
+	LoadTexture("data/TEXTURE/chainsawtutorial.png", &TexTutorial);
+	g_nIdxTexTutorial[1] = Set2DPolygon(POS_TUTORIAL, VECNULL, D3DXVECTOR2(900.0f, 610.0f), TexTutorial, DEF_COL);
+	SetEnable2DPolygon(g_nIdxTexTutorial[1], false);
 }
 
 //==================================================================================
@@ -209,6 +225,19 @@ void UpdateGimmick(void)
 		UpdateMotion(pGimmick->myType);
 
 		pGimmick->nCounter++;		// カウンター増加
+	}
+
+	// === チュートリアルを非表示に === //
+	if (g_bAnyTex == true)
+	{
+		if (GetKeyboardTrigger(DIK_RETURN) == true || GetJoypadTrigger(0, JOYKEY_A) == true)
+		{
+			g_bAnyTex = false;
+			for (int nCnt = 0; nCnt < 3; nCnt++)
+			{// すべてのチュートリアルを非表示に
+				SetEnable2DPolygon(g_nIdxTexTutorial[nCnt], false);
+			}
+		}
 	}
 }
 
@@ -726,6 +755,10 @@ bool CollisionGimmick(
 					{// でかボタンを押す
 						SetMotionType(MOTIONTYPE_ACTION, false, 0, GIMMICKTYPE_BIGBUTTON);
 						ClearGimmick(GIMMICKTYPE_BIGBUTTON);
+
+						// カタパルトチュートリアルを表示
+						SetEnable2DPolygon(g_nIdxTexTutorial[0], true);
+						g_bAnyTex = true;
 					}
 
 					if (g_aGimmick[nCntModel].bClear == false && g_aGimmick[nCntModel].myType == GIMMICKTYPE_SMALLBUTTON && GetActivePlayer() == PLAYERTYPE_MOUSE)
@@ -1114,4 +1147,12 @@ void UpdateSpawnItem(void)
 			pItemSpawn->move = VECNULL;
 		}
 	}
+}
+
+//================================================================================================================
+// --- チュートリアルが表示されているかどうか ---
+//================================================================================================================
+bool IsTutorialreveal(void)
+{
+	return g_bAnyTex;
 }

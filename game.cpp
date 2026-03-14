@@ -78,7 +78,7 @@ ObserveEnding g_obEnding;			// エンディングへの移行状態
 void InitGame(void)
 {
 	/*** Aの初期化 ***/
-	
+
 	//===========================================
 	// 初期化
 
@@ -280,7 +280,8 @@ void UpdateGame(void)
 		|| GetDualInput(JOYKEY_START, DUAL_JOYPAD | DUAL_OR | DUAL_TRIGGER,
 			JOYKEY_START, DUAL_JOYPAD | DUAL_DUAL | DUAL_TRIGGER))
 		&& g_obEnding.bAlreadyEnd == false
-		&& IsEnableItemPut() == false)
+		&& IsEnableItemPut() == false
+		&& IsTutorialreveal() == false)
 	{
 		g_bPause = g_bPause ? false : true;
 	}
@@ -295,91 +296,94 @@ void UpdateGame(void)
 	//ポーズ状態がOFFの時
 	else
 	{
-		/*** Aの更新 ***/
+		if (IsTutorialreveal() == false)
+		{// チュートリアルが表示されていない場合
+			/*** Aの更新 ***/
 
-		/*** カメラの更新 ***/
-		UpdateCamera();
+			/*** カメラの更新 ***/
+			UpdateCamera();
 
-		/*** ビルボードの更新 ***/
-		UpdateBillboard();
+			/*** ビルボードの更新 ***/
+			UpdateBillboard();
 
-		/*** 3Dモデルの更新 ***/
-		Update3DModel();
+			/*** 3Dモデルの更新 ***/
+			Update3DModel();
 
-		/*** 2Dポリゴンの更新 ***/
-		Update2DPolygon();
+			/*** 2Dポリゴンの更新 ***/
+			Update2DPolygon();
 
-		/*** 床の更新 ***/
-		UpdateField();
+			/*** 床の更新 ***/
+			UpdateField();
 
-		/*** メッシュの更新 ***/
-		UpdateMesh();
+			/*** メッシュの更新 ***/
+			UpdateMesh();
 
-		/*** メッシュオービットの更新 ***/
-		UpdateMeshOrbit();
+			/*** メッシュオービットの更新 ***/
+			UpdateMeshOrbit();
 
-		/*** モデルの更新 ***/
-		UpdateModel();
+			/*** モデルの更新 ***/
+			UpdateModel();
 
-		/*** プレイヤーの更新 ***/
-		UpdatePlayer();
+			/*** プレイヤーの更新 ***/
+			UpdatePlayer();
 
-		/*** アイテムの更新 ***/
-		if (IsEndDialog() == true && GetCommonFade() == FADE_NONE)
-		{
-			UpdateItem();
+			/*** アイテムの更新 ***/
+			if (IsEndDialog() == true && GetCommonFade() == FADE_NONE)
+			{
+				UpdateItem();
+			}
+
+			/*** ライトの更新 ***/
+			UpdateLight();
+
+			/*** プロンプトの更新 ***/
+			UpdatePrompt();
+
+			/*** タイマーの更新 ***/
+			UpdateTimer();
+
+			/*** UIアームの更新 ***/
+			UpdateUIarm();
+
+			/*** UIメニュー更新 ***/
+			UpdateUImenu();
+
+			/*** UIプレイヤーの更新 ***/
+			UpdateUIplayer();
+
+			/*** UIコレクトの更新 ***/
+			UpdateUIcollect();
+
+			/*** パーティクルの更新 ***/
+			UpdateParticle();
+
+			/*** エフェクトの更新 ***/
+			UpdateEffect();
+
+			/*** ラインエフェクトの更新 ***/
+			UpdateLineEffect();
+
+			/*** マップの更新 ***/
+			UpdateMap();
+
+			/*** ダイアログの更新 ***/
+			UpdateDialog();
+
+			if (IsEndDialog() == true && GetCommonFade() == FADE_NONE)
+			{
+				AddTimer(-1);
+			}
+
+			if ((GetKeyboardTrigger(DIK_5) || GetJoypadTrigger(0, JOYKEY_BACK)) && IsEndDialog() == true && GetCommonFade() == FADE_NONE)
+			{
+				SetEnableUImenu(!GetEnableUImenu(), 0);
+			}
+
+			g_nCounterGame++;
 		}
-
-		/*** ライトの更新 ***/
-		UpdateLight();
-
-		/*** プロンプトの更新 ***/
-		UpdatePrompt();
-
-		/*** タイマーの更新 ***/
-		UpdateTimer();
-
-		/*** UIアームの更新 ***/
-		UpdateUIarm();
-
-		/*** UIメニュー更新 ***/
-		UpdateUImenu();
-
-		/*** UIプレイヤーの更新 ***/
-		UpdateUIplayer();
-
-		/*** UIコレクトの更新 ***/
-		UpdateUIcollect();
 
 		/*** ギミックの更新 ***/
 		UpdateGimmick();
-
-		/*** パーティクルの更新 ***/
-		UpdateParticle();
-
-		/*** エフェクトの更新 ***/
-		UpdateEffect();
-
-		/*** ラインエフェクトの更新 ***/
-		UpdateLineEffect();
-
-		/*** マップの更新 ***/
-		UpdateMap();
-
-		/*** ダイアログの更新 ***/
-		UpdateDialog();
-
-		if (IsEndDialog() == true && GetCommonFade() == FADE_NONE)
-		{
-			AddTimer(-1);
-		}
-
-		if ((GetKeyboardTrigger(DIK_5) || GetJoypadTrigger(0, JOYKEY_BACK)) && IsEndDialog() == true && GetCommonFade() == FADE_NONE)
-		{
-			SetEnableUImenu(!GetEnableUImenu(), 0);
-		}
-
-		g_nCounterGame++;
 	}
 
 	PrintDebugProc("NumPlayer %d  ActivePlayer %d  CameraNum %d", GetNumPlayer(), GetActivePlayer(), GetCameraNum());
@@ -469,7 +473,7 @@ void DrawGame(void)
 	/*** Aの描画 ***/
 
 	/*** UIアームの描画 ***/
-	if (IsEndDialog() == true 
+	if (IsEndDialog() == true
 		&& GetCommonFade() == FADE_NONE
 		&& g_bPause == false)
 	{
@@ -491,7 +495,7 @@ void DrawGame(void)
 
 	/*** マップの描画 ***/
 	if (IsEndDialog() == true
-		&& GetCommonFade() == FADE_NONE 
+		&& GetCommonFade() == FADE_NONE
 		&& GetActivePlayer() == PLAYERTYPE_GIRL
 		&& g_bPause == false
 		&& IsEnableItemPut() == false)
@@ -518,7 +522,7 @@ void DrawGame(void)
 	}
 
 	/*** UIアイテム描画 ***/
-	if (IsEndDialog() == true 
+	if (IsEndDialog() == true
 		&& g_bPause == false
 		&& IsEnableItemPut() == false)
 	{
