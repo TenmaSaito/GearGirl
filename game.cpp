@@ -146,9 +146,6 @@ void InitGame(void)
 	/*** UIコレクト初期化 ***/
 	InitUIcollect();
 
-	/*** ギミックの初期化 ***/
-	InitGimmick();
-
 	/*** エフェクトの初期化 ***/
 	InitEffect();
 
@@ -160,6 +157,9 @@ void InitGame(void)
 
 	/*** マップの初期化 ***/
 	InitMap(D3DXVECTOR3(150, 150, 0.0f), D3DXVECTOR2(180, 180), 1045.0f);
+
+	/*** ギミックの初期化 ***/
+	InitGimmick();
 
 	/*** ダイアログの初期化 ***/
 	InitDialog();

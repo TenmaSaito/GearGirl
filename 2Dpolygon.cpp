@@ -207,7 +207,7 @@ void SetRotation2DPolygon(IDX_2DPOLYGON nIdx2DPolygon, float fAngle)
 	p2DPoly->pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
 	// ポリゴンを回転
-	MyMathUtil::RollPolygon(pVtx, p2DPoly->pos, p2DPoly->fWidth, p2DPoly->fSize, fAngle, 0);
+	MyMathUtil::RollPolygon(pVtx, p2DPoly->pos, p2DPoly->fWidth, p2DPoly->fSize, fAngle);
 
 	/*** 頂点バッファの設定を終了 ***/
 	p2DPoly->pVtxBuff->Unlock();

@@ -210,8 +210,7 @@ void UpdateUImenu(void)
 		GetPTPLerp(pMenu->pos, WINDOW_MID, pMenu->s), 
 		GetPTPLerp(pMenu->size, OPEN_SIZE, pMenu->s).x,
 		GetPTPLerp(pMenu->size, OPEN_SIZE, pMenu->s).y,
-		pMenu->fAngle,
-		0);
+		pMenu->fAngle);
 
 	pMenu->vtxSafe.pVtxBuff->Unlock();
 }
