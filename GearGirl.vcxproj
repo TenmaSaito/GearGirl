@@ -166,6 +166,7 @@
     <ClCompile Include="game.cpp" />
     <ClCompile Include="gimmick.cpp" />
     <ClCompile Include="geteffect.cpp" />
+    <ClCompile Include="guide.cpp" />
     <ClCompile Include="happyend.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="item.cpp" />
@@ -231,6 +232,7 @@
     <ClInclude Include="game.h" />
     <ClInclude Include="gimmick.h" />
     <ClInclude Include="geteffect.h" />
+    <ClInclude Include="guide.h" />
     <ClInclude Include="happyend.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="item.h" />

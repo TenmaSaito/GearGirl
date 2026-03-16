@@ -276,6 +276,9 @@
     <ClCompile Include="itemEffector.cpp">
       <Filter>ソース ファイル\Mode\Game</Filter>
     </ClCompile>
+    <ClCompile Include="guide.cpp">
+      <Filter>ソース ファイル\Mode\Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h">
@@ -463,6 +466,9 @@
     </ClInclude>
     <ClInclude Include="Color_defs.h">
       <Filter>ヘッダー ファイル\Main\System</Filter>
+    </ClInclude>
+    <ClInclude Include="guide.h">
+      <Filter>ヘッダー ファイル\Mode\Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
