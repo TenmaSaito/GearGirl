@@ -30,7 +30,7 @@ void InitMeshCylinder(void)
 
 	//**************************************************************
 	// 位置・サイズの初期化
-	for (int nCntMeshCylinder = 0; nCntMeshCylinder < MAX_MESHCYLINDER; nCntMeshCylinder++,pMesh++)
+	for (int nCntMeshCylinder = 0; nCntMeshCylinder < MAX_MESHCYLINDER; nCntMeshCylinder++, pMesh++)
 	{
 		pMesh->pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		pMesh->rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
@@ -128,7 +128,7 @@ void DrawMeshCylinder(void)
 			//**************************************************************
 			// テクスチャの設定
 			pDevice->SetTexture(0, GetTexture(pMesh->nIdxTexture));
-			
+
 			//**************************************************************
 			// カリングモードの設定
 			pDevice->SetRenderState(D3DRS_CULLMODE, pMesh->culling);
@@ -145,18 +145,18 @@ void DrawMeshCylinder(void)
 //=========================================================================================
 // 壁を設置
 //=========================================================================================
-void SetMeshCylinder(vec3 pos, vec3 rot, float fRadius, float fHeight, int nHeightDivision, int nCircleDivision, D3DCULL cull, int nTex, bool bPat)
+void SetMeshCylinder(vec3 pos, vec3 rot, D3DXCOLOR col, float fRadius, float fHeight, int nHeightDivision, int nCircleDivision, D3DCULL cull, int nTex, bool bPat)
 
 {
 	//**************************************************************
 	// 変数宣言
 	LPDIRECT3DDEVICE9	pDevice = GetDevice();				// デバイスへのポインタ
 	P_MESH				pMesh = GetMeshCylinder();			// メッシュ情報
-	VERTEX_3D*			pVtx;								// 頂点情報へのポインタ
-	WORD*				pIdx;								// インデックス情報へのポインタ
+	VERTEX_3D* pVtx;								// 頂点情報へのポインタ
+	WORD* pIdx;								// インデックス情報へのポインタ
 	D3DXVECTOR3			vecDir;								// 法線ベクトル計算用
 	int					nHeightVerti = nHeightDivision + 1,
-						nCircleVerti = nCircleDivision + 1;	// 縦頂点数と横頂点数
+		nCircleVerti = nCircleDivision + 1;	// 縦頂点数と横頂点数
 	float				fAngle = 0.0f;
 
 	for (int nCntMeshCylinder = 0; nCntMeshCylinder < MAX_MESHCYLINDER; nCntMeshCylinder++, pMesh++)
@@ -204,8 +204,8 @@ void SetMeshCylinder(vec3 pos, vec3 rot, float fRadius, float fHeight, int nHeig
 				{
 					// 頂点座標を設定
 					pVtx[nCntVer].pos = D3DXVECTOR3(pMesh->size.x * sinf(fAngle * nCntCircle),
-						 pMesh->size.y - (pMesh->size.y / nHeightDivision) * nCntHeight,
-						 pMesh->size.z * cosf(fAngle * nCntCircle));
+						pMesh->size.y - (pMesh->size.y / nHeightDivision) * nCntHeight,
+						pMesh->size.z * cosf(fAngle * nCntCircle));
 
 					// 法線ベクトルの設定(正規化)
 					vecDir = D3DXVECTOR3(pVtx[nCntVer].pos.x, 0.0f, pVtx[nCntVer].pos.z); // 頂点座標<=真横なのでYだけ消す
@@ -213,7 +213,7 @@ void SetMeshCylinder(vec3 pos, vec3 rot, float fRadius, float fHeight, int nHeig
 					pVtx[nCntVer].nor = vecDir;
 
 					// 頂点カラー設定
-					pVtx[nCntVer].col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+					pVtx[nCntVer].col = col;
 
 					if (bPat)
 					{// テクスチャを繰り返す場合

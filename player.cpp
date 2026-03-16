@@ -85,7 +85,6 @@ int	g_nMotionCounter = 0;			// モーションカウンター
 bool g_aMovePlayer[PLAYERTYPE_MAX];	// プレイヤーが動いているか
 bool g_bShotMouse = false;			// ネズミを発射するフラグ
 bool g_bMovable = true;			// 動ける状態かどうか
-D3DXVECTOR3 g_Effectmove = {};
 IDX_MESHORBIT g_nIdxOrbit = -1;		// メッシュオービットのインデックス
 IDX_MESHORBIT g_nIdxOrbitSub = -1;	// サブメッシュオービットのインデックス
 int g_nKeepUpCounter = 0;			// 一定時間指定の距離に戻れない時に回すカウンター
@@ -185,8 +184,7 @@ void InitPlayer(void)
 	g_armPlayer = ARMTYPE_NORMAL;	// 通常アーム
 	g_aMovePlayer[0] = false;
 	g_aMovePlayer[1] = false;
-	g_Effectmove = {};
-	g_bShotMouse = false;			// ネズミを発射するフラグ
+	g_bShotMouse = false;		// ネズミを発射するフラグ
 	g_bMovable = true;			// 動ける状態かどうか
 
 	if (GetFirstMode() == MODE_GAME)

@@ -105,7 +105,7 @@ void InitItem(void)
 	g_bPutOut = false;		// アイテムを提出状態ではない
 	g_nSelectPut = -1;		// 提出時のカーソル
 	g_nChoisePut = -1;
-	LoadTexture("data\\TEXTURE\\flame.png", & g_nItemQuotaFlameTex);
+	LoadTexture("data\\TEXTURE\\flame.png", &g_nItemQuotaFlameTex);
 
 	// アイテム情報読込
 	P_ITEMINFO	pItemInfo = &g_aItemInfo[0];
@@ -167,7 +167,7 @@ void InitItem(void)
 		pItemQuota->pos = vec3(nCntQuota * SCREEN_WIDTH * 0.2f, SCREEN_HEIGHT * 0.75f, 0.0f);
 		pItemQuota->col = colX_ZERO;
 		pItemQuota->size = vec2(SCREEN_WIDTH * 0.08f, SCREEN_WIDTH * 0.08f);
-		pItemQuota->nIdxBox = Set2DPolygon(pItemQuota->pos,vec3_ZERO, pItemQuota->size, g_nItemQuotaFlameTex, pItemQuota->col);
+		pItemQuota->nIdxBox = Set2DPolygon(pItemQuota->pos, vec3_ZERO, pItemQuota->size, g_nItemQuotaFlameTex, pItemQuota->col);
 		SetEnable2DPolygon(pItemQuota->nIdxBox, false);
 		pItemQuota->nType = -1;
 		pItemQuota->bUse = false;
@@ -267,7 +267,7 @@ void UpdateMapItem(void)
 	// 変数宣言
 	P_ITEM pItem = GetItem();
 
-	for (int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++, pItem++)
+	for (int nCntItem = 0; nCntItem < ITEMTYPE_MAX; nCntItem++, pItem++)
 	{
 		if (pItem->bUse)
 		{
@@ -280,10 +280,12 @@ void UpdateMapItem(void)
 				MyMathUtil::RepairRot(pItem->rot.x);
 				MyMathUtil::RepairRot(pItem->rot.y);
 
+				// アイテムを囲むようにシリンダーを描画
+				SetMeshCylinder(pItem->pos, VECNULL, D3DXCOLOR(1.0f, 0.0f, 0.0f, 0.4f), 3.0f, 1000.0f, 1, 8, D3DCULL_CCW, -1, false);
+
 				break;
 			}
 
-			SetMeshCylinder(pItem->pos, VECNULL, 5.0f, 600.0f, 1, 1, D3DCULL_CCW, -1, false);
 		}
 	}
 }
@@ -378,7 +380,7 @@ void DrawItem(void)
 	D3DXMATRIX		mtxView, mtxRot, mtxTrans;		// マトリックス計算用
 	PMODELDATA		pModel;							// モデルデータへのポインタ
 	D3DMATERIAL9	matDef;							// 現在のマテリアル保存用
-	D3DXMATERIAL*	pMat;							// マテリアルデータへのポインタ
+	D3DXMATERIAL* pMat;							// マテリアルデータへのポインタ
 
 	for (int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++, pItem++)
 	{

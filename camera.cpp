@@ -9,8 +9,11 @@
 #include "camera.h"
 #include "input.h"
 #include "debugproc.h"
+#include "mathutil.h"
 
 #include "player.h"
+
+using namespace MyMathUtil;
 
 //**************************************************************
 // グローバル変数宣言
@@ -89,7 +92,7 @@ void InitCamera(void)
 		pCamera->fViewRadian = VIEW_RADIAN;						// 視野角
 
 		// 画面設定等
-		pCamera->viewport.MinZ = 0.0f;									
+		pCamera->viewport.MinZ = 0.0f;
 		pCamera->viewport.MaxZ = 1.0f;
 
 		pCamera->nCntAoutRot = 0;								// 自動で回り込み ONにするまでのカウンタ
@@ -153,11 +156,11 @@ void UpdateCamera(void)
 		g_bCameraDebug = g_bCameraDebug ^ 1;
 	}
 
-	if(g_bCameraDebug)
+	if (g_bCameraDebug)
 		PrintDebugProc("ON\n");
 	else
 		PrintDebugProc("OFF\n");
-	
+
 	//**************************************************************
 	// 変数宣言
 	P_CAMERA	pCamera;
@@ -198,7 +201,7 @@ void UpdateCamera(void)
 			pCamera->fViewRadian -= 1.0f;			// 視野角狭め
 		}
 	}
-	
+
 	// 共有部
 	CameraOrbit();					// カメラ回転
 	CameraFollow();					// 追従
@@ -238,8 +241,8 @@ void CameraIntegration(void)
 	// 変数宣言
 	P_CAMERA	pCamera = GetCamera();
 
-	Player*		pGirl = GetPlayer();
-	Player*		pMouse = pGirl + 1;
+	Player* pGirl = GetPlayer();
+	Player* pMouse = pGirl + 1;
 	vec3		playerDist = pGirl->pos - pMouse->pos;
 
 	// 一定距離近づいたら
@@ -371,8 +374,8 @@ void CameraMove(void)
 	// 移動
 	if (GetKeyboardRepeat(CAM_MOVE_UP) == true)
 	{// 前
-		  pCamera->posR.z += -sinf(-pCamera->rot.y) * 5;
-		  pCamera->posR.x += -cosf(-pCamera->rot.y) * 5;
+		pCamera->posR.z += -sinf(-pCamera->rot.y) * 5;
+		pCamera->posR.x += -cosf(-pCamera->rot.y) * 5;
 	}
 	if (GetKeyboardRepeat(CAM_MOVE_DW) == true)
 	{// 手前
@@ -381,13 +384,13 @@ void CameraMove(void)
 	}
 	if (GetKeyboardRepeat(CAM_MOVE_L) == true)
 	{// 左
-		 pCamera->posR.z += -sinf(D3DX_PI * 0.5f - pCamera->rot.y) * 5;
-		 pCamera->posR.x += -cosf(D3DX_PI * 0.5f - pCamera->rot.y) * 5;
+		pCamera->posR.z += -sinf(D3DX_PI * 0.5f - pCamera->rot.y) * 5;
+		pCamera->posR.x += -cosf(D3DX_PI * 0.5f - pCamera->rot.y) * 5;
 	}
 	if (GetKeyboardRepeat(CAM_MOVE_R) == true)
 	{// 右
-		 pCamera->posR.z += sinf(D3DX_PI * 0.5f - pCamera->rot.y) * 5;
-		 pCamera->posR.x += cosf(D3DX_PI * 0.5f - pCamera->rot.y) * 5;
+		pCamera->posR.z += sinf(D3DX_PI * 0.5f - pCamera->rot.y) * 5;
+		pCamera->posR.x += cosf(D3DX_PI * 0.5f - pCamera->rot.y) * 5;
 	}
 
 	//**************************************************************
@@ -411,7 +414,7 @@ void CameraRotation(P_CAMERA pCamera)
 	// 変数宣言
 	bool bUse = false;
 	Player* pPlayer = GetPlayer();
-	float fRotMove =  pPlayer->rot.y - pCamera->rot.y - D3DX_PI * 0.5f;	// 変化させる角度(目的値と現在値の差)
+	float fRotMove = pPlayer->rot.y - pCamera->rot.y - D3DX_PI * 0.5f;	// 変化させる角度(目的値と現在値の差)
 
 	//**************************************************************
 	// 回転方向正規化
@@ -539,7 +542,7 @@ void SetCamera(void)
 			bCameraSwitch = false;
 			continue;
 		}
-		else if(nCntCamera == PLAYERTYPE_GIRL)
+		else if (nCntCamera == PLAYERTYPE_GIRL)
 		{// 1P用カメラ設置
 			bCameraSwitch = true;
 		}
@@ -580,8 +583,8 @@ void SetCamera(void)
 				pDevice->SetRenderState(D3DRS_FOGENABLE, TRUE);
 				pDevice->SetRenderState(D3DRS_FOGTABLEMODE, D3DFOG_LINEAR);
 				pDevice->SetRenderState(D3DRS_FOGCOLOR, pCam->FogColor);
-				pDevice->SetRenderState(D3DRS_FOGSTART,*(DWORD *)(&pCam->fStart));
-				pDevice->SetRenderState(D3DRS_FOGEND,*(DWORD *)(&pCam->fEnd));
+				pDevice->SetRenderState(D3DRS_FOGSTART, *(DWORD*)(&pCam->fStart));
+				pDevice->SetRenderState(D3DRS_FOGEND, *(DWORD*)(&pCam->fEnd));
 			}
 
 			g_readyCamera = (CameraType)nCntCamera;	// セットしたカメラの番号を保存
@@ -598,14 +601,14 @@ void SetCamera(void)
 void SetUICamera(vec3 viewTopLeft, vec2 size)
 {
 	LPDIRECT3DDEVICE9	pDevice = GetDevice();		// デバイスへのポインタ
-	D3DXMATRIX mtxProjection,mtxView;
+	D3DXMATRIX mtxProjection, mtxView;
 	D3DVIEWPORT9 viewport;
-		viewport.X = viewTopLeft.x;
-		viewport.Y = viewTopLeft.y;
-		viewport.Width = size.x;
-		viewport.Height = size.y;
-		viewport.MinZ = 0.0f;
-		viewport.MaxZ = 1.0f;
+	viewport.X = viewTopLeft.x;
+	viewport.Y = viewTopLeft.y;
+	viewport.Width = size.x;
+	viewport.Height = size.y;
+	viewport.MinZ = 0.0f;
+	viewport.MaxZ = 1.0f;
 
 	vec3 vecU = vec3(0.0f, 1.0f, 0.0f),
 		posV = UICAMERA_POSV,
@@ -681,7 +684,7 @@ void GetCameraPos(int nCamNum, vec3* pPosV, vec3* pPosR)
 			posR = pCam->posR;
 		}
 	}
-	
+
 	*pPosV = posV;
 	*pPosR = posR;
 }
@@ -737,7 +740,7 @@ void CameraReset(void)
 	Player* pPlayer = GetPlayer();
 	float	fPlayerRot;
 
-	for (int nCntCamera = 0; nCntCamera < PLAYERTYPE_MAX; nCntCamera++, pCamera++,pPlayer++)
+	for (int nCntCamera = 0; nCntCamera < PLAYERTYPE_MAX; nCntCamera++, pCamera++, pPlayer++)
 	{
 		if (GetJoypadTrigger(nCntCamera, CAM_RESETJOY) || GetKeyboardTrigger(CAM_RESETKEY(nCntCamera)))
 		{
@@ -747,39 +750,23 @@ void CameraReset(void)
 				pPlayer++;
 			}
 
-			pCamera->rotDest.y = pPlayer->rot.y - D3DX_PI;
+			pCamera->rotDest.y = pPlayer->rot.y - D3DX_PI;	// プレイヤーの背後(180度)へ回転させる、目標の角度
+			pCamera->rotDest.y = RepairRot(pCamera->rotDest.y);	// 正規化
 			pCamera->bCamRotation = true;
 		}
-		
-		if(pCamera->bCamRotation)
+
+		if (pCamera->bCamRotation)
 		{
 			float fRotMove = (pCamera->rotDest.y - pCamera->rot.y);	// 変化させる角度(目的値と現在値の差)
 
-			//**************************************************************
-			// 回転方向正規化
-			if (0 < fRotMove)
-			{
-				if (D3DX_PI < fRotMove)
-				{
-					fRotMove -= D3DX_PI * 2;
-				}
-			}
-			else if (fRotMove < 0)
-			{
-				if (fRotMove < -D3DX_PI)
-				{
-					fRotMove += D3DX_PI * 2;
-				}
-			}
+			// 正規化
+			fRotMove = RepairRot(fRotMove);
+
 			// 補正しカメラを回転
 			pCamera->rot.y += fRotMove * CAMERA_ROTET_FACTOR;
 
-			//**************************************************************
-			// 異常な角度(X_PIを超える)値を修正
-			if (pCamera->rot.y < -D3DX_PI)
-				pCamera->rot.y += D3DX_PI * 2;
-			else if (pCamera->rot.y > D3DX_PI)
-				pCamera->rot.y += -D3DX_PI * 2;
+			// 正規化
+			pCamera->rot.y = RepairRot(pCamera->rot.y);
 
 			// ある程度近づいたらオフ
 			if (pCamera->rotDest.y - 0.1f <= pCamera->rot.y && pCamera->rot.y <= pCamera->rotDest.y + 0.1f)
@@ -832,7 +819,7 @@ void CleanFog(void)
 
 	// Disable fog blending.
 	pDevice->SetRenderState(D3DRS_FOGENABLE, FALSE);
-	
+
 	EndDevice();
 }
 

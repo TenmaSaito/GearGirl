@@ -442,7 +442,7 @@ bool LoadModel(void)
 					if (strstr(&Realize[0], "END_CLOUDSET") != NULL)
 					{
 						// 代入した情報をメッシュリングドームに反映
-						SetMeshCylinder(D3DXVECTOR3(0.0f, 0.0f, 0.0f), VECNULL, (float)nRadiusCloud, (float)nHeightCloud, nYdevideCloud, nXdevideCloud, D3DCULL_CW, aIdxTexture[nIdxTexCloud]);
+						SetMeshCylinder(D3DXVECTOR3(0.0f, 0.0f, 0.0f), VECNULL, DEF_COL, (float)nRadiusCloud, (float)nHeightCloud, nYdevideCloud, nXdevideCloud, D3DCULL_CW, aIdxTexture[nIdxTexCloud]);
 						break;
 					}
 				}
