@@ -14,6 +14,8 @@
 #include "3Dmodel.h"
 #include "modeldata.h"
 #include "mathUtil.h"
+#include "common_fade.h"
+#include "dialog.h"
 
 USE_UTIL;
 
@@ -40,7 +42,9 @@ typedef struct
 //*** 定数変数 ***
 //**********************************************************************************
 const char *g_pGuideModelPath = "data/MODEL/Guide/GuideArrow.x";	// ガイド矢印モデルのパス
-const float g_fLength
+const float g_fLengthPlayer = 15.0f;		// プレイヤーとの距離
+const float g_fHeightModel = 15.0f;			// 基本の高さ		
+const D3DXVECTOR3 g_posShop = D3DXVECTOR3(1463, 100, -455);				// 店の位置
 
 //**********************************************************************************
 //*** グローバル変数 ***
@@ -50,7 +54,7 @@ Guide g_guide = {};		// ガイドの情報
 //==================================================================================
 // --- 初期化 ---
 //==================================================================================
-void InitItemEffector(void)
+void InitGuide(void)
 {
 	// 初期化
 	AutoZeroMemory(g_guide);
@@ -68,7 +72,7 @@ void InitItemEffector(void)
 //==================================================================================
 // --- 終了 ---
 //==================================================================================
-void UninitItemEffector(void)
+void UninitGuide(void)
 {
 	// 特になし
 }
@@ -76,7 +80,7 @@ void UninitItemEffector(void)
 //==================================================================================
 // --- 更新 ---
 //==================================================================================
-void UpdateItemEffector(void)
+void UpdateGuide(void)
 {
 	Player *pPlayer = GetPlayer();
 	LPGIMMICK pGimmick = GetGimmick();
@@ -85,6 +89,8 @@ void UpdateItemEffector(void)
 
 	for (int nCntGimmick = 0; nCntGimmick < GIMMICKTYPE_MAX; nCntGimmick++)
 	{
+		if (pGimmick[nCntGimmick].bClear == true) continue;
+
 		if (pGimmick[nCntGimmick].myType == GIMMICKTYPE_TUNNEL
 			|| pGimmick[nCntGimmick].myType == GIMMICKTYPE_CLOSEDDOOR)
 		{
@@ -102,6 +108,16 @@ void UpdateItemEffector(void)
 	}
 
 	float fAngle = GetPosToPos(pGimmick[type].pos, pPlayer->pos);
+	if (TUTORIAL_NOW)
+	{
+		fAngle = GetPosToPos(g_posShop, pPlayer->pos);
+	}
 
 	D3DXVECTOR3 pos;
+	pos.x = pPlayer->pos.x + sinf(fAngle) * g_fLengthPlayer;
+	pos.y = pPlayer->pos.y + g_fHeightModel;
+	pos.z = pPlayer->pos.z + cosf(fAngle) * g_fLengthPlayer;
+
+	SetPosition3DModel(g_guide.Idx3DModel, pos);
+	SetRotation3DModel(g_guide.Idx3DModel, VEC_Y(fAngle));
 }

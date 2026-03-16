@@ -270,7 +270,7 @@
     <ClCompile Include="UIcollect.cpp">
       <Filter>ソース ファイル\Mode\Game</Filter>
     </ClCompile>
-    <ClCompile Include="geteffect.cpp">
+    <ClCompile Include="UIGet.cpp">
       <Filter>ソース ファイル\Mode\Game</Filter>
     </ClCompile>
     <ClCompile Include="itemEffector.cpp">
@@ -461,7 +461,7 @@
     <ClInclude Include="UIcollect.h">
       <Filter>ヘッダー ファイル\Mode\Game</Filter>
     </ClInclude>
-    <ClInclude Include="geteffect.h">
+    <ClInclude Include="UIGet.h">
       <Filter>ヘッダー ファイル\Mode\Game</Filter>
     </ClInclude>
     <ClInclude Include="itemEffector.h">

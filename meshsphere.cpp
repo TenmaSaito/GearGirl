@@ -308,11 +308,11 @@ bool SetColorMeshSphere(P_MESH pMesh, D3DXCOLOR col)
 
 	//**************************************************************
 	// 変数宣言
-	VERTEX_3D *pVtx = (VERTEX_3D*)NULL;						// 頂点情報へのポインタ
-	WORD* pIdx = (WORD*)NULL;								// インデックス情報へのポインタ
-	D3DXVECTOR3			vecDir;								// 法線ベクトル（計算用
-	float				fRadiusCal;							// 計算用半径
-	float				fHeightCal;							// 計算用高さ
+	VERTEX_3D			*pVtx = (VERTEX_3D*)NULL;	// 頂点情報へのポインタ
+	WORD				*pIdx = (WORD*)NULL;		// インデックス情報へのポインタ
+	D3DXVECTOR3			vecDir;						// 法線ベクトル（計算用
+	float				fRadiusCal;					// 計算用半径
+	float				fHeightCal;					// 計算用高さ
 	int					nHeightVerti = pMesh->nHeightDivision + 1,
 						nCircleVerti = pMesh->nCircleDivision + 1;	// 縦頂点数と横頂点数
 	vec3 angle = vec3((float)D3DX_PI / pMesh->nHeightDivision, (float)(2 * D3DX_PI / pMesh->nCircleDivision), (float)D3DX_PI / pMesh->nHeightDivision);
@@ -366,13 +366,13 @@ bool SetRadiusMeshSphere(P_MESH pMesh, float fRadius)
 
 	//**************************************************************
 	// 変数宣言
-	VERTEX_3D* pVtx = (VERTEX_3D*)NULL;						// 頂点情報へのポインタ
-	WORD* pIdx = (WORD*)NULL;								// インデックス情報へのポインタ
-	D3DXVECTOR3			vecDir;								// 法線ベクトル（計算用
-	float				fRadiusCal;							// 計算用半径
-	float				fHeightCal;							// 計算用高さ
+	VERTEX_3D*			pVtx = (VERTEX_3D*)NULL;	// 頂点情報へのポインタ
+	WORD*				pIdx = (WORD*)NULL;			// インデックス情報へのポインタ
+	D3DXVECTOR3			vecDir;						// 法線ベクトル（計算用
+	float				fRadiusCal;					// 計算用半径
+	float				fHeightCal;					// 計算用高さ
 	int					nHeightVerti = pMesh->nHeightDivision + 1,
-		nCircleVerti = pMesh->nCircleDivision + 1;	// 縦頂点数と横頂点数
+						nCircleVerti = pMesh->nCircleDivision + 1;	// 縦頂点数と横頂点数
 	vec3 angle = vec3((float)D3DX_PI / pMesh->nHeightDivision, (float)(2 * D3DX_PI / pMesh->nCircleDivision), (float)D3DX_PI / pMesh->nHeightDivision);
 
 	// 半径を適用

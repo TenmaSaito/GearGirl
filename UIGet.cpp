@@ -1,14 +1,20 @@
 //==================================================================================
 //
-// アイテム獲得時演出のcppファイル [geteffect.cpp]
+// アイテム獲得時演出のcppファイル [UIGet.cpp]
 // Author : TENMA
 //
 //==================================================================================
 //**********************************************************************************
 //*** インクルードファイル ***
 //**********************************************************************************
-#include "geteffect.h"
-#include "modeldata.h"
+#include "UIGet.h"
+
+#include "mathUtil.h"
+#include "Texture.h"
+#include "2Dpolygon.h"
+#include "item.h"
+
+USE_UTIL;
 
 //**********************************************************************************
 //*** マクロ定義 ***
@@ -19,12 +25,12 @@
 //**********************************************************************************
 STRUCT()
 {
-	D3DXVECTOR3 pos;	// エフェクト発生位置
-	float fRadius;		// 半径
-	float alpha;		// α値
+	D3DXCOLOR col;		// 色
+	float s;			// Lerp変換
 	int nCounter;		// カウンター
-	bool bUse;			// 使用状態
-} GetEffect;
+	IDX_2DPOLYGON poly;	// ポリゴンインデックス
+	bool bEnable;		// 描画状態
+} UIGet;
 
 //**********************************************************************************
 //*** プロトタイプ宣言 ***
@@ -33,19 +39,47 @@ STRUCT()
 //**********************************************************************************
 //*** 定数変数 ***
 //**********************************************************************************
-const D3DXVECTOR3 g_posEffectUI = D3DXVECTOR3();		// UIの表示位置
-const D3DXVECTOR2 g_sizeEffectUI = D3DXVECTOR2();		// UIのサイズ
+const D3DXVECTOR3 g_posBefore = D3DXVECTOR3();		// UIの開始位置
+const D3DXVECTOR3 g_posAfter = D3DXVECTOR3();		// UIの最終位置
+const D3DXVECTOR2 g_sizeEffectUI = D3DXVECTOR2();	// UIのサイズ
+
+const char *g_apUIGetTexture[ITEMTYPE_MAX] =		// 各取得時のテクスチャのパス
+{
+	"data/TEXTURE/",
+	"data/TEXTURE/",
+	"data/TEXTURE/",
+	"data/TEXTURE/",
+	"data/TEXTURE/",
+	"data/TEXTURE/",
+	"data/TEXTURE/",
+	"data/TEXTURE/",
+	"data/TEXTURE/",
+	"data/TEXTURE/",
+};
+
+const int g_nCountFadeOutUI = 60;		// 獲得UIが消えるまでの待機時間
 
 //**********************************************************************************
 //*** グローバル変数 ***
 //**********************************************************************************
+UIGet g_aUIGet[ITEMTYPE_MAX] = {};		// 取得時UIの情報
 
 //==================================================================================
 // --- 初期化 ---
 //==================================================================================
 void InitGetEffect(void)
 {
+	// 初期化
+	AutoZeroMemory(g_aUIGet);
 
+	for (int nCntUI = 0; nCntUI < ITEMTYPE_MAX; nCntUI++)
+	{
+		IDX_TEXTURE tex;
+		LoadTexture(g_apUIGetTexture[nCntUI], &tex);
+		g_aUIGet[nCntUI].poly = Set2DPolygon(g_posBefore, VECNULL, g_sizeEffectUI, tex);
+		SetEnable2DPolygon(g_aUIGet[nCntUI].poly, false);
+		g_aUIGet[nCntUI].bEnable = false;
+	}
 }
 
 //==================================================================================
@@ -61,13 +95,25 @@ void UninitGetEffect(void)
 //==================================================================================
 void UpdateGetEffect(void)
 {
+	P_ITEM pItem = GetItem();
+	UIGet *pUIGet = &g_aUIGet[0];
 
-}
+	for (int nCntItem = 0; nCntItem < ITEMTYPE_MAX; nCntItem++, pItem++)
+	{
+		if (pItem->bGet == true)
+		{
+			if (pUIGet->bEnable == false)
+			{ // 初獲得状態なら
 
-//==================================================================================
-// --- 描画 ---
-//==================================================================================
-void DrawGetEffect(void)
-{
+			}
+			else if(pUIGet->s <= 0.0f)
+			{ // 獲得後、一定時間たった場合
 
+			}
+			else
+			{ // 獲得後
+
+			}
+		}
+	}
 }

@@ -17,6 +17,7 @@
 #include "field.h"
 #include "game.h"
 #include "gimmick.h"
+#include "guide.h"
 #include "judgeEnd.h"
 #include "input.h"
 #include "item.h"
@@ -167,6 +168,9 @@ void InitGame(void)
 	/*** アイテムエフェクターの初期化 ***/
 	InitItemEffector();
 
+	/*** ガイドの初期化 ***/
+	InitGuide();
+
 	//==========================================
 	/*** モデルのスクリプト読み込み ***/
 	LoadModel();
@@ -275,6 +279,9 @@ void UninitGame(void)
 
 	/*** アイテムエフェクターの終了 ***/
 	UninitItemEffector();
+
+	/*** ガイドの終了 ***/
+	UninitGuide();
 }
 
 //==================================================================================
@@ -379,6 +386,9 @@ void UpdateGame(void)
 			/*** アイテムエフェクターの更新 ***/
 			UpdateItemEffector();
 
+			/*** ガイドの更新 ***/
+			UpdateGuide();
+
 			if (IsEndDialog() == true && GetCommonFade() == FADE_NONE)
 			{
 				AddTimer(-1);
@@ -435,9 +445,6 @@ void DrawGame(void)
 		/*** 床の描画  ***/
 		DrawField();
 
-		/*** 3Dモデルの描画 ***/
-		Draw3DModel();
-
 		/*** モデルの描画 ***/
 		DrawModel();
 
@@ -480,6 +487,9 @@ void DrawGame(void)
 
 		/*** ラインエフェクトの描画 ***/
 		DrawLineEffect();
+
+		/*** 3Dモデルの描画 ***/
+		Draw3DModel();
 
 		/*** フォグをクリア ***/
 		CleanFog();

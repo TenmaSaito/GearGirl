@@ -165,7 +165,7 @@
     <ClCompile Include="field.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="gimmick.cpp" />
-    <ClCompile Include="geteffect.cpp" />
+    <ClCompile Include="UIGet.cpp" />
     <ClCompile Include="guide.cpp" />
     <ClCompile Include="happyend.cpp" />
     <ClCompile Include="input.cpp" />
@@ -232,7 +232,7 @@
     <ClInclude Include="field.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="gimmick.h" />
-    <ClInclude Include="geteffect.h" />
+    <ClInclude Include="UIGet.h" />
     <ClInclude Include="guide.h" />
     <ClInclude Include="happyend.h" />
     <ClInclude Include="input.h" />

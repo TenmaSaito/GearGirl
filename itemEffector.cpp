@@ -12,6 +12,11 @@
 #include "mesh.h"
 #include "mathUtil.h"
 #include "Color_defs.h"
+#include "input.h"
+#include "player.h"
+#include "debugproc.h"
+
+USE_UTIL;
 
 //**********************************************************************************
 //*** マクロ定義 ***
@@ -37,6 +42,8 @@ STRUCT()
 //**********************************************************************************
 void UpdateFinishEffector(ItemEffector *pEffector);
 void UpdateNormalEffector(ItemEffector *pEffector);
+void _3DVibration(ItemEffector *pEffector);
+void FloatNormalize(float *pInOut, float min, float max);
 
 //**********************************************************************************
 //*** 定数変数 ***
@@ -46,7 +53,8 @@ const D3DXVECTOR2 g_sizeEffectUI = D3DXVECTOR2();		// UIのサイズ
 const float g_fStartRadius = 10.0f;						// 開始時半径
 const float g_fIncreaseRadius = 0.1f;					// 半径増加係数
 const float g_fIncreaseRadiusFinish = 5.0f;				// 終了時半径増加係数
-const float g_fDecreaseAlphaFinish = 0.003f;			// 終了時α値減少係数		
+const float g_fDecreaseAlphaFinish = 0.003f;			// 終了時α値減少係数	
+const WORD g_wStartVib = 65500;							// バイブレーションの初期値
 
 //**********************************************************************************
 //*** グローバル変数 ***
@@ -58,8 +66,6 @@ ItemEffector g_aEffector[ITEMTYPE_MAX];					// エフェクターの種類
 //==================================================================================
 void InitItemEffector(void)
 {
-	USE_UTIL;
-
 	AutoZeroMemory(g_aEffector);
 }
 
@@ -77,6 +83,8 @@ void UninitItemEffector(void)
 void UpdateItemEffector(void)
 {
 	ItemEffector *pEffector = &g_aEffector[0];
+
+	_3DVibration(pEffector);
 
 	for (int nCntEffector = 0; nCntEffector < ITEMTYPE_MAX; nCntEffector++, pEffector++)
 	{
@@ -192,4 +200,75 @@ void UpdateNormalEffector(ItemEffector *pEffector)
 	// 各種変数を適用
 	SetColorMeshSphere(&GetMeshSphere()[pEffector->nIdxSphere], pEffector->col);
 	SetRadiusMeshSphere(&GetMeshSphere()[pEffector->nIdxSphere], pEffector->fRadius);
+}
+
+//==================================================================================
+// --- アイテムエフェクトの立体振動システム ---
+//==================================================================================
+void _3DVibration(ItemEffector *pEffector)
+{
+	// 変数
+	Player *pPlayer = GetPlayer();					// プレイヤーの位置取得用
+	Player *pMouse = &pPlayer[PLAYERTYPE_MOUSE];	// ネズミのポインタ
+	float rotLeft = pMouse->rot.y + D3DX_HALFPI,	// プレイヤーの左
+		  rotRight = pMouse->rot.y - D3DX_HALFPI;	// プレイヤーの右
+	float fLength = 1000000.0f;						// アイテムとプレイヤーの距離
+	ITEMTYPE type;									// 対象のアイテムの種類
+
+	// アイテムの中で最もネズミに近いアイテムを取得
+	for (int nCntItem = 0; nCntItem < ITEMTYPE_MAX; nCntItem++)
+	{
+		if (pEffector[nCntItem].bFinish == true) continue;
+
+		D3DXVECTOR3 diff = pMouse->pos - pEffector[nCntItem].pos;
+		float fPTPLength = D3DXVec3Length(&diff);		// 2点間の距離を求める
+
+		if (fPTPLength < fLength)
+		{
+			fLength = fPTPLength;
+			type = (ITEMTYPE)nCntItem;
+		}
+	}
+
+	// バイブレーション可能距離外の場合終了
+	if (fLength >= MAXWORD)
+	{
+		return;
+	}
+
+	// アイテムへの角度
+	float fAngle = GetPosToPos(pEffector[type].pos, pMouse->pos);
+
+	// 左の角度との差異
+	float fDestLeft = rotLeft - fAngle;
+	fDestLeft = RepairRot(fDestLeft);
+	fDestLeft = fabsf(fDestLeft);
+	FloatNormalize(&fDestLeft, 0.0f, D3DX_PI);
+	int nLeft = (g_wStartVib * 0.5f) - ((g_wStartVib * 0.5f) * fDestLeft);
+
+	float fDestRight = rotRight - fAngle;
+	fDestRight = RepairRot(fDestRight);
+	fDestRight = fabsf(fDestRight);
+	FloatNormalize(&fDestRight, 0.0f, D3DX_PI);
+	int nRight = (g_wStartVib * 0.5f) - ((g_wStartVib * 0.5f) * fDestRight);
+
+	if (GetNumPlayer() == 2)
+	{
+		SetVibration(PLAYERTYPE_MOUSE, nLeft, nRight, INT_INFINITY);
+	}
+	else
+	{
+		if (GetActivePlayer() == PLAYERTYPE_MOUSE)
+		{
+			SetVibration(0, nLeft, nRight, INT_INFINITY);
+		}
+	}
+}
+
+//==================================================================================
+// --- 浮動小数の正規化処理 ---
+//==================================================================================
+void FloatNormalize(float *pInOut, float min, float max)
+{
+	*pInOut = (*pInOut - min) / (max - min);
 }
