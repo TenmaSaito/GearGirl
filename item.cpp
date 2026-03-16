@@ -282,6 +282,8 @@ void UpdateMapItem(void)
 
 				break;
 			}
+
+			SetMeshCylinder(pItem->pos, VECNULL, 5.0f, 600.0f, 1, 1, D3DCULL_CCW, -1, false);
 		}
 	}
 }

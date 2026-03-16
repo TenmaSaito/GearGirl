@@ -207,9 +207,9 @@ void InitGimmick(void)
 	g_nIdxTexTutorial[1] = Set2DPolygon(POS_TUTORIAL, VECNULL, D3DXVECTOR2(900.0f, 610.0f), TexTutorial, DEF_COL);
 	SetEnable2DPolygon(g_nIdxTexTutorial[TUTORIALTYPE_CHAINSAW], false);
 
-	//LoadTexture("data/TEXTURE/VALVEtutorial.png", &TexTutorial);
-	//g_nIdxTexTutorial[1] = Set2DPolygon(POS_TUTORIAL, VECNULL, D3DXVECTOR2(900.0f, 610.0f), TexTutorial, DEF_COL);
-	//SetEnable2DPolygon(g_nIdxTexTutorial[TUTORIALTYPE_VALVE], false);
+	LoadTexture("data/TEXTURE/VALVEtutorial.png", &TexTutorial);
+	g_nIdxTexTutorial[2] = Set2DPolygon(POS_TUTORIAL, VECNULL, D3DXVECTOR2(900.0f, 610.0f), TexTutorial, DEF_COL);
+	SetEnable2DPolygon(g_nIdxTexTutorial[TUTORIALTYPE_VALVE], false);
 }
 
 //==================================================================================
