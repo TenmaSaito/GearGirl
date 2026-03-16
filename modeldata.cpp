@@ -41,7 +41,7 @@ void InitModelData(void)
 //================================================================================================================
 // --- モデルの読み込み ---
 //================================================================================================================
-HRESULT LoadModelData(_In_ const char* pXFileName, int *pOutnIdx)
+HRESULT LoadModelData(_In_ const char *pXFileName, IDX_MODELDATA *pOutnIdx)
 {
 	/*** デバイスの取得 ***/
 	AUTODEVICE9 pAuto;				// デバイス自動解放システム
@@ -242,7 +242,7 @@ void ResetModelData(void)
 //================================================================================================================
 // --- オブジェクト情報の取得 ---
 //================================================================================================================
-LPMODELDATA GetModelData(int nType)
+LPMODELDATA GetModelData(IDX_MODELDATA nType)
 {
 	LPMODELDATA pModelData = &g_aModelData[nType];
 	if (pModelData->bSafe == true)

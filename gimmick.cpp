@@ -19,6 +19,8 @@
 #include "input.h"
 #include "2Dpolygon.h"
 
+#include "Conditional_defs.h"
+
 //**********************************************************************************
 //*** マクロ定義 ***
 //**********************************************************************************
@@ -76,15 +78,27 @@ const int g_aIdxItem[g_nNumSpawnItem] = { 1, 9 };		// 出現するアイテム番号
 const float g_fResistPow = 0.05f;						// 加速度の減速係数
 const D3DXVECTOR3 g_aMoveSpawn[g_nNumSpawnItem] =		// 出現後のアイテムの加速度
 {
-	D3DXVECTOR3(20.0f, 40.0f, 10.0f),
-	D3DXVECTOR3(5.0f, 40.0f, 16.0f),
+	D3DXVECTOR3(-3.0f, 5.0f, -5.0f),
+	D3DXVECTOR3(5.0f, 5.0f, 3.0f),
 };
 
 const D3DXVECTOR3 g_posSpawn = D3DXVECTOR3(1000, 105, 110);			// 出現開始位置
 const D3DXVECTOR3 g_aVecParticle[2] =								// パーティクルの上下限ベクトル
 {
-	D3DXVECTOR3(100, 100, 100),
-	D3DXVECTOR3(-100, 0, -100),
+	D3DXVECTOR3(500, 2000, 500),
+	D3DXVECTOR3(-250, 0, -250),
+};
+
+const char *g_apGimmickPromptTexture[GIMMICKTYPE_MAX] =		// 各ギミックのプロンプト
+{
+	"data/TEXTURE/TestPrompt.png",		// 人間用ボタン
+	"data/TEXTURE/TestPrompt.png",		// ネズミ用ボタン
+	"data/TEXTURE/TestPrompt.png",		// 倒木1
+	"data/TEXTURE/TestPrompt.png",		// 倒木2
+	"data/TEXTURE/TestPrompt.png",		// 倒木3
+	"UNUSED",							// UNUSED
+	"UNUSED",							// UNUSED
+	"data/TEXTURE/TestPrompt.png",		// バルブ
 };
 
 //**********************************************************************************
@@ -157,10 +171,14 @@ void InitGimmick(void)
 				g_aGimmick[nCntMotion].rot = g_aGimmickData[nCntMotion].rotDefault;
 				g_aGimmick[nCntMotion].fRadius = g_aGimmickData[nCntMotion].fRadius;
 
-				int Tex;
-				LoadTexture("data/TEXTURE/TestPrompt.png", &Tex);
-				g_aGimmick[nCntMotion].nIdxPrompt = SetPrompt(g_aGimmick[nCntMotion].pos, D3DXVECTOR2(15.0f, 8.0f), Tex, false);
-				SetEnablePrompt(true, g_aGimmick[nCntMotion].nIdxPrompt);
+				// テクスチャ読み込み判定
+				if (C_FAILED(g_apGimmickPromptTexture[nCntMotion], "UNUSED"))
+				{
+					IDX_TEXTURE Tex;
+					LoadTexture("data/TEXTURE/TestPrompt.png", &Tex);
+					g_aGimmick[nCntMotion].nIdxPrompt = SetPrompt(g_aGimmick[nCntMotion].pos, D3DXVECTOR2(15.0f, 8.0f), Tex, false);
+					SetEnablePrompt(true, g_aGimmick[nCntMotion].nIdxPrompt);
+				}
 			}
 		}
 	}
@@ -232,20 +250,20 @@ void UpdateGimmick(void)
 			SetMotionType(MOTIONTYPE_ACTION, false, 0, GIMMICKTYPE_CLOSEDDOOR);
 		}
 
-		if (pTarget->bClear == true
-			&& pTarget->myType == GIMMICKTYPE_STATUE
-			&& pTarget->bFinishMotion == true
+		if (pGimmick->bClear == true
+			&& pGimmick->myType == GIMMICKTYPE_STATUE
+			&& pGimmick->bFinishMotion == true
 			&& pItemSpawn->bSpawned == false)
 		{
 			SpawnItem();
 		}
 
-		UpdateSpawnItem();
-
 		UpdateMotion(pGimmick->myType);
 
 		pGimmick->nCounter++;		// カウンター増加
 	}
+
+	UpdateSpawnItem();
 
 	// プレイヤーの情報を取得
 	Player* pPlayer = GetPlayer();
@@ -1182,11 +1200,17 @@ void SpawnItem(void)
 
 		// 各加速度を設定
 		pItemSpawn->move = g_aMoveSpawn[nCntUpdate];
+		pItemSpawn->pos += CONVERSION_Y(pItemSpawn->move, 140.0f);	// 初速を設定
+		pItemSpawn->nIdxItem = g_aIdxItem[nCntUpdate];				// アイテムインデックスを設定
 
-		// 噴水パーティクルを設置
-		SetParticle(CONVERSION_Y(g_posSpawn, g_posSpawn.y + 10.0f), CParamColor::BLUE, g_aVecParticle[1], g_aVecParticle[0],
-			1, 3.0f, 5, 5, true);
+		P_ITEM pItem = &GetItem()[pItemSpawn->nIdxItem];
+		pItem->bUse = true;
+		pItem->bGirl = pItem->bMouse = true;
 	}
+
+	// 噴水パーティクルを設置
+	SetParticle(CONVERSION_Y(g_posSpawn, g_posSpawn.y + 30.0f), CParamColor::BLUE, g_aVecParticle[1], g_aVecParticle[0],
+		1, 3.0f, 1000000, 15, true);
 }
 
 //================================================================================================================
@@ -1213,7 +1237,7 @@ void UpdateSpawnItem(void)
 		pItemSpawn->move.y += GRAVITY;
 
 		// 地面判定
-		if (pItemSpawn->move.y <= 120.0f)
+		if (pItemSpawn->pos.y <= 120.0f)
 		{
 			pItemSpawn->pos.y = 120.0f;
 			pItemSpawn->move = VECNULL;
