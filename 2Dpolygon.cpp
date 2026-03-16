@@ -195,6 +195,25 @@ void SetPosition2DPolygon(IDX_2DPOLYGON nId2DPolygon, D3DXVECTOR3 pos)
 }
 
 //================================================================================================================
+// --- ポリゴンの回転処理 ---
+//================================================================================================================
+void SetRotation2DPolygon(IDX_2DPOLYGON nIdx2DPolygon, float fAngle)
+{
+	if (nIdx2DPolygon == -1 || nIdx2DPolygon >= (sizeof g_a2DPolygon / sizeof(_2DPOLYGON))) return;
+	LP2DPOLYGON p2DPoly = &g_a2DPolygon[nIdx2DPolygon];
+	VERTEX_2D* pVtx;					// 頂点情報へのポインタ
+
+	/*** 頂点バッファの設定 ***/
+	p2DPoly->pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+
+	// ポリゴンを回転
+	MyMathUtil::RollPolygon(pVtx, p2DPoly->pos, p2DPoly->fWidth, p2DPoly->fSize, fAngle, 0);
+
+	/*** 頂点バッファの設定を終了 ***/
+	p2DPoly->pVtxBuff->Unlock();
+}
+
+//================================================================================================================
 // --- ポリゴンの色を変更する処理 ---
 //================================================================================================================
 void SetColor2DPolygon(IDX_2DPOLYGON nId2DPolygon, D3DXCOLOR col)

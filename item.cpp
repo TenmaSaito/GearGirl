@@ -23,6 +23,7 @@
 #include "Texture.h"
 #include "timer.h"
 #include "UImenu.h"
+#include "itemEffector.h"
 
 using  namespace MyMathUtil;
 
@@ -560,6 +561,7 @@ void CollisionItem(vec3 pos, float fRange, int type)
 				// 取得処理
 				pItem->bGet = true;
 				SetParticle(pItem->pos, colX(0.5f, 0.1f, 0.1f, 0.3f), vec3(-0.5f, -0.5f, -0.5f), vec3(1.0f, 1.0f, 1.0f), 1, 5.0f, 20, 10, false);
+				SetGetEffect(pItem->nIdxEffector);
 				break;
 			}
 		}
@@ -838,11 +840,12 @@ void SelectItem(void)
 
 //=========================================================================================
 // 単体アイテム設置
-void SetItem(vec3 pos, vec3 rot, ITEMTYPE type, bool bReflectGirl, bool bReflectMouse, bool bColi)
+IDX_ITEM SetItem(vec3 pos, vec3 rot, ITEMTYPE type, bool bReflectGirl, bool bReflectMouse, bool bColi)
 {
 	//**************************************************************
 	// 変数宣言
 	P_ITEM pItem = GetItem();
+	IDX_ITEM error = -1;
 
 	if (MIDCHECK(-1, type, ITEMTYPE_MAX))
 	{
@@ -860,10 +863,15 @@ void SetItem(vec3 pos, vec3 rot, ITEMTYPE type, bool bReflectGirl, bool bReflect
 				pItem->bMouse = bReflectMouse;
 				pItem->bGet = false;
 				pItem->bUse = true;
+				error = nCntItem;
+
+				pItem->nIdxEffector = SetItemEffector(pos, D3DXCOLOR(0, 1, 0, 1));
 				break;
 			}
 		}
 	}
+
+	return error;
 }
 
 //=========================================================================================

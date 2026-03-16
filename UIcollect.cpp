@@ -84,10 +84,10 @@ void InitUIcollect(void)
 		OutputDebugString(TEXT("テクスチャの読み込みに失敗しました......"));
 	}
 
-	if (FAILED(LoadTexture(g_aCollectUITexture[1], &pUICollect->texNum)))
+	/*if (FAILED(LoadTexture(g_aCollectUITexture[1], &pUICollect->texNum)))
 	{
 		OutputDebugString(TEXT("テクスチャの読み込みに失敗しました......"));
-	}
+	}*/
 
 	VERTEX_2D *pVtx = nullptr;
 

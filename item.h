@@ -12,6 +12,7 @@
 #include "main.h"
 #include "modeldata.h"
 #include "endomacro.h"
+#include "itemEffector.h"
 
 //=========================================================================================
 // マクロ定義
@@ -22,6 +23,11 @@
 #define ITEM_RANGE		(15.0f)		// アイテム当たり判定範囲
 
 #define SPIN_ITEM		(0.02f)		// アイテムの回転速度
+
+//==============================================================
+// 型定義
+//==============================================================
+typedef int IDX_ITEM;				// アイテムインデックス
 
 //==============================================================
 // 列挙型
@@ -79,6 +85,7 @@ typedef struct Item
 	int				nIdxModel;			// モデルデータのインデックス
 	D3DXMATRIX		mtxWorld;			// ワールドマトリックス
 	int				nIdxQuota;			// 表示用の枠のインデックス
+	IDX_EFFECTOR	nIdxEffector;		// エフェクターのインデックス
 	D3DXVECTOR3		Dist;				// プレイヤーとアイテムの距離計算用
 	float			fDistance;			// 計算結果
 	float			fCol;				// 距離による色の変化用
@@ -93,7 +100,7 @@ void UninitItem(void);
 void UpdateItem(void);
 void DrawItem(void);
 void DrawUIItem(void);
-void SetItem(vec3 pos, vec3 rot, ITEMTYPE type, bool bReflectGirl = true, bool bReflectMouse = true, bool bColi = false);			// アイテム設置
+IDX_ITEM SetItem(vec3 pos, vec3 rot, ITEMTYPE type, bool bReflectGirl = true, bool bReflectMouse = true, bool bColi = false);			// アイテム設置
 void CollisionItem(vec3 pos, float fRange, int type);	// 当たり判定
 void EnableItemPut(void);										// アイテム提出フラグを切り替え
 bool IsEnableItemPut(void);

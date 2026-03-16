@@ -169,6 +169,7 @@
     <ClCompile Include="happyend.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="item.cpp" />
+    <ClCompile Include="itemEffector.cpp" />
     <ClCompile Include="judgeEnd.cpp" />
     <ClCompile Include="light.cpp" />
     <ClCompile Include="lineEffect.cpp" />
@@ -217,6 +218,7 @@
     <ClInclude Include="badend.h" />
     <ClInclude Include="billboard.h" />
     <ClInclude Include="camera.h" />
+    <ClInclude Include="Color_defs.h" />
     <ClInclude Include="common_fade.h" />
     <ClInclude Include="Conditional_defs.h" />
     <ClInclude Include="debugproc.h" />
@@ -232,6 +234,7 @@
     <ClInclude Include="happyend.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="item.h" />
+    <ClInclude Include="itemEffector.h" />
     <ClInclude Include="judgeEnd.h" />
     <ClInclude Include="light.h" />
     <ClInclude Include="lineEffect.h" />

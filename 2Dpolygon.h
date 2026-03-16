@@ -31,6 +31,7 @@ void Draw2DPolygon(void);
 
 int Set2DPolygon(D3DXVECTOR3 pos, D3DXVECTOR3 rot, D3DXVECTOR2 size, int nIdTexture = -1, D3DXCOLOR col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
 void SetPosition2DPolygon(IDX_2DPOLYGON nId2DPolygon, D3DXVECTOR3 pos);
+void SetRotation2DPolygon(IDX_2DPOLYGON nIdx2DPolygon, float fAngle);
 void SetColor2DPolygon(IDX_2DPOLYGON nId2DPolygon, D3DXCOLOR col);
 void SetSize2DPolygon(IDX_2DPOLYGON nId2DPolygon, D3DXVECTOR2 size);
 void Destroy2DPolygon(IDX_2DPOLYGON nId2DPolygon);

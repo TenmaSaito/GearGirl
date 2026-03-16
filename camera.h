@@ -20,7 +20,7 @@
 #define VIEW_1P_MINDEPTH		(5.0f)					// 最小描画距離
 #define VIEW_1P_MAXDEPTH		(10000.0f)				// 最大描画距離
 #define VIEW_2P_MINDEPTH		(5.0f)					// 最小描画距離
-#define VIEW_2P_MAXDEPTH		(1000.0f)				// 最大描画距離
+#define VIEW_2P_MAXDEPTH		(10000.0f)				// 最大描画距離
 #define CAMERA_V_DEFPOS			(0.0f, 350.0f, 500.0f)	// 視点のデフォ位置
 #define CAMERA_R_DEFPOS			(0.0f, 0.0f, 0.0f)		// 注視点のデフォ位置
 #define CAMERA_1P_DISTANS		(55.0f)					// 少女の,カメラと注視点の距離

@@ -18,6 +18,7 @@
 #include "item.h"
 #include "input.h"
 #include "2Dpolygon.h"
+#include "itemEffector.h"
 
 #include "Conditional_defs.h"
 
@@ -45,7 +46,7 @@ STRUCT()
 {
 	D3DXVECTOR3 pos;	// 位置
 	D3DXVECTOR3 move;	// 加速度
-	int nIdxItem;		// 出現するアイテム番号
+	IDX_ITEM nIdxItem;	// 出現するアイテム番号
 	bool bSpawned;		// 出現済み判定
 } ItemSpawn;
 
@@ -74,7 +75,7 @@ void UpdateSpawnItem(void);
 //*** 定数変数 ***
 //**********************************************************************************
 const int g_nNumSpawnItem = 2;							// 噴水ギミッククリア時に出現するアイテム数
-const int g_aIdxItem[g_nNumSpawnItem] = { 1, 9 };		// 出現するアイテム番号
+const ITEMTYPE g_aIdxItem[g_nNumSpawnItem] = { ITEMTYPE_GEARS_TRUE, ITEMTYPE_SPRING_FALSE };	// 出現するアイテム番号
 const float g_fResistPow = 0.05f;						// 加速度の減速係数
 const D3DXVECTOR3 g_aMoveSpawn[g_nNumSpawnItem] =		// 出現後のアイテムの加速度
 {
@@ -1201,11 +1202,13 @@ void SpawnItem(void)
 		// 各加速度を設定
 		pItemSpawn->move = g_aMoveSpawn[nCntUpdate];
 		pItemSpawn->pos += CONVERSION_Y(pItemSpawn->move, 140.0f);	// 初速を設定
-		pItemSpawn->nIdxItem = g_aIdxItem[nCntUpdate];				// アイテムインデックスを設定
 
-		P_ITEM pItem = &GetItem()[pItemSpawn->nIdxItem];
-		pItem->bUse = true;
-		pItem->bGirl = pItem->bMouse = true;
+		// アイテムを設置
+		pItemSpawn->nIdxItem = SetItem(VECNULL, VECNULL, g_aIdxItem[nCntUpdate]);
+
+		P_ITEM pItem = GetItem();
+		pItem[pItemSpawn->nIdxItem].bUse = true;
+		pItem[pItemSpawn->nIdxItem].bGirl = pItem[pItemSpawn->nIdxItem].bMouse = true;
 	}
 
 	// 噴水パーティクルを設置
@@ -1228,6 +1231,7 @@ void UpdateSpawnItem(void)
 
 		pItemSpawn->pos += pItemSpawn->move;		// 位置を更新
 		pItem->pos = pItemSpawn->pos;
+		SetPositionItemEffector(pItem->nIdxEffector, pItem->pos);
 
 		// 加速度を減速
 		pItemSpawn->move.x += (0.0f - pItemSpawn->move.x) * g_fResistPow;

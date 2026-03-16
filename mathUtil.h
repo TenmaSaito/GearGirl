@@ -270,7 +270,7 @@ namespace MyMathUtil
 
 	//------------------------------------------------------------------------------
 	/*** í∏ì_èÓïÒä÷òA ***/
-	void RollPolygon(VERTEX_2D* pVtx, D3DXVECTOR3 pos, float fWidth, float fHeight, float fRot, int nSpeed);
+	void RollPolygon(VERTEX_2D* pVtx, D3DXVECTOR3 pos, float fWidth, float fHeight, float fRot);
 	void SetFullScreenPolygon(VERTEX_2D* pVtx);
 	void SetPolygonSize(VERTEX_3D* pVtx, D3DXVECTOR2 size, bool bY);
 	void SetPolygonPos(VERTEX_2D* pVtx, D3DXVECTOR3 pos, D3DXVECTOR2 size);

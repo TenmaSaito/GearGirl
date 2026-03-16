@@ -82,7 +82,7 @@ void DrawMeshDome(void);
 void DrawMeshCylinder(void);
 void DrawMeshRing(void);
 
-void SetMeshSphere	(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int nCircleDivision, D3DCULL cull = D3DCULL_CCW, int nTex = -1, bool bPat = false);
+int SetMeshSphere	(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int nCircleDivision, D3DCULL cull = D3DCULL_CCW, int nTex = -1, bool bPat = false);
 void SetMeshDome	(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int nCircleDivision, D3DCULL cull = D3DCULL_CCW, int nTex = -1, bool bPat = false);
 void SetMeshCylinder(vec3 pos, vec3 rot, float fRadius,float fHeight, int nHeightDivision, int nCircleDivision, D3DCULL cull = D3DCULL_CCW, int nTex = -1, bool bPat = false);
 int SetMeshRing	(vec3 pos, vec3 rot, float fInner, float fOuter, int nHeightDivision, int nCircleDivision,  D3DCULL cull = D3DCULL_CCW, int nTex = -1, bool bPat = false);
@@ -100,5 +100,8 @@ int GetNumMeshRing(void);
 bool SetPositionMesh(P_MESH pMesh, vec3 pos, int nIdx, int MAX);
 bool SetRotationMesh(P_MESH pMesh, vec3 rot, int nIdx, int MAX);
 bool ReleaseMesh(P_MESH pMesh, int nIdx, int MAX);
+
+bool SetColorMeshSphere(P_MESH pMesh, D3DXCOLOR col);
+bool SetRadiusMeshSphere(P_MESH pMesh, float fRadius);
 
 #endif // !_MESH_H_

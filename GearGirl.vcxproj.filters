@@ -273,6 +273,9 @@
     <ClCompile Include="geteffect.cpp">
       <Filter>ソース ファイル\Mode\Game</Filter>
     </ClCompile>
+    <ClCompile Include="itemEffector.cpp">
+      <Filter>ソース ファイル\Mode\Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h">
@@ -454,6 +457,12 @@
     </ClInclude>
     <ClInclude Include="geteffect.h">
       <Filter>ヘッダー ファイル\Mode\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="itemEffector.h">
+      <Filter>ヘッダー ファイル\Mode\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Color_defs.h">
+      <Filter>ヘッダー ファイル\Main\System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

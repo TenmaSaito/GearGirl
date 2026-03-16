@@ -404,7 +404,7 @@ float MyMathUtil::GetPTPLength3D(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2)
 //==================================================================
 // --- É|ÉäÉSÉìÇâÒì]Ç≥ÇπÇÈèàóù ---
 //==================================================================
-void MyMathUtil::RollPolygon(VERTEX_2D* pVtx, D3DXVECTOR3 pos, float fWidth, float fHeight, float fRot, int nSpeed)
+void MyMathUtil::RollPolygon(VERTEX_2D* pVtx, D3DXVECTOR3 pos, float fWidth, float fHeight, float fRot)
 {
 	float fLength = sqrtf(powf(fWidth, 2.0f) + powf(fHeight, 2.0f));
 	float fAngle = atan2f(fWidth, fHeight);

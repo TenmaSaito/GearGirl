@@ -20,6 +20,7 @@
 #include "judgeEnd.h"
 #include "input.h"
 #include "item.h"
+#include "itemEffector.h"
 #include "light.h"
 #include "lineEffect.h"
 #include "mathUtil.h"
@@ -163,6 +164,9 @@ void InitGame(void)
 	/*** ダイアログの初期化 ***/
 	InitDialog();
 
+	/*** アイテムエフェクターの初期化 ***/
+	InitItemEffector();
+
 	//==========================================
 	/*** モデルのスクリプト読み込み ***/
 	LoadModel();
@@ -268,6 +272,9 @@ void UninitGame(void)
 
 	/*** ダイアログの終了 ***/
 	UninitDialog();
+
+	/*** アイテムエフェクターの終了 ***/
+	UninitItemEffector();
 }
 
 //==================================================================================
@@ -369,6 +376,9 @@ void UpdateGame(void)
 			/*** ダイアログの更新 ***/
 			UpdateDialog();
 
+			/*** アイテムエフェクターの更新 ***/
+			UpdateItemEffector();
+
 			if (IsEndDialog() == true && GetCommonFade() == FADE_NONE)
 			{
 				AddTimer(-1);
@@ -445,7 +455,16 @@ void DrawGame(void)
 		}
 
 		/*** メッシュの描画 ***/
-		DrawMesh();
+		if (nCntDraw == PLAYERTYPE_MOUSE || GetActivePlayer() == PLAYERTYPE_MOUSE)
+		{ // ネズミの場合のみZFuncを無効に
+			SetEnableZFunction(pDevice, false);
+			DrawMeshSphere();
+			SetEnableZFunction(pDevice, true);
+		}
+		else
+		{
+			DrawMesh();
+		}
 
 		/*** メッシュオービットの描画 ***/
 		DrawMeshOrbit();
