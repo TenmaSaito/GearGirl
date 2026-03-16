@@ -49,6 +49,11 @@ typedef enum
 	SOUND_LABEL_SE_G_DASH,			// ダッシュ時の風の音
 	SOUND_LABEL_SE_G_FALLENTREE,	// 木を切った後の消滅音
 	SOUND_LABEL_SE_G_DIAROG,		// ダイアログ表示の音
+	SOUND_LABEL_SE_G_CHAINSAW,		// チェンソーの音
+	SOUND_LABEL_SE_G_VALVE,			// バルブが回転する音
+	SOUND_LABEL_SE_G_FOUNTAIN,		// 噴水の音
+	SOUND_LABEL_SE_G_CANCEL,		// キャンセル音
+	SOUND_LABEL_SE_G_GETITEM,		// アイテム取得時の音
 	SOUND_LABEL_MAX,
 } SOUND_LABEL;
 

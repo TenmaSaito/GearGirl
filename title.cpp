@@ -82,7 +82,7 @@ void InitTitle(void)
 	InitTLogo();
 
 	// ƒJƒƒ‰‚Ì’Ç‰Á
-	AddTCamera(D3DXVECTOR3(-35.0f, 30.0f, 0.0f), VEC_Y(CParamFloat::HALFPI), 100.0f);
+	AddTCamera(D3DXVECTOR3(-12.5f, 20.0f, 0.0f), VEC_Y(CParamFloat::HALFPI), 65.0f);
 
 	// ƒ‚ƒfƒ‹‚Ì“Ç‚Ýž‚Ý
 	int nIdxModel;
@@ -168,11 +168,10 @@ void UpdateTitle(void)
 	{
 		if (Step(g_nCounterTrain, MOVE_TIME))
 		{
-			LP3DMODEL pModel;
-			pModel = Get3DModel(g_nIdxTrain);
+			LP3DMODEL pModel= Get3DModel(g_nIdxTrain);
 			if (pModel)
 			{
-				pModel->pos.y = CParamVector::V3NULL.y + 0.05f;
+				pModel->pos.y = CParamVector::V3NULL.y + 0.4f;
 			}
 		}
 		else
@@ -182,13 +181,12 @@ void UpdateTitle(void)
 	}
 	else
 	{
-		LP3DMODEL pModel;
-		pModel = Get3DModel(g_nIdxTrain);
+		LP3DMODEL pModel = Get3DModel(g_nIdxTrain);
 		if (pModel)
 		{
-			if (g_nCounterTrain % 60 >= 30)
+			if (g_nCounterTrain % 20 >= 10)
 			{
-				pModel->pos.y = CParamVector::V3NULL.y + 0.02f;
+				pModel->pos.y = CParamVector::V3NULL.y + 0.1f;
 			}
 			else
 			{
