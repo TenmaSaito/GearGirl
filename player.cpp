@@ -84,7 +84,7 @@ int g_nUseArm = 0;
 int	g_nMotionCounter = 0;			// モーションカウンター
 bool g_aMovePlayer[PLAYERTYPE_MAX];	// プレイヤーが動いているか
 bool g_bShotMouse = false;			// ネズミを発射するフラグ
-bool g_bMovable = false;			// 動ける状態かどうか
+bool g_bMovable = true;			// 動ける状態かどうか
 D3DXVECTOR3 g_Effectmove = {};
 IDX_MESHORBIT g_nIdxOrbit = -1;		// メッシュオービットのインデックス
 IDX_MESHORBIT g_nIdxOrbitSub = -1;	// サブメッシュオービットのインデックス
@@ -187,6 +187,7 @@ void InitPlayer(void)
 	g_aMovePlayer[1] = false;
 	g_Effectmove = {};
 	g_bShotMouse = false;			// ネズミを発射するフラグ
+	g_bMovable = true;			// 動ける状態かどうか
 
 	if (GetFirstMode() == MODE_GAME)
 	{
@@ -228,6 +229,7 @@ void UpdatePlayer(void)
 	Gimmick* pGimmick = GetGimmick() + 5;
 
 	pPlayer->bUseLandMotion = false;
+	g_bMovable = true;	// 移動を可能に
 
 	for (int nCntPlayer = 0; nCntPlayer < PLAYERTYPE_MAX; nCntPlayer++, pPlayer++)
 	{
@@ -262,7 +264,12 @@ void UpdatePlayer(void)
 			// === ２人プレイもしくはアクティブなプレイヤーの処理 === //
 			if (GetNumPlayer() == 2 || GetActivePlayer() == PlayerType(nCntPlayer))
 			{
-				if (g_bMovable == true)
+				if (g_aPlayer[PLAYERTYPE_GIRL].motionType != MOTIONTYPE_CUTTING
+					&& g_aPlayer[PLAYERTYPE_GIRL].motionTypeBlend != MOTIONTYPE_CUTTING
+					&& g_aPlayer[PLAYERTYPE_GIRL].motionType != MOTIONTYPE_ACTION
+					&& g_aPlayer[PLAYERTYPE_GIRL].motionTypeBlend != MOTIONTYPE_ACTION
+					&& g_aPlayer[PLAYERTYPE_GIRL].motionType != MOTIONTYPE_VALVE
+					&& g_aPlayer[PLAYERTYPE_GIRL].motionTypeBlend != MOTIONTYPE_VALVE)
 				{
 					MovePlayer((PlayerType)nCntPlayer);	// 移動に関する処理
 				}
@@ -280,7 +287,7 @@ void UpdatePlayer(void)
 					SetOffSetOrbit(g_nIdxOrbitSub, D3DXVECTOR3(-10.0f, 0.0f, 0.0f), D3DXVECTOR3(10.0f, 0.0f, 0.0f));
 
 					if (pPlayer->bDash == true)
-					{
+					{// ダッシュ時の風の音
 						PlaySound(SOUND_LABEL_SE_G_DASH);
 					}
 				}
@@ -296,7 +303,7 @@ void UpdatePlayer(void)
 					SetOffSetOrbit(g_nIdxOrbitSub, D3DXVECTOR3(-10.0f, 0.0f, 0.0f), D3DXVECTOR3(10.0f, 0.0f, 0.0f));
 
 					if (pPlayer->bDash == true)
-					{
+					{// ダッシュ時の風の音
 						PlaySound(SOUND_LABEL_SE_G_DASH);
 					}
 				}
@@ -375,7 +382,6 @@ void UpdatePlayer(void)
 		{
 			SetMotionType(MOTIONTYPE_NEUTRAL, true, 10, (PlayerType)nCntPlayer);
 			pPlayer->bDash = false;
-			g_bMovable = true;	// 移動を可能に
 		}
 
 		// === 重力をかけ続ける === //
@@ -534,64 +540,64 @@ void UpdatePlayer(void)
 		}
 
 		// === アイテムの情報を取得 === //
-		Item* pItem = GetItem();
+		//Item* pItem = GetItem();
 
-		if (g_ActivePlayer == PLAYERTYPE_MOUSE || GetNumPlayer() == 2)
-		{// ネズミ操作時
-			for (int nCntItem = 0; nCntItem < 4; nCntItem++, pItem++)
-			{// アイテムのMAX分回す
-				if (pItem->bGet == false && pItem->bUse == true)
-				{// 取得されていないアイテムの場合	
+		//if (g_ActivePlayer == PLAYERTYPE_MOUSE || GetNumPlayer() == 2)
+		//{// ネズミ操作時
+		//	for (int nCntItem = 0; nCntItem < ITEMTYPE_MAX; nCntItem++, pItem++)
+		//	{// アイテムのMAX分回す
+		//		if (pItem->bGet == false && pItem->bUse == true)
+		//		{// 取得されていないアイテムの場合	
 
-					// 距離の計算
-					pItem->Dist.x = SQUARE(pItem->pos.x - pMouse->pos.x);
-					pItem->Dist.y = SQUARE(pItem->pos.y - pMouse->pos.y);
-					pItem->Dist.z = SQUARE(pItem->pos.z - pMouse->pos.z);
+		//			// 距離の計算
+		//			pItem->Dist.x = SQUARE(pItem->pos.x - pMouse->pos.x);
+		//			pItem->Dist.y = SQUARE(pItem->pos.y - pMouse->pos.y);
+		//			pItem->Dist.z = SQUARE(pItem->pos.z - pMouse->pos.z);
 
-					// 距離の絶対値を算出
-					pItem->fDistance = sqrtf(__ABSOLUTE(pItem->Dist.x + pItem->Dist.z));
+		//			// 距離の絶対値を算出
+		//			pItem->fDistance = sqrtf(__ABSOLUTE(pItem->Dist.x + pItem->Dist.z));
 
-					if (pItem->fDistance >= 200.0f)
-					{
-						pItem->fDistance = 200.0f;
-					}
+		//			if (pItem->fDistance >= 200.0f)
+		//			{
+		//				pItem->fDistance = 200.0f;
+		//			}
 
-					// === 値を0~1にスケール(正規)化 === //
-					pItem->fCol = pItem->fDistance / 200.0f;
+		//			// === 値を0~1にスケール(正規)化 === //
+		//			pItem->fCol = pItem->fDistance / 200.0f;
 
-					if (pItem->fCol < 0.4)
-					{// 近いと青色に
-						// === 正解パーツ用パーティクル === //
-						if (pItem->type >= 0 && pItem->type <= 4)
-						{
-							//SetParticle(pItem->pos, MyMathUtil::GetColLerp(D3DXCOLOR(COL_BLUE), D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f), fCol), D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 1, 3, true, true);
-							//SetEffect(pItem->pos, MyMathUtil::GetColLerp(D3DXCOLOR(COL_BLUE), D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f), pItem->fCol), D3DXVECTOR3(5.0f, 5.0f, 5.0f), 20.0f, 20.0f, 10.0f, 3, true, true);
-							SetEffect(pItem->pos, COL_BLUE, D3DXVECTOR3(5.0f, 5.0f, 5.0f), 20.0f, 20.0f, 10.0f, 3, true, true);
-						}
-						// === 外れパーツ用パーティクル === //
-						if (pItem->type >= 5 && pItem->type <= 9)
-						{
-							//SetParticle(pItem->pos, COL_RED, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true, true);
-							SetEffect(pItem->pos, COL_RED, D3DXVECTOR3(5.0f, 5.0f, 5.0f), 20.0f, 20.0f, 10.0f, 3, true, true);
-						}
-					}
-					else
-					{// 遠いと白に
-						// === 正解パーツ用パーティクル === //
-						if (pItem->type >= 0 && pItem->type <= 4)
-						{
-							//SetEffect(pItem->pos, MyMathUtil::GetColLerp(D3DXCOLOR(COL_BLUE), D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f), pItem->fCol), D3DXVECTOR3(5.0f, 5.0f, 5.0f), 20.0f, 20.0f, 10.0f, 3, true, true);
-							SetEffect(pItem->pos, DEF_COL, D3DXVECTOR3(5.0f, 5.0f, 5.0f), 20.0f, 20.0f, 10.0f, 3, true, true);
-						}
-						// === 外れパーツ用パーティクル === //
-						if (pItem->type >= 5 && pItem->type <= 9)
-						{
-							SetEffect(pItem->pos, DEF_COL, D3DXVECTOR3(5.0f, 5.0f, 5.0f), 20.0f, 20.0f, 10.0f, 3, true, true);
-						}
-					}
-				}
-			}
-		}
+		//			if (pItem->fCol < 0.4)
+		//			{// 近いと青色もしくは赤色に
+		//				// === 正解パーツ用パーティクル === //
+		//				if (pItem->type >= 0 && pItem->type <= 4)
+		//				{
+		//					//SetParticle(pItem->pos, MyMathUtil::GetColLerp(D3DXCOLOR(COL_BLUE), D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f), fCol), D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 1, 3, true, true);
+		//					//SetEffect(pItem->pos, MyMathUtil::GetColLerp(D3DXCOLOR(COL_BLUE), D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f), pItem->fCol), D3DXVECTOR3(5.0f, 5.0f, 5.0f), 20.0f, 20.0f, 10.0f, 3, true, true);
+		//					SetEffect(pItem->pos, COL_BLUE, D3DXVECTOR3(100.0f, 100.0f, 100.0f), 5.0f, 5.0f, 30.0f, 5, true, true);
+		//				}
+		//				// === 外れパーツ用パーティクル === //
+		//				if (pItem->type >= 5 && pItem->type <= 9)
+		//				{
+		//					//SetParticle(pItem->pos, COL_RED, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true, true);
+		//					SetEffect(pItem->pos, COL_RED, D3DXVECTOR3(5.0f, 5.0f, 5.0f), 20.0f, 20.0f, 10.0f, 3, true, true);
+		//				}
+		//			}
+		//			else
+		//			{// 遠いと白に
+		//				// === 正解パーツ用パーティクル === //
+		//				if (pItem->type >= 0 && pItem->type <= 4)
+		//				{
+		//					//SetEffect(pItem->pos, MyMathUtil::GetColLerp(D3DXCOLOR(COL_BLUE), D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f), pItem->fCol), D3DXVECTOR3(5.0f, 5.0f, 5.0f), 20.0f, 20.0f, 10.0f, 3, true, true);
+		//					SetEffect(pItem->pos, DEF_COL, D3DXVECTOR3(100.0f, 100.0f, 100.0f), 5.0f, 5.0f, 30.0f, 3, true, true);
+		//				}
+		//				// === 外れパーツ用パーティクル === //
+		//				if (pItem->type >= 5 && pItem->type <= 9)
+		//				{
+		//					SetEffect(pItem->pos, DEF_COL, D3DXVECTOR3(5.0f, 5.0f, 5.0f), 20.0f, 20.0f, 10.0f, 3, true, true);
+		//				}
+		//			}
+		//		}
+		//	}
+		//}
 	}
 #ifdef _DEBUG
 	// ***************************************************************************
@@ -946,9 +952,10 @@ void ActionPlayer(PlayerType nPlayer, Player* pPlayer)
 					if (pPlayer->pos.x >= 1115.0f)
 					{// バルブの前でのみ可能
 						g_bMovable = false;	// 移動を不可能に
-						pPlayer->pos = D3DXVECTOR3(1116.0f, 100.0f, 109.0f);
+						pPlayer->pos = D3DXVECTOR3(1120.0f, 100.0f, 109.0f);
 						pPlayer->rot = D3DXVECTOR3(0.0f, D3DX_HALFPI, 0.0f);
 						SetMotionType(MOTIONTYPE_VALVE, true, 10, nPlayer);
+						PlaySound(SOUND_LABEL_SE_G_VALVE);
 					}
 				}
 
@@ -990,6 +997,7 @@ void ActionPlayer(PlayerType nPlayer, Player* pPlayer)
 					&& g_aPlayer[PLAYERTYPE_GIRL].pos.x >= 1670.0f && g_aPlayer[PLAYERTYPE_GIRL].pos.x <= 2160.0f)
 				{// 教会の敷地内でのみ使用可能
 					SetMotionType(MOTIONTYPE_CUTTING, true, 10, nPlayer);
+					PlaySound(SOUND_LABEL_SE_G_CHAINSAW);
 					g_nMotionCounter = 8;
 				}
 				break;
@@ -1990,18 +1998,19 @@ void UpdateArm(void)
 	if (g_aPlayer[PLAYERTYPE_GIRL].state != PLAYERSTATE_THROWWAITING)
 	{
 		// アームの切り替え処理
-		if (GetKeyboardTrigger(DIK_9))
-		{
-			int nArm = g_armPlayer;
-			nArm--;
-			if (FAILED(CheckIndex(ARMTYPE_MAX, nArm, 0)))
-			{
-				nArm = ARMTYPE_MAX - 1;
-			}
+		//if (GetKeyboardTrigger(DIK_9))
+		//{
+		//	int nArm = g_armPlayer;
+		//	nArm--;
+		//	if (FAILED(CheckIndex(ARMTYPE_MAX, nArm, 0)))
+		//	{
+		//		nArm = ARMTYPE_MAX - 1;
+		//	}
 
-			g_armPlayer = (ArmType)nArm;
-		}
-		else if (GetKeyboardTrigger(DIK_0) == true || GetJoypadTrigger(0, JOYKEY_RB) == true)
+		//	g_armPlayer = (ArmType)nArm;
+		//}
+		
+		if (GetKeyboardTrigger(DIK_0) == true || GetJoypadTrigger(0, JOYKEY_RB) == true)
 		{
 			int nArm = g_armPlayer;
 			nArm++;

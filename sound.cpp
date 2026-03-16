@@ -81,6 +81,11 @@ SOUNDINFO g_aSoundInfo[SOUND_LABEL_MAX] =
 	{"data/SOUND/SE/SE_DASH.wav", 0, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},			// ダッシュ時の風の音
 	{"data/SOUND/SE/SE_FALLENTREE.wav", 0, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},	// 木を切った後の消滅音
 	{"data/SOUND/SE/SE_MESSAGE.wav", 0, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},		// ダイアログ表示の音
+	{"data/SOUND/SE/SE_chainsaw.wav", 0, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},		// チェンソーの音
+	{"data/SOUND/SE/SE_valve.wav", 0, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},			// バルブの回転する音
+	{"data/SOUND/SE/SE_fountain.wav", 0, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},		// 噴水の音
+	{"data/SOUND/SE/SE_cancel.wav", 0, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},		// キャンセル時の音
+	{"data/SOUND/SE/SE_getitem.wav", 0, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},		// アイテム取得時の音
 };
 
 //=============================================================================
