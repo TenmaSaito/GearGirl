@@ -55,6 +55,7 @@ const float g_fIncreaseRadius = 0.1f;					// 半径増加係数
 const float g_fIncreaseRadiusFinish = 5.0f;				// 終了時半径増加係数
 const float g_fDecreaseAlphaFinish = 0.003f;			// 終了時α値減少係数	
 const WORD g_wStartVib = 65500;							// バイブレーションの初期値
+const float g_fRadiusVib = 225.0f;						// バイブレーションの稼働半径
 
 //**********************************************************************************
 //*** グローバル変数 ***
@@ -231,7 +232,7 @@ void _3DVibration(ItemEffector *pEffector)
 	}
 
 	// バイブレーション可能距離外の場合終了
-	if (fLength >= MAXWORD)
+	if (fLength >= g_fRadiusVib)
 	{
 		SetVibration(0, 0, 0, INT_INFINITY);
 		return;
@@ -247,6 +248,7 @@ void _3DVibration(ItemEffector *pEffector)
 	FloatNormalize(&fDestLeft, 0.0f, D3DX_PI);
 	int nLeft = (g_wStartVib * 0.5f) - ((g_wStartVib * 0.5f) * fDestLeft);
 
+	// 右の角度との差異
 	float fDestRight = rotRight - fAngle;
 	fDestRight = RepairRot(fDestRight);
 	fDestRight = fabsf(fDestRight);
