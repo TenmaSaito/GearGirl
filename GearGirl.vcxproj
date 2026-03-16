@@ -166,6 +166,7 @@
     <ClCompile Include="game.cpp" />
     <ClCompile Include="gimmick.cpp" />
     <ClCompile Include="geteffect.cpp" />
+    <ClCompile Include="guide.cpp" />
     <ClCompile Include="happyend.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="item.cpp" />
@@ -188,6 +189,7 @@
     <ClCompile Include="teamLogo.cpp" />
     <ClCompile Include="titleSelect.cpp" />
     <ClCompile Include="tLogo.cpp" />
+    <ClCompile Include="tplayer.cpp" />
     <ClCompile Include="tutorial.cpp" />
     <ClCompile Include="UIcollect.cpp" />
     <ClCompile Include="UImenu.cpp" />
@@ -231,6 +233,7 @@
     <ClInclude Include="game.h" />
     <ClInclude Include="gimmick.h" />
     <ClInclude Include="geteffect.h" />
+    <ClInclude Include="guide.h" />
     <ClInclude Include="happyend.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="item.h" />
@@ -254,6 +257,7 @@
     <ClInclude Include="teamLogo.h" />
     <ClInclude Include="titleSelect.h" />
     <ClInclude Include="tLogo.h" />
+    <ClInclude Include="tplayer.h" />
     <ClInclude Include="tutorial.h" />
     <ClInclude Include="UIcollect.h" />
     <ClInclude Include="UImenu.h" />

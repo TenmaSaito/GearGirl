@@ -909,6 +909,10 @@ char *MyMathUtil::UniteChar(char* pOut, const char* fmt, ...)
 //==================================================================
 int MyMathUtil::GenerateMessageBox(_In_ UINT nType, _In_ const char* pCaption, _In_ const char* fmt, ...)
 {
+#ifdef NOMESSAGEBOX
+	return -1;
+#endif
+
 	HWND hWnd = GetHandleWindow();
 	if (hWnd == NULL)
 	{
@@ -919,6 +923,13 @@ int MyMathUtil::GenerateMessageBox(_In_ UINT nType, _In_ const char* pCaption, _
 	{
 		return -1;
 	}
+
+#ifdef NOWARNINGS
+	if (nType == MB_ICONERROR || nType == MB_ICONWARNING)
+	{
+		return -1;
+	}
+#endif
 
 	va_list ap;
 	va_start(ap, fmt);

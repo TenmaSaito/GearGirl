@@ -68,7 +68,7 @@ void Draw3DModel(void)
 	// 3Dモデルの描画
 	for (int nCnt3DModel = 0; nCnt3DModel < MAX_3DMODEL; nCnt3DModel++, p3DModel++)
 	{
-		if (p3DModel->bUse != false)
+		if ((p3DModel->bUse NAND p3DModel->bEnable))
 		{ // もし使われていれば
 			/*** ワールドマトリックスの初期化 ***/
 			D3DXMatrixIdentity(&p3DModel->mtxWorld);
@@ -124,13 +124,13 @@ void Draw3DModel(void)
 //=================================================================================================
 // --- モデル設置 ---
 //=================================================================================================
-int Set3DModel(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nIdxModelData)
+IDX_3DMODEL Set3DModel(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nIdxModelData)
 {
 	LP3DMODEL p3DModel = &g_aModel[0];
-	int nCnt3DModel;
+	IDX_3DMODEL error = -1;
 
 	// 3Dモデルの設置
-	for (nCnt3DModel = 0; nCnt3DModel < MAX_3DMODEL; nCnt3DModel++, p3DModel++)
+	for (int nCnt3DModel = 0; nCnt3DModel < MAX_3DMODEL; nCnt3DModel++, p3DModel++)
 	{
 		if (p3DModel->bUse == false)
 		{ // もし使われていなければ
@@ -138,22 +138,63 @@ int Set3DModel(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nIdxModelData)
 			p3DModel->rot = rot;
 			p3DModel->nIdx3Dmodel = nIdxModelData;
 			p3DModel->bUse = true;
+			p3DModel->bEnable = true;
 			g_nNum3DModel++;
+			error = nCnt3DModel;
 
 			break;
 		}
 	}
 
-	// 最大数を超えていれば-1に変更
-	if (nCnt3DModel >= MAX_3DMODEL) nCnt3DModel = -1;
+	return error;
+}
 
-	return nCnt3DModel;
+//=================================================================================================
+// --- 位置変更 ---
+//=================================================================================================
+void SetPosition3DModel(IDX_3DMODEL Idx, D3DXVECTOR3 pos)
+{
+	// もしインデックス外なら
+	if (Idx < 0 || Idx >= MAX_3DMODEL) return;
+	
+	LP3DMODEL p3DModel = &g_aModel[Idx];
+	if (p3DModel->bUse == false) return;
+
+	p3DModel->pos = pos;
+}
+
+//=================================================================================================
+// --- 角度変更 ---
+//=================================================================================================
+void SetRotation3DModel(IDX_3DMODEL Idx, D3DXVECTOR3 rot)
+{
+	// もしインデックス外なら
+	if (Idx < 0 || Idx >= MAX_3DMODEL) return;
+
+	LP3DMODEL p3DModel = &g_aModel[Idx];
+	if (p3DModel->bUse == false) return;
+
+	p3DModel->rot = rot;
+}
+
+//=================================================================================================
+// --- 描画状態変更 ---
+//=================================================================================================
+void SetEnable3DModel(IDX_3DMODEL Idx, bool bEnable)
+{
+	// もしインデックス外なら
+	if (Idx < 0 || Idx >= MAX_3DMODEL) return;
+
+	LP3DMODEL p3DModel = &g_aModel[Idx];
+	if (p3DModel->bUse == false) return;
+
+	p3DModel->bEnable = bEnable;
 }
 
 //=================================================================================================
 // --- ポインタ取得 ---
 //=================================================================================================
-LP3DMODEL Get3DModel(int nIdxModel)
+LP3DMODEL Get3DModel(IDX_3DMODEL nIdxModel)
 {
 	// もしインデックス外なら
 	if (nIdxModel < 0 || nIdxModel >= MAX_3DMODEL) return NULL;
