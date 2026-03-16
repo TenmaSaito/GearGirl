@@ -233,6 +233,7 @@ void _3DVibration(ItemEffector *pEffector)
 	// バイブレーション可能距離外の場合終了
 	if (fLength >= MAXWORD)
 	{
+		SetVibration(0, 0, 0, INT_INFINITY);
 		return;
 	}
 
@@ -253,13 +254,13 @@ void _3DVibration(ItemEffector *pEffector)
 	int nRight = (g_wStartVib * 0.5f) - ((g_wStartVib * 0.5f) * fDestRight);
 
 	if (GetNumPlayer() == 2)
-	{
+	{ // 2Pプレイの場合、ネズミ側のコントローラーにのみ振動
 		SetVibration(PLAYERTYPE_MOUSE, nLeft, nRight, INT_INFINITY);
 	}
 	else
-	{
+	{ // 1Pプレイの場合
 		if (GetActivePlayer() == PLAYERTYPE_MOUSE)
-		{
+		{ // ネズミ操作時のみ振動
 			SetVibration(0, nLeft, nRight, INT_INFINITY);
 		}
 	}
