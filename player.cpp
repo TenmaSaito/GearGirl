@@ -81,9 +81,10 @@ int g_nNumPlayer = 1;				// プレイヤーのアクティブ人数
 int g_ActivePlayer = 0;				// 操作しているプレイヤータイプ
 int g_Functionkey = 0;
 int g_nUseArm = 0;
-bool g_aMovePlayer[PLAYERTYPE_MAX];	// プレイヤーが動いているか
 int	g_nMotionCounter = 0;			// モーションカウンター
+bool g_aMovePlayer[PLAYERTYPE_MAX];	// プレイヤーが動いているか
 bool g_bShotMouse = false;			// ネズミを発射するフラグ
+bool g_bMovable = false;			// 動ける状態かどうか
 D3DXVECTOR3 g_Effectmove = {};
 IDX_MESHORBIT g_nIdxOrbit = -1;		// メッシュオービットのインデックス
 IDX_MESHORBIT g_nIdxOrbitSub = -1;	// サブメッシュオービットのインデックス
@@ -261,7 +262,10 @@ void UpdatePlayer(void)
 			// === ２人プレイもしくはアクティブなプレイヤーの処理 === //
 			if (GetNumPlayer() == 2 || GetActivePlayer() == PlayerType(nCntPlayer))
 			{
-				MovePlayer((PlayerType)nCntPlayer);	// 移動に関する処理
+				if (g_bMovable == true)
+				{
+					MovePlayer((PlayerType)nCntPlayer);	// 移動に関する処理
+				}
 
 				// 左スティックを押し込むとダッシュ状態(速度)に
 				if (pPlayer->motionType == MOTIONTYPE_MOVE && nCntPlayer == PLAYERTYPE_GIRL && GetJoypadTrigger(0, JOYKEY_LEFT_PUSH) == true)
@@ -371,6 +375,7 @@ void UpdatePlayer(void)
 		{
 			SetMotionType(MOTIONTYPE_NEUTRAL, true, 10, (PlayerType)nCntPlayer);
 			pPlayer->bDash = false;
+			g_bMovable = true;	// 移動を可能に
 		}
 
 		// === 重力をかけ続ける === //
@@ -566,7 +571,8 @@ void UpdatePlayer(void)
 						// === 外れパーツ用パーティクル === //
 						if (pItem->type >= 5 && pItem->type <= 9)
 						{
-							SetParticle(pItem->pos, COL_RED, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true, true);
+							//SetParticle(pItem->pos, COL_RED, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true, true);
+							SetEffect(pItem->pos, COL_RED, D3DXVECTOR3(5.0f, 5.0f, 5.0f), 20.0f, 20.0f, 10.0f, 3, true, true);
 						}
 					}
 					else
@@ -580,7 +586,7 @@ void UpdatePlayer(void)
 						// === 外れパーツ用パーティクル === //
 						if (pItem->type >= 5 && pItem->type <= 9)
 						{
-							SetParticle(pItem->pos, DEF_COL, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true, true);
+							SetEffect(pItem->pos, DEF_COL, D3DXVECTOR3(5.0f, 5.0f, 5.0f), 20.0f, 20.0f, 10.0f, 3, true, true);
 						}
 					}
 				}
@@ -925,6 +931,8 @@ Player* GetPlayer(void)
 // =================================================
 void ActionPlayer(PlayerType nPlayer, Player* pPlayer)
 {
+	Gimmick* pGimmick = GetGimmick() + 7;
+
 	if (nPlayer == PLAYERTYPE_GIRL)
 	{
 		if (GetKeyboardTrigger(DIK_RETURN) == true || GetJoypadTrigger(0, JOYKEY_B) == true)
@@ -933,9 +941,18 @@ void ActionPlayer(PlayerType nPlayer, Player* pPlayer)
 			{
 				// NORMAL
 			case ARMTYPE_NORMAL:
-				SetMotionType(MOTIONTYPE_VALVE, true, 10, nPlayer);
-				break;
+				if (IsDetection(pGimmick->pos, pPlayer->pos, pGimmick->fRadius) == true)
+				{
+					if (pPlayer->pos.x >= 1115.0f)
+					{// バルブの前でのみ可能
+						g_bMovable = false;	// 移動を不可能に
+						pPlayer->pos = D3DXVECTOR3(1116.0f, 100.0f, 109.0f);
+						pPlayer->rot = D3DXVECTOR3(0.0f, D3DX_HALFPI, 0.0f);
+						SetMotionType(MOTIONTYPE_VALVE, true, 10, nPlayer);
+					}
+				}
 
+				break;
 				// CATAPULT
 			case ARMTYPE_CATAPULT:
 				if (IsClearGimmick(GIMMICKTYPE_BIGBUTTON) == true)
@@ -943,14 +960,14 @@ void ActionPlayer(PlayerType nPlayer, Player* pPlayer)
 					if (pPlayer->pos.x < 700.0f && pPlayer->pos.z < -510.0f)
 					{// 駅のギミック周辺でしか使えないように設定
 						if (pPlayer->state != PLAYERSTATE_THROWWAITING && GetNumPlayer() == 1)
-						{
+						{// 1人プレイ時
 							PlaySound(SOUND_LABEL_SE_G_THROW);
 							SetMotionType(MOTIONTYPE_ACTION, true, 10, nPlayer);
 							g_nMotionCounter = 10;
 							g_bShotMouse = true;
 						}
 						else if (pPlayer->state != PLAYERSTATE_THROWWAITING && GetNumPlayer() == 2)
-						{
+						{// 2人プレイ時
 							if (g_aPlayer[PLAYERTYPE_MOUSE].pos.x - g_aPlayer[PLAYERTYPE_GIRL].pos.x <= 20.0f
 								&& g_aPlayer[PLAYERTYPE_MOUSE].pos.x - g_aPlayer[PLAYERTYPE_GIRL].pos.x >= -20.0f
 								&& g_aPlayer[PLAYERTYPE_MOUSE].pos.z - g_aPlayer[PLAYERTYPE_GIRL].pos.z <= 20.0f
