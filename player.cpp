@@ -365,6 +365,8 @@ void UpdatePlayer(void)
 			&& pPlayer->motionTypeBlend != MOTIONTYPE_NEUTRAL
 			&& pPlayer->motionType != MOTIONTYPE_CUTTING
 			&& pPlayer->motionTypeBlend != MOTIONTYPE_CUTTING
+			&& pPlayer->motionType != MOTIONTYPE_VALVE
+			&& pPlayer->motionTypeBlend != MOTIONTYPE_VALVE
 			&& g_aMovePlayer[nCntPlayer] == false))
 		{
 			SetMotionType(MOTIONTYPE_NEUTRAL, true, 10, (PlayerType)nCntPlayer);
@@ -931,6 +933,7 @@ void ActionPlayer(PlayerType nPlayer, Player* pPlayer)
 			{
 				// NORMAL
 			case ARMTYPE_NORMAL:
+				SetMotionType(MOTIONTYPE_VALVE, true, 10, nPlayer);
 				break;
 
 				// CATAPULT

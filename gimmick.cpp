@@ -497,7 +497,7 @@ void CaseMulti(LPGIMMICK pGimmick)
 		}
 
 		// === バルブの判定処理 === //
-		if (pGimmick->myType == GIMMICKTYPE_STATUE && pPlayer->motionType == MOTIONTYPE_ACTION && pPlayer->Armtype == ARMTYPE_NORMAL)
+		if (pGimmick->myType == GIMMICKTYPE_STATUE && pPlayer->motionType == MOTIONTYPE_VALVE && pPlayer->Armtype == ARMTYPE_NORMAL)
 		{
 			pGimmick->bClear = true;
 			SetMotionType(MOTIONTYPE_ACTION, false, 0, GIMMICKTYPE_STATUE);
@@ -567,7 +567,7 @@ void CaseSolo(LPGIMMICK pGimmick)
 		}
 
 		// === バルブの判定処理 === //
-		if (pGimmick->myType == GIMMICKTYPE_STATUE && pPlayer->motionType == MOTIONTYPE_ACTION && pPlayer->Armtype == ARMTYPE_NORMAL)
+		if (pGimmick->myType == GIMMICKTYPE_STATUE && pPlayer->motionType == MOTIONTYPE_VALVE && pPlayer->Armtype == ARMTYPE_NORMAL)
 		{
 			pGimmick->bClear = true;
 			SetMotionType(MOTIONTYPE_ACTION, false, 0, GIMMICKTYPE_STATUE);

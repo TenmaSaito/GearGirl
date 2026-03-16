@@ -28,11 +28,11 @@ typedef enum
 {
 	MOTIONTYPE_NEUTRAL = 0,			// 待機
 	MOTIONTYPE_MOVE,				// 移動
-	MOTIONTYPE_ACTION,				// 行動
+	MOTIONTYPE_ACTION,				// カタパルト
 	MOTIONTYPE_JUMP,				// ジャンプ
 	MOTIONTYPE_LANDING,				// 着地
 	MOTIONTYPE_CUTTING,				// 切る
-	MOTIONTYPE_RESERVED_1,			// モーション1
+	MOTIONTYPE_VALVE,				// バルブを回す
 	MOTIONTYPE_RESERVED_2,			// モーション2
 	MOTIONTYPE_RESERVED_3,			// モーション3
 	MOTIONTYPE_RESERVED_4,			// モーション4
