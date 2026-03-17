@@ -15,12 +15,14 @@
 #include "titleSelect.h"
 #include "tLogo.h"
 #include "modeldata.h"
+#include "motion.h"
 #include "2Dpolygon.h"
 #include "3Dmodel.h"
 #include "mathUtil.h"
 #include "skybox.h"
 #include "common_fade.h"
 #include "input.h"
+#include "tplayer.h"
 
 // 名前空間の省略
 using namespace MyMathUtil;
@@ -57,6 +59,9 @@ void InitTitle(void)
 	/*** モデルデータの初期化 ***/
 	InitModelData();
 
+	/*** モーションデータの初期化 ***/
+	InitMotion();
+
 	/*** テクスチャの初期化 ***/
 	InitTexture();
 
@@ -81,6 +86,9 @@ void InitTitle(void)
 	/*** ロゴの初期化 ***/
 	InitTLogo();
 
+	/*** プレイヤーの初期化 ***/
+	InitTPlayer();
+
 	// カメラの追加
 	AddTCamera(D3DXVECTOR3(-12.5f, 20.0f, 0.0f), VEC_Y(CParamFloat::HALFPI), 65.0f);
 
@@ -101,6 +109,9 @@ void InitTitle(void)
 	// ロゴの設置
 	SetTLogo(g_aPosTLogo[0], g_aPosTLogo[1], g_sizeTLogo, tex);
 
+	// プレイヤーの設置
+	SetTPlayer();
+
 	g_nCounterTrain = 0;
 }
 
@@ -111,6 +122,9 @@ void UninitTitle(void)
 {
 	/*** モデルデータの終了 ***/
 	UninitModelData();
+
+	/*** モーションデータの初期化 ***/
+	UninitMotion();
 
 	/*** テクスチャの終了 ***/
 	UninitTexture();
@@ -135,6 +149,9 @@ void UninitTitle(void)
 
 	/*** カメラの終了 ***/
 	UninitTCamera();
+
+	/*** プレイヤーの終了 ***/
+	UninitTPlayer();
 }
 
 //==================================================================================
@@ -162,6 +179,9 @@ void UpdateTitle(void)
 
 	/*** ロゴの更新 ***/
 	UpdateTLogo();
+
+	/*** プレイヤーの更新 ***/
+	UpdateTPlayer();
 
 	// モデルの座標更新
 	if (g_nCounterTrain > MOVE_INTERVAL)
@@ -211,6 +231,9 @@ void DrawTitle(void)
 
 	/*** 3Dモデルの描画 ***/
 	Draw3DModel();
+
+	/*** プレイヤーの描画 ***/
+	DrawTPlayer();
 
 	/*** 選択肢の描画 ***/
 	DrawTitleSelect();
