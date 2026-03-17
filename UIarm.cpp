@@ -146,6 +146,7 @@ void UpdateUIarm(void)
 	pVtx[3].pos.x = g_ArmUI.pos.x + UI_ARM_SIZE;
 
 	if (GetKeyboardTrigger(DIK_0) == true || GetJoypadTrigger(0, JOYKEY_RB))
+	{
 		pVtx[0].tex.x += UI_TEX_SIZE;
 		pVtx[1].tex.x += UI_TEX_SIZE;
 		pVtx[2].tex.x += UI_TEX_SIZE;
