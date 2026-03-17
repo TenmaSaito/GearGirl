@@ -20,6 +20,7 @@
 #include "input.h"
 #include "2Dpolygon.h"
 #include "itemEffector.h"
+#include "sound.h"
 
 #include "Conditional_defs.h"
 
@@ -124,6 +125,7 @@ IDX_TEXTURE g_nIdxTexTutorial[3];			// チュートリアル1枚絵用のインデックス
 bool g_bAnyTex;								// いずれかのテクスチャが表示されているか
 bool g_bDispTutorialChainsaw;				// 1度でもチェンソーチュートリアルテクスチャを表示したかどうか
 bool g_bDispTutorialvalve;					// 1度でもバルブチュートリアルテクスチャを表示したかどうか
+int g_nIdx = 0;
 
 //==================================================================================
 // --- 初期化 ---
@@ -211,6 +213,10 @@ void InitGimmick(void)
 	LoadTexture("data/TEXTURE/VALVEtutorial.png", &TexTutorial);
 	g_nIdxTexTutorial[2] = Set2DPolygon(POS_TUTORIAL, VECNULL, D3DXVECTOR2(900.0f, 610.0f), TexTutorial, DEF_COL);
 	SetEnable2DPolygon(g_nIdxTexTutorial[TUTORIALTYPE_VALVE], false);
+
+	g_nIdx = SetMeshCylinder(g_aGimmick[GIMMICKTYPE_STATUE].pos, VECNULL, COL_BLUE, 3.0f, 500.0f, 1, 8);
+	SetMeshCylinder(g_aGimmick[GIMMICKTYPE_FALLENTREE].pos, VECNULL, COL_BLUE, 3.0f, 500.0f, 1, 8);
+
 }
 
 //==================================================================================
@@ -271,34 +277,39 @@ void UpdateGimmick(void)
 	Player* pPlayer = GetPlayer();
 
 	// === チュートリアルテクスチャを出していない場合、ギミックの場所にシリンダーを置いてわかりやすくする
-	//if (g_bDispTutorialChainsaw == false)
-	//{
-	//	if (IsDetection(g_aGimmick[GIMMICKTYPE_FALLENTREE].pos, pPlayer->pos, 700.0f) == true)
-	//	{// 一定距離以内でシリンダーを出す
-	//		SetEnableMeshCylinder(g_nIdxCylinder[GIMMICKTYPE_FALLENTREE], true);
-	//	}
-	//	else
-	//	{
-	//		SetEnableMeshCylinder(g_nIdxCylinder[GIMMICKTYPE_FALLENTREE], false);
-	//	}
-	//}
-	//if (g_bDispTutorialvalve == false)
-	//{
-	//	if (IsDetection(g_aGimmick[GIMMICKTYPE_STATUE].pos, pPlayer->pos, 700.0f) == true)
-	//	{// 一定距離以内でシリンダーを出す
-	//		SetEnableMeshCylinder(g_nIdxCylinder[GIMMICKTYPE_STATUE], true);
-	//	}
-	//	else
-	//	{
-	//		SetEnableMeshCylinder(g_nIdxCylinder[GIMMICKTYPE_STATUE], false);
-	//	}
-	//}
+	if (g_bDispTutorialChainsaw == true)
+	{
+		//if (IsDetection(g_aGimmick[GIMMICKTYPE_FALLENTREE].pos, pPlayer->pos, 700.0f) == true)
+		//{// 一定距離以内でシリンダーを出す
+		//	SetEnableMeshCylinder(g_aGimmick[GIMMICKTYPE_FALLENTREE].nIdxMeshCylinder, true);
+		//}
+		//else
+		//{
+		//	SetEnableMeshCylinder(g_aGimmick[GIMMICKTYPE_FALLENTREE].nIdxMeshCylinder, false);
+		//}
+
+		MeshInfo* pMesh = GetMeshCylinder() + g_nIdx;
+		pMesh->bUse = false;
+			SetEnableMeshCylinder(g_nIdx, false);
+	}
+	if (g_bDispTutorialvalve == false)
+	{
+		//if (IsDetection(g_aGimmick[GIMMICKTYPE_STATUE].pos, pPlayer->pos, 700.0f) == true)
+		//{// 一定距離以内でシリンダーを出す
+		//	SetEnableMeshCylinder(g_aGimmick[GIMMICKTYPE_STATUE].nIdxMeshCylinder, true);
+		//}
+		//else
+		//{
+		//	SetEnableMeshCylinder(g_aGimmick[GIMMICKTYPE_STATUE].nIdxMeshCylinder, false);
+		//}
+	}
 
 	// === チュートリアルを非表示に === //
 	if (g_bAnyTex == true)
 	{
 		if (GetKeyboardTrigger(DIK_RETURN) == true || GetJoypadTrigger(0, JOYKEY_A) == true)
 		{
+			PlaySound(SOUND_LABEL_SE_G_CANCEL);
 			g_bAnyTex = false;
 			for (int nCnt = 0; nCnt < TUTORIALTYPE_MAX; nCnt++)
 			{// すべてのチュートリアルを非表示に
@@ -515,19 +526,23 @@ void CaseMulti(LPGIMMICK pGimmick)
 		if (pGimmick->myType == GIMMICKTYPE_FALLENTREE && pPlayer->motionType == MOTIONTYPE_CUTTING && pPlayer->nKey == 3)
 		{
 			pGimmick->bClear = true;
+			PlaySound(SOUND_LABEL_SE_G_FALLENTREE);
 		}
 		else if (pGimmick->myType == GIMMICKTYPE_FALLENTREE2 && pPlayer->motionType == MOTIONTYPE_CUTTING && pPlayer->nKey == 3)
 		{
 			pGimmick->bClear = true;
+			PlaySound(SOUND_LABEL_SE_G_FALLENTREE);
 		}
 		else if (pGimmick->myType == GIMMICKTYPE_FALLENTREE3 && pPlayer->motionType == MOTIONTYPE_CUTTING && pPlayer->nKey == 3)
 		{
 			pGimmick->bClear = true;
+			PlaySound(SOUND_LABEL_SE_G_FALLENTREE);
 		}
 
 		// === バルブの判定処理 === //
 		if (pGimmick->myType == GIMMICKTYPE_STATUE && pPlayer->motionType == MOTIONTYPE_VALVE && pPlayer->Armtype == ARMTYPE_NORMAL)
 		{
+			PlaySound(SOUND_LABEL_SE_G_FOUNTAIN);
 			pGimmick->bClear = true;
 			SetMotionType(MOTIONTYPE_ACTION, false, 0, GIMMICKTYPE_STATUE);
 		}
@@ -536,6 +551,7 @@ void CaseMulti(LPGIMMICK pGimmick)
 		// チェンソーのチュートリアルをまだ表示していなければだす
 		if ((pGimmick->myType == GIMMICKTYPE_FALLENTREE || pGimmick->myType == GIMMICKTYPE_FALLENTREE2 || pGimmick->myType == GIMMICKTYPE_FALLENTREE3) && g_bDispTutorialChainsaw == false)
 		{
+			PlaySound(SOUND_LABEL_SE_G_TUTORIAL);
 			SetEnable2DPolygon(g_nIdxTexTutorial[1], true);
 			g_bDispTutorialChainsaw = true;	// 表示済みに
 			g_bAnyTex = true;	// チュートリアル表示中
@@ -543,6 +559,7 @@ void CaseMulti(LPGIMMICK pGimmick)
 		// バルブのチュートリアルをまだ表示していなければだす
 		if (pGimmick->myType == GIMMICKTYPE_STATUE && g_bDispTutorialvalve == false)
 		{
+			PlaySound(SOUND_LABEL_SE_G_TUTORIAL);
 			SetEnable2DPolygon(g_nIdxTexTutorial[TUTORIALTYPE_VALVE], true);
 			g_bDispTutorialvalve = true;	// 表示済みに
 			g_bAnyTex = true;	// チュートリアル表示中
@@ -587,19 +604,23 @@ void CaseSolo(LPGIMMICK pGimmick)
 		if (pGimmick->myType == GIMMICKTYPE_FALLENTREE && pPlayer->motionType == MOTIONTYPE_CUTTING && pPlayer->nKey == 3)
 		{
 			pGimmick->bClear = true;
+			PlaySound(SOUND_LABEL_SE_G_FALLENTREE);
 		}
 		else if (pGimmick->myType == GIMMICKTYPE_FALLENTREE2 && pPlayer->motionType == MOTIONTYPE_CUTTING && pPlayer->nKey == 3)
 		{
 			pGimmick->bClear = true;
+			PlaySound(SOUND_LABEL_SE_G_FALLENTREE);
 		}
 		else if (pGimmick->myType == GIMMICKTYPE_FALLENTREE3 && pPlayer->motionType == MOTIONTYPE_CUTTING && pPlayer->nKey == 3)
 		{
 			pGimmick->bClear = true;
+			PlaySound(SOUND_LABEL_SE_G_FALLENTREE);
 		}
 
 		// === バルブの判定処理 === //
 		if (pGimmick->myType == GIMMICKTYPE_STATUE && pPlayer->motionType == MOTIONTYPE_VALVE && pPlayer->Armtype == ARMTYPE_NORMAL)
 		{
+			PlaySound(SOUND_LABEL_SE_G_FOUNTAIN);
 			pGimmick->bClear = true;
 			SetMotionType(MOTIONTYPE_ACTION, false, 0, GIMMICKTYPE_STATUE);
 		}
@@ -608,6 +629,7 @@ void CaseSolo(LPGIMMICK pGimmick)
 		// チェンソーのチュートリアルをまだ表示していなければだす
 		if ((pGimmick->myType == GIMMICKTYPE_FALLENTREE || pGimmick->myType == GIMMICKTYPE_FALLENTREE2 || pGimmick->myType == GIMMICKTYPE_FALLENTREE3) && g_bDispTutorialChainsaw == false)
 		{
+			PlaySound(SOUND_LABEL_SE_G_TUTORIAL);
 			SetEnable2DPolygon(g_nIdxTexTutorial[1], true);
 			g_bDispTutorialChainsaw = true;	// 表示済みに
 			g_bAnyTex = true;	// チュートリアル表示中
@@ -615,6 +637,7 @@ void CaseSolo(LPGIMMICK pGimmick)
 		// バルブのチュートリアルをまだ表示していなければだす
 		if (pGimmick->myType == GIMMICKTYPE_STATUE && g_bDispTutorialvalve == false)
 		{
+			PlaySound(SOUND_LABEL_SE_G_TUTORIAL);
 			SetEnable2DPolygon(g_nIdxTexTutorial[TUTORIALTYPE_VALVE], true);
 			g_bDispTutorialvalve = true;	// 表示済みに
 			g_bAnyTex = true;	// チュートリアル表示中
@@ -868,6 +891,7 @@ bool CollisionGimmick(
 					{// ちびボタンを押す
 						SetMotionType(MOTIONTYPE_ACTION, false, 0, GIMMICKTYPE_SMALLBUTTON);
 						ClearGimmick(GIMMICKTYPE_SMALLBUTTON);
+						PlaySound(SOUND_LABEL_SE_G_OPENDOOR);
 					}
 				}
 			}

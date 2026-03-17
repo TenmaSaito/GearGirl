@@ -86,6 +86,9 @@ SOUNDINFO g_aSoundInfo[SOUND_LABEL_MAX] =
 	{"data/SOUND/SE/SE_fountain.wav", 0, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},		// 噴水の音
 	{"data/SOUND/SE/SE_cancel.wav", 0, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},		// キャンセル時の音
 	{"data/SOUND/SE/SE_getitem.wav", 0, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},		// アイテム取得時の音
+	{"data/SOUND/SE/SE_tutorial.wav", 0, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},		// チュートリアル表示の音
+	{"data/SOUND/SE/SE_charachange.wav", 0, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},	// 操作対象切り替えの音
+	{"data/SOUND/SE/SE_opendoor.wav", 0, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, D3DXVECTOR3_NULL, false},	// 操作対象切り替えの音
 };
 
 //=============================================================================

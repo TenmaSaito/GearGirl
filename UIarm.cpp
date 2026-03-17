@@ -9,6 +9,10 @@
 #include "UIarm.h"
 #include "player.h"
 #include "camera.h"
+#include "game.h"
+#include "prompt.h"
+#include "gimmick.h"
+#include "dialog.h"
 
 //=========================================================
 // マクロ定義
@@ -22,8 +26,7 @@
 // アームUIの構造体
 typedef struct
 {
-	D3DXVECTOR3				pos;					// UIアームの位置
-	D3DXVECTOR3				move;					// UIアームの移動量
+	D3DXVECTOR3		pos;	// UIアームの位置
 }ArmUI;
 
 //=========================================================
@@ -51,16 +54,15 @@ void InitUIarm(void)
 	//-------------------------------------
 	// 頂点バッファの作成
 	pDevice->CreateVertexBuffer(sizeof(VERTEX_2D) * 4,
-								D3DUSAGE_WRITEONLY,
-								FVF_VERTEX_2D,
-								D3DPOOL_MANAGED,
-								&g_pVtxBuffUIarm,
-								NULL);
+		D3DUSAGE_WRITEONLY,
+		FVF_VERTEX_2D,
+		D3DPOOL_MANAGED,
+		&g_pVtxBuffUIarm,
+		NULL);
 
 	//-------------------------------------
 	// 初期化
 	g_ArmUI.pos = D3DXVECTOR3(UI_DRAW_START_X, 570.0f, 0.0f);
-	g_ArmUI.move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	g_nDirectionPlayer = 0;
 
 	//-------------------------------------
@@ -127,6 +129,8 @@ void UpdateUIarm(void)
 {
 	VERTEX_2D* pVtx;								// 頂点情報へのポインタ
 
+	Player* pPlayer = GetPlayer();
+
 	if (GetCameraNum() == 1)
 	{
 		g_ArmUI.pos.x = UI_DRAW_START_X;
@@ -145,12 +149,15 @@ void UpdateUIarm(void)
 	pVtx[2].pos.x = g_ArmUI.pos.x;
 	pVtx[3].pos.x = g_ArmUI.pos.x + UI_ARM_SIZE;
 
-	if (GetKeyboardTrigger(DIK_0) == true || GetJoypadTrigger(0, JOYKEY_RB))
-	{
-		pVtx[0].tex.x += UI_TEX_SIZE;
-		pVtx[1].tex.x += UI_TEX_SIZE;
-		pVtx[2].tex.x += UI_TEX_SIZE;
-		pVtx[3].tex.x += UI_TEX_SIZE;
+	if (GAME_NOW && ITEMPROMPT_OFF && DIAROG_OFF && IsTutorialreveal() == false && pPlayer->state != PLAYERSTATE_THROWWAITING && pPlayer->motionType != MOTIONTYPE_CUTTING)
+	{// 提出状態やチュートリアルが表示されていないときや、プレイヤーが動作に入っているときに変化させない
+		if (GetKeyboardTrigger(DIK_0) == true || GetJoypadTrigger(0, JOYKEY_RB))
+		{
+			pVtx[0].tex.x += UI_TEX_SIZE;
+			pVtx[1].tex.x += UI_TEX_SIZE;
+			pVtx[2].tex.x += UI_TEX_SIZE;
+			pVtx[3].tex.x += UI_TEX_SIZE;
+		}
 	}
 
 	// === 最初に戻す === //
@@ -186,12 +193,12 @@ void DrawUIarm(void)
 	//-------------------------------------
 	// 頂点バッファをデータストリームに設定
 	pDevice->SetStreamSource(0,
-							g_pVtxBuffUIarm,			// 頂点バッファへのポインタ
-							0,
-							sizeof(VERTEX_2D));			// 頂点情報構造体のサイズ
+		g_pVtxBuffUIarm,			// 頂点バッファへのポインタ
+		0,
+		sizeof(VERTEX_2D));			// 頂点情報構造体のサイズ
 
-	//-------------------------------------
-	// 頂点フォーマットの設定
+//-------------------------------------
+// 頂点フォーマットの設定
 	pDevice->SetFVF(FVF_VERTEX_2D);
 
 	// テクスチャの設定
@@ -199,6 +206,6 @@ void DrawUIarm(void)
 
 	// ポリゴンの描画
 	pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP,	// プリミティブの種類
-							0,					// 描画する最初の頂点インデックス
-							2);					// プリミティブ(ポリゴン)数
+		0,					// 描画する最初の頂点インデックス
+		2);					// プリミティブ(ポリゴン)数
 }

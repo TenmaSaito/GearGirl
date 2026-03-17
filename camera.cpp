@@ -12,6 +12,7 @@
 #include "mathutil.h"
 
 #include "player.h"
+#include "sound.h"
 
 using namespace MyMathUtil;
 
@@ -452,6 +453,8 @@ void CameraOrbit(void)
 	P_CAMERA pCamera = GetCamera();				// カメラ情報
 	vec3 rightStick;
 
+	Player* pPlayer = GetPlayer();
+
 	for (int nCntPlayer = 0; nCntPlayer < GetNumPlayer(); nCntPlayer++, pCamera++)
 	{
 		// 1人プレイ時
@@ -469,19 +472,35 @@ void CameraOrbit(void)
 		if (GetKeyboardPress(CAM_ORBIT_R(nCntPlayer)))
 		{
 			pCamera->rot.y -= CAMERA_SPIN_X;
+			if (nCntPlayer == PLAYERTYPE_GIRL && pPlayer->state == PLAYERSTATE_THROWWAITING)
+			{// 投げ待機状態で視点を動かすと音を再生
+				PlaySound(SOUND_LABEL_SE_G_THROWPOINT);
+			}
 		}
 		if (GetKeyboardPress(CAM_ORBIT_L(nCntPlayer)))
 		{
 			pCamera->rot.y += CAMERA_SPIN_X;
+			if (nCntPlayer == PLAYERTYPE_GIRL && pPlayer->state == PLAYERSTATE_THROWWAITING)
+			{// 投げ待機状態で視点を動かすと音を再生
+				PlaySound(SOUND_LABEL_SE_G_THROWPOINT);
+			}
 		}
 
 		if (GetKeyboardPress(CAM_ORBIT_UP(nCntPlayer)))
 		{
 			pCamera->rot.x -= CAMERA_SPIN_Y;
+			if (nCntPlayer == PLAYERTYPE_GIRL && pPlayer->state == PLAYERSTATE_THROWWAITING)
+			{// 投げ待機状態で視点を動かすと音を再生
+				PlaySound(SOUND_LABEL_SE_G_THROWPOINT);
+			}
 		}
 		if (GetKeyboardPress(CAM_ORBIT_DW(nCntPlayer)))
 		{
 			pCamera->rot.x += CAMERA_SPIN_Y;
+			if (nCntPlayer == PLAYERTYPE_GIRL && pPlayer->state == PLAYERSTATE_THROWWAITING)
+			{// 投げ待機状態で視点を動かすと音を再生
+				PlaySound(SOUND_LABEL_SE_G_THROWPOINT);
+			}
 		}
 
 		// コントローラー操作
@@ -489,6 +508,11 @@ void CameraOrbit(void)
 		{// 1人プレイなら常に一つ目のコントローラー情報を取得。そうじゃなければカメラのタイプ（対応プレイヤーナンバー）のコントローラー情報を取得
 			pCamera->rot.y += rightStick.x * CAMERA_SPIN_X;
 			pCamera->rot.x += rightStick.y * CAMERA_SPIN_Y;
+			
+			if (nCntPlayer == PLAYERTYPE_GIRL && pPlayer->state == PLAYERSTATE_THROWWAITING)
+			{// 投げ待機状態で視点を動かすと音を再生
+				PlaySound(SOUND_LABEL_SE_G_THROWPOINT);
+			}
 		}
 
 		//**************************************************************

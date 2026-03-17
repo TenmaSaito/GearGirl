@@ -111,9 +111,9 @@ STRUCT()
 //**********************************************************************************
 STRUCT()
 {
-	const wchar_t *pLog;		// ログの内容
+	const wchar_t* pLog;		// ログの内容
 	LOGTYPE type;				// タイプ
-} Log;	
+} Log;
 
 //**********************************************************************************
 //*** チュートリアルで動くテクスチャの情報 ***
@@ -145,7 +145,7 @@ void MovableTutorial(void);
 Dialog g_aDialog[DIALOG_NUM];
 
 // ダイアログの情報
-const Dialog g_aDialogInfo[DIALOG_NUM] =		
+const Dialog g_aDialogInfo[DIALOG_NUM] =
 {
 	{D3DXVECTOR3(CParamVector::WINMID.x, CParamVector::WINMID.y * 1.75f, 0.0f), D3DXVECTOR2(1280.0f, 300.0f), -1, -1},
 	{D3DXVECTOR3(CParamVector::WINMID.x, CParamVector::WINMID.y * 1.75f, 0.0f), D3DXVECTOR2(1280.0f, 300.0f), -1, -1},
@@ -154,14 +154,14 @@ const Dialog g_aDialogInfo[DIALOG_NUM] =
 #pragma region テクスチャパスまとめ
 
 // テクスチャパス
-const char *g_apDialogTexture[DIALOG_NUM] =		
+const char* g_apDialogTexture[DIALOG_NUM] =
 {
 	"data/TEXTURE/girl_frame.png",
 	"data/TEXTURE/man_frame.png",
 };
 
 // チュートリアル中のテクスチャ
-const char *g_apTutorialTexture[TUTORIAL_TEX_MAX] =
+const char* g_apTutorialTexture[TUTORIAL_TEX_MAX] =
 {
 	"data/TEXTURE/LeftStick.png",
 	"data/TEXTURE/RightStick.png",
@@ -193,7 +193,7 @@ const D3DXVECTOR3 g_aMoveTexture[TUTORIAL_TEX_MAX][2] =
 #pragma region ログの情報まとめ
 
 // ログの情報
-Log g_apLog[] =		
+Log g_apLog[] =
 {
 	{L"久しぶりにこの町に来た。懐かしいな。", LOGTYPE_GIRL},
 	{L"お～い嬢ちゃん、久しぶり！ちとこっちに来てくれねぇか！", LOGTYPE_OLDMAN},
@@ -202,7 +202,7 @@ Log g_apLog[] =
 };
 
 // チュートリアルログの情報
-Log g_apTutorialLog[] =		
+Log g_apTutorialLog[] =
 {
 	{L"よぉ。久しぶりだな、嬢ちゃん。少しお願い聞いてくれねぇか。", LOGTYPE_OLDMAN},
 	{L"この街のシンボルの時計台が壊れちまって、\n直さなきゃならないんだ。", LOGTYPE_OLDMAN},
@@ -288,7 +288,7 @@ void InitDialog(void)
 		LoadTexture(g_apTutorialTexture[nCntTex], &tex);
 		g_aAnimTex[nCntTex].poly =
 			Set2DPolygon(g_aMoveTexture[nCntTex][0],
-				CParamVector::V3NULL, 
+				CParamVector::V3NULL,
 				g_aTutorial[nCntTex].size,
 				tex);
 
@@ -337,7 +337,7 @@ void UpdateDialog(void)
 {
 	if (g_bIsEndTutorial == true) return;
 
-	Log *pLogInfo = &g_apLog[g_CurrentID];
+	Log* pLogInfo = &g_apLog[g_CurrentID];
 	const LPMESSAGELOG pMessageLog = GetMessageLogPointer();
 
 	if (GetKeyboardTrigger(DIK_BACK)
@@ -361,6 +361,16 @@ void UpdateDialog(void)
 
 		Destroy2DPolygon(g_IdxLeftStick);
 		Destroy2DPolygon(g_IdxRightStick);
+
+		if (GetCommonFade() == FADE_IN)
+		{
+			D3DXVECTOR3 pos = D3DXVECTOR3(1450.0f, 100.0f, -473.0f);
+
+			// チュートリアルスキップ時に店の前へワープ
+			Player* pPlayer = GetPlayer();
+			pPlayer->pos = pos;
+
+		}
 	}
 
 	if (g_bIsMovableTutorial == true)
@@ -524,12 +534,12 @@ void NowLog(void)
 {
 	switch (g_logPhase)
 	{
-	// 最初のログ
+		// 最初のログ
 	case LOGPHASE_FIRST:
 		FirstLog();
 		break;
 
-	// チュートリアル中のログ
+		// チュートリアル中のログ
 	case LOGPHASE_TUTORIAL:
 		TutorialLog();
 		break;

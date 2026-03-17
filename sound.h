@@ -54,6 +54,9 @@ typedef enum
 	SOUND_LABEL_SE_G_FOUNTAIN,		// 噴水の音
 	SOUND_LABEL_SE_G_CANCEL,		// キャンセル音
 	SOUND_LABEL_SE_G_GETITEM,		// アイテム取得時の音
+	SOUND_LABEL_SE_G_TUTORIAL,		// チュートリアル表示の音
+	SOUND_LABEL_SE_G_CHARACHANGE,	// 操作対象切り替えの音
+	SOUND_LABEL_SE_G_OPENDOOR,		// ドアが開く音
 	SOUND_LABEL_MAX,
 } SOUND_LABEL;
 

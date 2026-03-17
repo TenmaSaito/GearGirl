@@ -335,7 +335,7 @@ void ChangePhase(void)
 		else if (GetDualInput(JOYKEY_B, DUAL_JOYPAD | DUAL_RELEASE | DUAL_OR,
 			DIK_BACK, DUAL_KEYBOARD | DUAL_TRIGGER) && g_nPhaseSelect > 0)
 		{
-			PlaySound(SOUND_LABEL_SE_T_CANCEL);
+			PlaySound(SOUND_LABEL_SE_G_CANCEL);
 
 			for (int nCntSelect = g_aPhaseSelect[g_nPhaseSelect][0]; nCntSelect < g_aPhaseSelect[g_nPhaseSelect][1]; nCntSelect++)
 			{
