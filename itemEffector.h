@@ -31,4 +31,6 @@ void UpdateItemEffector(void);
 IDX_EFFECTOR SetItemEffector(D3DXVECTOR3 pos, D3DXCOLOR col);
 void SetGetEffect(IDX_EFFECTOR Idx);
 void SetPositionItemEffector(IDX_EFFECTOR Idx, D3DXVECTOR3 pos);
+bool IsCouldViewItemEffectorByMouse(void);
+void SetViewItemEffectorByMouse(void);
 #endif
