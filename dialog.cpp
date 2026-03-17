@@ -195,16 +195,16 @@ const D3DXVECTOR3 g_aMoveTexture[TUTORIAL_TEX_MAX][2] =
 // ログの情報
 Log g_apLog[] =		
 {
-	{L"街に着いた。", LOGTYPE_GIRL},
-	{L"お～い、そこの嬢ちゃん！ちとこっちに来てくれねぇか！", LOGTYPE_OLDMAN},
-	{L"ん？あそこの人に呼ばれてる気がする。", LOGTYPE_GIRL},
+	{L"久しぶりにこの町に来た。懐かしいな。", LOGTYPE_GIRL},
+	{L"お～い嬢ちゃん、久しぶり！ちとこっちに来てくれねぇか！", LOGTYPE_OLDMAN},
+	{L"ん？呼ばれてる気がする。", LOGTYPE_GIRL},
 	{L"気になるし、行ってみよう。", LOGTYPE_GIRL},
 };
 
 // チュートリアルログの情報
 Log g_apTutorialLog[] =		
 {
-	{L"よぉ。嬢ちゃん。少しお願い聞いてくれねぇか。", LOGTYPE_OLDMAN},
+	{L"よぉ。久しぶりだな、嬢ちゃん。少しお願い聞いてくれねぇか。", LOGTYPE_OLDMAN},
 	{L"この街のシンボルの時計台が壊れちまって、\n直さなきゃならないんだ。", LOGTYPE_OLDMAN},
 	{L"その為に街から時計台のパーツを集めてきてほしい。", LOGTYPE_OLDMAN},
 	{L"うちのネズミとアームを貸してやる。\n大事に使ってくれよ。", LOGTYPE_OLDMAN},

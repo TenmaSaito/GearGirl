@@ -16,6 +16,7 @@
 #include "mathUtil.h"
 #include "common_fade.h"
 #include "dialog.h"
+#include "Color_defs.h"
 
 USE_UTIL;
 
@@ -66,7 +67,7 @@ void InitGuide(void)
 	// モデル設置
 	g_guide.Idx3DModel = Set3DModel(VECNULL, VECNULL, md);
 
-	SetEnable3DModel(g_guide.Idx3DModel, false);
+	SetEnable3DModel(g_guide.Idx3DModel, true);
 }
 
 //==================================================================================
@@ -84,8 +85,8 @@ void UpdateGuide(void)
 {
 	Player *pPlayer = GetPlayer();
 	LPGIMMICK pGimmick = GetGimmick();
-	float fLength = 1000000.0f;		// ギミックとプレイヤーの距離
-	GIMMICKTYPE type;				// 最も近いギミック
+	float fLength = 1000000.0f;			// ギミックとプレイヤーの距離
+	GIMMICKTYPE type = GIMMICKTYPE_MAX;	// 最も近いギミック
 
 	for (int nCntGimmick = 0; nCntGimmick < GIMMICKTYPE_MAX; nCntGimmick++)
 	{
@@ -110,7 +111,28 @@ void UpdateGuide(void)
 	float fAngle = GetPosToPos(pGimmick[type].pos, pPlayer->pos);
 	if (TUTORIAL_NOW)
 	{
+		type = GIMMICKTYPE_MAX;
+	}
+	else
+	{
+		D3DXVECTOR3 diff = pPlayer->pos - g_posShop;
+		float fPTPLength = D3DXVec3Length(&diff);		// 2点間の距離を求める
+
+		if (fPTPLength < fLength)
+		{
+			fLength = fPTPLength;
+			type = (GIMMICKTYPE)GIMMICKTYPE_MAX;
+		}
+	}
+
+	if (type == GIMMICKTYPE_MAX)
+	{
 		fAngle = GetPosToPos(g_posShop, pPlayer->pos);
+		SetColor3DModel(g_guide.Idx3DModel, D3DXCOLOR(0, 1, 0, 1), false);
+	}
+	else
+	{
+		SetColor3DModel(g_guide.Idx3DModel, COLOR_UNUSED, false);
 	}
 
 	D3DXVECTOR3 pos;

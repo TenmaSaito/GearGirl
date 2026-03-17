@@ -160,6 +160,7 @@
     <ClCompile Include="debugproc.cpp" />
     <ClCompile Include="dialog.cpp" />
     <ClCompile Include="effect.cpp" />
+    <ClCompile Include="effectInstancing.cpp" />
     <ClCompile Include="explosion.cpp" />
     <ClCompile Include="fade.cpp" />
     <ClCompile Include="field.cpp" />
@@ -226,6 +227,7 @@
     <ClInclude Include="debugproc.h" />
     <ClInclude Include="dialog.h" />
     <ClInclude Include="effect.h" />
+    <ClInclude Include="effectInstancing.h" />
     <ClInclude Include="endomacro.h" />
     <ClInclude Include="explosion.h" />
     <ClInclude Include="fade.h" />

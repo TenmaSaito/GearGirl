@@ -10,6 +10,7 @@
 #include "3DModel.h"
 #include "modeldata.h"
 #include "mathUtil.h"
+#include "Color_defs.h"
 
 using namespace MyMathUtil;
 
@@ -68,7 +69,7 @@ void Draw3DModel(void)
 	// 3Dモデルの描画
 	for (int nCnt3DModel = 0; nCnt3DModel < MAX_3DMODEL; nCnt3DModel++, p3DModel++)
 	{
-		if ((p3DModel->bUse NAND p3DModel->bEnable))
+		if (p3DModel->bUse && p3DModel->bEnable)
 		{ // もし使われていれば
 			/*** ワールドマトリックスの初期化 ***/
 			D3DXMatrixIdentity(&p3DModel->mtxWorld);
@@ -104,8 +105,23 @@ void Draw3DModel(void)
 
 				for (int nCntMat = 0; nCntMat < (int)pModelData->dwNumMat; nCntMat++)
 				{
-					/*** マテリアルの設定 ***/
-					pDevice->SetMaterial(&pMat[nCntMat].MatD3D);
+					if (p3DModel->col != COLOR_UNUSED)
+					{
+						D3DMATERIAL9 customMat = pMat[nCntMat].MatD3D;
+						customMat.Diffuse = p3DModel->col;
+						if (p3DModel->bAlpha == false)
+						{
+							customMat.Diffuse.a = pMat[nCntMat].MatD3D.Diffuse.a;
+						}
+
+						/*** マテリアルの設定 ***/
+						pDevice->SetMaterial(&customMat);
+					}
+					else
+					{
+						/*** マテリアルの設定 ***/
+						pDevice->SetMaterial(&pMat[nCntMat].MatD3D);
+					}
 
 					/*** テクスチャの設定 ***/
 					pDevice->SetTexture(0, pModelData->apTexture[nCntMat]);
@@ -136,9 +152,11 @@ IDX_3DMODEL Set3DModel(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nIdxModelData)
 		{ // もし使われていなければ
 			p3DModel->pos = pos;
 			p3DModel->rot = rot;
+			p3DModel->col = COLOR_UNUSED;
 			p3DModel->nIdx3Dmodel = nIdxModelData;
 			p3DModel->bUse = true;
 			p3DModel->bEnable = true;
+			p3DModel->bAlpha = false;
 			g_nNum3DModel++;
 			error = nCnt3DModel;
 
@@ -189,6 +207,21 @@ void SetEnable3DModel(IDX_3DMODEL Idx, bool bEnable)
 	if (p3DModel->bUse == false) return;
 
 	p3DModel->bEnable = bEnable;
+}
+
+//=================================================================================================
+// --- 色変更 ---
+//=================================================================================================
+void SetColor3DModel(IDX_3DMODEL Idx, D3DXCOLOR col, bool bAlpha)
+{
+	// もしインデックス外なら
+	if (Idx < 0 || Idx >= MAX_3DMODEL) return;
+
+	LP3DMODEL p3DModel = &g_aModel[Idx];
+	if (p3DModel->bUse == false) return;
+
+	p3DModel->col = col;
+	p3DModel->bAlpha = bAlpha;
 }
 
 //=================================================================================================

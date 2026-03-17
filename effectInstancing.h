@@ -1,27 +1,47 @@
 //================================================================================================================
 //
-// DirectXのライト用ヘッダファイル [light.h]
+// DirectXのビルボードバレット表示用ヘッダファイル [bullet.h]
 // Author : TENMA
 //
 //================================================================================================================
-#ifndef _LIGHT_H_
-#define _LIGHT_H_
+#ifndef _EFFECT_H_
+#define _EFFECT_H_
 
 //**********************************************************************************
 //*** インクルードファイル ***
 //**********************************************************************************
-#include "game.h"
+#include "main.h"
+#include "input.h"
 
 //**********************************************************************************
 //*** マクロ定義 ***
 //**********************************************************************************
 
+typedef struct
+{
+	D3DXVECTOR3 pos;			// 頂点座標
+	D3DXVECTOR3 nor;			// 法線
+	D3DXVECTOR2 tex;			// テクスチャ座標
+} VTX_GEOMETRY;
+
+#define FVF_GEOMETRY		(D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX1)
+
+typedef struct
+{
+	D3DXMATRIX mtxWorld;		// ワールドマトリックス
+	D3DXCOLOR col;				// 頂点カラー
+} VTX_INSTANCE;
+
 //**********************************************************************************
 //*** プロトタイプ宣言 ***
 //**********************************************************************************
-void InitLight(void);
-void UninitLight(void);
-void UpdateLight(void);
+void InitEffectInstancing(void);
+void UninitEffectInstancing(void);
+void UpdateEffectInstancing(void);
+void DrawEffectInstancing(void);
+void DrawEffectInstancingInstance(void);
 
-D3DLIGHT9 *GetLight(void);
+void SetEffectInstancing(D3DXVECTOR3 pos, D3DXVECTOR3 rot, float fSpd, float fWidth, float fHeight, int nLife = -1);
+void SetIndexTextureEffectInstancing(int nIndexTexture);
+LPD3DXEFFECT GetShader(void);
 #endif

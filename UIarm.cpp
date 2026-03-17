@@ -7,6 +7,8 @@
 #include "main.h"
 #include "input.h"
 #include "UIarm.h"
+#include "player.h"
+#include "camera.h"
 
 //=========================================================
 // マクロ定義
@@ -60,7 +62,7 @@ void InitUIarm(void)
 	g_ArmUI.pos = D3DXVECTOR3(UI_DRAW_START_X, 570.0f, 0.0f);
 	g_ArmUI.move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	g_nDirectionPlayer = 0;
-	
+
 	//-------------------------------------
 	// 頂点バッファをロックし、頂点情報へのポインタを獲得
 	g_pVtxBuffUIarm->Lock(0, 0, (void**)&pVtx, 0);
@@ -125,11 +127,11 @@ void UpdateUIarm(void)
 {
 	VERTEX_2D* pVtx;								// 頂点情報へのポインタ
 
-	if (g_nDirectionPlayer == 0)
+	if (GetCameraNum() == 1)
 	{
 		g_ArmUI.pos.x = UI_DRAW_START_X;
 	}
-	else if (g_nDirectionPlayer == 1)
+	else if (GetCameraNum() == 2)
 	{
 		g_ArmUI.pos.x = 500.0f;
 	}
@@ -138,15 +140,12 @@ void UpdateUIarm(void)
 	// 頂点バッファをロックし、頂点情報へのポインタを獲得
 	g_pVtxBuffUIarm->Lock(0, 0, (void**)&pVtx, 0);
 
-	if (GetKeyboardTrigger(DIK_9) || GetJoypadTrigger(0, JOYKEY_RB))
-	{
-		// テクスチャ座標の設定
-		pVtx[0].tex.x -= UI_TEX_SIZE;
-		pVtx[1].tex.x -= UI_TEX_SIZE;
-		pVtx[2].tex.x -= UI_TEX_SIZE;
-		pVtx[3].tex.x -= UI_TEX_SIZE;
-	}
-	else if (GetKeyboardTrigger(DIK_0) == true)
+	pVtx[0].pos.x = g_ArmUI.pos.x;
+	pVtx[1].pos.x = g_ArmUI.pos.x + UI_ARM_SIZE;
+	pVtx[2].pos.x = g_ArmUI.pos.x;
+	pVtx[3].pos.x = g_ArmUI.pos.x + UI_ARM_SIZE;
+
+	if (GetKeyboardTrigger(DIK_0) || GetJoypadTrigger(0, JOYKEY_RB))
 	{
 		// テクスチャ座標の設定
 		pVtx[0].tex.x += UI_TEX_SIZE;

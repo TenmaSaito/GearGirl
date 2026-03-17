@@ -15,6 +15,7 @@
 //**********************************************************************************
 //*** マクロ定義 ***
 //**********************************************************************************
+#define MAX_MAT			(25)	// マテリアルの最大数
 
 //**********************************************************************************
 //*** 型宣言 ***
@@ -26,12 +27,14 @@ typedef int IDX_3DMODEL;		// 3Dモデルのインデックス
 //**********************************************************************************
 STRUCT(_3DMODEL)
 {
+	D3DXCOLOR col;			// 色
 	D3DXVECTOR3 pos;		// 3Dモデルの位置
 	D3DXVECTOR3 rot;		// 3Dモデルの向き
 	D3DXMATRIX mtxWorld;	// ワールドマトリックス
 	int nIdx3Dmodel;		// モデルデータのインデックス
 	bool bUse;				// 格納状況
 	bool bEnable;			// 描画するかどうか
+	bool bAlpha;			// α値を変更するか
 } _3DMODEL;
 
 typedef struct _3DMODEL *P3DMODEL, *LP3DMODEL;
@@ -47,6 +50,7 @@ void Draw3DModel(void);
 IDX_3DMODEL Set3DModel(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nIdxModelData);
 void SetPosition3DModel(IDX_3DMODEL Idx, D3DXVECTOR3 pos);
 void SetRotation3DModel(IDX_3DMODEL Idx, D3DXVECTOR3 rot);
-void SetEnable3DModel(IDX_3DMODEL Idx, bool bEnable);
+void SetEnable3DModel(IDX_3DMODEL Idx, bool bEnable); 
+void SetColor3DModel(IDX_3DMODEL Idx, D3DXCOLOR col, bool bAlpha);
 LP3DMODEL Get3DModel(IDX_3DMODEL nIdxModel);
 #endif
