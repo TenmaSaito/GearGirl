@@ -22,10 +22,10 @@
 //=========================================================
 //マクロ定義
 //=========================================================
-#define MAX_POUSE		PAUSE_MENU_MAX		// ポーズの種類
-#define HEIGHT_SIZE		100.0f 				// 縦サイズ
-#define WIDTH_SIZE		600.0f				// 横サイズ
-#define LINE_SPACE		50.0f				// 行間隔
+#define MAX_POUSE		(PAUSE_MENU_MAX)	// ポーズの種類
+#define HEIGHT_SIZE		(150.0f)			// 縦サイズ
+#define WIDTH_SIZE		(450.0f)			// 横サイズ
+#define LINE_SPACE		(50.0f)				// 行間隔
 
 //=========================================================
 //グローバル変数
@@ -42,9 +42,9 @@ int nPauseData;
 //=========================================================
 const char* c_apFilenamePause[PAUSE_MENU_MAX] =
 {
-	"data\\TEXTURE\\Pouse Restart.png",
-	"data\\TEXTURE\\Pouse Retitle.png",
-	"data\\TEXTURE\\Pouse Close.png",
+	"data\\TEXTURE\\pause_continue.png",
+	"data\\TEXTURE\\pause_restart.png",
+	"data\\TEXTURE\\pause_title.png",
 };
 
 //=========================================================
