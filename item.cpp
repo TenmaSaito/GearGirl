@@ -224,9 +224,12 @@ void UpdateItem(void)
 	// •Ö—˜‰®”»’è
 	if (IsDispPrompt(GetIdxShopPrompt()))
 	{
-		if (GetKeyboardTrigger(DIK_RETURN) || GetKeyboardTrigger(DIK_F) || GetKeyboardTrigger(DIK_SPACE) || GetJoypadTrigger(PLAYERTYPE_GIRL, JOYKEY_A))
+		if (GetActivePlayer() == PLAYERTYPE_GIRL || 1 < GetNumPlayer())
 		{
-			g_bPutOut = true;
+			if (GetKeyboardTrigger(DIK_RETURN) || GetKeyboardTrigger(DIK_F) || GetJoypadTrigger(PLAYERTYPE_GIRL, JOYKEY_A))
+			{
+				g_bPutOut = true;
+			}
 		}
 
 		if (GetKeyboardTrigger(DIK_BACK) || GetJoypadTrigger(0, JOYKEY_B))
