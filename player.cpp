@@ -476,13 +476,7 @@ void UpdatePlayer(void)
 		if (GAME_NOW)
 		{// ゲーム本編中
 			// アイテムとの当たり判定
-			if (CollisionItem(pPlayer->pos, PLAYER_RANGE, nCntPlayer) == true)
-			{
-				if (nCntPlayer == PLAYERTYPE_MOUSE)
-				{// ネズミでアイテム取得時にバイブレーションをかける
-					SetVibration(PLAYERTYPE_MOUSE, 3000, 3000, 30);
-				}
-			}
+			CollisionItem(pPlayer->pos, PLAYER_RANGE, nCntPlayer);
 		}
 
 		// === ギミックとの当たり判定 === //
