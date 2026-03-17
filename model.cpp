@@ -123,6 +123,15 @@ void DrawModel(void)
 	{
 		if (g_ModelInfo[nCntModel].bUse == true)
 		{
+			if (GetNumPlayer() == 2 && GetReadyCamera() == CAMERATYPE_PLAYER_TWO)
+			{
+				Player *pPlayer = GetPlayer();
+				D3DXVECTOR3 length = pPlayer->pos - g_ModelInfo[nCntModel].pos;
+				FLOAT fLength = D3DXVec3Length(&length);
+
+				if (fLength >= 700.0f) continue;
+			}
+
 			// ワールドマトリックスの設定
 			pDevice->SetTransform(D3DTS_WORLD, &g_ModelInfo[nCntModel].mtxWorld);
 
@@ -929,6 +938,11 @@ bool CollisionModel
 			float fLineToMove = 0.0f;					// vecLineとの外積
 			float fRate = 0.0f;							// 面積比率
 			float fVecPosToNor = 0.0f;					// 逆法線との外積
+
+			D3DXVECTOR3 length = *pPos - pObject->pos;
+			FLOAT fLength = D3DXVec3Length(&length);
+
+			if (fLength >= 500.0f) continue;
 
 			if (pPos->y >= pObject->pos.y + pObjInfo->vtxMin.y - 10.0f
 				&& pPos->y <= pObject->pos.y + pObjInfo->vtxMax.y)

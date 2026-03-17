@@ -53,6 +53,7 @@ int				g_nSetItemNum = 0;					// 設置済みのアイテム数
 int				g_nSelectPut = -1;					// 提出時のカーソル
 int				g_nChoisePut = -1;					// 選択中のカーソル
 int				g_nItemQuotaFlameTex = -1;			// アイテム欄のフレームのテクスチャ番号
+int				g_nCoutItemFram = 0;				// フレーム数カウント
 bool			g_bPutOut = false;					// アイテムを提出するときtrue
 Item			g_aItem[MAX_ITEM];					// アイテム情報
 ItemQuota		g_aItemQuota[ITEMTYPE_MAX];			// 所持アイテムを表示する枠のインデックス
@@ -105,6 +106,7 @@ void InitItem(void)
 	g_bPutOut = false;		// アイテムを提出状態ではない
 	g_nSelectPut = -1;		// 提出時のカーソル
 	g_nChoisePut = -1;
+	g_nCoutItemFram = 0;
 	LoadTexture("data\\TEXTURE\\flame.png", &g_nItemQuotaFlameTex);
 
 	// アイテム情報読込
@@ -222,11 +224,15 @@ void UninitItem(void)
 void UpdateItem(void)
 {
 	// 便利屋判定
-	if (IsDispPrompt(GetIdxShopPrompt()))
+	if (IsDispPrompt(GetIdxShopPrompt()) && g_bPutOut == false)
 	{
-		if (GetKeyboardTrigger(DIK_RETURN) || GetKeyboardTrigger(DIK_F) || GetKeyboardTrigger(DIK_SPACE) || GetJoypadTrigger(PLAYERTYPE_GIRL, JOYKEY_A))
+		if (GetActivePlayer() == PLAYERTYPE_GIRL || 1 < GetNumPlayer())
 		{
-			g_bPutOut = true;
+			if (GetKeyboardTrigger(DIK_RETURN) || GetKeyboardTrigger(DIK_F) || GetJoypadTrigger(PLAYERTYPE_GIRL, JOYKEY_A))
+			{
+				g_bPutOut = true;
+				g_nCoutItemFram = 10;
+			}
 		}
 
 		if (GetKeyboardTrigger(DIK_BACK) || GetJoypadTrigger(0, JOYKEY_B))
@@ -239,10 +245,6 @@ void UpdateItem(void)
 			g_nChoisePut = -1;
 		}
 	}
-	else if (g_bOnDebugItem == false)
-	{// デバッグ用
-		g_bPutOut = false;
-	}
 
 	// マップアイテム更新
 	UpdateMapItem();
@@ -250,6 +252,8 @@ void UpdateItem(void)
 	// ポーチアイテム更新
 	UpdatePouchItem();
 
+	if(0 < g_nCoutItemFram)
+	g_nCoutItemFram--;
 #ifdef _DEBUG
 	if (GetKeyboardTrigger(DIK_F3))
 	{
@@ -298,7 +302,7 @@ void UpdatePouchItem(void)
 	P_ITEMQUOTA pPutQuota = &g_aPutQuota[0];
 
 	// 提出フラグが立っていたら
-	if (g_bPutOut)
+	if (g_bPutOut && g_nCoutItemFram <= 0)
 	{
 		PutOut();		// 取得済みアイテム表示
 
@@ -357,7 +361,10 @@ void UpdatePouchItem(void)
 			// メニュー表示中、色をつける
 			// アイテム欄
 			for (int nCntQuota = 0; nCntQuota < ITEMTYPE_MAX; nCntQuota++, pItemQuota++)
+			{
 				SetColor2DPolygon(pItemQuota->nIdxBox, colX(1.0f, 1.0f, 1.0f, 0.3f));
+				SetEnable2DPolygon(pItemQuota->nIdxBox, true);
+			}
 		}
 		else
 		{

@@ -55,7 +55,6 @@ const float g_fIncreaseRadius = 0.1f;					// 半径増加係数
 const float g_fIncreaseRadiusFinish = 5.0f;				// 終了時半径増加係数
 const float g_fDecreaseAlphaFinish = 0.003f;			// 終了時α値減少係数	
 const WORD g_wStartVib = 65500;							// バイブレーションの初期値
-const float g_fRadiusVib = 225.0f;						// バイブレーションの稼働半径
 
 //**********************************************************************************
 //*** グローバル変数 ***
@@ -214,27 +213,34 @@ void _3DVibration(ItemEffector *pEffector)
 	float rotLeft = pMouse->rot.y + D3DX_HALFPI,	// プレイヤーの左
 		  rotRight = pMouse->rot.y - D3DX_HALFPI;	// プレイヤーの右
 	float fLength = 1000000.0f;						// アイテムとプレイヤーの距離
-	ITEMTYPE type;									// 対象のアイテムの種類
+	ITEMTYPE type = ITEMTYPE_MAX;					// 対象のアイテムの種類
 
 	// アイテムの中で最もネズミに近いアイテムを取得
 	for (int nCntItem = 0; nCntItem < ITEMTYPE_MAX; nCntItem++)
 	{
+		// アイテムが取得済みの場合、スキップ
 		if (pEffector[nCntItem].bFinish == true) continue;
 
 		D3DXVECTOR3 diff = pMouse->pos - pEffector[nCntItem].pos;
 		float fPTPLength = D3DXVec3Length(&diff);		// 2点間の距離を求める
 
+		// 二点間の距離を判定
 		if (fPTPLength < fLength)
-		{
+		{ // 基準以下の場合、基準を更新しアイテムの種類を保存
 			fLength = fPTPLength;
 			type = (ITEMTYPE)nCntItem;
 		}
 	}
 
-	// バイブレーション可能距離外の場合終了
-	if (fLength >= g_fRadiusVib)
+	// 判定されなかった場合終了
+	if (type == ITEMTYPE_MAX)
 	{
-		SetVibration(0, 0, 0, INT_INFINITY);
+		return;
+	}
+
+	// バイブレーション可能距離外の場合終了
+	if (fLength >= MAXWORD)
+	{
 		return;
 	}
 
@@ -242,30 +248,42 @@ void _3DVibration(ItemEffector *pEffector)
 	float fAngle = GetPosToPos(pEffector[type].pos, pMouse->pos);
 
 	// 左の角度との差異
-	float fDestLeft = rotLeft - fAngle;
-	fDestLeft = RepairRot(fDestLeft);
-	fDestLeft = fabsf(fDestLeft);
-	FloatNormalize(&fDestLeft, 0.0f, D3DX_PI);
-	int nLeft = (g_wStartVib * 0.5f) - ((g_wStartVib * 0.5f) * fDestLeft);
+	float fDestLeft = rotLeft - fAngle;			// 角度の差分を計算
+	fDestLeft = RepairRot(fDestLeft);			// 角度の修正
+	fDestLeft = fabsf(fDestLeft);				// 角度の絶対値を求める
+	FloatNormalize(&fDestLeft, 0.0f, D3DX_PI);	// 角度の正規化
+	int nLeft = (g_wStartVib) - ((g_wStartVib) * fDestLeft);		// 正規化した値から振動の値を求める
+	if (nLeft <= 10000)
+	{
+		nLeft = 0;
+	}
 
 	// 右の角度との差異
-	float fDestRight = rotRight - fAngle;
-	fDestRight = RepairRot(fDestRight);
-	fDestRight = fabsf(fDestRight);
-	FloatNormalize(&fDestRight, 0.0f, D3DX_PI);
-	int nRight = (g_wStartVib * 0.5f) - ((g_wStartVib * 0.5f) * fDestRight);
+	float fDestRight = rotRight - fAngle;		// 角度の差分を計算
+	fDestRight = RepairRot(fDestRight);			// 角度の修正
+	fDestRight = fabsf(fDestRight);				// 角度の絶対値を求める
+	FloatNormalize(&fDestRight, 0.0f, D3DX_PI);	// 角度の正規化
+	int nRight = (g_wStartVib) - ((g_wStartVib) * fDestRight);	// 正規化した値から振動の値を求める
+	if (nRight <= 10000)
+	{
+		nRight = 0;
+	}
 
-	if (GetNumPlayer() == 2)
-	{ // 2Pプレイの場合、ネズミ側のコントローラーにのみ振動
+	if (GetNumPlayer() == 2 && GetJoypadPress(PLAYERTYPE_MOUSE, JOYKEY_RB))
+	{ // 2Pプレイの場合、B長押し時ネズミ側のコントローラーにのみ振動
 		SetVibration(PLAYERTYPE_MOUSE, nLeft, nRight, INT_INFINITY);
 	}
-	else
-	{ // 1Pプレイの場合
-		if (GetActivePlayer() == PLAYERTYPE_MOUSE)
-		{ // ネズミ操作時のみ振動
-			SetVibration(0, nLeft, nRight, INT_INFINITY);
-		}
+	else if (GetActivePlayer() == PLAYERTYPE_MOUSE && GetJoypadPress(0, JOYKEY_RB))
+	{ // 1Pプレイの場合、B長押し時ネズミ操作時のみ振動
+		SetVibration(0, nLeft, nRight, INT_INFINITY);
 	}
+	else
+	{ // 長押しをしていない場合、バイブレーションをリセット
+		SetVibration(0, 0, 0, INT_INFINITY);
+		SetVibration(1, 0, 0, INT_INFINITY);
+	}
+
+	PrintDebugProc("L %d : R %d\n", nLeft, nRight);
 }
 
 //==================================================================================

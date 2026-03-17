@@ -282,6 +282,12 @@
     <ClCompile Include="tplayer.cpp">
       <Filter>ソース ファイル\Mode\Title</Filter>
     </ClCompile>
+    <ClCompile Include="effectInstancing.cpp">
+      <Filter>ソース ファイル\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="ranking.cpp">
+      <Filter>ソース ファイル\Mode\Result</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h">
@@ -475,6 +481,12 @@
     </ClInclude>
     <ClInclude Include="tplayer.h">
       <Filter>ヘッダー ファイル\Mode\Title</Filter>
+    </ClInclude>
+    <ClInclude Include="effectInstancing.h">
+      <Filter>ヘッダー ファイル\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="ranking.h">
+      <Filter>ヘッダー ファイル\Mode\Result</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

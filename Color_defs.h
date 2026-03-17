@@ -19,6 +19,7 @@
 #define COLOR_WHITE				(D3DXCOLOR(1, 1, 1, 1))					// 基本色
 #define COLOR_NONE				(D3DXCOLOR(0, 0, 0, 0))					// 無色
 #define COLOR_INV				(D3DXCOLOR(1, 1, 1, 0))					// 透明
+#define COLOR_UNUSED			(D3DXCOLOR(-1, -1, -1, -1))				// 未使用
 
 #define COLOR_FILL(elem)		(D3DXCOLOR(elem, elem, elem, elem))		// 指定色
 

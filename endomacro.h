@@ -21,9 +21,14 @@
 #define colX			D3DXCOLOR
 #define colX_ZERO		D3DXCOLOR(0.0f,0.0f,0.0f,0.0f)
 #define colX_WHITE		D3DXCOLOR(1.0f,1.0f,1.0f,1.0f)
+#define colX_RED		D3DXCOLOR(1.0f,0.0f,0.0f,1.0f)
+#define colX_GREEN		D3DXCOLOR(0.0f,1.0f,0.0f,1.0f)
+#define colX_BLUE		D3DXCOLOR(0.0f,0.0f,1.0f,1.0f)
 #define POINTER(mold,name)			typedef struct mold* name			// (mold) のポインタ型の (name) を定義する
 #define MIDCHECK(MIN,N,MAX)			(MIN < N && N < MAX)				// 最小最大のチェック
 #define SQUARE(X)					((X) * (X))							// ２乗
 #define __ABSOLUTE(X)				(X < 0 ? X* -1:X)					// 絶対値
+#define VECTOR3_ANGLE(POS,L,Z)		vec3(POS.x + sinf(Z) * L,POS.y + cosf(Z) * L,0.0f)	// 角度と対角線で点を求める
+
 
 #endif // !_ENDOMACRO_H_
