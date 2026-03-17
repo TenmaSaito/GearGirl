@@ -8,6 +8,7 @@
 #include <d3dx9math.h>
 #include "main.h"
 #include "camera.h"
+#include "common_fade.h"
 #include "debugproc.h"
 #include "dialog.h"
 #include "effect.h"
@@ -226,6 +227,9 @@ void UpdatePlayer(void)
 	// 駅のギミック情報を取得
 	Gimmick* pGimmick = GetGimmick() + 5;
 
+	// 汎用フェードの情報の取得
+	FADE Fade = GetCommonFade();
+
 	pPlayer->bUseLandMotion = false;
 	g_bMovable = true;	// 移動を可能に
 
@@ -267,7 +271,8 @@ void UpdatePlayer(void)
 					&& g_aPlayer[PLAYERTYPE_GIRL].motionType != MOTIONTYPE_ACTION
 					&& g_aPlayer[PLAYERTYPE_GIRL].motionTypeBlend != MOTIONTYPE_ACTION
 					&& g_aPlayer[PLAYERTYPE_GIRL].motionType != MOTIONTYPE_VALVE
-					&& g_aPlayer[PLAYERTYPE_GIRL].motionTypeBlend != MOTIONTYPE_VALVE)
+					&& g_aPlayer[PLAYERTYPE_GIRL].motionTypeBlend != MOTIONTYPE_VALVE
+					&& Fade == FADE_NONE)
 				{
 					MovePlayer((PlayerType)nCntPlayer);	// 移動に関する処理
 				}
@@ -403,6 +408,11 @@ void UpdatePlayer(void)
 			pPlayer->pos.x = MAX_XMOVE2;
 		}
 
+		if (pPlayer->pos.x < 710.0f && pPlayer->pos.x >= 690.0f && pPlayer->pos.z <= -700.0f)
+		{
+			pPlayer->pos.x = 690.0f;
+		}
+
 		// === 駅のガラスの裏にいかないようにする === //
 		if (pPlayer->pos.x <= 700.0f)
 		{
@@ -442,7 +452,7 @@ void UpdatePlayer(void)
 		}
 
 		// === モデルとの当たり判定 === //
-		if (nCntPlayer == PLAYERTYPE_GIRL || (nCntPlayer == PLAYERTYPE_MOUSE && GetActivePlayer() == PLAYERTYPE_MOUSE))
+		if (nCntPlayer == PLAYERTYPE_GIRL || (nCntPlayer == PLAYERTYPE_MOUSE && GetActivePlayer() == PLAYERTYPE_MOUSE) || GetNumPlayer() == 2)
 		{// 少女に対してと、ネズミは操作しているときのみ
 			if (CollisionModel(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move, 5, 50))
 			{
@@ -513,89 +523,33 @@ void UpdatePlayer(void)
 			if (g_nNumPlayer == 1)
 			{// シングルプレイ時
 				if (GetJoypadTrigger(0, JOYKEY_LB) == true || GetKeyboardTrigger(DIK_Q) == true)
-				{
-					// 駅の範囲内なら切り替えを行わないようにする
-					if (g_aPlayer[PLAYERTYPE_MOUSE].pos.z <= -774.0f && g_aPlayer[PLAYERTYPE_MOUSE].pos.x <= 700.0f)
+				{// 特定のモーション中は切り替え不可
+					if (g_aPlayer[PLAYERTYPE_GIRL].motionType != MOTIONTYPE_ACTION && g_aPlayer[PLAYERTYPE_GIRL].motionTypeBlend != MOTIONTYPE_ACTION
+						&& g_aPlayer[PLAYERTYPE_GIRL].motionType != MOTIONTYPE_CUTTING && g_aPlayer[PLAYERTYPE_GIRL].motionTypeBlend != MOTIONTYPE_CUTTING
+						&& g_aPlayer[PLAYERTYPE_GIRL].motionType != MOTIONTYPE_VALVE && g_aPlayer[PLAYERTYPE_GIRL].motionTypeBlend != MOTIONTYPE_VALVE)
 					{
-						// 駅のガラス張りのところでは切り替え不可
-					}
-					else
-					{
-						if (g_aPlayer[PLAYERTYPE_GIRL].state != PLAYERSTATE_THROWWAITING && g_bShotMouse == false)
+						if (g_aPlayer[PLAYERTYPE_MOUSE].pos.z <= -774.0f && g_aPlayer[PLAYERTYPE_MOUSE].pos.x <= 700.0f)
+						{// 駅の範囲内なら切り替えを行わないようにする
+							// 駅のガラス張りのところでは切り替え不可
+						}
+						else
 						{
-							if (g_ActivePlayer == 1)
-							{// ネズミ→少女
-								g_ActivePlayer = 0;
-							}
-							else
-							{// 少女→ネズミ
-								g_ActivePlayer = 1;
+							if (g_aPlayer[PLAYERTYPE_GIRL].state != PLAYERSTATE_THROWWAITING && g_bShotMouse == false)
+							{
+								if (g_ActivePlayer == 1)
+								{// ネズミ→少女
+									g_ActivePlayer = 0;
+								}
+								else
+								{// 少女→ネズミ
+									g_ActivePlayer = 1;
+								}
 							}
 						}
 					}
 				}
 			}
 		}
-
-		// === アイテムの情報を取得 === //
-		//Item* pItem = GetItem();
-
-		//if (g_ActivePlayer == PLAYERTYPE_MOUSE || GetNumPlayer() == 2)
-		//{// ネズミ操作時
-		//	for (int nCntItem = 0; nCntItem < ITEMTYPE_MAX; nCntItem++, pItem++)
-		//	{// アイテムのMAX分回す
-		//		if (pItem->bGet == false && pItem->bUse == true)
-		//		{// 取得されていないアイテムの場合	
-
-		//			// 距離の計算
-		//			pItem->Dist.x = SQUARE(pItem->pos.x - pMouse->pos.x);
-		//			pItem->Dist.y = SQUARE(pItem->pos.y - pMouse->pos.y);
-		//			pItem->Dist.z = SQUARE(pItem->pos.z - pMouse->pos.z);
-
-		//			// 距離の絶対値を算出
-		//			pItem->fDistance = sqrtf(__ABSOLUTE(pItem->Dist.x + pItem->Dist.z));
-
-		//			if (pItem->fDistance >= 200.0f)
-		//			{
-		//				pItem->fDistance = 200.0f;
-		//			}
-
-		//			// === 値を0~1にスケール(正規)化 === //
-		//			pItem->fCol = pItem->fDistance / 200.0f;
-
-		//			if (pItem->fCol < 0.4)
-		//			{// 近いと青色もしくは赤色に
-		//				// === 正解パーツ用パーティクル === //
-		//				if (pItem->type >= 0 && pItem->type <= 4)
-		//				{
-		//					//SetParticle(pItem->pos, MyMathUtil::GetColLerp(D3DXCOLOR(COL_BLUE), D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f), fCol), D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 1, 3, true, true);
-		//					//SetEffect(pItem->pos, MyMathUtil::GetColLerp(D3DXCOLOR(COL_BLUE), D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f), pItem->fCol), D3DXVECTOR3(5.0f, 5.0f, 5.0f), 20.0f, 20.0f, 10.0f, 3, true, true);
-		//					SetEffect(pItem->pos, COL_BLUE, D3DXVECTOR3(100.0f, 100.0f, 100.0f), 5.0f, 5.0f, 30.0f, 5, true, true);
-		//				}
-		//				// === 外れパーツ用パーティクル === //
-		//				if (pItem->type >= 5 && pItem->type <= 9)
-		//				{
-		//					//SetParticle(pItem->pos, COL_RED, D3DXVECTOR3(-1.0f, -1.0f, -1.0f), D3DXVECTOR3(20.0f, 20.0f, 20.0f), 3, 1.5f, 3, 10, true, true);
-		//					SetEffect(pItem->pos, COL_RED, D3DXVECTOR3(5.0f, 5.0f, 5.0f), 20.0f, 20.0f, 10.0f, 3, true, true);
-		//				}
-		//			}
-		//			else
-		//			{// 遠いと白に
-		//				// === 正解パーツ用パーティクル === //
-		//				if (pItem->type >= 0 && pItem->type <= 4)
-		//				{
-		//					//SetEffect(pItem->pos, MyMathUtil::GetColLerp(D3DXCOLOR(COL_BLUE), D3DXCOLOR(0.8f, 0.8f, 0.8f, 1.0f), pItem->fCol), D3DXVECTOR3(5.0f, 5.0f, 5.0f), 20.0f, 20.0f, 10.0f, 3, true, true);
-		//					SetEffect(pItem->pos, DEF_COL, D3DXVECTOR3(100.0f, 100.0f, 100.0f), 5.0f, 5.0f, 30.0f, 3, true, true);
-		//				}
-		//				// === 外れパーツ用パーティクル === //
-		//				if (pItem->type >= 5 && pItem->type <= 9)
-		//				{
-		//					SetEffect(pItem->pos, DEF_COL, D3DXVECTOR3(5.0f, 5.0f, 5.0f), 20.0f, 20.0f, 10.0f, 3, true, true);
-		//				}
-		//			}
-		//		}
-		//	}
-		//}
 	}
 #ifdef _DEBUG
 	// ***************************************************************************
@@ -2007,7 +1961,7 @@ void UpdateArm(void)
 
 		//	g_armPlayer = (ArmType)nArm;
 		//}
-		
+
 		if (GetKeyboardTrigger(DIK_0) == true || GetJoypadTrigger(0, JOYKEY_RB) == true)
 		{
 			int nArm = g_armPlayer;

@@ -19,7 +19,7 @@
 //*************************************************************************************************
 //*** マクロ定義 ***
 //*************************************************************************************************
-#define	MAX_EFFECT	(4096)	// エフェクトの最大数
+#define	MAX_EFFECT	(2048)	// エフェクトの最大数
 
 //*************************************************************************************************
 //*** エフェクト構造体の定義 ***
@@ -164,8 +164,6 @@ void UpdateEffect(void)
 	Player* pPlayer = GetPlayer();
 	Player* pMouse = GetPlayer() + 1;
 
-	Gimmick* pGimmick = GetGimmick() + 5;
-
 	int nCntEffect;
 	VERTEX_3D* pVtx;
 
@@ -199,11 +197,6 @@ void UpdateEffect(void)
 				if (g_aEffect[nCntEffect].pos.x >= MAX_XMOVE2)
 				{
 					g_aEffect[nCntEffect].pos.x = MAX_XMOVE2;
-				}
-
-				if (pGimmick->myType == GIMMICKTYPE_CLOSEDDOOR)
-				{
-					CollisionGimmick(&g_aEffect[nCntEffect].pos, &g_aEffect[nCntEffect].posOld, &g_aEffect[nCntEffect].move, pMouse, 5.0f, 2.0f);
 				}
 			}
 
@@ -316,16 +309,16 @@ void DrawEffect(void)
 		if (g_aEffect[nCntEffect].bUse == true)
 		{// 弾が使用されている
 
-			if (g_aEffect[nCntEffect].bVisible == true)
-			{// Zテストを有効にしたいものは、インデックスを渡してスキップ
-				g_aIdxZTest[g_nIdxEffect] = nCntEffect;
-				g_nIdxEffect++;
+			//if (g_aEffect[nCntEffect].bVisible == true)
+			//{// Zテストを有効にしたいものは、インデックスを渡してスキップ
+			//	g_aIdxZTest[g_nIdxEffect] = nCntEffect;
+			//	g_nIdxEffect++;
 
-				continue;
-			}
+			//	continue;
+			//}
 
-			if (g_aEffect[nCntEffect].bVisible == false || (g_aEffect[nCntEffect].bVisible == true && GetReadyCamera() == CAMERATYPE_PLAYER_TWO))
-			{// 全員が見える奴と、ネズミ限定の奴を描画
+			if (g_aEffect[nCntEffect].bVisible == false || (g_aEffect[nCntEffect].bVisible == true && GetReadyCamera() == CAMERATYPE_PLAYER_ONE))
+			{// 全員が見える奴と、少女限定の奴を描画
 				/*** ワールドマトリックスの初期化 ***/
 				D3DXMatrixIdentity(&g_aEffect[nCntEffect].mtxWorld);
 
@@ -357,43 +350,43 @@ void DrawEffect(void)
 		}
 	}
 
-	/*** Zテストを無効にする ***/
-	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
-	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+	///*** Zテストを無効にする ***/
+	//pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
+	//pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 
-	for (int nCntZTest = 0; nCntZTest < g_nIdxEffect; nCntZTest++)
-	{
-		if (g_aEffect[g_aIdxZTest[nCntZTest]].bVisible == false || (g_aEffect[g_aIdxZTest[nCntZTest]].bVisible == true && GetReadyCamera() == CAMERATYPE_PLAYER_TWO))
-		{// 全員が見える奴と、ネズミ限定の奴を描画
-			/*** ワールドマトリックスの初期化 ***/
-			D3DXMatrixIdentity(&g_aEffect[g_aIdxZTest[nCntZTest]].mtxWorld);
+	//for (int nCntZTest = 0; nCntZTest < g_nIdxEffect; nCntZTest++)
+	//{
+	//	if (g_aEffect[g_aIdxZTest[nCntZTest]].bVisible == false || (g_aEffect[g_aIdxZTest[nCntZTest]].bVisible == true && GetReadyCamera() == CAMERATYPE_PLAYER_TWO))
+	//	{// 全員が見える奴と、ネズミ限定の奴を描画
+	//		/*** ワールドマトリックスの初期化 ***/
+	//		D3DXMatrixIdentity(&g_aEffect[g_aIdxZTest[nCntZTest]].mtxWorld);
 
-			/*** カメラのビューマトリックスを取得 ***/
-			pDevice->GetTransform(D3DTS_VIEW, &mtxView);
+	//		/*** カメラのビューマトリックスを取得 ***/
+	//		pDevice->GetTransform(D3DTS_VIEW, &mtxView);
 
-			/*** マトリックスの逆行列を求める (※ 位置を反映する前に必ず行うこと！) ***/
-			D3DXMatrixInverse(&g_aEffect[g_aIdxZTest[nCntZTest]].mtxWorld, NULL, &mtxView);
+	//		/*** マトリックスの逆行列を求める (※ 位置を反映する前に必ず行うこと！) ***/
+	//		D3DXMatrixInverse(&g_aEffect[g_aIdxZTest[nCntZTest]].mtxWorld, NULL, &mtxView);
 
-			/** 逆行列によって入ってしまった位置情報を初期化 **/
-			g_aEffect[g_aIdxZTest[nCntZTest]].mtxWorld._41 = 0.0f;
-			g_aEffect[g_aIdxZTest[nCntZTest]].mtxWorld._42 = 0.0f;
-			g_aEffect[g_aIdxZTest[nCntZTest]].mtxWorld._43 = 0.0f;
+	//		/** 逆行列によって入ってしまった位置情報を初期化 **/
+	//		g_aEffect[g_aIdxZTest[nCntZTest]].mtxWorld._41 = 0.0f;
+	//		g_aEffect[g_aIdxZTest[nCntZTest]].mtxWorld._42 = 0.0f;
+	//		g_aEffect[g_aIdxZTest[nCntZTest]].mtxWorld._43 = 0.0f;
 
-			/*** 位置を反映 (※ 向きを反映したのちに行うこと！) ***/
-			D3DXMatrixTranslation(&mtxTrans,
-				g_aEffect[g_aIdxZTest[nCntZTest]].pos.x,
-				g_aEffect[g_aIdxZTest[nCntZTest]].pos.y,
-				g_aEffect[g_aIdxZTest[nCntZTest]].pos.z);
+	//		/*** 位置を反映 (※ 向きを反映したのちに行うこと！) ***/
+	//		D3DXMatrixTranslation(&mtxTrans,
+	//			g_aEffect[g_aIdxZTest[nCntZTest]].pos.x,
+	//			g_aEffect[g_aIdxZTest[nCntZTest]].pos.y,
+	//			g_aEffect[g_aIdxZTest[nCntZTest]].pos.z);
 
-			D3DXMatrixMultiply(&g_aEffect[g_aIdxZTest[nCntZTest]].mtxWorld, &g_aEffect[g_aIdxZTest[nCntZTest]].mtxWorld, &mtxTrans);
+	//		D3DXMatrixMultiply(&g_aEffect[g_aIdxZTest[nCntZTest]].mtxWorld, &g_aEffect[g_aIdxZTest[nCntZTest]].mtxWorld, &mtxTrans);
 
-			/*** ワールドマトリックスの設定 ***/
-			pDevice->SetTransform(D3DTS_WORLD, &g_aEffect[g_aIdxZTest[nCntZTest]].mtxWorld);
+	//		/*** ワールドマトリックスの設定 ***/
+	//		pDevice->SetTransform(D3DTS_WORLD, &g_aEffect[g_aIdxZTest[nCntZTest]].mtxWorld);
 
-			// ポリゴン描写
-			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, nCntZTest * 4, 2);
-		}
-	}
+	//		// ポリゴン描写
+	//		pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, nCntZTest * 4, 2);
+	//	}
+	//}
 
 	// aブレンディングを元に戻す
 	pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
