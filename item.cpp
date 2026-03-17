@@ -123,7 +123,7 @@ void InitItem(void)
 	}
 
 	// アイテム配置初期化
-	for (int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++, pItem++)
+	for (int nCntItem = 0; nCntItem < ITEMTYPE_MAX; nCntItem++, pItem++)
 	{
 		pItem->bGet = false;
 		pItem->bUse = false;
@@ -282,14 +282,16 @@ void UpdateMapItem(void)
 				pItem->rot.y += SPIN_ITEM;
 
 				MyMathUtil::RepairRot(pItem->rot.x);
-				MyMathUtil::RepairRot(pItem->rot.y);
-
-				// アイテムを囲むようにシリンダーを描画
-				SetMeshCylinder(pItem->pos, VECNULL, D3DXCOLOR(1.0f, 0.0f, 0.0f, 0.4f), 3.0f, 1000.0f, 1, 8, D3DCULL_CCW, -1, false);
+				MyMathUtil::RepairRot(pItem->rot.y);				
 
 				break;
 			}
 
+			if (pItem->bGet == false)
+			{
+				// 位置を変更
+				SetPositionMeshCylinder(pItem->nIdxMesh, pItem->pos);
+			}
 		}
 	}
 }
@@ -537,7 +539,7 @@ void CollisionItem(vec3 pos, float fRange, int type)
 	P_ITEM pItem = GetItem();					// 先頭アドレス
 	P_ITEMQUOTA	pItemQuota = &g_aItemQuota[0];
 
-	for (int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++, pItem++)
+	for (int nCntItem = 0; nCntItem < ITEMTYPE_MAX; nCntItem++, pItem++)
 	{
 		if (pItem->bUse && pItem->bGet == false)
 		{
@@ -573,6 +575,9 @@ void CollisionItem(vec3 pos, float fRange, int type)
 				pItem->bGet = true;
 				SetParticle(pItem->pos, colX(0.5f, 0.1f, 0.1f, 0.3f), vec3(-0.5f, -0.5f, -0.5f), vec3(1.0f, 1.0f, 1.0f), 1, 5.0f, 20, 10, false);
 				SetGetEffect(pItem->nIdxEffector);
+
+				// シリンダーを非表示に
+				SetEnableMeshCylinder(pItem->nIdxMesh, false);
 				break;
 			}
 		}
@@ -877,6 +882,11 @@ IDX_ITEM SetItem(vec3 pos, vec3 rot, ITEMTYPE type, bool bReflectGirl, bool bRef
 				error = nCntItem;
 
 				pItem->nIdxEffector = SetItemEffector(pos, D3DXCOLOR(0, 1, 0, 1));
+
+				// メッシュシリンダーのインデックスを保管
+				pItem->nIdxMesh = SetMeshCylinder(pItem->pos, VECNULL, COL_RED, 5.0f, 500.0f, 1, 8);
+				SetEnableMeshCylinder(pItem->nIdxMesh, true);
+
 				break;
 			}
 		}

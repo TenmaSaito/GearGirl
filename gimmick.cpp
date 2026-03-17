@@ -124,7 +124,6 @@ IDX_TEXTURE g_nIdxTexTutorial[3];			// チュートリアル1枚絵用のインデックス
 bool g_bAnyTex;								// いずれかのテクスチャが表示されているか
 bool g_bDispTutorialChainsaw;				// 1度でもチェンソーチュートリアルテクスチャを表示したかどうか
 bool g_bDispTutorialvalve;					// 1度でもバルブチュートリアルテクスチャを表示したかどうか
-int g_nIdxCylinder[GIMMICKTYPE_MAX] = {};	// メッシュシリンダーのインデックスを保管
 
 //==================================================================================
 // --- 初期化 ---
@@ -183,10 +182,6 @@ void InitGimmick(void)
 					SetEnablePrompt(true, g_aGimmick[nCntMotion].nIdxPrompt);
 				}
 			}
-
-			// インデックスを保管
-			g_nIdxCylinder[nCntMotion] = SetMeshCylinder(g_aGimmick[nCntMotion].pos, VECNULL, COL_BLUE, 10.0f, 800.0f, 1, 8);
-			SetEnableMeshCylinder(g_nIdxCylinder[nCntMotion], false);	// 非表示に
 		}
 	}
 
@@ -276,28 +271,28 @@ void UpdateGimmick(void)
 	Player* pPlayer = GetPlayer();
 
 	// === チュートリアルテクスチャを出していない場合、ギミックの場所にシリンダーを置いてわかりやすくする
-	if (g_bDispTutorialChainsaw == false)
-	{
-		if (IsDetection(g_aGimmick[GIMMICKTYPE_FALLENTREE].pos, pPlayer->pos, 700.0f) == true)
-		{// 一定距離以内でシリンダーを出す
-			SetEnableMeshCylinder(g_nIdxCylinder[GIMMICKTYPE_FALLENTREE], true);
-		}
-		else
-		{
-			SetEnableMeshCylinder(g_nIdxCylinder[GIMMICKTYPE_FALLENTREE], false);
-		}
-	}
-	if (g_bDispTutorialvalve == false)
-	{
-		if (IsDetection(g_aGimmick[GIMMICKTYPE_STATUE].pos, pPlayer->pos, 700.0f) == true)
-		{// 一定距離以内でシリンダーを出す
-			SetEnableMeshCylinder(g_nIdxCylinder[GIMMICKTYPE_STATUE], true);
-		}
-		else
-		{
-			SetEnableMeshCylinder(g_nIdxCylinder[GIMMICKTYPE_STATUE], false);
-		}
-	}
+	//if (g_bDispTutorialChainsaw == false)
+	//{
+	//	if (IsDetection(g_aGimmick[GIMMICKTYPE_FALLENTREE].pos, pPlayer->pos, 700.0f) == true)
+	//	{// 一定距離以内でシリンダーを出す
+	//		SetEnableMeshCylinder(g_nIdxCylinder[GIMMICKTYPE_FALLENTREE], true);
+	//	}
+	//	else
+	//	{
+	//		SetEnableMeshCylinder(g_nIdxCylinder[GIMMICKTYPE_FALLENTREE], false);
+	//	}
+	//}
+	//if (g_bDispTutorialvalve == false)
+	//{
+	//	if (IsDetection(g_aGimmick[GIMMICKTYPE_STATUE].pos, pPlayer->pos, 700.0f) == true)
+	//	{// 一定距離以内でシリンダーを出す
+	//		SetEnableMeshCylinder(g_nIdxCylinder[GIMMICKTYPE_STATUE], true);
+	//	}
+	//	else
+	//	{
+	//		SetEnableMeshCylinder(g_nIdxCylinder[GIMMICKTYPE_STATUE], false);
+	//	}
+	//}
 
 	// === チュートリアルを非表示に === //
 	if (g_bAnyTex == true)
