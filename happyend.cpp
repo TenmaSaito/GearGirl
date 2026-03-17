@@ -37,7 +37,7 @@ void InitHappyEnd(void)
 {
 	int Tex;
 
-	LoadTexture("data/TEXTURE/result.png", &Tex);
+	LoadTexture("data/TEXTURE/resultBG.png", &Tex);
 	g_nIdxHResultPolygon[0] = Set2DPolygon(D3DXVECTOR3(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 0.0f), VECNULL, D3DXVECTOR2(1280, 720), Tex, DEF_COL);
 
 	LoadTexture("data/TEXTURE/Clockneedle.png", &Tex);
