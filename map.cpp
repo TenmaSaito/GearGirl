@@ -29,6 +29,7 @@ USE_PARAM;
 #include "field.h"
 #include "UImenu.h"
 #include "dialog.h"
+#include "gimmick.h"
 
 //**********************************************************************************
 //*** マクロ定義 ***
@@ -40,7 +41,7 @@ USE_PARAM;
 //*** マップカメラ構造体 ***
 //**********************************************************************************
 typedef TCamera MapCamera;
-typedef MapCamera *LPMAPCAMERA, *PMAPCAMERA;
+typedef MapCamera* LPMAPCAMERA, * PMAPCAMERA;
 
 //**********************************************************************************
 //*** マップ上のアイコンの種類 ***
@@ -52,7 +53,7 @@ typedef enum
 	MAPICONTYPE_LBUTTON,		// 大きなボタン
 	MAPICONTYPE_TREE,			// 倒木エリア
 	MAPICONTYPE_FOUNTAIN,		// 噴水
-	MAPICONTYPE_MAX	
+	MAPICONTYPE_MAX
 } MAPICONTYPE;
 
 //**********************************************************************************
@@ -79,6 +80,7 @@ STRUCT(MapIcon)
 	D3DXMATRIX mtxWorld;			// ワールドマトリックス
 	float s;						// Lerp変換用変数
 	bool bReverse;					// Lerp反転
+	bool bUse;
 } MapIcon;
 
 //**********************************************************************************
@@ -109,13 +111,13 @@ void DrawIcon(void);
 void DrawMapIcon(void);
 void DrawPlayerIcon(void);
 
-MapIcon *GetMapIcon(void);
-PlayerIcon *GetPlayerIcon(void);
+MapIcon* GetMapIcon(void);
+PlayerIcon* GetPlayerIcon(void);
 
 // ユーザー定義のリテラル演算子(テスト)
 D3DXVECTOR3 operator"" _v3(long double val)
 {
-	return D3DXVECTOR3(val, val, val); 
+	return D3DXVECTOR3(val, val, val);
 }
 
 D3DXVECTOR3 operator"" _v3(unsigned long long val)
@@ -157,12 +159,12 @@ MapCamera MiniMap =	// ミニマップの基本情報
 // マップアイコンの情報
 const MapIcon g_aMapIconInfo[MAPICONTYPE_MAX] =
 {
-	// NULL, -1, 位置, 角度, サイズ, 色, NULL, 0.0f, false;
-	{NULL, -1, D3DXVECTOR3(1450, 100, -425), 0_v3, D3DXVECTOR2(250, 250), CParamColor::WHITE, CParamEx::MTX_IDENTITY, 0, false},
-	{NULL, -1, D3DXVECTOR3(573, 100, -900), VECNULL, D3DXVECTOR2(250, 250), CParamColor::WHITE, CParamEx::MTX_IDENTITY, 0, false},
-	{NULL, -1, D3DXVECTOR3(535, 100, -630), VECNULL, D3DXVECTOR2(250, 250), CParamColor::WHITE, CParamEx::MTX_IDENTITY, 0, false},
-	{NULL, -1, D3DXVECTOR3(1695, 100, 460), VECNULL, D3DXVECTOR2(250, 250), CParamColor::WHITE, CParamEx::MTX_IDENTITY, 0, false},
-	{NULL, -1, D3DXVECTOR3(1100, 100, 110), VECNULL, D3DXVECTOR2(250, 250), CParamColor::WHITE, CParamEx::MTX_IDENTITY, 0, false},
+	// NULL, -1, 位置, 角度, サイズ, 色, NULL, 0.0f, false, true;
+	{NULL, -1, D3DXVECTOR3(1450, 100, -425), 0_v3, D3DXVECTOR2(250, 250), CParamColor::WHITE, CParamEx::MTX_IDENTITY, 0, false, true},
+	{NULL, -1, D3DXVECTOR3(573, 100, -900), VECNULL, D3DXVECTOR2(250, 250), CParamColor::WHITE, CParamEx::MTX_IDENTITY, 0, false, true},
+	{NULL, -1, D3DXVECTOR3(535, 100, -630), VECNULL, D3DXVECTOR2(250, 250), CParamColor::WHITE, CParamEx::MTX_IDENTITY, 0, false, true},
+	{NULL, -1, D3DXVECTOR3(1695, 100, 460), VECNULL, D3DXVECTOR2(250, 250), CParamColor::WHITE, CParamEx::MTX_IDENTITY, 0, false, true},
+	{NULL, -1, D3DXVECTOR3(1100, 100, 110), VECNULL, D3DXVECTOR2(250, 250), CParamColor::WHITE, CParamEx::MTX_IDENTITY, 0, false, true},
 };
 
 // キャラクターアイコンのサイズ
@@ -176,7 +178,7 @@ const D3DXVECTOR2 g_aPlayerIconSize[] =
 const D3DXVECTOR2 g_UIMapSize = D3DXVECTOR2(200, 85);
 
 // マップアイコンのテクスチャパス
-const char *g_apMapIconTexture[MAPICONTYPE_MAX] =
+const char* g_apMapIconTexture[MAPICONTYPE_MAX] =
 {
 	// 店のアイコン
 	"data/TEXTURE/shopicon_blackbg.png",
@@ -189,7 +191,7 @@ const char *g_apMapIconTexture[MAPICONTYPE_MAX] =
 };
 
 // プレイヤーアイコンのテクスチャパス
-const char *g_apPlayerIconTexture[PLAYERTYPE_MAX] =
+const char* g_apPlayerIconTexture[PLAYERTYPE_MAX] =
 {
 	// 少女のアイコン
 	"data/TEXTURE/GirlIcon.png",
@@ -198,8 +200,8 @@ const char *g_apPlayerIconTexture[PLAYERTYPE_MAX] =
 	"data/TEXTURE/MouseIcon.png",
 };
 
-const char *g_pArrowIconTexture = "data/TEXTURE/IconArrow.png";		// 矢印のアイコン
-const char *g_pUIMapTexture = "data/TEXTURE/UI_MAP.png";			// マップのUI
+const char* g_pArrowIconTexture = "data/TEXTURE/IconArrow.png";		// 矢印のアイコン
+const char* g_pUIMapTexture = "data/TEXTURE/UI_MAP.png";			// マップのUI
 
 //==================================================================================
 // --- 初期化 ---
@@ -208,7 +210,7 @@ void InitMap(D3DXVECTOR3 mid, D3DXVECTOR2 size, float fLength, float zn, float z
 {
 	// 自作ユーティリティ使用宣言
 	USE_UTIL;
-	
+
 	// 初期化
 	AutoZeroMemory(g_map);
 	AutoZeroMemory(g_mapCamera);
@@ -303,7 +305,7 @@ void UpdateMap(void)
 			D3DCOLOR_RGBA(0, 0, 0, 0), 1.0f, 0);
 	}
 
-	Player *pPlayer = GetPlayer();			// プレイヤーの取得
+	Player* pPlayer = GetPlayer();			// プレイヤーの取得
 
 	pMCam->posR = D3DXVECTOR3(pPlayer->pos.x, pMCam->posR.y, pPlayer->pos.z);				// 注視点位置をプレイヤーの位置に変更
 
@@ -443,10 +445,10 @@ void InitIcon(void)
 {
 	// デバイスの取得
 	AUTODEVICE9 AD9;		// デバイスの自動解放用変数
-	MapIcon *pMIcon = &g_aMapIcon[0];
-	PlayerIcon *pPIcon = &g_aPlayerIcon[0];
+	MapIcon* pMIcon = &g_aMapIcon[0];
+	PlayerIcon* pPIcon = &g_aPlayerIcon[0];
 	IDX_TEXTURE tex;
-	VERTEX_3D *pVtx;
+	VERTEX_3D* pVtx;
 
 	// アイコンの作成
 	for (int nCntIcon = 0; nCntIcon < MAPICONTYPE_MAX; nCntIcon++, pMIcon++)
@@ -524,8 +526,8 @@ void InitIcon(void)
 //==================================================================================
 void UninitIcon(void)
 {
-	MapIcon *pMIcon = &g_aMapIcon[0];
-	PlayerIcon *pPIcon = &g_aPlayerIcon[0];
+	MapIcon* pMIcon = &g_aMapIcon[0];
+	PlayerIcon* pPIcon = &g_aPlayerIcon[0];
 
 	/*** マップアイコン解放 ***/
 	for (int nCntRelease = 0; nCntRelease < MAPICONTYPE_MAX; nCntRelease++, pMIcon++)
@@ -546,8 +548,8 @@ void UninitIcon(void)
 //==================================================================================
 void UpdateIcon(void)
 {
-	PlayerIcon *pPIcon = GetPlayerIcon();	// プレイヤーアイコン
-	Player *pPlayer = GetPlayer();			// プレイヤー
+	PlayerIcon* pPIcon = GetPlayerIcon();	// プレイヤーアイコン
+	Player* pPlayer = GetPlayer();			// プレイヤー
 
 	for (int nCntIcon = 0; nCntIcon < PLAYERTYPE_MAX; nCntIcon++, pPIcon++, pPlayer++)
 	{
@@ -555,6 +557,46 @@ void UpdateIcon(void)
 
 		pPIcon->pos = EXTRACT_XZ(pos);							// アイコン位置をプレイヤー座標に置換
 		pPIcon->rotArrow = VEC_Y(InverseRot(rot.y));			// 矢印アイコンの向きをプレイヤーの向きに置換
+	}
+
+	MapIcon* pMapIcon = GetMapIcon();	// マップアイコン
+
+	Gimmick* pGimmick = GetGimmick();	// ギミックの情報
+
+	// === ギミッククリアで対応しているマップアイコンを消去する === //
+	for (int nCntGimmick = 0; nCntGimmick < GIMMICKTYPE_MAX; nCntGimmick++, pGimmick++)
+	{// ギミック数分まわす
+		for (int nCntMapIcon = 0; nCntMapIcon < MAPICONTYPE_MAX; nCntMapIcon++, pMapIcon++)
+		{// マップアイコン分回す
+			if (pGimmick->bClear == true)
+			{// クリア済みなら
+				switch (pGimmick->myType)
+				{
+					// でかボタン
+				case GIMMICKTYPE_BIGBUTTON:
+					g_aMapIcon[MAPICONTYPE_LBUTTON].bUse = false;
+					break;
+					// ちびボタン
+				case GIMMICKTYPE_SMALLBUTTON:
+					g_aMapIcon[MAPICONTYPE_SBUTTON].bUse = false;
+
+					break;
+					// 倒木
+				case GIMMICKTYPE_FALLENTREE:
+					g_aMapIcon[MAPICONTYPE_TREE].bUse = false;
+
+					break;
+					// 銅像(バルブ)
+				case GIMMICKTYPE_STATUE:
+					g_aMapIcon[MAPICONTYPE_FOUNTAIN].bUse = false;
+
+					break;
+					// それ以外
+				default:
+					break;
+				}
+			}
+		}
 	}
 }
 
@@ -587,48 +629,52 @@ void DrawMapIcon(void)
 	AUTODEVICE9 Auto;							// デバイス自動解放システム
 	LPDIRECT3DDEVICE9 pDevice = Auto.pDevice;	// 自動解放システムを介してデバイスを取得
 
-	MapIcon *pMIcon = &g_aMapIcon[0];
+	MapIcon* pMIcon = &g_aMapIcon[0];
 
 	// 計算用マトリックス
 	D3DXMATRIX mtxRot, mtxTrans;
 
 	for (int nCntMapIcon = 0; nCntMapIcon < MAPICONTYPE_MAX; nCntMapIcon++, pMIcon++)
 	{
-		/*** ワールドマトリックスの初期化 ***/
-		D3DXMatrixIdentity(&pMIcon->mtxWorld);
+		if (pMIcon->bUse == true)
+		{
+			/*** ワールドマトリックスの初期化 ***/
+			D3DXMatrixIdentity(&pMIcon->mtxWorld);
 
-		/*** 向きを反映 (※ 位置を反映する前に必ず行うこと！) ***/
-		D3DXMatrixRotationYawPitchRoll(&mtxRot,
-			pMIcon->rot.y,		// Y軸回転
-			pMIcon->rot.x,		// X軸回転
-			pMIcon->rot.z);		// Z軸回転
+			/*** 向きを反映 (※ 位置を反映する前に必ず行うこと！) ***/
+			D3DXMatrixRotationYawPitchRoll(&mtxRot,
+				pMIcon->rot.y,		// Y軸回転
+				pMIcon->rot.x,		// X軸回転
+				pMIcon->rot.z);		// Z軸回転
 
-		D3DXMatrixMultiply(&pMIcon->mtxWorld, &pMIcon->mtxWorld, &mtxRot);
+			D3DXMatrixMultiply(&pMIcon->mtxWorld, &pMIcon->mtxWorld, &mtxRot);
 
-		/*** 位置を反映 (※ 向きを反映したのちに行うこと！) ***/
-		D3DXMatrixTranslation(&mtxTrans,
-			pMIcon->pos.x,
-			pMIcon->pos.y,
-			pMIcon->pos.z);
+			/*** 位置を反映 (※ 向きを反映したのちに行うこと！) ***/
+			D3DXMatrixTranslation(&mtxTrans,
+				pMIcon->pos.x,
+				pMIcon->pos.y,
+				pMIcon->pos.z);
 
-		D3DXMatrixMultiply(&pMIcon->mtxWorld, &pMIcon->mtxWorld, &mtxTrans);
+			D3DXMatrixMultiply(&pMIcon->mtxWorld, &pMIcon->mtxWorld, &mtxTrans);
 
-		/*** ワールドマトリックスの設定 ***/
-		pDevice->SetTransform(D3DTS_WORLD, &pMIcon->mtxWorld);
+			/*** ワールドマトリックスの設定 ***/
+			pDevice->SetTransform(D3DTS_WORLD, &pMIcon->mtxWorld);
 
-		/*** 頂点バッファをデータストリームに設定 ***/
-		pDevice->SetStreamSource(0, pMIcon->pVtx, 0, sizeof(VERTEX_3D));
+			/*** 頂点バッファをデータストリームに設定 ***/
+			pDevice->SetStreamSource(0, pMIcon->pVtx, 0, sizeof(VERTEX_3D));
 
-		/*** 頂点フォーマットの設定 ***/
-		pDevice->SetFVF(FVF_VERTEX_3D);
+			/*** 頂点フォーマットの設定 ***/
+			pDevice->SetFVF(FVF_VERTEX_3D);
 
-		/*** テクスチャの設定 ***/
-		pDevice->SetTexture(0, GetTexture(pMIcon->tex));
+			/*** テクスチャの設定 ***/
+			pDevice->SetTexture(0, GetTexture(pMIcon->tex));
 
-		/*** ポリゴンの描画 ***/
-		pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP,		// プリミティブの種類
-			0,											// 描画する最初の頂点インデックス
-			2);											// 描画するプリミティブの数
+			/*** ポリゴンの描画 ***/
+			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP,		// プリミティブの種類
+				0,											// 描画する最初の頂点インデックス
+				2);											// 描画するプリミティブの数
+		}
+
 	}
 }
 
@@ -641,7 +687,7 @@ void DrawPlayerIcon(void)
 	AUTODEVICE9 Auto;							// デバイス自動解放システム
 	LPDIRECT3DDEVICE9 pDevice = Auto.pDevice;	// 自動解放システムを介してデバイスを取得
 
-	PlayerIcon *pPIcon = &g_aPlayerIcon[0];
+	PlayerIcon* pPIcon = &g_aPlayerIcon[0];
 
 	// 計算用マトリックス
 	D3DXMATRIX mtxRot, mtxTrans;
@@ -736,7 +782,7 @@ void DrawPlayerIcon(void)
 //==================================================================================
 // --- マップアイコンの取得 ---
 //==================================================================================
-MapIcon *GetMapIcon(void)
+MapIcon* GetMapIcon(void)
 {
 	return &g_aMapIcon[0];
 }
@@ -744,7 +790,7 @@ MapIcon *GetMapIcon(void)
 //==================================================================================
 // --- プレイヤーアイコンの取得 ---
 //==================================================================================
-PlayerIcon *GetPlayerIcon(void)
+PlayerIcon* GetPlayerIcon(void)
 {
 	return &g_aPlayerIcon[0];
 }

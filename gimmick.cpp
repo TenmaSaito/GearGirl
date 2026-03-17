@@ -273,14 +273,14 @@ void UpdateGimmick(void)
 	{
 		if (IsDetection(g_aGimmick[GIMMICKTYPE_FALLENTREE].pos, pPlayer->pos, 700.0f) == true)
 		{// 一定距離以内でパーティクルを出す
-			SetParticle(D3DXVECTOR3(1655, 110, 460), COL_RED, D3DXVECTOR3(0.0f, 100.0f, 0.0f), D3DXVECTOR3(3.0f, 200.0f, 3.0f), 5, 2.0f, 2, 20, false, false);
+			SetParticle(D3DXVECTOR3(1655, 110, 460), COL_RED, D3DXVECTOR3(0.0f, 100.0f, 0.0f), D3DXVECTOR3(3.0f, 200.0f, 3.0f), 5, 2.0f, 2, 20, false, true);
 		}
 	}
 	if (g_bDispTutorialvalve == false)
 	{
 		if (IsDetection(g_aGimmick[GIMMICKTYPE_STATUE].pos, pPlayer->pos, 700.0f) == true)
 		{// 一定距離以内でパーティクルを出す
-			SetParticle(D3DXVECTOR3(1120, 110, 110), COL_RED, D3DXVECTOR3(0.0f, 100.0f, 0.0f), D3DXVECTOR3(3.0f, 200.0f, 3.0f), 5, 2.0f, 2, 20, false, false);
+			SetParticle(D3DXVECTOR3(1120, 110, 110), COL_RED, D3DXVECTOR3(0.0f, 100.0f, 0.0f), D3DXVECTOR3(3.0f, 200.0f, 3.0f), 5, 2.0f, 2, 20, false, true);
 		}
 	}
 
@@ -528,12 +528,14 @@ void CaseMulti(LPGIMMICK pGimmick)
 		{
 			SetEnable2DPolygon(g_nIdxTexTutorial[1], true);
 			g_bDispTutorialChainsaw = true;	// 表示済みに
+			g_bAnyTex = true;	// チュートリアル表示中
 		}
 		// バルブのチュートリアルをまだ表示していなければだす
 		if (pGimmick->myType == GIMMICKTYPE_STATUE && g_bDispTutorialvalve == false)
 		{
 			SetEnable2DPolygon(g_nIdxTexTutorial[TUTORIALTYPE_VALVE], true);
 			g_bDispTutorialvalve = true;	// 表示済みに
+			g_bAnyTex = true;	// チュートリアル表示中
 		}
 
 		bDetection = true;

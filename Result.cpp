@@ -14,6 +14,7 @@
 #include "normalend.h"
 #include "happyend.h"
 #include "sound.h"
+#include "2Dpolygon.h"
 
 //**********************************************************************************
 //*** マクロ定義 ***
@@ -73,10 +74,8 @@ void InitResult(void)
 //==================================================================================
 void UninitResult(void)
 {
-	/*** 各エンディングの終了 ***/
-	UninitBadEnd();
-	UninitNormalEnd();
-	UninitHappyEnd();
+	// 2Dポリゴンの終了処理
+	Uninit2DPolygon();
 }
 
 //==================================================================================
@@ -103,16 +102,19 @@ void UpdateResult(void)
 		// バッドエンド
 	case ENDTYPE_BAD:
 		UpdateBadEnd();
+		Update2DPolygon();
 		break;
 
 		// ノーマルエンド
 	case ENDTYPE_NORMAL:
 		UpdateNormalEnd();
+		Update2DPolygon();
 		break;
 
 		// ハッピーエンド
 	case ENDTYPE_HAPPY:
 		UpdateHappyEnd();
+		Update2DPolygon();
 		break;
 
 		// 例外エンド
@@ -134,16 +136,19 @@ void DrawResult(void)
 		// バッドエンド
 	case ENDTYPE_BAD:
 		DrawBadEnd();
+		Draw2DPolygon();
 		break;
 
 		// ノーマルエンド
 	case ENDTYPE_NORMAL:
 		DrawNormalEnd();
+		Draw2DPolygon();
 		break;
 
 		// ハッピーエンド
 	case ENDTYPE_HAPPY:
 		DrawHappyEnd();
+		Draw2DPolygon();
 		break;
 
 		// 例外エンド
