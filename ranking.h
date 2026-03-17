@@ -33,10 +33,8 @@
 //==============================================================
 typedef enum
 {
-	RESULTTEX_BG = 0,						// îwåi
-	RESULTTEX_RESULT,						// RESULT
+	RESULTTEX_RESULT = 0,						// RESULT
 	RESULTTEX_SCORE,						// SCORE
-	RESULTTEX_ITEMCOUNT,					// î[ïiêî
 	RESULTTEX_RANK,							// RANKING
 	RESULTTEX_RANKNUM,						// èáà 
 	RESULTTEX_NUM,							// êîéö

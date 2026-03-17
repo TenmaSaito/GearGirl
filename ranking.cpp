@@ -7,7 +7,6 @@
 //**************************************************************
 // インクルード
 #include "ranking.h"
-#include "sound.h"
 #include "input.h"
 #include "fade.h"
 #include "debugproc.h"
@@ -30,13 +29,11 @@ int						g_aHighScore[MAX_NUMSCORE] =				// ランキング
 };
 const char*				g_aResultTexFile[] =
 {
-	"data\\TEXTURE\\BG\\ResultBG.png",								// RESULTTEX_BG			[0]
-	"data\\TEXTURE\\Word\\Result.png",								// RESULTTEX_RESULT		[1]
-	"data\\TEXTURE\\Word\\Score.png",								// RESULTTEX_SCORE		[2]
-	"data\\TEXTURE\\Word\\ItemCount.png",							// RESULTTEX_ITEMCOUNT	[3]
-	"data\\TEXTURE\\Word\\Ranking.png",								// RESULTTEX_RANK		[4]
-	"data\\TEXTURE\\Word\\RankNum.png",								// RESULTTEX_RANKNUM	[5]
-	"data\\TEXTURE\\Word\\Number002.png",							// RESULTTEX_NUM		[6]
+	"data\\TEXTURE\\Result.png",					// RESULTTEX_RESULT		[0]
+	"data\\TEXTURE\\Score.png",						// RESULTTEX_SCORE		[1]
+	"data\\TEXTURE\\Ranking.png",					// RESULTTEX_RANK		[2]
+	"data\\TEXTURE\\RankNum.png",					// RESULTTEX_RANKNUM	[3]
+	"data\\TEXTURE\\Number002.png",					// RESULTTEX_NUM		[4]
 };
 const int				g_nMaxTexResult = sizeof g_aResultTexFile / sizeof(const char*);
 
@@ -92,10 +89,6 @@ void InitRanking(void)
 	//**************************************************************
 	//  リザルト情報初期化
 	pResult = GetThisScore();
-	// 背景
-	pos = vec3(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, 0.0f);
-	size = vec3(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, 0.0f);
-	SetResult(pos, size, vec3_ZERO, colX_WHITE, RESULTTEX_BG, -1, pResult);
 
 	// "RESULT"
 	pos = vec3(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.15f, 0.0f);
@@ -116,29 +109,10 @@ void InitRanking(void)
 		nThisScore *= 0.1f;
 	}
 	
-	// "届けた数"
-	pos = vec3(SCREEN_WIDTH * 0.52f, SCREEN_HEIGHT * 0.6f, 0.0f);
-	size = vec3(SCREEN_WIDTH * 0.2f, SCREEN_HEIGHT * 0.05f, 0.0f);
-	SetResult(pos, size, vec3_ZERO, colX_GREEN, RESULTTEX_ITEMCOUNT, -1, pResult);
-
-	// 総配達数
-	nThisScore = 0;// GetDropCount();
-	for (int nCntNum = 2; 0 < nCntNum; nCntNum--)
-	{
-		pos = vec3(SCREEN_WIDTH * 0.6f + ((nCntNum - 1) * 40.0f),SCREEN_HEIGHT * 0.6f, 0.0f);
-		size = vec3(SCREEN_WIDTH * 0.02f, SCREEN_HEIGHT * 0.05f, 0.0f);
-		SetResult(pos, size, vec3_ZERO, colX_WHITE, RESULTTEX_NUM, nThisScore % 10, pResult);
-		nThisScore *= 0.1f;
-	}
 
 	//**************************************************************
 	//  ランキング初期化
 	pResult = GetRanking();
-
-	// 背景
-	pos = vec3(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, 0.0f);
-	size = vec3(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, 0.0f);
-	SetResult(pos, size, vec3_ZERO, colX_WHITE, RESULTTEX_BG, -1, pResult);
 
 	// "RANKING"
 	pos = vec3(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.15f, 0.0f);
@@ -173,8 +147,6 @@ void InitRanking(void)
 		}
 	}	
 
-	// 音楽
-	// PlaySound(SOUND_LABEL_BGM003);
 
 	// リザルト内のモード
 	SetResultMode(g_resultMode);
@@ -211,9 +183,6 @@ int SortRanking(int nThisScore)
 //=========================================================================================
 void UninitRanking(void)
 {
-	// 音楽を止める
-	StopSound();
-
 	//**************************************************************
 	// テクスチャの破棄
 	for (int nCntTex = 0; nCntTex < MAX_RESULT_TEX; nCntTex++)
@@ -251,7 +220,7 @@ void UpdateRanking(void)
 	//**************************************************************
 	// ランキング更新
 	case RESULT_RANGING:
-		UpdateRanking();
+		UpdateRank();
 		break;
 
 	default:
@@ -286,7 +255,7 @@ void UpdateRank(void)
 	// 次へ
 	if (GetKeyboardTrigger(KEY_ENTER) || GetJoypadTrigger(0,JOY_ENTER))
 	{
-		SetFade(MODE_TITLE);
+		SetMode(MODE_TEAMLOGO);
 	}
 
 	//**************************************************************
@@ -331,70 +300,73 @@ void UpdateVtxResult(P_RESULT pResult)
 {
 	//**************************************************************
 	// 変数宣言
-	VERTEX_2D*			pVtx;				// 頂点情報へのポインタ
+	VERTEX_2D* pVtx;				// 頂点情報へのポインタ
 	int					nTexPosMax;
 
 	//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 	// 頂点バッファをロックし、頂点情報へのポインタを取得
-	g_pVtxBuffResult->Lock(0, 0, (void**)&pVtx, 0);
-	for (int nCntResult = 0; nCntResult < MAX_RESULT; nCntResult++, pResult++)
+	if (g_pVtxBuffResult)
 	{
-		if (pResult->bUse)
+		g_pVtxBuffResult->Lock(0, 0, (void**)&pVtx, 0);
+		for (int nCntResult = 0; nCntResult < MAX_RESULT; nCntResult++, pResult++)
 		{
-			// 頂点座標を設定
-			pVtx[nCntResult * 4 + 0].pos = VECTOR3_ANGLE(pResult->pos, pResult->fLength, pResult->rot.z + pResult->fAngle);
-			pVtx[nCntResult * 4 + 1].pos = VECTOR3_ANGLE(pResult->pos, pResult->fLength, pResult->rot.z - pResult->fAngle);
-			pVtx[nCntResult * 4 + 2].pos = VECTOR3_ANGLE(pResult->pos, pResult->fLength, pResult->rot.z + D3DX_PI - pResult->fAngle);
-			pVtx[nCntResult * 4 + 3].pos = VECTOR3_ANGLE(pResult->pos, pResult->fLength, pResult->rot.z - D3DX_PI + pResult->fAngle);
+			if (pResult->bUse)
+			{
+				// 頂点座標を設定
+				pVtx[nCntResult * 4 + 0].pos = VECTOR3_ANGLE(pResult->pos, pResult->fLength, pResult->rot.z + pResult->fAngle);
+				pVtx[nCntResult * 4 + 1].pos = VECTOR3_ANGLE(pResult->pos, pResult->fLength, pResult->rot.z - pResult->fAngle);
+				pVtx[nCntResult * 4 + 2].pos = VECTOR3_ANGLE(pResult->pos, pResult->fLength, pResult->rot.z + D3DX_PI - pResult->fAngle);
+				pVtx[nCntResult * 4 + 3].pos = VECTOR3_ANGLE(pResult->pos, pResult->fLength, pResult->rot.z - D3DX_PI + pResult->fAngle);
 
-			// rhwの設定
-			pVtx[nCntResult * 4 + 0].rhw = 1.0f;
-			pVtx[nCntResult * 4 + 1].rhw = 1.0f;
-			pVtx[nCntResult * 4 + 2].rhw = 1.0f;
-			pVtx[nCntResult * 4 + 3].rhw = 1.0f;
+				// rhwの設定
+				pVtx[nCntResult * 4 + 0].rhw = 1.0f;
+				pVtx[nCntResult * 4 + 1].rhw = 1.0f;
+				pVtx[nCntResult * 4 + 2].rhw = 1.0f;
+				pVtx[nCntResult * 4 + 3].rhw = 1.0f;
 
-			// 頂点カラー設定
-			pVtx[nCntResult * 4 + 0].col = pResult->col;
-			pVtx[nCntResult * 4 + 1].col = pResult->col;
-			pVtx[nCntResult * 4 + 2].col = pResult->col;
-			pVtx[nCntResult * 4 + 3].col = pResult->col;
+				// 頂点カラー設定
+				pVtx[nCntResult * 4 + 0].col = pResult->col;
+				pVtx[nCntResult * 4 + 1].col = pResult->col;
+				pVtx[nCntResult * 4 + 2].col = pResult->col;
+				pVtx[nCntResult * 4 + 3].col = pResult->col;
 
-			// テクスチャの座標設定
-			if (-1 < pResult->nTexPos)
-			{// 数字のテスクチャなら
-				nTexPosMax = (pResult->nTexPos + 1);
-				pVtx[nCntResult * 4 + 0].tex = D3DXVECTOR2(0.1f * pResult->nTexPos, 0.0f);
-				pVtx[nCntResult * 4 + 1].tex = D3DXVECTOR2(0.1f * nTexPosMax, 0.0f);
-				pVtx[nCntResult * 4 + 2].tex = D3DXVECTOR2(0.1f * pResult->nTexPos, 1.0f);
-				pVtx[nCntResult * 4 + 3].tex = D3DXVECTOR2(0.1f * nTexPosMax, 1.0f);
+				// テクスチャの座標設定
+				if (-1 < pResult->nTexPos)
+				{// 数字のテスクチャなら
+					nTexPosMax = (pResult->nTexPos + 1);
+					pVtx[nCntResult * 4 + 0].tex = D3DXVECTOR2(0.1f * pResult->nTexPos, 0.0f);
+					pVtx[nCntResult * 4 + 1].tex = D3DXVECTOR2(0.1f * nTexPosMax, 0.0f);
+					pVtx[nCntResult * 4 + 2].tex = D3DXVECTOR2(0.1f * pResult->nTexPos, 1.0f);
+					pVtx[nCntResult * 4 + 3].tex = D3DXVECTOR2(0.1f * nTexPosMax, 1.0f);
+				}
+				else
+				{// それ以外は１枚絵
+					pVtx[nCntResult * 4 + 0].tex = D3DXVECTOR2(0.0f, 0.0f);
+					pVtx[nCntResult * 4 + 1].tex = D3DXVECTOR2(1.0f, 0.0f);
+					pVtx[nCntResult * 4 + 2].tex = D3DXVECTOR2(0.0f, 1.0f);
+					pVtx[nCntResult * 4 + 3].tex = D3DXVECTOR2(1.0f, 1.0f);
+				}
 			}
 			else
-			{// それ以外は１枚絵
-				pVtx[nCntResult * 4 + 0].tex = D3DXVECTOR2(0.0f, 0.0f);
-				pVtx[nCntResult * 4 + 1].tex = D3DXVECTOR2(1.0f, 0.0f);
-				pVtx[nCntResult * 4 + 2].tex = D3DXVECTOR2(0.0f, 1.0f);
-				pVtx[nCntResult * 4 + 3].tex = D3DXVECTOR2(1.0f, 1.0f);
+			{
+				// 頂点座標を設定
+				pVtx[nCntResult * 4 + 0].pos = vec3_ZERO;
+				pVtx[nCntResult * 4 + 1].pos = vec3_ZERO;
+				pVtx[nCntResult * 4 + 2].pos = vec3_ZERO;
+				pVtx[nCntResult * 4 + 3].pos = vec3_ZERO;
+
+				// 頂点カラー設定
+				pVtx[nCntResult * 4 + 0].col = colX_WHITE;
+				pVtx[nCntResult * 4 + 1].col = colX_WHITE;
+				pVtx[nCntResult * 4 + 2].col = colX_WHITE;
+				pVtx[nCntResult * 4 + 3].col = colX_WHITE;
+
 			}
 		}
-		else
-		{
-			// 頂点座標を設定
-			pVtx[nCntResult * 4 + 0].pos = vec3_ZERO;
-			pVtx[nCntResult * 4 + 1].pos = vec3_ZERO;
-			pVtx[nCntResult * 4 + 2].pos = vec3_ZERO;
-			pVtx[nCntResult * 4 + 3].pos = vec3_ZERO;
-
-			// 頂点カラー設定
-			pVtx[nCntResult * 4 + 0].col = colX_WHITE;
-			pVtx[nCntResult * 4 + 1].col = colX_WHITE;
-			pVtx[nCntResult * 4 + 2].col = colX_WHITE;
-			pVtx[nCntResult * 4 + 3].col = colX_WHITE;
-
-		}
+		// 頂点バッファのロック解除
+		g_pVtxBuffResult->Unlock();
+		//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 	}
-	// 頂点バッファのロック解除
-	g_pVtxBuffResult->Unlock();
-	//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 }
 
 //=========================================================================================
