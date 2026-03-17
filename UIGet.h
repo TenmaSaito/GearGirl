@@ -19,9 +19,8 @@
 //**********************************************************************************
 //*** プロトタイプ宣言 ***
 //**********************************************************************************
-void InitGetEffect(void);
-void UninitGetEffect(void);
-void UpdateGetEffect(void);
-void DrawGetEffect(void);
+void InitUIGet(void);
+void UninitUIGet(void);
+void UpdateUIGet(void);
 
 #endif

@@ -341,8 +341,8 @@ void UpdateDialog(void)
 	const LPMESSAGELOG pMessageLog = GetMessageLogPointer();
 
 	if (GetKeyboardTrigger(DIK_BACK)
-		|| GetJoypadTrigger(0, JOYKEY_START)
-		|| GetJoypadTrigger(1, JOYKEY_START))
+		|| GetJoypadTrigger(0, JOYKEY_BACK)
+		|| GetJoypadTrigger(1, JOYKEY_BACK))
 	{ // チュートリアルスキップ
 		SetCommonFade(30, 30, 30);
 		g_bIsEndTutorial = true;

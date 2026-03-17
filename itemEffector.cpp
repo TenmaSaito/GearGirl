@@ -15,6 +15,7 @@
 #include "input.h"
 #include "player.h"
 #include "debugproc.h"
+#include "Color_defs.h"
 
 USE_UTIL;
 
@@ -55,18 +56,35 @@ const float g_fIncreaseRadius = 0.1f;					// 半径増加係数
 const float g_fIncreaseRadiusFinish = 5.0f;				// 終了時半径増加係数
 const float g_fDecreaseAlphaFinish = 0.003f;			// 終了時α値減少係数	
 const WORD g_wStartVib = 65500;							// バイブレーションの初期値
+const int g_nCountView = 160;							// 透視可能時間
 
 //**********************************************************************************
 //*** グローバル変数 ***
 //**********************************************************************************
-ItemEffector g_aEffector[ITEMTYPE_MAX];					// エフェクターの種類
+ItemEffector g_aEffector[ITEMTYPE_MAX];		// エフェクターの種類
+int g_nCounterEffector = 0;					// 透過エフェクトが使用できる時間
+int g_nCounterCoolDown = 0;					// 透過エフェクトのクールタイム
+int g_nIdxPlayerEffectSphere;				// プレイヤーのスフィアインデックス
+float g_fRadiusPlayerEffectSphere;			// ネズミのスフィア半径
+D3DXCOLOR g_colPlayerEffectSphere;			// 色
 
 //==================================================================================
 // --- 初期化 ---
 //==================================================================================
 void InitItemEffector(void)
 {
+	// 初期化
 	AutoZeroMemory(g_aEffector);
+	g_nCounterEffector = 0;
+	g_nCounterCoolDown = 0;
+	g_nIdxPlayerEffectSphere = -1;
+
+	Player* pMouse = &GetPlayer()[PLAYERTYPE_MOUSE];
+	g_nIdxPlayerEffectSphere = SetMeshSphere(pMouse->pos,
+		VECNULL,
+		10,
+		16,
+		16);
 }
 
 //==================================================================================
@@ -82,7 +100,8 @@ void UninitItemEffector(void)
 //==================================================================================
 void UpdateItemEffector(void)
 {
-	ItemEffector *pEffector = &g_aEffector[0];
+	ItemEffector* pEffector = &g_aEffector[0];
+	Player* pMouse = &GetPlayer()[PLAYERTYPE_MOUSE];
 
 	_3DVibration(pEffector);
 
@@ -99,6 +118,22 @@ void UpdateItemEffector(void)
 				UpdateNormalEffector(pEffector);
 			}
 		}
+	}
+
+	if (g_nCounterEffector > 0)
+	{
+		g_nCounterEffector--;
+		g_fRadiusPlayerEffectSphere += g_fIncreaseRadiusFinish;
+		g_colPlayerEffectSphere.a -= g_fDecreaseAlphaFinish * 0.5f;
+		SetPositionMesh(GetMeshSphere(), pMouse->pos, g_nIdxPlayerEffectSphere, GetNumMeshSphere());
+		SetRadiusMeshSphere(&GetMeshSphere()[g_nIdxPlayerEffectSphere], g_fRadiusPlayerEffectSphere);
+		SetColorMeshSphere(&GetMeshSphere()[g_nIdxPlayerEffectSphere], g_colPlayerEffectSphere);
+	}
+
+	if (g_nCounterEffector <= 0 && g_nCounterCoolDown > 0)
+	{
+		SetColorMeshSphere(&GetMeshSphere()[g_nIdxPlayerEffectSphere], COLOR_INV);
+		g_nCounterCoolDown--;
 	}
 }
 
@@ -292,4 +327,27 @@ void _3DVibration(ItemEffector *pEffector)
 void FloatNormalize(float *pInOut, float min, float max)
 {
 	*pInOut = (*pInOut - min) / (max - min);
+}
+
+//==================================================================================
+// --- 透過処理の判定 ---
+//==================================================================================
+bool IsCouldViewItemEffectorByMouse(void)
+{
+	return (g_nCounterEffector > 0) ? true : false;
+}
+
+//==================================================================================
+// --- 透過処理の設定 ---
+//==================================================================================
+void SetViewItemEffectorByMouse(void)
+{
+	if (true) return;
+
+	g_nCounterEffector = g_nCountView;
+	g_nCounterCoolDown = g_nCountView * 0.5f;
+
+	SetColorMeshSphere(&GetMeshSphere()[g_nIdxPlayerEffectSphere], D3DXCOLOR(1, 1, 0, 1));
+	g_fRadiusPlayerEffectSphere = 10.0f;
+	g_colPlayerEffectSphere = D3DXCOLOR(1, 1, 0, 0.5f);
 }

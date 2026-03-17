@@ -46,6 +46,8 @@ SetWarning("modeldata.hがインクルードされていません。modeldata関連関数は無効化さ
 #define InitRot(x, y, z)		RepairedRot(D3DXVECTOR3(x, y, z))	// 修正済み角度
 #define foreach(type, var, lpArray)		for(type &var : lpArray)	// foreach構文
 #define for_skip				continue							// skip
+#define PLUS(n)					(n < 0 ? -n : n)					// +
+#define MINUS(n)				(n > 0 ? -n : n)					// -
 
 #ifdef _DEBUG
 #define DEBUG_FUNC(func)		func		// DEBUG時使用関数

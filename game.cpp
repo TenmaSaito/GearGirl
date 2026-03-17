@@ -44,6 +44,7 @@
 #include "UImenu.h"
 #include "UIplayer.h"
 #include "UIcollect.h"
+#include "UIGet.h"
 #include "2Dpolygon.h"
 #include "3Dmodel.h"
 
@@ -146,6 +147,9 @@ void InitGame(void)
 
 	/*** UIコレクト初期化 ***/
 	InitUIcollect();
+
+	/*** UIゲット初期化 ***/
+	InitUIGet();
 
 	/*** エフェクトの初期化 ***/
 	InitEffect();
@@ -282,6 +286,9 @@ void UninitGame(void)
 
 	/*** ガイドの終了 ***/
 	UninitGuide();
+
+	/*** UIゲット終了 ***/
+	UninitUIGet();
 }
 
 //==================================================================================
@@ -367,6 +374,9 @@ void UpdateGame(void)
 
 			/*** UIコレクトの更新 ***/
 			UpdateUIcollect();
+
+			/*** UIゲット更新 ***/
+			UpdateUIGet();
 
 			/*** パーティクルの更新 ***/
 			UpdateParticle();
@@ -462,7 +472,7 @@ void DrawGame(void)
 		}
 
 		/*** メッシュの描画 ***/
-		if (nCntDraw == PLAYERTYPE_MOUSE || GetActivePlayer() == PLAYERTYPE_MOUSE)
+		if ((nCntDraw == PLAYERTYPE_MOUSE || GetActivePlayer() == PLAYERTYPE_MOUSE))
 		{ // ネズミの場合のみZFuncを無効に
 			SetEnableZFunction(pDevice, false);
 			DrawMeshSphere();
@@ -504,12 +514,14 @@ void DrawGame(void)
 	/*** UIアームの描画 ***/
 	if (IsEndDialog() == true
 		&& GetCommonFade() == FADE_NONE
-		&& g_bPause == false)
+		&& g_bPause == false
+		&& IsEnableItemPut() == false)
 	{
 		DrawUIarm();
 	}
 
-	if (g_bPause == false)
+	if (g_bPause == false
+		&& IsEnableItemPut() == false)
 	{
 		/*** UIプレイヤーの描画 ***/
 		DrawUIplayer();
