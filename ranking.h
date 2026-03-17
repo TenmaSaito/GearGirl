@@ -27,13 +27,12 @@
 #define KEY_BACK			DIK_A			// 前の画面へ
 #define JOY_ENTER			JOYKEY_A		// コントローラー操作で次へ
 
-
 //==============================================================
 // リザルトテクスチャ
 //==============================================================
 typedef enum
 {
-	RESULTTEX_RESULT = 0,						// RESULT
+	RESULTTEX_RESULT = 0,					// RESULT
 	RESULTTEX_SCORE,						// SCORE
 	RESULTTEX_RANK,							// RANKING
 	RESULTTEX_RANKNUM,						// 順位
@@ -46,10 +45,21 @@ typedef enum
 //==============================================================
 typedef enum
 {
-	RESULT_SCORE = 0,						// クリア画面
-	RESULT_RANGING,							// ランキング画面
+	RESULT_NONE = 0,					// ゼロ
+	RESULT_SCORE,						// クリア画面
+	RESULT_RANGING,						// ランキング画面
 	RESULT_MAX
 }RESULTMODE;
+
+//==============================================================
+// リザルト切り替え
+//==============================================================
+typedef enum
+{
+	RESULTFADE_NONE = 0,
+	RESULTFADE_IN,
+	RESULTFADE_OUT
+}RESULTFADE;
 
 //==============================================================
 // リザルト情報構造体
@@ -77,7 +87,8 @@ void UpdateRanking(void);
 void DrawRanking(void);
 P_RESULT GetThisScore(void);
 P_RESULT GetRanking(void);
-void SetResultMode(RESULTMODE mode);
+P_RESULT GetThisModeRanking(void);
+void SetResultMode(RESULTMODE next);
 P_RESULT SetResult(vec3 pos, vec3 size, vec3 rot, colX col, int nTex, int nTexPos, P_RESULT pResult);
 
 #endif // !_RANKING_H_
