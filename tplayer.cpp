@@ -40,7 +40,7 @@ void CalcMatrix(TPlayer* pTPlayer);
 
 // =================================================
 // 定数変数
-const char *pTPlayerMotionPath = "data/Scripts/ここにパスを入力";
+const char *pTPlayerMotionPath = "data/Scripts/titlegeargirl.txt";
 
 // =================================================
 // グローバル変数

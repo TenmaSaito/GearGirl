@@ -1,0 +1,380 @@
+#==============================================================================
+#
+# 『モーションビューワ』スクリプトファイル [motion.txt]
+# Author : AKIRA TANAKA
+#
+#==============================================================================
+SCRIPT			# この行は絶対消さないこと！
+
+#------------------------------------------------------------------------------
+# モデル数
+#------------------------------------------------------------------------------
+NUM_MODEL = 17
+
+#------------------------------------------------------------------------------
+# モデルファイル名
+#------------------------------------------------------------------------------
+MODEL_FILENAME = data/MODEL/character/00_body.x			# [0]腹
+MODEL_FILENAME = data/MODEL/character/01_body.x			# [1]胸
+MODEL_FILENAME = data/MODEL/character/02_body.x			# [2]スカート
+MODEL_FILENAME = data/MODEL/character/03_neck.x			# [3]首
+MODEL_FILENAME = data/MODEL/character/04_head.x			# [4]顔
+MODEL_FILENAME = data/MODEL/character/05_upperArm_L.x	# [5]二の腕L
+MODEL_FILENAME = data/MODEL/character/06_foreArm_L.x	# [6]前腕L
+MODEL_FILENAME = data/MODEL/character/07_hand_L.x		# [7]手L
+MODEL_FILENAME = data/MODEL/character/08_thighs_L.x		# [8]太ももL
+MODEL_FILENAME = data/MODEL/character/09_calf_L.x		# [9]ふくらはぎL
+MODEL_FILENAME = data/MODEL/character/10_feet_L.x		# [10]足L
+MODEL_FILENAME = data/MODEL/character/08_thighs_R.x	# [11]太ももR
+MODEL_FILENAME = data/MODEL/character/09_calf_R.x		# [12]ふくらはぎR
+MODEL_FILENAME = data/MODEL/character/10_feet_R.x		# [13]足R
+MODEL_FILENAME = data/MODEL/character/05_upperArm_R.x	# [14]二の腕R
+MODEL_FILENAME = data/MODEL/character/06_foreArm_R.x	# [15]前腕R
+MODEL_FILENAME = data/MODEL/character/07_hand_R.x		# [16]手R
+
+#------------------------------------------------------------------------------
+# キャラクター情報
+#------------------------------------------------------------------------------
+CHARACTERSET
+	NUM_PARTS = 17					# パーツ数
+	MOVE = 3.0						# 移動量
+	JUMP = 12.25					# ジャンプ量
+
+	PARTSSET
+		INDEX = 0					# 腹
+		PARENT = -1					# (親)NULL
+		POS = 0.0 11.8 0.0			#56
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+	
+	PARTSSET
+		INDEX = 1					# 胸
+		PARENT = 0					# (親)体
+		POS = 0.0 0.9 0.0
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+
+	PARTSSET
+		INDEX = 2					# 尻
+		PARENT = 0					# (親)体
+		POS = 0.0 -1.0 0.0
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+
+	PARTSSET
+		INDEX = 3					# 首
+		PARENT = 1					# 胸
+		POS = 0.0 2.28 0.34
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+
+	PARTSSET
+		INDEX = 4					# 顔
+		PARENT = 3					# 首
+		POS = 0.0 1.1 -0.1
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+
+	PARTSSET
+		INDEX = 5					# 二の腕L
+		PARENT = 1					# 胸
+		POS = 1.2 2.0 0.6
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+	
+		PARTSSET
+		INDEX = 6					# 前腕
+		PARENT = 5					# 二の腕L
+		POS = 2.6 0.0 0.0
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+	
+	PARTSSET
+		INDEX = 7					# 手
+		PARENT = 6					# 前腕
+		POS = 2.6 0.3 -0.28
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+	
+	PARTSSET
+		INDEX = 8					# 太もも
+		PARENT = 2					# 尻
+		POS = 0.8 -1.6 0.4
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+	
+	PARTSSET
+		INDEX = 9					# ふくらはぎ
+		PARENT = 8					# 太もも
+		POS = 0.05 -4.25 -0.01
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+	
+	PARTSSET
+		INDEX = 10					# 足
+		PARENT = 9					# ふくらはぎ
+		POS = -0.05 -4.3 0.2
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+	
+		PARTSSET
+		INDEX = 11					# 太ももR
+		PARENT = 2					# 尻
+		POS = -0.8 -1.6 0.4
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+	
+	PARTSSET
+		INDEX = 12					# ふくらはぎ
+		PARENT = 11					# 太もも
+		POS = -0.05 -4.25 -0.01
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+	
+	PARTSSET
+		INDEX = 13					# 足
+		PARENT = 12					# ふくらはぎ
+		POS = 0.05 -4.3 0.2
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+	
+	PARTSSET
+		INDEX = 14					# 二の腕R
+		PARENT = 1					# 胸
+		POS = -1.2 2.0 0.6
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+	
+	PARTSSET
+		INDEX = 15					# 前腕
+		PARENT = 14					# 二の腕
+		POS = -2.6 0.0 0.0
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+	
+	PARTSSET
+		INDEX = 16					# 手
+		PARENT = 15					# 前腕
+		POS = -2.6 0.3 -0.28
+		ROT = 0.0 0.0 0.0
+	END_PARTSSET
+END_CHARACTERSET
+
+#------------------------------------------------------------------------------
+# モーション情報
+#------------------------------------------------------------------------------
+#---------------------------------------
+# [0] うとうと
+#---------------------------------------
+MOTIONSET
+	LOOP = 1		# ループするかどうか[0:ループしない / 1:ループする]
+	NUM_KEY = 2		# キー数
+
+	KEYSET			# --- << KEY : 0 / 2 >> ---
+		FRAME = 40
+		KEY	# ----- [ 0 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 0.00 0.00 0.00
+		END_KEY
+
+		KEY	# ----- [ 1 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = -0.28 -0.19 0.00
+		END_KEY
+
+		KEY	# ----- [ 2 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 0.03 0.00 0.00
+		END_KEY
+
+		KEY	# ----- [ 3 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = -0.13 0.00 -0.22
+		END_KEY
+
+		KEY	# ----- [ 4 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = -0.57 -0.31 -0.06
+		END_KEY
+
+		KEY	# ----- [ 5 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 0.63 0.00 -1.35
+		END_KEY
+
+		KEY	# ----- [ 6 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = -1.01 1.38 -1.35
+		END_KEY
+
+		KEY	# ----- [ 7 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 0.00 0.00 0.00
+		END_KEY
+
+		KEY	# ----- [ 8 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 1.19 0.00 0.00
+		END_KEY
+
+		KEY	# ----- [ 9 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = -1.38 0.00 0.00
+		END_KEY
+
+		KEY	# ----- [ 10 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 0.00 0.00 0.00
+		END_KEY
+
+		KEY	# ----- [ 11 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 1.19 0.00 0.00
+		END_KEY
+
+		KEY	# ----- [ 12 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = -1.38 0.00 0.00
+		END_KEY
+
+		KEY	# ----- [ 13 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 0.00 0.00 0.00
+		END_KEY
+
+		KEY	# ----- [ 14 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 0.00 -0.44 1.19
+		END_KEY
+
+		KEY	# ----- [ 15 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 0.00 0.00 0.00
+		END_KEY
+
+		KEY	# ----- [ 16 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 0.00 0.00 -0.47
+		END_KEY
+
+		KEY	# ----- [ 17 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 0.00 0.00 0.00
+		END_KEY
+
+		KEY	# ----- [ 18 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 0.00 0.00 0.00
+		END_KEY
+
+		KEY	# ----- [ 19 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 0.00 0.00 0.00
+		END_KEY
+	END_KEYSET
+
+	KEYSET			# --- << KEY : 1 / 2 >> ---
+		FRAME = 40
+		KEY	# ----- [ 0 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 0.00 0.00 0.00
+		END_KEY
+
+		KEY	# ----- [ 1 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 0.00 -0.19 0.00
+		END_KEY
+
+		KEY	# ----- [ 2 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 0.03 0.00 0.00
+		END_KEY
+
+		KEY	# ----- [ 3 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = -0.00 0.00 -0.22
+		END_KEY
+
+		KEY	# ----- [ 4 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = -0.03 -0.31 -0.06
+		END_KEY
+
+		KEY	# ----- [ 5 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 0.41 0.00 -1.35
+		END_KEY
+
+		KEY	# ----- [ 6 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = -1.01 1.38 -1.35
+		END_KEY
+
+		KEY	# ----- [ 7 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 0.00 0.00 0.00
+		END_KEY
+
+		KEY	# ----- [ 8 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 1.19 0.00 0.00
+		END_KEY
+
+		KEY	# ----- [ 9 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = -1.38 0.00 0.00
+		END_KEY
+
+		KEY	# ----- [ 10 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 0.00 0.00 0.00
+		END_KEY
+
+		KEY	# ----- [ 11 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 1.19 0.00 0.00
+		END_KEY
+
+		KEY	# ----- [ 12 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = -1.38 0.00 0.00
+		END_KEY
+
+		KEY	# ----- [ 13 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 0.00 0.00 0.00
+		END_KEY
+
+		KEY	# ----- [ 14 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 0.00 -0.44 1.19
+		END_KEY
+
+		KEY	# ----- [ 15 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 0.00 0.00 0.00
+		END_KEY
+
+		KEY	# ----- [ 16 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 0.00 0.00 -0.47
+		END_KEY
+
+		KEY	# ----- [ 17 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 0.00 0.00 0.00
+		END_KEY
+
+		KEY	# ----- [ 18 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 0.00 0.00 0.00
+		END_KEY
+
+		KEY	# ----- [ 19 ] -----
+			POS = 0.00 0.00 0.00
+			ROT = 0.00 0.00 0.00
+		END_KEY
+	END_KEYSET
+END_MOTIONSET
+
+END_SCRIPT		# この行は絶対消さないこと！
