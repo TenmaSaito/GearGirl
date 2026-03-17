@@ -72,7 +72,7 @@ void InitTPlayer(void)
 		g_TPlayer.nKey = 0;
 		g_TPlayer.motionType = MOTIONTYPE_NEUTRAL;
 		g_TPlayer.motionTypeBlend = MOTIONTYPE_NEUTRAL;
-		g_TPlayer.nNumMotion = 0;
+		g_TPlayer.nNumMotion = 1;
 		g_TPlayer.nNumModel = 0;
 		g_TPlayer.bFinishMotion = true;
 		g_TPlayer.bDash = false;
@@ -392,7 +392,6 @@ void DrawShadowTPlayer(TPlayer* pTPlayer, int nCntModel, LPDIRECT3DDEVICE9 pDevi
 		}
 	}
 }
-
 
 // =================================================
 // ÉvÉåÉCÉÑÅ[ÇÃèÓïÒÇìnÇ∑

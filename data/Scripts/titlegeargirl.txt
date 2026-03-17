@@ -171,7 +171,7 @@ MOTIONSET
 	NUM_KEY = 2		# ÉLÅ[êî
 
 	KEYSET			# --- << KEY : 0 / 2 >> ---
-		FRAME = 40
+		FRAME = 120
 		KEY	# ----- [ 0 ] -----
 			POS = 0.00 0.00 0.00
 			ROT = 0.00 0.00 0.00
@@ -274,7 +274,7 @@ MOTIONSET
 	END_KEYSET
 
 	KEYSET			# --- << KEY : 1 / 2 >> ---
-		FRAME = 40
+		FRAME = 160
 		KEY	# ----- [ 0 ] -----
 			POS = 0.00 0.00 0.00
 			ROT = 0.00 0.00 0.00
