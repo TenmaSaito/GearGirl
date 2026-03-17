@@ -1,11 +1,11 @@
 //==================================================================================================================================
 //
-//			リザルトの処理 [result.h]
+//			リザルトの処理 [ranking.h]
 //			Author : ENDO HIDETO
 // 
 //==================================================================================================================================
-#ifndef _RESULT_H_
-#define _RESULT_H_	// 2重インクルード防止
+#ifndef _RANKING_H_
+#define _RANKING_H_	// 2重インクルード防止
 
 //==============================================================
 // ヘッダーインクルード
@@ -18,7 +18,7 @@
 #define MAX_RESULT			(32)			// 表示物の最大数
 #define MAX_RESULT_TEX		(8)				// テクスチャの最大数
 #define MAX_NUMSCORE		(5)				// スコアを表示する数
-#define MAX_SCOREDIGIT		(3)				// スコアの桁数
+#define MAX_SCOREDIGIT		(5)				// スコアの桁数
 #define SCOREMOVE			(79)			// 取ったスコアが動くフレーム数
 
 //**************************************************************
@@ -73,13 +73,13 @@ POINTER(RESULT, P_RESULT);
 //=========================================================================================
 // プロトタイプ宣言
 //=========================================================================================
-void InitResult(void);
-void UninitResult(void);
-void UpdateResult(void);
-void DrawResult(void);
-P_RESULT GetResult(void);
+void InitRanking(void);
+void UninitRanking(void);
+void UpdateRanking(void);
+void DrawRanking(void);
+P_RESULT GetThisScore(void);
 P_RESULT GetRanking(void);
 void SetResultMode(RESULTMODE mode);
 P_RESULT SetResult(vec3 pos, vec3 size, vec3 rot, colX col, int nTex, int nTexPos, P_RESULT pResult);
 
-#endif // !_RESULT_H_
+#endif // !_RANKING_H_

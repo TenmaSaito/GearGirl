@@ -30,4 +30,5 @@
 #define __ABSOLUTE(X)				(X < 0 ? X* -1:X)					// â‘Î’l
 #define VECTOR3_ANGLE(POS,L,Z)		vec3(POS.x + sinf(Z) * L,POS.y + cosf(Z) * L,0.0f)	// Šp“x‚Æ‘ÎŠpü‚Å“_‚ð‹‚ß‚é
 
+
 #endif // !_ENDOMACRO_H_

@@ -44,18 +44,18 @@ const int				g_nMaxTexResult = sizeof g_aResultTexFile / sizeof(const char*);
 // プロトタイプ宣言
 int SortRanking(int nThisScore);
 void UpdateScore(void);
-void UpdateRanking(void);
+void UpdateRank(void);
 void UpdateVtxResult(P_RESULT pResult);
 
 //=========================================================================================
 // リザルト初期化
 //=========================================================================================
-void InitResult(void)
+void InitRanking(void)
 {
 	//**************************************************************
 	// 変数宣言
 	LPDIRECT3DDEVICE9	pDevice = GetDevice();			// デバイスへのポインタ
-	P_RESULT			pResult = GetResult();			// リザルト情報ポインタ
+	P_RESULT			pResult = GetThisScore();		// リザルト情報ポインタ
 	vec3				pos, size;
 	int					nCntResult = 0;
 	int					nCntRanking = 0;
@@ -77,7 +77,7 @@ void InitResult(void)
 	// テクスチャ読み込み
 	for (int nCntTex = 0; nCntTex < g_nMaxTexResult; nCntTex++)
 	{
-		if (FAILED(D3DXCreateTextureFromFile(pDevice, g_aResultTexFile[nCntTex], &g_apTextureResult[nCntTex])));
+		D3DXCreateTextureFromFile(pDevice, g_aResultTexFile[nCntTex], &g_apTextureResult[nCntTex]);
 	}
 
 	//**************************************************************
@@ -91,7 +91,7 @@ void InitResult(void)
 
 	//**************************************************************
 	//  リザルト情報初期化
-	pResult = GetResult();
+	pResult = GetThisScore();
 	// 背景
 	pos = vec3(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, 0.0f);
 	size = vec3(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, 0.0f);
@@ -122,7 +122,7 @@ void InitResult(void)
 	SetResult(pos, size, vec3_ZERO, colX_GREEN, RESULTTEX_ITEMCOUNT, -1, pResult);
 
 	// 総配達数
-	nThisScore = GetDropCount();
+	nThisScore = 0;// GetDropCount();
 	for (int nCntNum = 2; 0 < nCntNum; nCntNum--)
 	{
 		pos = vec3(SCREEN_WIDTH * 0.6f + ((nCntNum - 1) * 40.0f),SCREEN_HEIGHT * 0.6f, 0.0f);
@@ -209,7 +209,7 @@ int SortRanking(int nThisScore)
 //=========================================================================================
 // リザルト終了
 //=========================================================================================
-void UninitResult(void)
+void UninitRanking(void)
 {
 	// 音楽を止める
 	StopSound();
@@ -238,7 +238,7 @@ void UninitResult(void)
 //=========================================================================================
 // リザルト更新
 //=========================================================================================
-void UpdateResult(void)
+void UpdateRanking(void)
 {
 	switch (g_resultMode)
 	{
@@ -275,16 +275,16 @@ void UpdateScore(void)
 
 	//**************************************************************
 	// 頂点の更新
-	UpdateVtxResult(GetResult());
+	UpdateVtxResult(GetThisScore());
 }
 
 //=========================================================================================
 // ランキング更新
-void UpdateRanking(void)
+void UpdateRank(void)
 {
 	//**************************************************************
 	// 次へ
-	if (GetKeyboardTrigger(KEY_ENTER) || GetJoypadTrigger(JOY_ENTER))
+	if (GetKeyboardTrigger(KEY_ENTER) || GetJoypadTrigger(0,JOY_ENTER))
 	{
 		SetFade(MODE_TITLE);
 	}
@@ -299,7 +299,6 @@ void UpdateRanking(void)
 			if (0 < g_nScoreMoveCouter)
 			{
 				(g_pThisRanking + nCntNum)->rot.z += 0.08f;
-				NormalizationCircle(&g_pThisRanking->rot.z);
 			}
 			else
 			{
@@ -308,8 +307,6 @@ void UpdateRanking(void)
 
 			// 色の変化
 			(g_pThisRanking + nCntNum)->rot.x += 0.05f;
-			NormalizationCircle(&g_pThisRanking->rot.x);
-
 			(g_pThisRanking + nCntNum)->col.r = 1 - sinf((g_pThisRanking + nCntNum)->rot.x) * 0.3f;
 			(g_pThisRanking + nCntNum)->col.g = 1 - sinf((g_pThisRanking + nCntNum)->rot.x) * 0.3f;
 			(g_pThisRanking + nCntNum)->col.b = 1 - sinf((g_pThisRanking + nCntNum)->rot.x) * 0.3f;
@@ -403,7 +400,7 @@ void UpdateVtxResult(P_RESULT pResult)
 //=========================================================================================
 // リザルト描画
 //=========================================================================================
-void DrawResult(void)
+void DrawRanking(void)
 {
 	//**************************************************************
 	// 変数宣言
@@ -421,7 +418,7 @@ void DrawResult(void)
 
 	if (g_resultMode == RESULT_SCORE)
 	{// スコア表示モード
-		pResult = GetResult();
+		pResult = GetThisScore();
 		for (int nCntResult = 0; nCntResult < MAX_RESULT; nCntResult++, pResult++)
 		{
 			if (pResult->bUse)
@@ -454,7 +451,7 @@ void DrawResult(void)
 //=========================================================================================
 // リザルト情報取得
 //=========================================================================================
-P_RESULT GetResult(void)
+P_RESULT GetThisScore(void)
 {
 	return &g_aResult[0];
 }
