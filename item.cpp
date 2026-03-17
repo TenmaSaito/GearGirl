@@ -67,13 +67,13 @@ ItemInfo		g_aItemInfo[ITEMTYPE_MAX] =
 	{"data\\MODEL\\Item\\GearSmall.x",-1},			// [1] –‚©‚ê‚½¬‚³‚È•Ô
 	{"data\\MODEL\\Item\\GearLarge.x",-1},			// [2] ãY—í‚È‘å‚«‚¢•Ô
 	{"data\\MODEL\\Item\\Shaft.x",-1},				// [3] ‚Ü‚Á‚·‚®‚È²
-	{"data\\MODEL\\Item\\GearLarge.x",-1},			// [4] ’š”J‚É’¼‚³‚ê‚½‚º‚ñ‚Ü‚¢
+	{"data\\MODEL\\Item\\Spring.x",-1},			// [4] ’š”J‚É’¼‚³‚ê‚½‚º‚ñ‚Ü‚¢
 
 	{"data\\MODEL\\Item\\old_screw.x",-1},			// [5] ŒÃ‚¢‚Ë‚¶
 	{"data\\MODEL\\Item\\GearSmallDificit.x",-1},	// [6] K‚Ñ‚½¬‚³‚¢•Ô
 	{"data\\MODEL\\Item\\GearLargeDificit.x",-1},	// [7] Œ‡‚¯‚½‘å‚«‚¢•Ô
 	{"data\\MODEL\\Item\\ShaftCurv.x",-1},			// [8] ­‚µ‚¢‹È‚ª‚Á‚½²
-	{"data\\MODEL\\Item\\GearLarge.x",-1},			// [9] ‚ä‚ª‚ñ‚¾‚º‚ñ‚Ü‚¢
+	{"data\\MODEL\\Item\\Spring_false.x",-1},			// [9] ‚ä‚ª‚ñ‚¾‚º‚ñ‚Ü‚¢
 };
 ItemInfo		g_aItemUIInfo[PUTOUTUI_MAX] =
 {
