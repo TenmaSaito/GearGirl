@@ -240,7 +240,7 @@ void UpdatePlayer(void)
 		// === 現在位置の保存 === //
 		pPlayer->posOld = pPlayer->pos;
 
-		if (GAME_NOW)
+		if (GAME_NOW && ITEMPROMPT_OFF)
 		{// ゲーム本編中
 			// === ２人プレイもしくはアクティブなプレイヤーの処理 === //
 			if (GetNumPlayer() == 2 || GetActivePlayer() == PlayerType(nCntPlayer))
@@ -536,6 +536,7 @@ void UpdatePlayer(void)
 						{
 							if (g_aPlayer[PLAYERTYPE_GIRL].state != PLAYERSTATE_THROWWAITING && g_bShotMouse == false)
 							{
+								PlaySound(SOUND_LABEL_SE_G_CHARACHANGE);
 								if (g_ActivePlayer == 1)
 								{// ネズミ→少女
 									g_ActivePlayer = 0;
@@ -932,7 +933,6 @@ void ActionPlayer(PlayerType nPlayer, Player* pPlayer)
 								&& g_aPlayer[PLAYERTYPE_MOUSE].pos.z - g_aPlayer[PLAYERTYPE_GIRL].pos.z <= 20.0f
 								&& g_aPlayer[PLAYERTYPE_MOUSE].pos.z - g_aPlayer[PLAYERTYPE_GIRL].pos.z >= -20.0f)
 							{
-								PlaySound(SOUND_LABEL_SE_G_THROW);
 								SetMotionType(MOTIONTYPE_ACTION, true, 10, nPlayer);
 								g_nMotionCounter = 10;
 								g_bShotMouse = true;
@@ -1964,6 +1964,7 @@ void UpdateArm(void)
 
 		if (GetKeyboardTrigger(DIK_0) == true || GetJoypadTrigger(0, JOYKEY_RB) == true)
 		{
+			PlaySound(SOUND_LABEL_SE_G_ARMSWITCH);
 			int nArm = g_armPlayer;
 			nArm++;
 			if (FAILED(CheckIndex(ARMTYPE_MAX, nArm)))
@@ -2037,8 +2038,9 @@ void ShotMouse(void)
 			}
 
 			if (GetKeyboardTrigger(DIK_RETURN) == true || GetJoypadTrigger(0, JOYKEY_B) == true)
-			{
+			{// 投げる
 				pPlayer->state = PLAYERSTATE_NEUTRAL;
+				PlaySound(SOUND_LABEL_SE_G_THROW);
 
 				// ネズミを操作対象に
 				g_ActivePlayer = 1;

@@ -42,7 +42,7 @@ void InitMeshCylinder(void)
 		pMesh->nVerti = 0;
 		pMesh->nPrim = 0;
 		pMesh->bUse = false;
-		pMesh->bDisp = true;
+		pMesh->bDisp = false;
 	}
 }
 
@@ -92,54 +92,51 @@ void DrawMeshCylinder(void)
 
 	for (int nCntMeshCylinder = 0; nCntMeshCylinder < MAX_MESHCYLINDER; nCntMeshCylinder++, pMesh++)
 	{
-		if (pMesh->bDisp == true)
+		if (pMesh->bUse && pMesh->bDisp == true)
 		{
-			if (pMesh->bUse)
-			{
-				//**************************************************************
-				// ワールドマトリックスの初期化
-				D3DXMatrixIdentity(&pMesh->mtxWorld);
+			//**************************************************************
+			// ワールドマトリックスの初期化
+			D3DXMatrixIdentity(&pMesh->mtxWorld);
 
-				//**************************************************************
-				// 向きを反映
-				D3DXMatrixRotationYawPitchRoll(&mtxRot, pMesh->rot.y, pMesh->rot.x, pMesh->rot.z);
-				D3DXMatrixMultiply(&pMesh->mtxWorld, &pMesh->mtxWorld, &mtxRot);
+			//**************************************************************
+			// 向きを反映
+			D3DXMatrixRotationYawPitchRoll(&mtxRot, pMesh->rot.y, pMesh->rot.x, pMesh->rot.z);
+			D3DXMatrixMultiply(&pMesh->mtxWorld, &pMesh->mtxWorld, &mtxRot);
 
-				//**************************************************************
-				// 位置を反映
-				D3DXMatrixTranslation(&mtxTrans, pMesh->pos.x, pMesh->pos.y, pMesh->pos.z);
-				D3DXMatrixMultiply(&pMesh->mtxWorld, &pMesh->mtxWorld, &mtxTrans);
+			//**************************************************************
+			// 位置を反映
+			D3DXMatrixTranslation(&mtxTrans, pMesh->pos.x, pMesh->pos.y, pMesh->pos.z);
+			D3DXMatrixMultiply(&pMesh->mtxWorld, &pMesh->mtxWorld, &mtxTrans);
 
-				//**************************************************************
-				// ワールドマトリックスの設定
-				pDevice->SetTransform(D3DTS_WORLD, &pMesh->mtxWorld);
+			//**************************************************************
+			// ワールドマトリックスの設定
+			pDevice->SetTransform(D3DTS_WORLD, &pMesh->mtxWorld);
 
-				//**************************************************************
-				// 頂点バッファをデータストリームに設定
-				pDevice->SetStreamSource(0,
-					pMesh->pVtxBuff,
-					0,
-					sizeof(VERTEX_3D));
+			//**************************************************************
+			// 頂点バッファをデータストリームに設定
+			pDevice->SetStreamSource(0,
+				pMesh->pVtxBuff,
+				0,
+				sizeof(VERTEX_3D));
 
-				// インデックスバッファを設定
-				pDevice->SetIndices(pMesh->pIdxBuffer);
+			// インデックスバッファを設定
+			pDevice->SetIndices(pMesh->pIdxBuffer);
 
-				//**************************************************************
-				// 頂点フォーマットの設定
-				pDevice->SetFVF(FVF_VERTEX_3D);
+			//**************************************************************
+			// 頂点フォーマットの設定
+			pDevice->SetFVF(FVF_VERTEX_3D);
 
-				//**************************************************************
-				// テクスチャの設定
-				pDevice->SetTexture(0, GetTexture(pMesh->nIdxTexture));
+			//**************************************************************
+			// テクスチャの設定
+			pDevice->SetTexture(0, GetTexture(pMesh->nIdxTexture));
 
-				//**************************************************************
-				// カリングモードの設定
-				pDevice->SetRenderState(D3DRS_CULLMODE, pMesh->culling);
+			//**************************************************************
+			// カリングモードの設定
+			pDevice->SetRenderState(D3DRS_CULLMODE, pMesh->culling);
 
-				//**************************************************************
-				// フィールドの描画
-				pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, 0, 0, pMesh->nVerti, 0, pMesh->nPrim);
-			}
+			//**************************************************************
+			// フィールドの描画
+			pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, 0, 0, pMesh->nVerti, 0, pMesh->nPrim);
 		}
 	}
 
@@ -179,6 +176,7 @@ int SetMeshCylinder(vec3 pos, vec3 rot, D3DXCOLOR col, float fRadius, float fHei
 			pMesh->nIdxTexture = nTex;
 			pMesh->bPattanrn = bPat;
 			pMesh->culling = cull;
+			pMesh->bDisp = false;
 
 			//**************************************************************
 			// 頂点バッファの読み込み
@@ -264,6 +262,7 @@ int SetMeshCylinder(vec3 pos, vec3 rot, D3DXCOLOR col, float fRadius, float fHei
 			pMesh->bUse = true;
 			g_nSetMeshCylinder++;
 			nIdx = nCntMeshCylinder;
+
 			break;
 		}
 	}
@@ -294,7 +293,9 @@ int GetNumMeshCylinder(void)
 //=========================================================================================
 void SetEnableMeshCylinder(int nIdx, bool bDisp)
 {
-	g_aMeshCylinder[nIdx].bDisp = bDisp;
+	MeshInfo* pMesh = &g_aMeshCylinder[nIdx];
+
+	pMesh->bUse = bDisp;
 }
 
 //=========================================================================================

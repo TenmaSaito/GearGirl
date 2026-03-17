@@ -189,9 +189,11 @@ void UpdateTitle(void)
 		if (Step(g_nCounterTrain, MOVE_TIME))
 		{
 			LP3DMODEL pModel= Get3DModel(g_nIdxTrain);
+			TPlayer* pTPlayer = GetTPlayer();
 			if (pModel)
 			{
 				pModel->pos.y = CParamVector::V3NULL.y + 0.4f;
+				pTPlayer->pos.y = CParamVector::V3NULL.y + 0.4f;
 			}
 		}
 		else
@@ -202,15 +204,18 @@ void UpdateTitle(void)
 	else
 	{
 		LP3DMODEL pModel = Get3DModel(g_nIdxTrain);
+		TPlayer* pTPlayer = GetTPlayer();
 		if (pModel)
 		{
 			if (g_nCounterTrain % 20 >= 10)
 			{
 				pModel->pos.y = CParamVector::V3NULL.y + 0.1f;
+				pTPlayer->pos.y = CParamVector::V3NULL.y + 0.1f;
 			}
 			else
 			{
 				pModel->pos.y = CParamVector::V3NULL.y;
+				pTPlayer->pos = PLAYER_POSDEF;
 			}
 		}
 	}

@@ -10,6 +10,8 @@
 #include "input.h"
 #include "fade.h"
 #include "debugproc.h"
+#include "game.h"
+#include "sound.h"
 
 //**************************************************************
 // グローバル変数
@@ -19,6 +21,7 @@ RESULT					g_aResult[MAX_RESULT];						// 今回の結果表示
 RESULT					g_aRanking[MAX_RESULT];						// ランキング表示
 RESULTMODE				g_resultMode;								// リザルト内のモード
 P_RESULT				g_pThisRanking;								// 今回のランキングを指すポインタ
+int						g_nCounterEnding = 0;				// エンディングカウンター
 int						g_nSelectResult;
 int						g_nThisScore;								// 今回のスコア
 int						g_nThisRank;								// 今回の順位
@@ -36,6 +39,11 @@ const char*				g_aResultTexFile[] =
 	"data\\TEXTURE\\Number002.png",					// RESULTTEX_NUM		[4]
 };
 const int				g_nMaxTexResult = sizeof g_aResultTexFile / sizeof(const char*);
+
+//**********************************************************************************
+//*** 定数変数 ***
+//**********************************************************************************
+constexpr int c_EndingTime = 240;		// エンディング持続時間
 
 //**************************************************************
 // プロトタイプ宣言
@@ -56,7 +64,7 @@ void InitRanking(void)
 	vec3				pos, size;
 	int					nCntResult = 0;
 	int					nCntRanking = 0;
-	int					nThisScore = 0;// GetScore();
+	int					nThisScore = GetScore();
 	int					nThisRank;
 
 	//**************************************************************
@@ -66,7 +74,7 @@ void InitRanking(void)
 	g_resultMode = RESULT_SCORE;
 	g_nScoreMoveCouter = SCOREMOVE;
 	g_nSelectResult = 0;
-	g_nThisScore = 0;// GetScore();
+	g_nThisScore = GetScore();
 	nThisRank = SortRanking(g_nThisScore);
 	g_pThisRanking = NULL;
 
@@ -108,7 +116,6 @@ void InitRanking(void)
 		SetResult(pos, size, vec3_ZERO, colX_WHITE, RESULTTEX_NUM, nThisScore % 10, pResult);
 		nThisScore *= 0.1f;
 	}
-	
 
 	//**************************************************************
 	//  ランキング初期化
@@ -147,6 +154,7 @@ void InitRanking(void)
 		}
 	}	
 
+	g_nCounterEnding = 0;
 
 	// リザルト内のモード
 	SetResultMode(g_resultMode);
@@ -226,6 +234,7 @@ void UpdateRanking(void)
 	default:
 		break;
 	}
+	g_nCounterEnding++;
 }
 
 //=========================================================================================
@@ -234,11 +243,15 @@ void UpdateScore(void)
 {
 	//**************************************************************
 	// 次へ
-	if (GetFade() == FADE_NONE)
+	if (GetKeyboardTrigger(DIK_RETURN)
+		|| GetJoypadTrigger(0, JOYKEY_A)
+		|| GetJoypadTrigger(0, JOYKEY_START)
+		|| g_nCounterEnding >= c_EndingTime)
 	{
-		if (GetKeyboardTrigger(KEY_ENTER) || GetJoypadTrigger(0,JOY_ENTER))
+		if (GetFade() == FADE_NONE)
 		{
 			SetResultMode(RESULT_RANGING);
+			g_nCounterEnding = 0;
 		}
 	}
 
@@ -253,9 +266,16 @@ void UpdateRank(void)
 {
 	//**************************************************************
 	// 次へ
-	if (GetKeyboardTrigger(KEY_ENTER) || GetJoypadTrigger(0,JOY_ENTER))
+	if (GetKeyboardTrigger(DIK_RETURN)
+		|| GetJoypadTrigger(0, JOYKEY_A)
+		|| GetJoypadTrigger(0, JOYKEY_START)
+		|| g_nCounterEnding >= c_EndingTime)
 	{
-		SetMode(MODE_TEAMLOGO);
+		if (GetFade() == FADE_NONE)
+		{
+			SetFade(MODE_TEAMLOGO);
+			StopSound();
+		}
 	}
 
 	//**************************************************************

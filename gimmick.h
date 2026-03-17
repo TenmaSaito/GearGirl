@@ -58,6 +58,7 @@ START_UNABLE
 UNABLE_THISFILE(26495)
 typedef struct
 {
+	// ギミックの要素
 	D3DXVECTOR3 pos;		// 中心位置
 	D3DXVECTOR3 rot;		// ギミック全体の向き
 	D3DXMATRIX mtxWorld;	// ワールドマトリックス
