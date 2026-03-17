@@ -224,7 +224,7 @@ void UninitItem(void)
 void UpdateItem(void)
 {
 	// 便利屋判定
-	if (IsDispPrompt(GetIdxShopPrompt()))
+	if (IsDispPrompt(GetIdxShopPrompt()) && g_bPutOut == false)
 	{
 		if (GetActivePlayer() == PLAYERTYPE_GIRL || 1 < GetNumPlayer())
 		{
@@ -244,10 +244,6 @@ void UpdateItem(void)
 			g_nSelectPut = 0;
 			g_nChoisePut = -1;
 		}
-	}
-	else if (g_bOnDebugItem == false)
-	{// デバッグ用
-		g_bPutOut = false;
 	}
 
 	// マップアイテム更新
