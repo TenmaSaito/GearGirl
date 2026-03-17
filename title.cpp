@@ -110,7 +110,7 @@ void InitTitle(void)
 	SetTLogo(g_aPosTLogo[0], g_aPosTLogo[1], g_sizeTLogo, tex);
 
 	// プレイヤーの設置
-	SetTPlayer();
+	SetTPlayer(VECNULL, VECNULL);
 
 	g_nCounterTrain = 0;
 }

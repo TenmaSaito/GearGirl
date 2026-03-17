@@ -1,9 +1,9 @@
-//// =================================================
-//// 
-//// タイトル用プレイヤー処理[tTPlayer.cpp]
-//// Author : Tenma Saito
-//// 
-//// =================================================
+// =================================================
+// 
+// タイトル用プレイヤー処理[tTPlayer.cpp]
+// Author : Tenma Saito
+// 
+// =================================================
 #include "tplayer.h"
 #include "modeldata.h"
 #include "motion.h"
@@ -35,7 +35,7 @@ void UpdateMotion(void);	// モーションのアップデート
 void SetMotionType(MOTIONTYPE motionTypeNext, bool bBlend, int nFrameBlend);	// モーションの変更
 void DrawNormalTPlayer(TPlayer* pTPlayer, int nCntModel, LPDIRECT3DDEVICE9 pDevice);	// プレイヤーの通常描画
 void DrawShadowTPlayer(TPlayer* pTPlayer, int nCntModel, LPDIRECT3DDEVICE9 pDevice);	// プレイヤーの影の描画
-void CreateShadowMatrix(LPDIRECT3DDEVICE9 pDevice, D3DXMATRIX* pMtxTPlayer, ShadowMatrix* pOut);		// シャドウマトリックスの作成
+void CreateShadowMatrixT(LPDIRECT3DDEVICE9 pDevice, D3DXMATRIX* pMtxTPlayer, ShadowMatrix* pOut);		// シャドウマトリックスの作成
 void CalcMatrix(TPlayer* pTPlayer);
 
 // =================================================
@@ -46,8 +46,6 @@ const char *pTPlayerMotionPath = "data/Scripts/ここにパスを入力";
 // グローバル変数
 TPlayer g_TPlayer;	// プレイヤーの樹応報
 int g_IdxShadowTPlayer = -1;		// 使用する影の番号
-int	g_nMotionCounter = 0;			// モーションカウンター
-int g_nKeepUpCounter = 0;			// 一定時間指定の距離に戻れない時に回すカウンター
 
 // =================================================
 // 初期化処理
@@ -67,13 +65,15 @@ void InitTPlayer(void)
 	{
 		g_TPlayer.pos = PLAYER_POSDEF;
 		g_TPlayer.posOld = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		g_TPlayer.rot = D3DXVECTOR3(0.0f, D3DX_PI, 0.0f);
+		g_TPlayer.rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		g_TPlayer.bDisp = true;
 		g_TPlayer.bJump = false;
 		g_TPlayer.nCounterMotion = 0;
 		g_TPlayer.nKey = 0;
 		g_TPlayer.motionType = MOTIONTYPE_NEUTRAL;
 		g_TPlayer.motionTypeBlend = MOTIONTYPE_NEUTRAL;
+		g_TPlayer.nNumMotion = 0;
+		g_TPlayer.nNumModel = 0;
 		g_TPlayer.bFinishMotion = true;
 		g_TPlayer.bDash = false;
 	}
@@ -104,9 +104,6 @@ void InitTPlayer(void)
 		}
 	}
 
-	g_nMotionCounter = 0;
-	g_nKeepUpCounter = 0;
-
 	// デバイスの破棄
 	EndDevice();
 
@@ -127,6 +124,8 @@ void UninitTPlayer(void)
 // =================================================
 void UpdateTPlayer(void)
 {
+	if (g_TPlayer.nNumMotion == 0) return;
+
 	// モーションの更新
 	UpdateMotion();
 }
@@ -301,7 +300,7 @@ void DrawNormalTPlayer(TPlayer* pTPlayer, int nCntModel, LPDIRECT3DDEVICE9 pDevi
 // =================================================
 // シャドウマトリックスの作成処理
 // =================================================
-void CreateShadowMatrix(LPDIRECT3DDEVICE9 pDevice, D3DXMATRIX* pMtx, ShadowMatrix* pOut)
+void CreateShadowMatrixT(LPDIRECT3DDEVICE9 pDevice, D3DXMATRIX* pMtx, ShadowMatrix* pOut)
 {
 	// 各NULLCHECK
 	if (pDevice == nullptr)
@@ -365,7 +364,7 @@ void DrawShadowTPlayer(TPlayer* pTPlayer, int nCntModel, LPDIRECT3DDEVICE9 pDevi
 	ShadowMatrix shadow;			// 平面投影関連
 
 	// シャドウマトリックスの作成
-	CreateShadowMatrix(pDevice, &pTPlayer->PartsInfo.aParts[nCntModel].mtxWorld, &shadow);
+	CreateShadowMatrixT(pDevice, &pTPlayer->PartsInfo.aParts[nCntModel].mtxWorld, &shadow);
 
 	// プレイヤーのワールドマトリックスの設定
 	pDevice->SetTransform(D3DTS_WORLD, &shadow.mtxShadow);
