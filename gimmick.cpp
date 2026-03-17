@@ -10,6 +10,7 @@
 #include "effect.h"
 #include "gimmick.h"
 #include "motion.h"
+#include "mesh.h"
 #include "modeldata.h"
 #include "param.h"
 #include "prompt.h"
@@ -90,7 +91,7 @@ const D3DXVECTOR3 g_aVecParticle[2] =								// パーティクルの上下限ベクトル
 	D3DXVECTOR3(-250, 0, -250),
 };
 
-const char *g_apGimmickPromptTexture[GIMMICKTYPE_MAX] =		// 各ギミックのプロンプト
+const char* g_apGimmickPromptTexture[GIMMICKTYPE_MAX] =		// 各ギミックのプロンプト
 {
 	"data/TEXTURE/TestPrompt.png",		// 人間用ボタン
 	"data/TEXTURE/TestPrompt.png",		// ネズミ用ボタン
@@ -123,6 +124,7 @@ IDX_TEXTURE g_nIdxTexTutorial[3];			// チュートリアル1枚絵用のインデックス
 bool g_bAnyTex;								// いずれかのテクスチャが表示されているか
 bool g_bDispTutorialChainsaw;				// 1度でもチェンソーチュートリアルテクスチャを表示したかどうか
 bool g_bDispTutorialvalve;					// 1度でもバルブチュートリアルテクスチャを表示したかどうか
+int g_nIdxCylinder[GIMMICKTYPE_MAX] = {};	// メッシュシリンダーのインデックスを保管
 
 //==================================================================================
 // --- 初期化 ---
@@ -181,6 +183,10 @@ void InitGimmick(void)
 					SetEnablePrompt(true, g_aGimmick[nCntMotion].nIdxPrompt);
 				}
 			}
+
+			// インデックスを保管
+			g_nIdxCylinder[nCntMotion] = SetMeshCylinder(g_aGimmick[nCntMotion].pos, VECNULL, COL_BLUE, 10.0f, 800.0f, 1, 8);
+			SetEnableMeshCylinder(g_nIdxCylinder[nCntMotion], false);	// 非表示に
 		}
 	}
 
@@ -269,18 +275,27 @@ void UpdateGimmick(void)
 	// プレイヤーの情報を取得
 	Player* pPlayer = GetPlayer();
 
+	// === チュートリアルテクスチャを出していない場合、ギミックの場所にシリンダーを置いてわかりやすくする
 	if (g_bDispTutorialChainsaw == false)
 	{
 		if (IsDetection(g_aGimmick[GIMMICKTYPE_FALLENTREE].pos, pPlayer->pos, 700.0f) == true)
-		{// 一定距離以内でパーティクルを出す
-			SetParticle(D3DXVECTOR3(1655, 110, 460), COL_RED, D3DXVECTOR3(0.0f, 100.0f, 0.0f), D3DXVECTOR3(3.0f, 200.0f, 3.0f), 5, 2.0f, 2, 20, false, true);
+		{// 一定距離以内でシリンダーを出す
+			SetEnableMeshCylinder(g_nIdxCylinder[GIMMICKTYPE_FALLENTREE], true);
+		}
+		else
+		{
+			SetEnableMeshCylinder(g_nIdxCylinder[GIMMICKTYPE_FALLENTREE], false);
 		}
 	}
 	if (g_bDispTutorialvalve == false)
 	{
 		if (IsDetection(g_aGimmick[GIMMICKTYPE_STATUE].pos, pPlayer->pos, 700.0f) == true)
-		{// 一定距離以内でパーティクルを出す
-			SetParticle(D3DXVECTOR3(1120, 110, 110), COL_RED, D3DXVECTOR3(0.0f, 100.0f, 0.0f), D3DXVECTOR3(3.0f, 200.0f, 3.0f), 5, 2.0f, 2, 20, false, true);
+		{// 一定距離以内でシリンダーを出す
+			SetEnableMeshCylinder(g_nIdxCylinder[GIMMICKTYPE_STATUE], true);
+		}
+		else
+		{
+			SetEnableMeshCylinder(g_nIdxCylinder[GIMMICKTYPE_STATUE], false);
 		}
 	}
 

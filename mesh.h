@@ -19,7 +19,7 @@
 #define MESHTYPE				(4)						// 種類
 #define MAX_MESHSPHERE			(16)					// スフィア
 #define MAX_MESHDOME			(16)					// ドーム
-#define MAX_MESHCYLINDER		(16)					// シリンダー
+#define MAX_MESHCYLINDER		(32)					// シリンダー
 #define MAX_MESHRING			(64)					// リング
 #define MAX_MESH				(MAX_MESHSPHERE + MAX_MESHDOME + MAX_MESHCYLINDER + MAX_MESHRING)
 
@@ -52,6 +52,7 @@ typedef struct MeshInfo
 
 	D3DCULL					culling;			// カリングタイプ
 	bool					bUse;				// 使ってるか
+	bool					bDisp;				// 表示するか
 }MeshInfo;
 POINTER(MeshInfo, P_MESH);
 
@@ -84,7 +85,7 @@ void DrawMeshRing(void);
 
 int SetMeshSphere	(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int nCircleDivision, D3DCULL cull = D3DCULL_CCW, int nTex = -1, bool bPat = false);
 void SetMeshDome	(vec3 pos, vec3 rot, float fRadius, int nHeightDivision, int nCircleDivision, D3DCULL cull = D3DCULL_CCW, int nTex = -1, bool bPat = false);
-void SetMeshCylinder(vec3 pos, vec3 rot, D3DXCOLOR col, float fRadius,float fHeight, int nHeightDivision, int nCircleDivision, D3DCULL cull = D3DCULL_CCW, int nTex = -1, bool bPat = false);
+int SetMeshCylinder(vec3 pos, vec3 rot, D3DXCOLOR col, float fRadius,float fHeight, int nHeightDivision, int nCircleDivision, D3DCULL cull = D3DCULL_CCW, int nTex = -1, bool bPat = false);
 int SetMeshRing	(vec3 pos, vec3 rot, float fInner, float fOuter, int nHeightDivision, int nCircleDivision,  D3DCULL cull = D3DCULL_CCW, int nTex = -1, bool bPat = false);
 
 P_MESH GetMeshSphere(void);
@@ -103,5 +104,8 @@ bool ReleaseMesh(P_MESH pMesh, int nIdx, int MAX);
 
 bool SetColorMeshSphere(P_MESH pMesh, D3DXCOLOR col);
 bool SetRadiusMeshSphere(P_MESH pMesh, float fRadius);
+
+void SetEnableMeshCylinder(int nIdx, bool bDisp);
+void SetPositionMeshCylinder(int nIdx, D3DXVECTOR3 pos);
 
 #endif // !_MESH_H_

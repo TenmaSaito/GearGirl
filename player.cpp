@@ -284,10 +284,10 @@ void UpdatePlayer(void)
 					pPlayer->fMove = PLAYER_MOVE * 1.5f;
 
 					// ダッシュ時に軌跡を出す
-					SetEnableOrbit(g_nIdxOrbit, true);
-					SetOffSetOrbit(g_nIdxOrbit, D3DXVECTOR3(0.0f, -10.0f, 0.0f), D3DXVECTOR3(0.0f, 10.0f, 0.0f));
-					SetEnableOrbit(g_nIdxOrbitSub, true);
-					SetOffSetOrbit(g_nIdxOrbitSub, D3DXVECTOR3(-10.0f, 0.0f, 0.0f), D3DXVECTOR3(10.0f, 0.0f, 0.0f));
+					//SetEnableOrbit(g_nIdxOrbit, true);
+					//SetOffSetOrbit(g_nIdxOrbit, D3DXVECTOR3(0.0f, -10.0f, 0.0f), D3DXVECTOR3(0.0f, 10.0f, 0.0f));
+					//SetEnableOrbit(g_nIdxOrbitSub, true);
+					//SetOffSetOrbit(g_nIdxOrbitSub, D3DXVECTOR3(-10.0f, 0.0f, 0.0f), D3DXVECTOR3(10.0f, 0.0f, 0.0f));
 
 					if (pPlayer->bDash == true)
 					{// ダッシュ時の風の音
@@ -300,10 +300,10 @@ void UpdatePlayer(void)
 					pPlayer->fMove = PLAYER_MOVE * 1.5f;
 
 					// ダッシュ時に軌跡を出す
-					SetEnableOrbit(g_nIdxOrbit, true);
-					SetOffSetOrbit(g_nIdxOrbit, D3DXVECTOR3(0.0f, -10.0f, 0.0f), D3DXVECTOR3(0.0f, 10.0f, 0.0f));
-					SetEnableOrbit(g_nIdxOrbitSub, true);
-					SetOffSetOrbit(g_nIdxOrbitSub, D3DXVECTOR3(-10.0f, 0.0f, 0.0f), D3DXVECTOR3(10.0f, 0.0f, 0.0f));
+					//SetEnableOrbit(g_nIdxOrbit, true);
+					//SetOffSetOrbit(g_nIdxOrbit, D3DXVECTOR3(0.0f, -10.0f, 0.0f), D3DXVECTOR3(0.0f, 10.0f, 0.0f));
+					//SetEnableOrbit(g_nIdxOrbitSub, true);
+					//SetOffSetOrbit(g_nIdxOrbitSub, D3DXVECTOR3(-10.0f, 0.0f, 0.0f), D3DXVECTOR3(10.0f, 0.0f, 0.0f));
 
 					if (pPlayer->bDash == true)
 					{// ダッシュ時の風の音

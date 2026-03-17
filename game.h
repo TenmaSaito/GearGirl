@@ -28,4 +28,6 @@ void SetEnablePause(bool bPouse);
 
 void SetGameEnding(int nCountWait = DEFAULT_WAITING);
 int GetIdxShopPrompt(void);
+int GetScore(void);		// スコア(タイム)情報の譲渡
+
 #endif
