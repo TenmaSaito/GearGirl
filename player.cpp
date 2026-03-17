@@ -512,8 +512,8 @@ void UpdatePlayer(void)
 		}
 	}
 
-	// === プロンプトを描画 === //
-	DetectionPrompt(g_aPlayer[PLAYERTYPE_GIRL].pos, 50.0f);
+	// === プロンプトを描画(便利屋) === //
+	DetectionPrompt(g_aPlayer[PLAYERTYPE_GIRL].pos, 30.0f);
 
 	if (GAME_NOW)
 	{// === チュートリアル外での更新 === // 
@@ -893,7 +893,7 @@ void ActionPlayer(PlayerType nPlayer, Player* pPlayer)
 	Gimmick* pGimmick = GetGimmick() + 7;
 
 	if (nPlayer == PLAYERTYPE_GIRL)
-	{
+	{// 少女の処理
 		if (GetKeyboardTrigger(DIK_RETURN) == true || GetJoypadTrigger(0, JOYKEY_B) == true)
 		{
 			switch (g_armPlayer)
@@ -907,7 +907,12 @@ void ActionPlayer(PlayerType nPlayer, Player* pPlayer)
 						g_bMovable = false;	// 移動を不可能に
 						pPlayer->pos = D3DXVECTOR3(1120.0f, 100.0f, 109.0f);
 						pPlayer->rot = D3DXVECTOR3(0.0f, D3DX_HALFPI, 0.0f);
-						SetMotionType(MOTIONTYPE_VALVE, true, 10, nPlayer);
+						// 連打防止
+						if (pPlayer->motionType != MOTIONTYPE_VALVE && pPlayer->motionTypeBlend != MOTIONTYPE_VALVE)
+						{
+							SetMotionType(MOTIONTYPE_VALVE, true, 10, nPlayer);
+							CameraReset();
+						}
 						PlaySound(SOUND_LABEL_SE_G_VALVE);
 					}
 				}
@@ -948,7 +953,11 @@ void ActionPlayer(PlayerType nPlayer, Player* pPlayer)
 				if (g_aPlayer[PLAYERTYPE_GIRL].pos.z >= 200.0f && g_aPlayer[PLAYERTYPE_GIRL].pos.z <= 700.0f
 					&& g_aPlayer[PLAYERTYPE_GIRL].pos.x >= 1670.0f && g_aPlayer[PLAYERTYPE_GIRL].pos.x <= 2160.0f)
 				{// 教会の敷地内でのみ使用可能
-					SetMotionType(MOTIONTYPE_CUTTING, true, 10, nPlayer);
+					// 連打防止
+					if (pPlayer->motionType != MOTIONTYPE_CUTTING && pPlayer->motionTypeBlend != MOTIONTYPE_CUTTING)
+					{
+						SetMotionType(MOTIONTYPE_CUTTING, true, 10, nPlayer);
+					}
 					PlaySound(SOUND_LABEL_SE_G_CHAINSAW);
 					g_nMotionCounter = 8;
 				}
@@ -2077,4 +2086,17 @@ void ShotMouse(void)
 			}
 		}
 	}
+}
+
+
+void SetRotShop(D3DXVECTOR3 pos)
+{
+	Player* pPlayer = GetPlayer();
+
+	// 角度を求める
+	float fAngleplayer = atan2(pPlayer->pos.x - pos.x, pPlayer->pos.z - pos.z);
+
+	pPlayer->rot.y = fAngleplayer;
+
+	RotRepair(pPlayer->playertype);
 }

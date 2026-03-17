@@ -305,3 +305,69 @@ void SetPositionMeshCylinder(int nIdx, D3DXVECTOR3 pos)
 {
 	g_aMeshCylinder[nIdx].pos = pos;
 }
+
+//=========================================================================================
+// シリンダーの半径を変更
+//=========================================================================================
+bool SetRadiusMeshCylinder(P_MESH pMesh, float fRadius)
+{
+	// NULLCHECK
+	if (pMesh == nullptr)
+	{
+		OutputDebugString(TEXT("メッシュのポインタ取得に失敗"));
+		return false;
+	}
+
+	// USECHECK
+	if (pMesh->bUse == false)
+	{
+		OutputDebugString(TEXT("メッシュが未使用状態です"));
+		return false;
+	}
+
+	//**************************************************************
+	// 変数宣言
+	VERTEX_3D* pVtx = (VERTEX_3D*)NULL;	// 頂点情報へのポインタ
+	WORD* pIdx = (WORD*)NULL;			// インデックス情報へのポインタ
+	D3DXVECTOR3			vecDir;						// 法線ベクトル（計算用
+	float				fRadiusCal;					// 計算用半径
+	float				fHeightCal;					// 計算用高さ
+	int					nHeightVerti = pMesh->nHeightDivision + 1,
+		nCircleVerti = pMesh->nCircleDivision + 1;	// 縦頂点数と横頂点数
+	vec3 angle = vec3((float)D3DX_PI / pMesh->nHeightDivision, (float)(2 * D3DX_PI / pMesh->nCircleDivision), (float)D3DX_PI / pMesh->nHeightDivision);
+
+	// 半径を適用
+	pMesh->size = vec3(fRadius, fRadius, fRadius);
+
+	//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+	// 頂点バッファをロックし、頂点情報へのポインタを取得
+	pMesh->pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+
+	for (int nCntHeight = 0, nCntVer = 0; nCntHeight <= pMesh->nHeightDivision; nCntHeight++)
+	{
+		fRadiusCal = pMesh->size.x * sinf(angle.x * nCntHeight);
+		fHeightCal = pMesh->size.x * cosf(angle.x * nCntHeight);
+
+		for (int nCntCircle = 0; nCntCircle <= pMesh->nCircleDivision; nCntCircle++, nCntVer++)
+		{
+			// 頂点座標を設定
+			pVtx[nCntVer].pos = D3DXVECTOR3(fRadiusCal * sinf(angle.y * nCntCircle),
+				fHeightCal,
+				fRadiusCal * cosf(angle.y * nCntCircle));
+		}
+	}
+
+	// 頂点バッファのロック解除
+	pMesh->pVtxBuff->Unlock();
+	//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+	return true;
+}
+
+//=========================================================================================
+// 柱の更新
+//=========================================================================================
+void UpdateGimmickpiller(void)
+{
+
+}

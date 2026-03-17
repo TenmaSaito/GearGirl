@@ -37,9 +37,19 @@
 #define UIMENU_ON		(GetEnableUImenu() == true)		// アイテムUI表示中
 #define UIMENU_OFF		(GetEnableUImenu() == false)	// アイテムUI非表示中
 
-// 要素の設定
+// 色の設定
 #define COL_RED			D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f)	// 赤色
-#define COL_BLUE		D3DXCOLOR(0.0f, 1.0f, 1.0f, 1.0f)	// 青色
+#define COL_HALFRED		D3DXCOLOR(1.0f, 0.0f, 0.0f, 0.5f)	// 赤色(半透明)
+#define COL_GREEN		D3DXCOLOR(0.0f, 1.0f, 0.0f, 1.0f)	// 緑色
+#define COL_HALFGREEN	D3DXCOLOR(0.0f, 1.0f, 0.0f, 0.5f)	// 緑色(半透明)
+#define COL_BLUE		D3DXCOLOR(0.0f, 0.0f, 1.0f, 1.0f)	// 青色
+#define COL_HALFBLUE	D3DXCOLOR(0.0f, 0.0f, 1.0f, 0.5f)	// 青色(半透明)
+#define COL_YELLOW		D3DXCOLOR(1.0f, 1.0f, 0.0f, 1.0f)	// 黄色
+#define COL_HALFYELLOW	D3DXCOLOR(1.0f, 1.0f, 0.0f, 0.5f)	// 黄色(半透明)
+#define COL_PURPLE		D3DXCOLOR(1.0f, 0.0f, 1.0f, 1.0f)	// 黄色
+#define COL_HALFPURPLE	D3DXCOLOR(1.0f, 0.0f, 1.0f, 0.5f)	// 黄色(半透明)
+#define COL_BLACK		D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f)	// 黒
+#define COL_HALFBLACK		D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.5f)	// 黒(半透明)
 
 // ゲームの設定
 #define MAX_ZMOVE1		(-1590)		// Z軸移動可能領域1
@@ -143,5 +153,6 @@ int GetNumPlayer(void);			// プレイ人数情報を渡す
 int GetActivePlayer(void);		// 操作しているプレイヤー情報を渡す
 void SetPlayer(D3DXVECTOR3* pPosGirl, D3DXVECTOR3* pPosMouse);	// プレイヤーの位置情報を渡す
 void ChangeNumPlayer(void);		// プレイ人数を切り替える(デバッグ用)
+void SetRotShop(D3DXVECTOR3 pos);
 
 #endif

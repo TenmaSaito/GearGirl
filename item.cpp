@@ -230,6 +230,9 @@ void UpdateItem(void)
 		{
 			if (GetKeyboardTrigger(DIK_RETURN) || GetKeyboardTrigger(DIK_F) || GetJoypadTrigger(PLAYERTYPE_GIRL, JOYKEY_A))
 			{
+				// 提出画面に移行の際、強制的に店の方に体を向ける
+				SetRotShop(D3DXVECTOR3(1450.0f, 100.0f, -460.0f));
+
 				g_bPutOut = true;
 				g_nCoutItemFram = 10;
 			}

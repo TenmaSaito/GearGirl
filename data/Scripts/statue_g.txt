@@ -114,7 +114,7 @@ MOTIONSET
 
 		KEY	# ----- [ 1 ] -----
 			POS = 0.00 0.00 0.00
-			ROT = -3.11 0.00 0.00
+			ROT = 3.11 0.00 0.00
 		END_KEY
 	END_KEYSET
 END_MOTIONSET

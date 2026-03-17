@@ -766,7 +766,7 @@ void CameraReset(void)
 
 	for (int nCntCamera = 0; nCntCamera < PLAYERTYPE_MAX; nCntCamera++, pCamera++, pPlayer++)
 	{
-		if (GetJoypadTrigger(nCntCamera, CAM_RESETJOY) || GetKeyboardTrigger(CAM_RESETKEY(nCntCamera)))
+		if (GetJoypadTrigger(nCntCamera, CAM_RESETJOY) || GetKeyboardTrigger(CAM_RESETKEY(nCntCamera)) || pPlayer->motionType == MOTIONTYPE_VALVE)
 		{
 			if (GetNumPlayer() == 1 && GetActivePlayer() == PLAYERTYPE_MOUSE)
 			{// 1人プレイでネズミがアクティブなら

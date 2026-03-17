@@ -125,7 +125,7 @@ IDX_TEXTURE g_nIdxTexTutorial[3];			// チュートリアル1枚絵用のインデックス
 bool g_bAnyTex;								// いずれかのテクスチャが表示されているか
 bool g_bDispTutorialChainsaw;				// 1度でもチェンソーチュートリアルテクスチャを表示したかどうか
 bool g_bDispTutorialvalve;					// 1度でもバルブチュートリアルテクスチャを表示したかどうか
-int g_nIdx = 0;
+int g_nIdx[3];
 
 //==================================================================================
 // --- 初期化 ---
@@ -214,8 +214,9 @@ void InitGimmick(void)
 	g_nIdxTexTutorial[2] = Set2DPolygon(POS_TUTORIAL, VECNULL, D3DXVECTOR2(900.0f, 610.0f), TexTutorial, DEF_COL);
 	SetEnable2DPolygon(g_nIdxTexTutorial[TUTORIALTYPE_VALVE], false);
 
-	g_nIdx = SetMeshCylinder(g_aGimmick[GIMMICKTYPE_STATUE].pos, VECNULL, COL_BLUE, 3.0f, 500.0f, 1, 8);
-	SetMeshCylinder(g_aGimmick[GIMMICKTYPE_FALLENTREE].pos, VECNULL, COL_BLUE, 3.0f, 500.0f, 1, 8);
+	g_nIdx[0] = SetMeshCylinder(g_aGimmick[GIMMICKTYPE_STATUE].pos, VECNULL, COL_HALFBLUE, 20.0f, 1500.0f, 1, 8);
+	g_nIdx[1] = SetMeshCylinder(g_aGimmick[GIMMICKTYPE_FALLENTREE].pos, VECNULL, COL_HALFGREEN, 20.0f, 1500.0f, 1, 8);
+	g_nIdx[2] = SetMeshCylinder(g_aGimmick[GIMMICKTYPE_CLOSEDDOOR].pos, VECNULL, COL_HALFYELLOW, 20.0f, 1500.0f, 1, 8);
 
 }
 
@@ -276,32 +277,35 @@ void UpdateGimmick(void)
 	// プレイヤーの情報を取得
 	Player* pPlayer = GetPlayer();
 
-	// === チュートリアルテクスチャを出していない場合、ギミックの場所にシリンダーを置いてわかりやすくする
-	if (g_bDispTutorialChainsaw == true)
+	// === クリア判定になるまで、ギミックの場所にシリンダーを置いてわかりやすくする
+	// バルブ
+	if (g_aGimmick[GIMMICKTYPE_STATUE].bClear == false)
 	{
-		//if (IsDetection(g_aGimmick[GIMMICKTYPE_FALLENTREE].pos, pPlayer->pos, 700.0f) == true)
-		//{// 一定距離以内でシリンダーを出す
-		//	SetEnableMeshCylinder(g_aGimmick[GIMMICKTYPE_FALLENTREE].nIdxMeshCylinder, true);
-		//}
-		//else
-		//{
-		//	SetEnableMeshCylinder(g_aGimmick[GIMMICKTYPE_FALLENTREE].nIdxMeshCylinder, false);
-		//}
-
-		MeshInfo* pMesh = GetMeshCylinder() + g_nIdx;
-		pMesh->bUse = false;
-			SetEnableMeshCylinder(g_nIdx, false);
+		SetEnableMeshCylinder(g_nIdx[0], true);
 	}
-	if (g_bDispTutorialvalve == false)
+	else
 	{
-		//if (IsDetection(g_aGimmick[GIMMICKTYPE_STATUE].pos, pPlayer->pos, 700.0f) == true)
-		//{// 一定距離以内でシリンダーを出す
-		//	SetEnableMeshCylinder(g_aGimmick[GIMMICKTYPE_STATUE].nIdxMeshCylinder, true);
-		//}
-		//else
-		//{
-		//	SetEnableMeshCylinder(g_aGimmick[GIMMICKTYPE_STATUE].nIdxMeshCylinder, false);
-		//}
+		SetEnableMeshCylinder(g_nIdx[0], false);
+	}
+	// 倒木
+	if (g_aGimmick[GIMMICKTYPE_FALLENTREE].bClear == false)
+	{
+		SetEnableMeshCylinder(g_nIdx[1], true);
+	}
+	else
+	{
+		SetEnableMeshCylinder(g_nIdx[1], false);
+	}
+	// 駅のガラスドア
+	if (g_aGimmick[GIMMICKTYPE_CLOSEDDOOR].bClear == false)
+	{
+
+	SetEnableMeshCylinder(g_nIdx[2], true);
+	}
+	else
+	{
+		SetEnableMeshCylinder(g_nIdx[2], false);
+
 	}
 
 	// === チュートリアルを非表示に === //

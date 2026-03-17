@@ -362,7 +362,7 @@ void UpdateDialog(void)
 		Destroy2DPolygon(g_IdxLeftStick);
 		Destroy2DPolygon(g_IdxRightStick);
 
-		if (GetCommonFade() == FADE_IN)
+		if (GetCommonFade() != FADE_OUT)
 		{
 			D3DXVECTOR3 pos = D3DXVECTOR3(1450.0f, 100.0f, -473.0f);
 
