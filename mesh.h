@@ -109,5 +109,6 @@ bool SetRadiusMeshSphere(P_MESH pMesh, float fRadius);
 void SetEnableMeshCylinder(int nIdx, bool bDisp);
 void SetPositionMeshCylinder(int nIdx, D3DXVECTOR3 pos);
 bool SetRadiusMeshCylinder(P_MESH pMesh, float fRadius);
+bool SetColorMeshCylinder(P_MESH pMesh, D3DXCOLOR col);
 
 #endif // !_MESH_H_

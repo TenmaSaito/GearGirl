@@ -36,6 +36,7 @@ typedef struct
 //*** グローバル変数 ***
 //*************************************************************************************************
 _2DPOLYGON g_a2DPolygon[MAX_POLYGON];				// ポリゴンの情報
+IDX_2DPOLYGON g_priorityIdx;				// 優先描画インデックス
 
 //================================================================================================================
 // --- ポリゴンの初期化処理 ---
@@ -81,6 +82,8 @@ void Draw2DPolygon(void)
 	{
 		if (p2DPoly->bUse & p2DPoly->bDisp)
 		{
+			if (nCntPoly == g_priorityIdx) continue;
+
 			/*** 頂点バッファをデータストリームに設定 ***/
 			pDevice->SetStreamSource(0, p2DPoly->pVtxBuff, 0, sizeof(VERTEX_2D));
 
@@ -95,6 +98,26 @@ void Draw2DPolygon(void)
 				0,											// 描画する最初の頂点インデックス
 				2);											// 描画するプリミティブの数
 		}
+	}
+
+	// 優先描画インデックスポリゴンを最後に描画
+	p2DPoly = &g_a2DPolygon[g_priorityIdx];
+
+	if (p2DPoly->bUse & p2DPoly->bDisp)
+	{
+		/*** 頂点バッファをデータストリームに設定 ***/
+		pDevice->SetStreamSource(0, p2DPoly->pVtxBuff, 0, sizeof(VERTEX_2D));
+
+		/*** 頂点フォーマットの設定 ***/
+		pDevice->SetFVF(FVF_VERTEX_2D);
+
+		/*** テクスチャの設定 ***/
+		pDevice->SetTexture(0, GetTexture(p2DPoly->nIdTexture));
+
+		/*** ポリゴンの描画 ***/
+		pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP,		// プリミティブの種類
+			0,											// 描画する最初の頂点インデックス
+			2);											// 描画するプリミティブの数
 	}
 }
 
@@ -274,7 +297,17 @@ void SetSize2DPolygon(IDX_2DPOLYGON nId2DPolygon, D3DXVECTOR2 size)
 }
 
 //================================================================================================================
-// --- ポリゴンの移動処理 ---
+// --- ポリゴンの優先順位を変更する処理 ---
+//================================================================================================================
+void SetPriority2DPolygon(IDX_2DPOLYGON nIdx2DPolygon)
+{
+	if (nIdx2DPolygon == -1 || nIdx2DPolygon >= (sizeof g_a2DPolygon / sizeof(_2DPOLYGON))) return;
+
+	g_priorityIdx = nIdx2DPolygon;
+}
+
+//================================================================================================================
+// --- ポリゴンの消去処理 ---
 //================================================================================================================
 void Destroy2DPolygon(IDX_2DPOLYGON nIdx2DPolygon)
 {

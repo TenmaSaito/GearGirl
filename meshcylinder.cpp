@@ -295,7 +295,7 @@ void SetEnableMeshCylinder(int nIdx, bool bDisp)
 {
 	MeshInfo* pMesh = &g_aMeshCylinder[nIdx];
 
-	pMesh->bUse = bDisp;
+	pMesh->bDisp = bDisp;
 }
 
 //=========================================================================================
@@ -332,12 +332,13 @@ bool SetRadiusMeshCylinder(P_MESH pMesh, float fRadius)
 	D3DXVECTOR3			vecDir;						// 法線ベクトル（計算用
 	float				fRadiusCal;					// 計算用半径
 	float				fHeightCal;					// 計算用高さ
+	float				fAngle = (float)(2 * D3DX_PI / pMesh->nCircleDivision);	// 角度
 	int					nHeightVerti = pMesh->nHeightDivision + 1,
 		nCircleVerti = pMesh->nCircleDivision + 1;	// 縦頂点数と横頂点数
 	vec3 angle = vec3((float)D3DX_PI / pMesh->nHeightDivision, (float)(2 * D3DX_PI / pMesh->nCircleDivision), (float)D3DX_PI / pMesh->nHeightDivision);
 
 	// 半径を適用
-	pMesh->size = vec3(fRadius, fRadius, fRadius);
+	pMesh->size = vec3(fRadius, pMesh->size.y, fRadius);
 
 	//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 	// 頂点バッファをロックし、頂点情報へのポインタを取得
@@ -345,15 +346,12 @@ bool SetRadiusMeshCylinder(P_MESH pMesh, float fRadius)
 
 	for (int nCntHeight = 0, nCntVer = 0; nCntHeight <= pMesh->nHeightDivision; nCntHeight++)
 	{
-		fRadiusCal = pMesh->size.x * sinf(angle.x * nCntHeight);
-		fHeightCal = pMesh->size.x * cosf(angle.x * nCntHeight);
-
 		for (int nCntCircle = 0; nCntCircle <= pMesh->nCircleDivision; nCntCircle++, nCntVer++)
 		{
 			// 頂点座標を設定
-			pVtx[nCntVer].pos = D3DXVECTOR3(fRadiusCal * sinf(angle.y * nCntCircle),
-				fHeightCal,
-				fRadiusCal * cosf(angle.y * nCntCircle));
+			pVtx[nCntVer].pos = D3DXVECTOR3(pMesh->size.x * sinf(fAngle * nCntCircle),
+				pMesh->size.y - (pMesh->size.y / pMesh->nHeightDivision) * nCntHeight,
+				pMesh->size.z * cosf(fAngle * nCntCircle));
 		}
 	}
 
@@ -362,6 +360,14 @@ bool SetRadiusMeshCylinder(P_MESH pMesh, float fRadius)
 	//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 	return true;
+}
+
+//=========================================================================================
+// 柱の更新
+//=========================================================================================
+bool SetColorMeshCylinder(P_MESH pMesh, D3DXCOLOR col)
+{
+
 }
 
 //=========================================================================================

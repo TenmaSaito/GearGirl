@@ -80,11 +80,6 @@ void InitItemEffector(void)
 	g_nIdxPlayerEffectSphere = -1;
 
 	Player* pMouse = &GetPlayer()[PLAYERTYPE_MOUSE];
-	g_nIdxPlayerEffectSphere = SetMeshSphere(pMouse->pos,
-		VECNULL,
-		10,
-		16,
-		16);
 }
 
 //==================================================================================
@@ -118,22 +113,6 @@ void UpdateItemEffector(void)
 				UpdateNormalEffector(pEffector);
 			}
 		}
-	}
-
-	if (g_nCounterEffector > 0)
-	{
-		g_nCounterEffector--;
-		g_fRadiusPlayerEffectSphere += g_fIncreaseRadiusFinish;
-		g_colPlayerEffectSphere.a -= g_fDecreaseAlphaFinish * 0.5f;
-		SetPositionMesh(GetMeshSphere(), pMouse->pos, g_nIdxPlayerEffectSphere, GetNumMeshSphere());
-		SetRadiusMeshSphere(&GetMeshSphere()[g_nIdxPlayerEffectSphere], g_fRadiusPlayerEffectSphere);
-		SetColorMeshSphere(&GetMeshSphere()[g_nIdxPlayerEffectSphere], g_colPlayerEffectSphere);
-	}
-
-	if (g_nCounterEffector <= 0 && g_nCounterCoolDown > 0)
-	{
-		SetColorMeshSphere(&GetMeshSphere()[g_nIdxPlayerEffectSphere], COLOR_INV);
-		g_nCounterCoolDown--;
 	}
 }
 
@@ -342,12 +321,5 @@ bool IsCouldViewItemEffectorByMouse(void)
 //==================================================================================
 void SetViewItemEffectorByMouse(void)
 {
-	if (true) return;
-
-	g_nCounterEffector = g_nCountView;
-	g_nCounterCoolDown = g_nCountView * 0.5f;
-
-	SetColorMeshSphere(&GetMeshSphere()[g_nIdxPlayerEffectSphere], D3DXCOLOR(1, 1, 0, 1));
-	g_fRadiusPlayerEffectSphere = 10.0f;
-	g_colPlayerEffectSphere = D3DXCOLOR(1, 1, 0, 0.5f);
+	// –³‚µ
 }

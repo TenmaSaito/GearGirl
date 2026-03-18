@@ -114,6 +114,7 @@ void UpdateUIGet(void)
 			if (pUIGet->bEnable == false)
 			{ // ‰Šl“¾ó‘Ô‚È‚ç
 				SetEnable2DPolygon(pUIGet->poly, true);
+				SetPriority2DPolygon(pUIGet->poly);
 				pUIGet->bEnable = true;
 				pUIGet->sign = 1;
 			}

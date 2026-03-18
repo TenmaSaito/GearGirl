@@ -477,6 +477,7 @@ void DrawGame(void)
 			SetEnableZFunction(pDevice, false);
 			DrawMeshSphere();
 			SetEnableZFunction(pDevice, true);
+			DrawMeshCylinder();
 		}
 		else
 		{
@@ -521,7 +522,8 @@ void DrawGame(void)
 	}
 
 	if (g_bPause == false
-		&& IsEnableItemPut() == false)
+		&& IsEnableItemPut() == false
+		&& GetNumPlayer() != 2)
 	{
 		/*** UIプレイヤーの描画 ***/
 		DrawUIplayer();
@@ -611,12 +613,4 @@ void SetGameEnding(int nCountWait)
 int GetIdxShopPrompt(void)
 {
 	return g_nIdxShopPrompt;
-}
-
-//==================================================================================
-// --- スコア情報の譲渡 ---
-//==================================================================================
-int GetScore(void)
-{
-	return 0;
 }

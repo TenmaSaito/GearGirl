@@ -23,34 +23,12 @@
 #include "sound.h"
 
 #include "Conditional_defs.h"
+#include "MyInline.inl"
 
 //**********************************************************************************
 //*** マクロ定義 ***
 //**********************************************************************************
 #define POS_TUTORIAL	D3DXVECTOR3(SCREEN_WIDTH / 2, 400.0f, 0.0f)	// チュートリアル1枚絵を出す位置
-
-//**********************************************************************************
-//*** ギミッククリア構造体 ***
-//**********************************************************************************
-STRUCT()
-{
-	const char* pFileName;		// ファイル名
-	COULD_PLAYER could;			// クリア可能なプレイヤータイプ
-	D3DXVECTOR3 posDefault;		// デフォルト位置
-	D3DXVECTOR3 rotDefault;		// デフォルト角度
-	float fRadius;				// 当たり判定の半径
-} GIMMICK_DATA;
-
-//**********************************************************************************
-//*** アイテム出現構造体 ***
-//**********************************************************************************
-STRUCT()
-{
-	D3DXVECTOR3 pos;	// 位置
-	D3DXVECTOR3 move;	// 加速度
-	IDX_ITEM nIdxItem;	// 出現するアイテム番号
-	bool bSpawned;		// 出現済み判定
-} ItemSpawn;
 
 //**********************************************************************************
 //*** ギミックチュートリアルの列挙型 ***
@@ -64,6 +42,51 @@ typedef enum
 }TUTORIALTYPE;
 
 //**********************************************************************************
+//*** ギミックシリンダーの種類 ***
+//**********************************************************************************
+typedef enum
+{
+	GC_STATUE = 0,		// 銅像のシリンダー
+	GC_FALLENTREE,		// 倒木のシリンダー
+	GC_BIGBUTTON,		// 駅前のボタンのシリンダー
+	GC_MAX
+}GIMMICKCYLINDER;
+
+//**********************************************************************************
+//*** ギミッククリア構造体 ***
+//**********************************************************************************
+typedef struct
+{
+	const char* pFileName;		// ファイル名
+	COULD_PLAYER could;			// クリア可能なプレイヤータイプ
+	D3DXVECTOR3 posDefault;		// デフォルト位置
+	D3DXVECTOR3 rotDefault;		// デフォルト角度
+	float fRadius;				// 当たり判定の半径
+} GIMMICK_DATA;
+
+//**********************************************************************************
+//*** ギミックシリンダー構造体 ***
+//**********************************************************************************
+typedef struct
+{
+	GIMMICKTYPE type;			// 対象のギミック
+	GIMMICKTYPE typeDetection;	// 範囲検知対象のギミック
+	int nIdxMeshCylinder;		// メッシュシリンダーのインデックス
+	float s;					// Lerp変換用変数
+}GC_DATA;
+
+//**********************************************************************************
+//*** アイテム出現構造体 ***
+//**********************************************************************************
+typedef struct
+{
+	D3DXVECTOR3 pos;	// 位置
+	D3DXVECTOR3 move;	// 加速度
+	IDX_ITEM nIdxItem;	// 出現するアイテム番号
+	bool bSpawned;		// 出現済み判定
+} ItemSpawn;
+
+//**********************************************************************************
 //*** プロトタイプ宣言 ***
 //**********************************************************************************
 void CaseMulti(LPGIMMICK pGimmick);
@@ -72,6 +95,7 @@ void SetMotionType(MOTIONTYPE, bool bBlend, int nFrameBlend, GIMMICKTYPE);
 void UpdateMotion(GIMMICKTYPE);
 void SpawnItem(void);
 void UpdateSpawnItem(void);
+void UpdateGimmickCylinder(void);
 
 //**********************************************************************************
 //*** 定数変数 ***
@@ -79,6 +103,9 @@ void UpdateSpawnItem(void);
 const int g_nNumSpawnItem = 2;							// 噴水ギミッククリア時に出現するアイテム数
 const ITEMTYPE g_aIdxItem[g_nNumSpawnItem] = { ITEMTYPE_GEARS_TRUE, ITEMTYPE_SPRING_FALSE };	// 出現するアイテム番号
 const float g_fResistPow = 0.05f;						// 加速度の減速係数
+const float g_fRadiusGCMin = 35.0f;						// 最小半径
+const float g_fRadiusGCMax = 200.0f;					// 最大半径
+const float g_fRadiusDetectionGC = 30.0f;				// 検知半径
 const D3DXVECTOR3 g_aMoveSpawn[g_nNumSpawnItem] =		// 出現後のアイテムの加速度
 {
 	D3DXVECTOR3(-3.0f, 5.0f, -5.0f),
@@ -125,7 +152,9 @@ IDX_TEXTURE g_nIdxTexTutorial[3];			// チュートリアル1枚絵用のインデックス
 bool g_bAnyTex;								// いずれかのテクスチャが表示されているか
 bool g_bDispTutorialChainsaw;				// 1度でもチェンソーチュートリアルテクスチャを表示したかどうか
 bool g_bDispTutorialvalve;					// 1度でもバルブチュートリアルテクスチャを表示したかどうか
-int g_nIdx[3];
+int g_aIdxGimmickCylinde[GC_MAX];			// 各主要ギミックのエリアシリンダーのインデックス
+float g_aRadiusGimmickCylinder[GC_MAX];		// 各主要ギミックのシリンダー半径
+GC_DATA g_aGCData[GC_MAX];		// シリンダー関連情報
 
 //==================================================================================
 // --- 初期化 ---
@@ -202,6 +231,7 @@ void InitGimmick(void)
 	// === チュートリアルの2Dポリゴンのインデックスを取得 === //
 	int TexTutorial;
 
+	// 各ギミックのチュートリアルポリゴンの設置
 	LoadTexture("data/TEXTURE/catapalttutorial.png", &TexTutorial);
 	g_nIdxTexTutorial[0] = Set2DPolygon(POS_TUTORIAL, VECNULL, D3DXVECTOR2(900.0f, 610.0f), TexTutorial, DEF_COL);
 	SetEnable2DPolygon(g_nIdxTexTutorial[TUTORIALTYPE_CATAPALT], false);
@@ -214,10 +244,24 @@ void InitGimmick(void)
 	g_nIdxTexTutorial[2] = Set2DPolygon(POS_TUTORIAL, VECNULL, D3DXVECTOR2(900.0f, 610.0f), TexTutorial, DEF_COL);
 	SetEnable2DPolygon(g_nIdxTexTutorial[TUTORIALTYPE_VALVE], false);
 
-	g_nIdx[0] = SetMeshCylinder(g_aGimmick[GIMMICKTYPE_STATUE].pos, VECNULL, COL_HALFBLUE, 20.0f, 1500.0f, 1, 8);
-	g_nIdx[1] = SetMeshCylinder(g_aGimmick[GIMMICKTYPE_FALLENTREE].pos, VECNULL, COL_HALFGREEN, 20.0f, 1500.0f, 1, 8);
-	g_nIdx[2] = SetMeshCylinder(g_aGimmick[GIMMICKTYPE_CLOSEDDOOR].pos, VECNULL, COL_HALFYELLOW, 20.0f, 1500.0f, 1, 8);
-
+	// 各ギミックのエリアシリンダーの設置
+	g_aGCData[GC_STATUE].nIdxMeshCylinder = SetMeshCylinder(g_aGimmick[GIMMICKTYPE_STATUE].pos, VECNULL, COL_HALFBLUE, g_fRadiusGCMin, 1500.0f, 1, 8);
+	SetEnableMeshCylinder(g_aGCData[GC_STATUE].nIdxMeshCylinder, true);
+	g_aGCData[GC_STATUE].type = GIMMICKTYPE_STATUE;
+	g_aGCData[GC_STATUE].typeDetection = GIMMICKTYPE_STATUE;
+	g_aGCData[GC_STATUE].s = 0.0f;
+	
+	g_aGCData[GC_FALLENTREE].nIdxMeshCylinder = SetMeshCylinder(g_aGimmick[GIMMICKTYPE_FALLENTREE].pos, VECNULL, COL_HALFGREEN, g_fRadiusGCMin, 1500.0f, 1, 8);
+	SetEnableMeshCylinder(g_aGCData[GC_FALLENTREE].nIdxMeshCylinder, true);
+	g_aGCData[GC_FALLENTREE].type = GIMMICKTYPE_FALLENTREE;
+	g_aGCData[GC_FALLENTREE].typeDetection = GIMMICKTYPE_FALLENTREE;
+	g_aGCData[GC_FALLENTREE].s = 0.0f;
+	
+	g_aGCData[GC_BIGBUTTON].nIdxMeshCylinder = SetMeshCylinder(g_aGimmick[GIMMICKTYPE_BIGBUTTON].pos, VECNULL, COL_HALFYELLOW, g_fRadiusGCMin, 1500.0f, 1, 8);
+	SetEnableMeshCylinder(g_aGCData[GC_BIGBUTTON].nIdxMeshCylinder, true);
+	g_aGCData[GC_BIGBUTTON].type = GIMMICKTYPE_CLOSEDDOOR;
+	g_aGCData[GC_BIGBUTTON].typeDetection = GIMMICKTYPE_BIGBUTTON;
+	g_aGCData[GC_BIGBUTTON].s = 0.0f;
 }
 
 //==================================================================================
@@ -281,31 +325,31 @@ void UpdateGimmick(void)
 	// バルブ
 	if (g_aGimmick[GIMMICKTYPE_STATUE].bClear == false)
 	{
-		SetEnableMeshCylinder(g_nIdx[0], true);
+		SetEnableMeshCylinder(g_aGCData[GC_STATUE].nIdxMeshCylinder, true);
 	}
 	else
 	{
-		SetEnableMeshCylinder(g_nIdx[0], false);
+		SetEnableMeshCylinder(g_aGCData[GC_STATUE].nIdxMeshCylinder, false);
 	}
+
 	// 倒木
 	if (g_aGimmick[GIMMICKTYPE_FALLENTREE].bClear == false)
 	{
-		SetEnableMeshCylinder(g_nIdx[1], true);
+		SetEnableMeshCylinder(g_aGCData[GC_FALLENTREE].nIdxMeshCylinder, true);
 	}
 	else
 	{
-		SetEnableMeshCylinder(g_nIdx[1], false);
+		SetEnableMeshCylinder(g_aGCData[GC_FALLENTREE].nIdxMeshCylinder, false);
 	}
+
 	// 駅のガラスドア
 	if (g_aGimmick[GIMMICKTYPE_CLOSEDDOOR].bClear == false)
 	{
-
-	SetEnableMeshCylinder(g_nIdx[2], true);
+		SetEnableMeshCylinder(g_aGCData[GC_BIGBUTTON].nIdxMeshCylinder, true);
 	}
 	else
 	{
-		SetEnableMeshCylinder(g_nIdx[2], false);
-
+		SetEnableMeshCylinder(g_aGCData[GC_BIGBUTTON].nIdxMeshCylinder, false);
 	}
 
 	// === チュートリアルを非表示に === //
@@ -321,6 +365,9 @@ void UpdateGimmick(void)
 			}
 		}
 	}
+
+	// シリンダーの更新
+	UpdateGimmickCylinder();
 }
 
 //==================================================================================
@@ -906,9 +953,9 @@ bool CollisionGimmick(
 	return bLand;
 }
 
-//================================================================================================================
+//==================================================================================
 // --- モーションの変更！ ---
-//================================================================================================================
+//==================================================================================
 void SetMotionType(MOTIONTYPE motionTypeNext, bool bBlend, int nFrameBlend, GIMMICKTYPE Type)
 {
 	LPGIMMICK pGimmick = &g_aGimmick[Type];	// プレイヤー情報へのアドレス	
@@ -1004,9 +1051,9 @@ void SetMotionType(MOTIONTYPE motionTypeNext, bool bBlend, int nFrameBlend, GIMM
 	}
 }
 
-//================================================================================================================
+//==================================================================================
 // --- モーションアップデート！ ---
-//================================================================================================================
+//==================================================================================
 void UpdateMotion(GIMMICKTYPE type)
 {
 	Gimmick* pGimmick = &g_aGimmick[type];	// プレイヤー情報へのアドレス	
@@ -1219,17 +1266,17 @@ void UpdateMotion(GIMMICKTYPE type)
 	}
 }
 
-//================================================================================================================
+//==================================================================================
 // --- ギミック情報の譲渡 ---
-//================================================================================================================
+//==================================================================================
 Gimmick* GetGimmick(void)
 {
 	return &g_aGimmick[0];
 }
 
-//================================================================================================================
+//==================================================================================
 // --- アイテムの出現処理 ---
-//================================================================================================================
+//==================================================================================
 void SpawnItem(void)
 {
 	ItemSpawn* pItemSpawn = &g_aItemSpawn[0];
@@ -1256,9 +1303,9 @@ void SpawnItem(void)
 		1, 3.0f, 1000000, 15, true);
 }
 
-//================================================================================================================
+//==================================================================================
 // --- 出現後のアイテム更新処理 ---
-//================================================================================================================
+//==================================================================================
 void UpdateSpawnItem(void)
 {
 	ItemSpawn* pItemSpawn = &g_aItemSpawn[0];
@@ -1289,9 +1336,65 @@ void UpdateSpawnItem(void)
 	}
 }
 
-//================================================================================================================
+//==================================================================================
+// --- ギミックシリンダーの更新処理 ---
+//==================================================================================
+void UpdateGimmickCylinder(void)
+{
+	Player *pPlayer = GetPlayer();
+	int nStartCount = (GetNumPlayer() == 2) ? 0 : GetActivePlayer();
+	int nMaxCount = (GetNumPlayer() == 2) ? PLAYERTYPE_MAX : PLAYERTYPE_MAX - (1 - GetActivePlayer());
+	bool aAlreadyDetection[GC_MAX] = {};		// 判定変数(falseの場合、どのプレイヤーにも近くない)
+
+	for (int nCntPlayer = nStartCount; nCntPlayer < nMaxCount; nCntPlayer++, pPlayer++)
+	{
+		for (int nCntGimmick = 0; nCntGimmick < GC_MAX; nCntGimmick++)
+		{
+			LPGIMMICK pGimmick = &GetGimmick()[g_aGCData[nCntGimmick].typeDetection];
+
+			// 半径を確認
+			if (IsDetection(pPlayer->pos, pGimmick->pos, g_fRadiusDetectionGC))
+			{ // 半径以下なら
+				aAlreadyDetection[nCntGimmick] = true;		// 判定済み
+				
+			}
+		}
+	}
+
+	for (int nCntGimmick = 0; nCntGimmick < GC_MAX; nCntGimmick++)
+	{
+		LPGIMMICK pGimmick = &GetGimmick()[g_aGCData[nCntGimmick].typeDetection];
+
+		if (aAlreadyDetection[nCntGimmick])
+		{ // プレイヤーが近いなら、半径増加
+			if (g_aGCData[nCntGimmick].s < 1.0f)
+			{
+				g_aGCData[nCntGimmick].s += 0.01f;
+				g_aGCData[nCntGimmick].s = (g_aGCData[nCntGimmick].s >= 1.0f) ? 1.0f : g_aGCData[nCntGimmick].s;
+			}
+
+			// シリンダーの半径を適用
+			SetRadiusMeshCylinder(&GetMeshCylinder()[g_aGCData[nCntGimmick].nIdxMeshCylinder],
+				Lerp(g_fRadiusGCMin, g_fRadiusGCMax, g_aGCData[nCntGimmick].s));
+		}
+		else
+		{ // プレイヤーが離れていれば、半径減少
+			if (g_aGCData[nCntGimmick].s > 0.0f)
+			{
+				g_aGCData[nCntGimmick].s -= 0.01f;
+				g_aGCData[nCntGimmick].s = (g_aGCData[nCntGimmick].s <= 0.0f) ? 0.0f : g_aGCData[nCntGimmick].s;
+			}
+
+			// シリンダーの半径を適用
+			SetRadiusMeshCylinder(&GetMeshCylinder()[g_aGCData[nCntGimmick].nIdxMeshCylinder],
+				Lerp(g_fRadiusGCMin, g_fRadiusGCMax, g_aGCData[nCntGimmick].s));
+		}
+	}
+}
+
+//==================================================================================
 // --- チュートリアルが表示されているかどうか ---
-//================================================================================================================
+//==================================================================================
 bool IsTutorialreveal(void)
 {
 	return g_bAnyTex;

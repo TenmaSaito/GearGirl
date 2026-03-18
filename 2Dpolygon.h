@@ -34,6 +34,7 @@ void SetPosition2DPolygon(IDX_2DPOLYGON nId2DPolygon, D3DXVECTOR3 pos);
 void SetRotation2DPolygon(IDX_2DPOLYGON nIdx2DPolygon, float fAngle);
 void SetColor2DPolygon(IDX_2DPOLYGON nId2DPolygon, D3DXCOLOR col);
 void SetSize2DPolygon(IDX_2DPOLYGON nId2DPolygon, D3DXVECTOR2 size);
+void SetPriority2DPolygon(IDX_2DPOLYGON nIdx2DPolygon);
 void Destroy2DPolygon(IDX_2DPOLYGON nId2DPolygon);
 void SetEnable2DPolygon(IDX_2DPOLYGON Idx2DPolygon, bool bEnable);
 #endif

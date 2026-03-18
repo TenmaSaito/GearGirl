@@ -113,17 +113,6 @@ void UpdateGuide(void)
 	{
 		type = GIMMICKTYPE_MAX;
 	}
-	else
-	{
-		D3DXVECTOR3 diff = pPlayer->pos - g_posShop;
-		float fPTPLength = D3DXVec3Length(&diff);		// 2“_ŠÔ‚Ì‹——£‚ğ‹‚ß‚é
-
-		if (fPTPLength < fLength)
-		{
-			fLength = fPTPLength;
-			type = (GIMMICKTYPE)GIMMICKTYPE_MAX;
-		}
-	}
 
 	if (type == GIMMICKTYPE_MAX)
 	{
