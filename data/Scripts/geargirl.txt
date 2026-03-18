@@ -38,7 +38,7 @@ MODEL_FILENAME = data/MODEL/character/07_hand_catapult.x		# [19]カタパルト手
 
 MODEL_FILENAME = data/MODEL/character/05_upperArm_chainsaw.x	# [20]ちぇんそー二の腕
 MODEL_FILENAME = data/MODEL/character/06_foreArm_chainsaw.x		# [21]ちぇんそー前腕
-MODEL_FILENAME = data/MODEL/character/07_hand_R.x		# [22]手R
+MODEL_FILENAME = data/MODEL/character/07_hand_chainsaw.x		# [22]ちぇんそー手
 
 #------------------------------------------------------------------------------
 # キャラクター情報
@@ -185,7 +185,7 @@ CHARACTERSET
 	PARTSSET
 		INDEX = 19					# カタパルト手
 		PARENT = 18					# カタパルト前腕
-		POS = -2.6 0.4 0.0
+		POS = -2.2 0.0 0.0
 		ROT = 0.0 0.0 0.0
 	END_PARTSSET
 	
