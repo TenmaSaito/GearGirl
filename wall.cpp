@@ -39,6 +39,7 @@ typedef struct
 	float fHeight;			// 奥行
 	int nIndexTexture;		// テクスチャの種類
 	bool bUse;				// 使用状況
+	bool bDisp;				// 表示状態
 	bool IsStatic;			// 移動しないか
 	D3DCULL type;			// カリングタイプ
 } Wall;
@@ -49,6 +50,7 @@ typedef struct
 LPDIRECT3DTEXTURE9		g_pTextureWall = NULL;	// テクスチャへのポインタ
 LPDIRECT3DVERTEXBUFFER9 g_pVtxBuffWall = NULL;	// 頂点バッファのポインタ
 Wall g_aWall[MAX_WALL];							// 壁の情報
+int g_aIdxWall[MAX_WALL];						// 壁のインデックス
 
 //================================================================================================================
 // --- リザルト用背景の初期化処理 ---
@@ -69,6 +71,7 @@ void InitWall(void)
 		g_aWall[nCntWall].fHeight = WALL_SIZE_Y;
 		g_aWall[nCntWall].nIndexTexture = 0;
 		g_aWall[nCntWall].bUse = false;
+		g_aWall[nCntWall].bDisp = true;
 		g_aWall[nCntWall].IsStatic = false;
 		g_aWall[nCntWall].type = D3DCULL_CCW;
 	}
@@ -126,6 +129,8 @@ void InitWall(void)
 
 	/*** 頂点バッファの設定を終了 ***/
 	g_pVtxBuffWall->Unlock();
+
+	EndDevice();
 }
 
 //================================================================================================================
@@ -175,7 +180,7 @@ void DrawWall(void)
 	for (int nCntWall = 0; nCntWall < MAX_WALL; nCntWall++)
 	{
 		// 使われていれば
-		if (g_aWall[nCntWall].bUse == true)
+		if (g_aWall[nCntWall].bUse == true && g_aWall[nCntWall].bDisp == true)
 		{
 			pDevice->GetRenderState(D3DRS_CULLMODE, &typeDef);
 			pDevice->SetRenderState(D3DRS_CULLMODE, g_aWall[nCntWall].type);
@@ -216,14 +221,17 @@ void DrawWall(void)
 			pDevice->SetRenderState(D3DRS_CULLMODE, typeDef);
 		}
 	}
+	EndDevice();
+
 }
 
 //================================================================================================================
 // --- 壁の設置処理 ---
 //================================================================================================================
-void SetWall(D3DXVECTOR3 pos, D3DXVECTOR3 rot, float fWidth, float fHeight, int nIndexTexture, int nXblock, int nZblock, D3DXCOLOR col, D3DCULL type, bool IsStatic)
+int SetWall(D3DXVECTOR3 pos, D3DXVECTOR3 rot, float fWidth, float fHeight, int nIndexTexture, int nXblock, int nZblock, D3DXCOLOR col, D3DCULL type, bool IsStatic)
 {
 	VERTEX_3D* pVtx;					// 頂点情報へのポインタ
+	int nIdxWall = -1;
 
 	/** 角度の修正! **/
 	if (rot.x < -D3DX_PI)
@@ -313,9 +321,11 @@ void SetWall(D3DXVECTOR3 pos, D3DXVECTOR3 rot, float fWidth, float fHeight, int 
 			/*** 頂点バッファの設定を終了 ***/
 			g_pVtxBuffWall->Unlock();
 
+			nIdxWall = nCntWall;
 			break;
 		}
 	}
+	return nIdxWall;
 }
 
 //================================================================================================================
@@ -685,4 +695,12 @@ void ReflectLine(D3DXVECTOR3 pPosStart, D3DXVECTOR3 pPosEnd, D3DXVECTOR3* pPosIn
 			}
 		}
 	}
+}
+
+//================================================================================================================
+// --- 壁の表示、非表示切り替え ---
+//================================================================================================================
+void SetEnableWall(int nIdx, bool bDisp)
+{
+	g_aWall[nIdx].bDisp = bDisp;
 }

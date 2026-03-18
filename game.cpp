@@ -47,6 +47,7 @@
 #include "UIcollect.h"
 #include "UIGet.h"
 #include "UIShop.h"
+#include "wall.h"
 #include "2Dpolygon.h"
 #include "3Dmodel.h"
 
@@ -110,6 +111,9 @@ void InitGame(void)
 
 	/*** 床の初期化 ***/
 	InitField();
+
+	/*** 壁の初期化 ***/
+	InitWall();
 
 	/*** メッシュの初期化 ***/
 	InitMesh();
@@ -235,6 +239,9 @@ void UninitGame(void)
 	/*** 床の終了 ***/
 	UninitField();
 
+	/*** 壁の終了 ***/
+	UninitWall();
+
 	/*** メッシュの終了 ***/
 	UninitMesh();
 
@@ -352,6 +359,9 @@ void UpdateGame(void)
 
 			/*** 床の更新 ***/
 			UpdateField();
+
+			/*** 壁の更新 ***/
+			UpdateWall();
 
 			/*** メッシュの更新 ***/
 			UpdateMesh();
@@ -480,6 +490,9 @@ void DrawGame(void)
 
 		/*** 床の描画  ***/
 		DrawField();
+
+		/*** 床の描画  ***/
+		DrawWall();
 
 		/*** モデルの描画 ***/
 		DrawModel();
