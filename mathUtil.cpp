@@ -1146,6 +1146,8 @@ D3DXCOLOR MyMathUtil::GetColLerp(D3DXCOLOR Start, D3DXCOLOR End, float s)
 {
 	D3DXCOLOR returnCol = D3DXCOLOR(1, 1, 1, 1);
 
+	if (s <= 0) s = 0;
+
 	returnCol = End - Start;
 	returnCol *= s;
 	returnCol += Start;

@@ -71,6 +71,11 @@ void Draw3DModel(void)
 	{
 		if (p3DModel->bUse && p3DModel->bEnable)
 		{ // もし使われていれば
+			if (!p3DModel->bZFunc)
+			{ // Zテスト無効
+				SetEnableZFunction(pDevice, false);
+			}
+
 			/*** ワールドマトリックスの初期化 ***/
 			D3DXMatrixIdentity(&p3DModel->mtxWorld);
 
@@ -109,6 +114,7 @@ void Draw3DModel(void)
 					{
 						D3DMATERIAL9 customMat = pMat[nCntMat].MatD3D;
 						customMat.Diffuse = p3DModel->col;
+						customMat.Emissive = p3DModel->col;
 						if (p3DModel->bAlpha == false)
 						{
 							customMat.Diffuse.a = pMat[nCntMat].MatD3D.Diffuse.a;
@@ -133,6 +139,11 @@ void Draw3DModel(void)
 				/*** 保存していたマテリアルを戻す！ ***/
 				pDevice->SetMaterial(&matDef);
 			}
+
+			if (!p3DModel->bZFunc)
+			{ // Zテスト無効
+				SetEnableZFunction(pDevice, true);
+			}
 		}
 	}
 }
@@ -156,6 +167,7 @@ IDX_3DMODEL Set3DModel(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nIdxModelData)
 			p3DModel->nIdx3Dmodel = nIdxModelData;
 			p3DModel->bUse = true;
 			p3DModel->bEnable = true;
+			p3DModel->bZFunc = true;
 			p3DModel->bAlpha = false;
 			g_nNum3DModel++;
 			error = nCnt3DModel;
@@ -222,6 +234,20 @@ void SetColor3DModel(IDX_3DMODEL Idx, D3DXCOLOR col, bool bAlpha)
 
 	p3DModel->col = col;
 	p3DModel->bAlpha = bAlpha;
+}
+
+//=================================================================================================
+// --- Zテスト変更 ---
+//=================================================================================================
+void SetZFunc3DModel(IDX_3DMODEL Idx, bool bEnable)
+{
+	// もしインデックス外なら
+	if (Idx < 0 || Idx >= MAX_3DMODEL) return;
+
+	LP3DMODEL p3DModel = &g_aModel[Idx];
+	if (p3DModel->bUse == false) return;
+
+	p3DModel->bZFunc = bEnable;
 }
 
 //=================================================================================================

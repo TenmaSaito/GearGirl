@@ -157,6 +157,15 @@ namespace MyInl
 			RepairRot((FLOAT)(rand() % 628 - 314) * 0.01f));
 	}
 
+	// F‚Ì®”’l‚Ìæ“¾
+	constexpr DWORD GetdwColor(float r, float g, float b, float a)
+	{
+		return ((DWORD)((a) * 255.0f) << 24) |
+			((DWORD)((r) * 255.0f) << 16) |
+			((DWORD)((g) * 255.0f) << 8) |
+			((DWORD)((b) * 255.0f));
+	}
+
 	// --- EVERY ---//
 	// ”»’è
 	template <typename T>
