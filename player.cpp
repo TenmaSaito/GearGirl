@@ -1454,7 +1454,7 @@ void JumpPlayer(PlayerType nPlayer)
 	// プレイヤー構造体をポインタ化
 	Player* pPlayer = &g_aPlayer[nPlayer];
 
-	if (ITEMPROMPT_OFF)
+	if (ITEMPROMPT_OFF && ITEM_OFF)
 	{
 		if (nPlayer == 0)
 		{// 少女
@@ -2054,6 +2054,7 @@ void ShotMouse(void)
 			{
 				// ネズミ投げ待機状態にする
 				pPlayer->state = PLAYERSTATE_THROWWAITING;
+				pMouse->state = PLAYERSTATE_THROWWAITING;
 				pCamera->rot.y = pPlayer->rot.y - D3DX_PI;
 
 				// 角度補正

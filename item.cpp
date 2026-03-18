@@ -592,6 +592,7 @@ void CollisionItem(vec3 pos, float fRange, int type)
 
 				// シリンダーを非表示に
 				SetEnableMeshCylinder(pItem->nIdxMesh, false);
+				ReleaseMesh(GetMeshCylinder(), pItem->nIdxMesh, GetNumMeshCylinder());
 				break;
 			}
 		}
