@@ -39,7 +39,7 @@ STRUCT()
 //**********************************************************************************
 //*** 定数変数 ***
 //**********************************************************************************
-const D3DXVECTOR3 g_posUIShop = D3DXVECTOR3(WINDOW_MID.x, WINDOW_MID.y + 200.0f, 0.0f);	// UIの位置
+const D3DXVECTOR3 g_posUIShop = D3DXVECTOR3(WINDOW_MID.x, WINDOW_MID.y + 250.0f, 0.0f);	// UIの位置
 const D3DXVECTOR2 g_sizeUIShop = D3DXVECTOR2(500, 110);	// UIのサイズ
 
 const char* g_apUIShopTexture[ITEMTYPE_MAX] =		// 各取得時のテクスチャのパス
@@ -100,7 +100,12 @@ void UpdateUIShop(void)
 	}
 
 	// 選択中アイテムがない場合、終了
-	if (GetNumSelect() == -1) return;
+	if (GetNumSelect() == -1)
+	{
+		SetEnable2DPolygon(g_UIShop.poly, false);
+		SetTexture2DPolygon(g_UIShop.poly, -1);
+		return;
+	}
 	
 	// 提出状態の時
 	SetEnable2DPolygon(g_UIShop.poly, true);

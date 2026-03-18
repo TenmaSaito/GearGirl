@@ -126,7 +126,7 @@ void InitEffect(void)
 	g_pVtxBuffEffect->Unlock();
 
 	// 初期化
-	g_aIdxZTest[MAX_EFFECT] = {};
+	//g_aIdxZTest[MAX_EFFECT] = {};
 
 	// 着地点に資格ポリゴンを表示するためにインデックスを取得
 	g_nIdxEffectField = SetField(VECNULL, VECNULL, VECNULL, 20, 20, NULL, 1, 1, D3DCULL_NONE);
