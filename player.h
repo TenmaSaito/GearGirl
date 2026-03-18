@@ -36,6 +36,11 @@
 #define ITEMPROMPT_OFF	(IsDispPrompt(GetIdxShopPrompt()) == false)	// アイテム提出のプロンプトが表示されていない
 #define UIMENU_ON		(GetEnableUImenu() == true)		// アイテムUI表示中
 #define UIMENU_OFF		(GetEnableUImenu() == false)	// アイテムUI非表示中
+#define MAP_ON			(GetEnableUImenu() == true)		// マップが拡大している
+#define MAP_OFF			(GetEnableUImenu() == false)	// マップが拡大してない
+#define TUTORIALTEX_ON	(IsTutorialreveal() == true)	// ギミックチュートリアルが表示されている
+#define TUTORIALTEX_OFF	(IsTutorialreveal() == false)	// ギミックチュートリアルが表示されていない
+
 
 // 色の設定
 #define COL_RED			D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f)	// 赤色

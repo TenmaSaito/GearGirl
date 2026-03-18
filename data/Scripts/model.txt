@@ -2830,21 +2830,49 @@ END_ITEMSET
 
 ITEMSET
 	ITEMTYPE = 2				# [2]大きな歯車
-	POS = 500.0 140.0 -1150.0			# 位置
+	POS = 500.0 140.0 -1150.0	# 位置
 	ROT = 0 0 0					# 角度
 	VISIBLE = 1					# 可視状態
 END_ITEMSET
 
 ITEMSET
 	ITEMTYPE = 3				# [3]軸(シャフト)
-	POS = 1750.0 140.0 475.0			# 位置
+	POS = 1750.0 140.0 475.0	# 位置
 	ROT = 0 0 0					# 角度
 	VISIBLE = 0					# 可視状態
 END_ITEMSET
 
 ITEMSET
-	ITEMTYPE = 4				# [4]ぜんまい
+	ITEMTYPE = 4				# [4]ばね
 	POS = 2090.0 140.0 470.0	# 位置
+	ROT = 0 0 0					# 角度
+	VISIBLE = 0					# 可視状態
+END_ITEMSET
+
+ITEMSET
+	ITEMTYPE = 5				# [5]古いねじ
+	POS = 1000.0 120.0 800.0	# 位置
+	ROT = 0 0 0					# 角度
+	VISIBLE = 0					# 可視状態
+END_ITEMSET
+
+ITEMSET
+	ITEMTYPE = 6				# [6]錆びた歯車
+	POS = 2230.0 120.0 480.0	# 位置
+	ROT = 0 0 0					# 角度
+	VISIBLE = 0					# 可視状態
+END_ITEMSET
+
+ITEMSET
+	ITEMTYPE = 7				# [7]欠けた歯車
+	POS = 1900.0 120.0 140.0	# 位置
+	ROT = 0 0 0					# 角度
+	VISIBLE = 0					# 可視状態
+END_ITEMSET
+
+ITEMSET
+	ITEMTYPE = 8				# [8]曲がった軸
+	POS = 2150.0 120.0 -600.0	# 位置
 	ROT = 0 0 0					# 角度
 	VISIBLE = 0					# 可視状態
 END_ITEMSET

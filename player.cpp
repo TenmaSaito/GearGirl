@@ -25,6 +25,7 @@
 #include "modeldata.h"
 #include "motion.h"
 #include "particle.h"
+#include "pause.h"
 #include "parabola.h"
 #include "player.h"
 #include "prompt.h"
@@ -242,7 +243,7 @@ void UpdatePlayer(void)
 		// === 現在位置の保存 === //
 		pPlayer->posOld = pPlayer->pos;
 
-		if (GAME_NOW && ITEMPROMPT_OFF)
+		if (GAME_NOW && ITEMPROMPT_OFF && GetEnableUImenu() == false)
 		{// ゲーム本編中
 			// === ２人プレイもしくはアクティブなプレイヤーの処理 === //
 			if (GetNumPlayer() == 2 || GetActivePlayer() == PlayerType(nCntPlayer))
@@ -258,7 +259,6 @@ void UpdatePlayer(void)
 
 				// カタパルトを起動した後の処理
 				ShotMouse();
-
 			}
 		}
 
@@ -319,7 +319,11 @@ void UpdatePlayer(void)
 					SetEnableOrbit(g_nIdxOrbit, false);
 					SetEnableOrbit(g_nIdxOrbitSub, false);
 				}
-				JumpPlayer((PlayerType)nCntPlayer);	// ジャンプに関する処理
+
+				if (pPlayer->state != PLAYERSTATE_THROWWAITING)
+				{
+					JumpPlayer((PlayerType)nCntPlayer);	// ジャンプに関する処理
+				}
 			}
 
 			// === 少女操作時のねずみの処理 === //
@@ -1957,6 +1961,7 @@ void MouseKeepUp(void)
 		if (50.0f < fPlayerDist)
 		{// 離れすぎていると切り替え不可能状態に
 			pGirl->bChangeable = false;
+			g_aPlayer[PLAYERTYPE_MOUSE].pos = pGirl->pos;
 		}
 		else if (50.0f >= fPlayerDist)
 		{// 一定距離以内なら切り替え可能に
@@ -1985,21 +1990,8 @@ void MouseKeepUp(void)
 // =================================================
 void UpdateArm(void)
 {
-	if (g_aPlayer[PLAYERTYPE_GIRL].state != PLAYERSTATE_THROWWAITING)
+	if (g_aPlayer[PLAYERTYPE_GIRL].state != PLAYERSTATE_THROWWAITING && GetActivePlayer() == PLAYERTYPE_GIRL)
 	{
-		// アームの切り替え処理
-		//if (GetKeyboardTrigger(DIK_9))
-		//{
-		//	int nArm = g_armPlayer;
-		//	nArm--;
-		//	if (FAILED(CheckIndex(ARMTYPE_MAX, nArm, 0)))
-		//	{
-		//		nArm = ARMTYPE_MAX - 1;
-		//	}
-
-		//	g_armPlayer = (ArmType)nArm;
-		//}
-
 		if (GetKeyboardTrigger(DIK_0) == true || GetJoypadTrigger(0, JOYKEY_RB) == true)
 		{
 			PlaySound(SOUND_LABEL_SE_G_ARMSWITCH);

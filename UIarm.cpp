@@ -7,6 +7,7 @@
 #include "main.h"
 #include "input.h"
 #include "UIarm.h"
+#include "UImenu.h"
 #include "player.h"
 #include "camera.h"
 #include "game.h"
@@ -149,7 +150,15 @@ void UpdateUIarm(void)
 	pVtx[2].pos.x = g_ArmUI.pos.x;
 	pVtx[3].pos.x = g_ArmUI.pos.x + UI_ARM_SIZE;
 
-	if (GAME_NOW && ITEMPROMPT_OFF && DIAROG_OFF && IsTutorialreveal() == false && pPlayer->state != PLAYERSTATE_THROWWAITING && pPlayer->motionType != MOTIONTYPE_CUTTING)
+	if (GAME_NOW 
+		&& ITEMPROMPT_OFF 
+		&& DIAROG_OFF 
+		&& TUTORIALTEX_OFF
+		&& MAP_OFF 
+		&& GetActivePlayer() == PLAYERTYPE_GIRL
+		&& pPlayer->state != PLAYERSTATE_THROWWAITING 
+		&& pPlayer->motionType != MOTIONTYPE_CUTTING 
+		&& pPlayer->motionType != MOTIONTYPE_VALVE)
 	{// 提出状態やチュートリアルが表示されていないときや、プレイヤーが動作に入っているときに変化させない
 		if (GetKeyboardTrigger(DIK_0) == true || GetJoypadTrigger(0, JOYKEY_RB))
 		{
