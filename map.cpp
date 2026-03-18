@@ -23,6 +23,7 @@ USE_UTIL;
 USE_PARAM;
 
 // 通常インクルード群
+#include "game.h"
 #include "camera.h"
 #include "tCamera.h"
 #include "player.h"
@@ -30,6 +31,7 @@ USE_PARAM;
 #include "UImenu.h"
 #include "dialog.h"
 #include "gimmick.h"
+#include "item.h"
 
 //**********************************************************************************
 //*** マクロ定義 ***
@@ -246,6 +248,15 @@ void UninitMap(void)
 //==================================================================================
 void UpdateMap(void)
 {
+	if (!GetEnableUI() || IsEnableItemPut() == false)
+	{ // UI非表示の場合、無効にする
+		SetEnable2DPolygon(g_IdxUIMap, false);
+	}
+	else
+	{
+		SetEnable2DPolygon(g_IdxUIMap, true);
+	}
+
 	// マップ無効中は即時終了
 	if (g_map.bEnable == false) return;
 
@@ -261,6 +272,10 @@ void UpdateMap(void)
 	if (g_map.bEnable == true && IsEndDialog() && UIMENU_OFF)
 	{
 		SetEnable2DPolygon(g_IdxUIMap, true);
+	}
+	else
+	{
+		SetEnable2DPolygon(g_IdxUIMap, false);
 	}
 
 	if (GetEnableUImenu() == true)

@@ -51,6 +51,8 @@
 #include "2Dpolygon.h"
 #include "3Dmodel.h"
 
+#include "Color_defs.h"
+
 using namespace MyMathUtil;
 
 //**********************************************************************************
@@ -71,12 +73,23 @@ STRUCT()
 //**********************************************************************************
 
 //**********************************************************************************
+//*** 定数変数 ***
+//**********************************************************************************
+const float g_fRadiusShopStart = 1.0f;		// ショップのシリンダー開始半径
+const float g_fRadiusShopFinish = 150.0f;	// 最大半径
+const float g_fHeightShopFinish = 1500.0f;	// 最大の高さ
+const int g_nStartLerpTime = 3600;			// Lerp変換開始秒数
+
+//**********************************************************************************
 //*** グローバル変数 ***
 //**********************************************************************************
-int g_nIdxShopPrompt = -1;	// 店前のプロンプトインデックス
-int g_nCounterGame = 0;	// ゲームのカウンター
-bool g_bPause = false;	//ポーズ状態のON/OFF
-ObserveEnding g_obEnding;			// エンディングへの移行状態
+int g_nIdxShopPrompt = -1;		// 店前のプロンプトインデックス
+int g_nIdxShopCylinder = -1;	// 店のシリンダー
+float g_fShopCylinderS = 0.0f;	// Lerp変換変数
+int g_nCounterGame = 0;			// ゲームのカウンター
+bool g_bPause = false;			//ポーズ状態のON/OFF
+bool g_bEnableUI = true;		// UIの描画状態
+ObserveEnding g_obEnding;		// エンディングへの移行状態
 
 //==================================================================================
 // --- 初期化 ---
@@ -206,6 +219,11 @@ void InitGame(void)
 	SetBillboard(D3DXVECTOR3(1450, 100, -445), 15, 25, Tex);
 
 	SetDialog();
+
+	g_nIdxShopCylinder = SetMeshCylinder(D3DXVECTOR3(1463, 100, -455), VECNULL, CONVERSION_A(COLOR_WHITE, 0.5f), g_fRadiusShopStart, g_fRadiusShopStart, 2, 16);
+	SetEnableMeshCylinder(g_nIdxShopCylinder, false);
+	g_fShopCylinderS = 0.0f;
+	g_bEnableUI = true;
 }
 
 //==================================================================================
@@ -331,6 +349,12 @@ void UpdateGame(void)
 		g_bPause = g_bPause ? false : true;
 	}
 
+	// UIの描画状態の切り替え
+	if (GetKeyboardTrigger(DIK_U))
+	{
+		g_bEnableUI = !g_bEnableUI;
+	}
+
 	//ポーズ状態がONの時
 	if (g_bPause == true)
 	{
@@ -447,6 +471,14 @@ void UpdateGame(void)
 
 		/*** ギミックの更新 ***/
 		UpdateGimmick();
+
+		if (GetTimer() <= g_nStartLerpTime && g_fShopCylinderS < 1.0f)
+		{
+			g_fShopCylinderS += 0.01f;
+			SetEnableMeshCylinder(g_nIdxShopCylinder, true);
+			SetRadiusMeshCylinder(&GetMeshCylinder()[g_nIdxShopCylinder], Lerp(g_fRadiusShopStart, g_fRadiusShopFinish, g_fShopCylinderS));
+			SetHeightMeshCylinder(&GetMeshCylinder()[g_nIdxShopCylinder], Lerp(g_fRadiusShopStart, g_fHeightShopFinish, g_fShopCylinderS));
+		}
 	}
 
 	PrintDebugProc("NumPlayer %d  ActivePlayer %d  CameraNum %d", GetNumPlayer(), GetActivePlayer(), GetCameraNum());
@@ -529,7 +561,8 @@ void DrawGame(void)
 		Draw3DModel();
 
 		/*** メッシュの描画 ***/
-		if ((nCntDraw == PLAYERTYPE_MOUSE || GetActivePlayer() == PLAYERTYPE_MOUSE))
+		if ((nCntDraw == PLAYERTYPE_MOUSE 
+			|| (GetNumPlayer() == 1 && GetActivePlayer() == PLAYERTYPE_MOUSE)))
 		{ // ネズミの場合のみZFuncを無効に
 			SetEnableZFunction(pDevice, false);
 			DrawMeshSphere();
@@ -555,21 +588,25 @@ void DrawGame(void)
 	if (IsEndDialog() == true
 		&& GetCommonFade() == FADE_NONE
 		&& g_bPause == false
-		&& IsEnableItemPut() == false)
+		&& IsEnableItemPut() == false
+		&& g_bEnableUI == true
+		&& GetActivePlayer() == PLAYERTYPE_GIRL)
 	{
 		DrawUIarm();
 	}
 
 	if (g_bPause == false
 		&& IsEnableItemPut() == false
-		&& GetNumPlayer() != 2)
+		&& GetNumPlayer() != 2
+		&& g_bEnableUI == true)
 	{
 		/*** UIプレイヤーの描画 ***/
 		DrawUIplayer();
 	}
 
 	if (g_bPause == false
-		&& IsEnableItemPut() == false)
+		&& IsEnableItemPut() == false
+		&& g_bEnableUI == true)
 	{
 		/*** UIメニュー描画 ***/
 		DrawUImenu();
@@ -580,25 +617,29 @@ void DrawGame(void)
 		&& GetCommonFade() == FADE_NONE
 		&& GetActivePlayer() == PLAYERTYPE_GIRL
 		&& g_bPause == false
-		&& IsEnableItemPut() == false)
+		&& IsEnableItemPut() == false
+		&& g_bEnableUI == true)
 	{
 		DrawMap();
 	}
 
-	if (g_bPause == false)
+	if (g_bPause == false
+		&& g_bEnableUI == true)
 	{
 		/*** 2Dポリゴンの描画 ***/
 		Draw2DPolygon();
 	}
 
-	if (IsEndDialog() == false)
+	if (g_bPause == false
+		&& IsEndDialog() == false)
 	{
 		/*** ダイアログの描画 ***/
 		DrawDialog();
 	}
 
 	/*** UIアイテム描画 ***/
-	if (g_bPause == false)
+	if (g_bPause == false
+		&& g_bEnableUI == true)
 	{
 		DrawUIItem();
 	}
@@ -606,15 +647,18 @@ void DrawGame(void)
 	/*** UIアイテム描画 ***/
 	if (IsEndDialog() == true
 		&& g_bPause == false
-		&& IsEnableItemPut() == false)
+		&& IsEnableItemPut() == false
+		&& g_bEnableUI == true)
 	{
 		/*** UIコレクトの更新 ***/
 		DrawUIcollect();
 	}
 
 	/*** タイマーの描画 ***/
-	if (IsEndDialog() == true
-		&& GetCommonFade() == FADE_NONE)
+	if (g_bPause == false
+		&& IsEndDialog() == true
+		&& GetCommonFade() == FADE_NONE
+		&& g_bEnableUI == true)
 	{
 		DrawTimer();
 	}
@@ -636,6 +680,14 @@ void SetEnablePause(bool bPouse)
 }
 
 //==================================================================================
+// --- UIの描画状態 ---
+//==================================================================================
+bool GetEnableUI(void)
+{
+	return g_bEnableUI;
+}
+
+//==================================================================================
 // --- 描画 ---
 //==================================================================================
 void SetGameEnding(int nCountWait)
@@ -652,4 +704,12 @@ void SetGameEnding(int nCountWait)
 int GetIdxShopPrompt(void)
 {
 	return g_nIdxShopPrompt;
+}
+
+//==================================================================================
+// --- ポーズ状態取得 ---
+//==================================================================================
+bool GetEnablePause(void)
+{
+	return g_bPause;
 }

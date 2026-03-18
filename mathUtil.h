@@ -504,6 +504,7 @@ namespace MyMathUtil
 	// üŒ`•âŠÔ
 	__forceinline float Lerp(float start, float end, float s)
 	{
+		s = (s < 0) ? 0 : ((s > 1) ? 1 : s);
 		return start + ((end - start) * s);
 	}
 
