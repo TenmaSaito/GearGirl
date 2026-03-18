@@ -46,6 +46,16 @@ typedef struct ItemQuota
 }ItemQuota;
 POINTER(ItemQuota, P_ITEMQUOTA);
 
+//==============================================================
+// アイテム配置構造体定義
+//==============================================================
+typedef struct PutOutInfo
+{
+	ITEMTYPE	type;
+	bool		bUse;
+}PutOutInfo;
+POINTER(PutOutInfo, P_PUTOUTINFO);
+
 //**************************************************************
 // グローバル変数宣言
 bool			g_bOnDebugItem = false;				// デバッグ中
@@ -58,22 +68,22 @@ bool			g_bPutOut = false;					// アイテムを提出するときtrue
 Item			g_aItem[MAX_ITEM];					// アイテム情報
 ItemQuota		g_aItemQuota[ITEMTYPE_MAX];			// 所持アイテムを表示する枠のインデックス
 ItemQuota		g_aPutQuota[NUM_PUTOUTITEM];		// 提出アイテムを表示する枠のインデックス
+PutOutInfo		g_aPutOut[NUM_PUTOUTITEM];			// 提出したアイテム
 
 ItemQuota		g_aPutOutUI[PUTOUTUI_MAX];			// 提出時　背景の暗転、決定やとりけしのUI等
-ITEMTYPE		g_aPutOut[NUM_PUTOUTITEM];			// 提出したアイテム
 ItemInfo		g_aItemInfo[ITEMTYPE_MAX] =
 {
 	{"data\\MODEL\\Item\\Screw.x",-1},				// [0] 新品ののねじ
 	{"data\\MODEL\\Item\\GearSmall.x",-1},			// [1] 磨かれた小さな歯車
 	{"data\\MODEL\\Item\\GearLarge.x",-1},			// [2] 綺麗な大きい歯車
 	{"data\\MODEL\\Item\\Shaft.x",-1},				// [3] まっすぐな軸
-	{"data\\MODEL\\Item\\Spring.x",-1},			// [4] 丁寧に直されたぜんまい
+	{"data\\MODEL\\Item\\Spring.x",-1},				// [4] 丁寧に直されたぜんまい
 
 	{"data\\MODEL\\Item\\old_screw.x",-1},			// [5] 古いねじ
 	{"data\\MODEL\\Item\\GearSmallDificit.x",-1},	// [6] 錆びた小さい歯車
 	{"data\\MODEL\\Item\\GearLargeDificit.x",-1},	// [7] 欠けた大きい歯車
 	{"data\\MODEL\\Item\\ShaftCurv.x",-1},			// [8] 少しい曲がった軸
-	{"data\\MODEL\\Item\\Spring_false.x",-1},			// [9] ゆがんだぜんまい
+	{"data\\MODEL\\Item\\Spring_false.x",-1},		// [9] ゆがんだぜんまい
 };
 ItemInfo		g_aItemUIInfo[PUTOUTUI_MAX] =
 {
@@ -185,7 +195,8 @@ void InitItem(void)
 		SetEnable2DPolygon(pPutQuota->nIdxBox, false);
 		pPutQuota->nType = -1;
 		pPutQuota->bUse = false;
-		g_aPutOut[nCntQuota] = ITEMTYPE_SPRING_FALSE;
+		g_aPutOut[nCntQuota].type = ITEMTYPE_SPRING_FALSE;
+		g_aPutOut[nCntQuota].bUse = false;
 	}
 
 	// 設置
@@ -713,6 +724,8 @@ void SelectItem(void)
 {
 	P_ITEMQUOTA pPutQuota = &g_aPutQuota[0];
 	P_ITEMQUOTA pUI = &g_aPutOutUI[0];
+	ITEMTYPE	PutOut[NUM_PUTOUTITEM] = {};
+	int nNum = 0;
 
 	//*********************************************************
 	// 所持アイテム欄
@@ -774,7 +787,15 @@ void SelectItem(void)
 				case 1:// 提出
 					if (GetFade() != FADE_NONE) return; // フェード中なら無視
 
-					JudgmentEnding(&g_aPutOut[0], 5);
+					for (int nCnt = 0, nNum = 0; nCnt < NUM_PUTOUTITEM; nCnt++)
+					{
+						if (g_aPutOut[nCnt].bUse)
+						{
+							PutOut[nNum] = g_aPutOut[nCnt].type;
+							nNum++;
+						}
+					}
+					JudgmentEnding(&PutOut[0], nNum);
 					SetFade(MODE_RESULT);
 
 					break;
@@ -821,7 +842,7 @@ void SelectItem(void)
 					{
 						g_aPutQuota[nCnt].nSave = g_nSelectPut;
 						g_aPutQuota[nCnt].nType = g_aItemQuota[g_nSelectPut].nType;
-						g_aPutOut[nCnt] = (ITEMTYPE)g_aPutQuota[nCnt].nType;
+						g_aPutOut[nCnt].type = (ITEMTYPE)g_aPutQuota[nCnt].nType;
 						g_aPutQuota[nCnt].bUse = true;
 						break;
 					}
@@ -832,13 +853,8 @@ void SelectItem(void)
 		{// 選択取り消し
 		}
 		else
-		{// それら以外を選択していたら決定と同じ処理
-			if (GetFade() != FADE_NONE) return; // フェード中なら無視
-
-			JudgmentEnding(&g_aPutOut[0], 5);
-
-			if (GetTimer() <= 10)
-				SetFade(MODE_RESULT);
+		{// それら以外を選択していたら提出画面終了
+			g_bPutOut = false;
 		}
 	}
 
@@ -919,4 +935,12 @@ void EnableItemPut(void)
 bool IsEnableItemPut(void)
 {
 	return g_bPutOut;
+}
+
+//=========================================================================================
+// 提出時選択中のアイテム
+//=========================================================================================
+ITEMTYPE GetNumSelect(void)
+{
+	return (ITEMTYPE)g_aItemQuota[g_nSelectPut].nType;
 }
