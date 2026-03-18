@@ -37,6 +37,7 @@
 #include "pause.h"
 #include "prompt.h"
 #include "sound.h"
+#include "skybox.h"
 #include "Texture.h"
 #include "thread.h"
 #include "timer.h"
@@ -175,6 +176,12 @@ void InitGame(void)
 	/*** ガイドの初期化 ***/
 	InitGuide();
 
+	/*** スカイボックスの初期化 ***/
+	InitSkybox();
+
+	// スカイボックスの設置
+	SetSkybox(SKYBOX::NORMAL);
+
 	//==========================================
 	/*** モデルのスクリプト読み込み ***/
 	LoadModel();
@@ -289,6 +296,9 @@ void UninitGame(void)
 
 	/*** UIゲット終了 ***/
 	UninitUIGet();
+
+	/*** スカイボックスの終了 ***/
+	UninitSkybox();
 }
 
 //==================================================================================
@@ -399,6 +409,9 @@ void UpdateGame(void)
 			/*** ガイドの更新 ***/
 			UpdateGuide();
 
+			/*** スカイボックスの更新 ***/
+			UpdateSkybox();
+
 			if (IsEndDialog() == true && GetCommonFade() == FADE_NONE)
 			{
 				AddTimer(-1);
@@ -451,6 +464,9 @@ void DrawGame(void)
 
 		// VERTEX_3D ============================================
 		/*** Aの描画 ***/
+
+		/*** スカイボックスの描画 ***/
+		DrawSkybox();
 
 		/*** 床の描画  ***/
 		DrawField();

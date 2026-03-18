@@ -42,15 +42,19 @@ typedef struct
 //**********************************************************************************
 //*** 定数変数 ***
 //**********************************************************************************
-const char *g_pGuideModelPath = "data/MODEL/Guide/GuideArrow.x";	// ガイド矢印モデルのパス
-const float g_fLengthPlayer = 15.0f;		// プレイヤーとの距離
-const float g_fHeightModel = 15.0f;			// 基本の高さ		
-const D3DXVECTOR3 g_posShop = D3DXVECTOR3(1463, 100, -455);				// 店の位置
+const char *g_apGuideModelPath[PLAYERTYPE_MAX] =			// ガイド矢印モデルのパス
+{
+	"data/MODEL/Guide/GuideArrow.x",
+	"data/MODEL/Guide/GuideArrow_Smaller.x",
+};	
+const float g_aLengthPlayer[PLAYERTYPE_MAX] = { 15.0f, 0 };			// プレイヤーとの距離
+const float g_aHeightModel[PLAYERTYPE_MAX] = { 15.0f, 4.5f };		// 基本の高さ		
+const D3DXVECTOR3 g_posShop = D3DXVECTOR3(1463, 100, -455);			// 店の位置
 
 //**********************************************************************************
 //*** グローバル変数 ***
 //**********************************************************************************
-Guide g_guide = {};		// ガイドの情報
+Guide g_aGuide[PLAYERTYPE_MAX] = {};		// ガイドの情報
 
 //==================================================================================
 // --- 初期化 ---
@@ -58,16 +62,24 @@ Guide g_guide = {};		// ガイドの情報
 void InitGuide(void)
 {
 	// 初期化
-	AutoZeroMemory(g_guide);
+	AutoZeroMemory(g_aGuide);
 
 	// モデル読み込み
 	IDX_MODELDATA md;
-	LoadModelData(g_pGuideModelPath, &md);
+	LoadModelData(g_apGuideModelPath[PLAYERTYPE_GIRL], &md);
 
 	// モデル設置
-	g_guide.Idx3DModel = Set3DModel(VECNULL, VECNULL, md);
+	g_aGuide[PLAYERTYPE_GIRL].Idx3DModel = Set3DModel(VECNULL, VECNULL, md);
 
-	SetEnable3DModel(g_guide.Idx3DModel, true);
+	LoadModelData(g_apGuideModelPath[PLAYERTYPE_MOUSE], &md);
+
+	// モデル設置
+	g_aGuide[PLAYERTYPE_MOUSE].Idx3DModel = Set3DModel(VECNULL, VECNULL, md);
+
+	SetEnable3DModel(g_aGuide[PLAYERTYPE_GIRL].Idx3DModel, true);
+	SetEnable3DModel(g_aGuide[PLAYERTYPE_MOUSE].Idx3DModel, true);
+	SetZFunc3DModel(g_aGuide[PLAYERTYPE_GIRL].Idx3DModel, false);
+	SetZFunc3DModel(g_aGuide[PLAYERTYPE_MOUSE].Idx3DModel, false);
 }
 
 //==================================================================================
@@ -84,51 +96,51 @@ void UninitGuide(void)
 void UpdateGuide(void)
 {
 	Player *pPlayer = GetPlayer();
-	LPGIMMICK pGimmick = GetGimmick();
-	float fLength = 1000000.0f;			// ギミックとプレイヤーの距離
-	GIMMICKTYPE type = GIMMICKTYPE_MAX;	// 最も近いギミック
+	Guide *pGuide = &g_aGuide[0];
+	GC_DATA *pGimmick = GetGCData();
 
-	for (int nCntGimmick = 0; nCntGimmick < GIMMICKTYPE_MAX; nCntGimmick++)
+	for (int nCntPlayer = 0; nCntPlayer < PLAYERTYPE_MAX; nCntPlayer++, pPlayer++, pGuide++)
 	{
-		if (pGimmick[nCntGimmick].bClear == true) continue;
+		GIMMICKTYPE type = GIMMICKTYPE_MAX;	// 最も近いギミック
+		float fLength = 1000000.0f;			// ギミックとプレイヤーの距離
+		float fAngle = 0.0f;				// 角度
+		D3DXCOLOR col = COLOR_WHITE;		// 矢印の色
 
-		if (pGimmick[nCntGimmick].myType == GIMMICKTYPE_TUNNEL
-			|| pGimmick[nCntGimmick].myType == GIMMICKTYPE_CLOSEDDOOR)
+		for (int nCntGimmick = 0; nCntGimmick < GC_MAX; nCntGimmick++)
 		{
-			continue;
+			if (pGimmick[nCntGimmick].bEnable == false) continue;
+
+			D3DXVECTOR3 posGimmick = GetGimmick()[pGimmick[nCntGimmick].typeDetection].pos;
+			D3DXVECTOR3 diff = pPlayer->pos - posGimmick;
+			float fPTPLength = D3DXVec3Length(&diff);		// 2点間の距離を求める
+
+			if (fPTPLength < fLength)
+			{
+				col = pGimmick[nCntGimmick].col;
+				fAngle = GetPosToPos(posGimmick, pPlayer->pos);
+				fLength = fPTPLength;
+				type = (GIMMICKTYPE)nCntGimmick;
+			}
 		}
 
-		D3DXVECTOR3 diff = pPlayer->pos - pGimmick[nCntGimmick].pos;
-		float fPTPLength = D3DXVec3Length(&diff);		// 2点間の距離を求める
-
-		if (fPTPLength < fLength)
+		if (TUTORIAL_NOW)
 		{
-			fLength = fPTPLength;
-			type = (GIMMICKTYPE)nCntGimmick;
+			type = GIMMICKTYPE_MAX;
 		}
-	}
 
-	float fAngle = GetPosToPos(pGimmick[type].pos, pPlayer->pos);
-	if (TUTORIAL_NOW)
-	{
-		type = GIMMICKTYPE_MAX;
-	}
+		if (type == GIMMICKTYPE_MAX)
+		{
+			fAngle = GetPosToPos(g_posShop, pPlayer->pos);
+			SetColor3DModel(pGuide->Idx3DModel, COLOR_UNUSED, false);
+		}
 
-	if (type == GIMMICKTYPE_MAX)
-	{
-		fAngle = GetPosToPos(g_posShop, pPlayer->pos);
-		SetColor3DModel(g_guide.Idx3DModel, D3DXCOLOR(0, 1, 0, 1), false);
-	}
-	else
-	{
-		SetColor3DModel(g_guide.Idx3DModel, COLOR_UNUSED, false);
-	}
+		D3DXVECTOR3 pos;
+		pos.x = pPlayer->pos.x + sinf(fAngle) * g_aLengthPlayer[nCntPlayer];
+		pos.y = pPlayer->pos.y + g_aHeightModel[nCntPlayer];
+		pos.z = pPlayer->pos.z + cosf(fAngle) * g_aLengthPlayer[nCntPlayer];
 
-	D3DXVECTOR3 pos;
-	pos.x = pPlayer->pos.x + sinf(fAngle) * g_fLengthPlayer;
-	pos.y = pPlayer->pos.y + g_fHeightModel;
-	pos.z = pPlayer->pos.z + cosf(fAngle) * g_fLengthPlayer;
-
-	SetPosition3DModel(g_guide.Idx3DModel, pos);
-	SetRotation3DModel(g_guide.Idx3DModel, VEC_Y(fAngle));
+		SetPosition3DModel(pGuide->Idx3DModel, pos);
+		SetRotation3DModel(pGuide->Idx3DModel, VEC_Y(fAngle));
+		SetColor3DModel(pGuide->Idx3DModel, col, false);
+	}
 }

@@ -23,6 +23,7 @@
 #include "sound.h"
 
 #include "Conditional_defs.h"
+#include "Color_defs.h"
 #include "MyInline.inl"
 
 //**********************************************************************************
@@ -42,17 +43,6 @@ typedef enum
 }TUTORIALTYPE;
 
 //**********************************************************************************
-//*** ギミックシリンダーの種類 ***
-//**********************************************************************************
-typedef enum
-{
-	GC_STATUE = 0,		// 銅像のシリンダー
-	GC_FALLENTREE,		// 倒木のシリンダー
-	GC_BIGBUTTON,		// 駅前のボタンのシリンダー
-	GC_MAX
-}GIMMICKCYLINDER;
-
-//**********************************************************************************
 //*** ギミッククリア構造体 ***
 //**********************************************************************************
 typedef struct
@@ -63,17 +53,6 @@ typedef struct
 	D3DXVECTOR3 rotDefault;		// デフォルト角度
 	float fRadius;				// 当たり判定の半径
 } GIMMICK_DATA;
-
-//**********************************************************************************
-//*** ギミックシリンダー構造体 ***
-//**********************************************************************************
-typedef struct
-{
-	GIMMICKTYPE type;			// 対象のギミック
-	GIMMICKTYPE typeDetection;	// 範囲検知対象のギミック
-	int nIdxMeshCylinder;		// メッシュシリンダーのインデックス
-	float s;					// Lerp変換用変数
-}GC_DATA;
 
 //**********************************************************************************
 //*** アイテム出現構造体 ***
@@ -103,7 +82,7 @@ void UpdateGimmickCylinder(void);
 const int g_nNumSpawnItem = 2;							// 噴水ギミッククリア時に出現するアイテム数
 const ITEMTYPE g_aIdxItem[g_nNumSpawnItem] = { ITEMTYPE_GEARS_TRUE, ITEMTYPE_SPRING_FALSE };	// 出現するアイテム番号
 const float g_fResistPow = 0.05f;						// 加速度の減速係数
-const float g_fRadiusGCMin = 35.0f;						// 最小半径
+const float g_fRadiusGCMin = 45.0f;						// 最小半径
 const float g_fRadiusGCMax = 200.0f;					// 最大半径
 const float g_fRadiusDetectionGC = 30.0f;				// 検知半径
 const D3DXVECTOR3 g_aMoveSpawn[g_nNumSpawnItem] =		// 出現後のアイテムの加速度
@@ -250,18 +229,27 @@ void InitGimmick(void)
 	g_aGCData[GC_STATUE].type = GIMMICKTYPE_STATUE;
 	g_aGCData[GC_STATUE].typeDetection = GIMMICKTYPE_STATUE;
 	g_aGCData[GC_STATUE].s = 0.0f;
-	
+	g_aGCData[GC_STATUE].fAngle = 0.0f;
+	g_aGCData[GC_STATUE].col = COL_HALFBLUE;
+	g_aGCData[GC_STATUE].bEnable = true;
+
 	g_aGCData[GC_FALLENTREE].nIdxMeshCylinder = SetMeshCylinder(g_aGimmick[GIMMICKTYPE_FALLENTREE].pos, VECNULL, COL_HALFGREEN, g_fRadiusGCMin, 1500.0f, 1, 8);
 	SetEnableMeshCylinder(g_aGCData[GC_FALLENTREE].nIdxMeshCylinder, true);
 	g_aGCData[GC_FALLENTREE].type = GIMMICKTYPE_FALLENTREE;
 	g_aGCData[GC_FALLENTREE].typeDetection = GIMMICKTYPE_FALLENTREE;
 	g_aGCData[GC_FALLENTREE].s = 0.0f;
+	g_aGCData[GC_FALLENTREE].fAngle = 0.0f;
+	g_aGCData[GC_FALLENTREE].col = COL_HALFGREEN;
+	g_aGCData[GC_FALLENTREE].bEnable = true;
 	
 	g_aGCData[GC_BIGBUTTON].nIdxMeshCylinder = SetMeshCylinder(g_aGimmick[GIMMICKTYPE_BIGBUTTON].pos, VECNULL, COL_HALFYELLOW, g_fRadiusGCMin, 1500.0f, 1, 8);
 	SetEnableMeshCylinder(g_aGCData[GC_BIGBUTTON].nIdxMeshCylinder, true);
 	g_aGCData[GC_BIGBUTTON].type = GIMMICKTYPE_CLOSEDDOOR;
 	g_aGCData[GC_BIGBUTTON].typeDetection = GIMMICKTYPE_BIGBUTTON;
 	g_aGCData[GC_BIGBUTTON].s = 0.0f;
+	g_aGCData[GC_BIGBUTTON].fAngle = 0.0f;
+	g_aGCData[GC_BIGBUTTON].col = COL_HALFYELLOW;
+	g_aGCData[GC_BIGBUTTON].bEnable = true;
 }
 
 //==================================================================================
@@ -323,33 +311,24 @@ void UpdateGimmick(void)
 
 	// === クリア判定になるまで、ギミックの場所にシリンダーを置いてわかりやすくする
 	// バルブ
-	if (g_aGimmick[GIMMICKTYPE_STATUE].bClear == false)
+	if (g_aGimmick[GIMMICKTYPE_STATUE].bClear == true)
 	{
-		SetEnableMeshCylinder(g_aGCData[GC_STATUE].nIdxMeshCylinder, true);
-	}
-	else
-	{
-		SetEnableMeshCylinder(g_aGCData[GC_STATUE].nIdxMeshCylinder, false);
+		SetColorMeshCylinder(&GetMeshCylinder()[g_aGCData[GC_STATUE].nIdxMeshCylinder], COLOR_INV);
+		g_aGCData[GC_STATUE].bEnable = false;
 	}
 
 	// 倒木
-	if (g_aGimmick[GIMMICKTYPE_FALLENTREE].bClear == false)
+	if (g_aGimmick[GIMMICKTYPE_FALLENTREE].bClear == true)
 	{
-		SetEnableMeshCylinder(g_aGCData[GC_FALLENTREE].nIdxMeshCylinder, true);
-	}
-	else
-	{
-		SetEnableMeshCylinder(g_aGCData[GC_FALLENTREE].nIdxMeshCylinder, false);
+		SetColorMeshCylinder(&GetMeshCylinder()[g_aGCData[GC_FALLENTREE].nIdxMeshCylinder], COLOR_INV);
+		g_aGCData[GC_FALLENTREE].bEnable = false;
 	}
 
 	// 駅のガラスドア
-	if (g_aGimmick[GIMMICKTYPE_CLOSEDDOOR].bClear == false)
+	if (g_aGimmick[GIMMICKTYPE_CLOSEDDOOR].bClear == true)
 	{
-		SetEnableMeshCylinder(g_aGCData[GC_BIGBUTTON].nIdxMeshCylinder, true);
-	}
-	else
-	{
-		SetEnableMeshCylinder(g_aGCData[GC_BIGBUTTON].nIdxMeshCylinder, false);
+		SetColorMeshCylinder(&GetMeshCylinder()[g_aGCData[GC_BIGBUTTON].nIdxMeshCylinder], COLOR_INV);
+		g_aGCData[GC_BIGBUTTON].bEnable = false;
 	}
 
 	// === チュートリアルを非表示に === //
@@ -1376,6 +1355,12 @@ void UpdateGimmickCylinder(void)
 			// シリンダーの半径を適用
 			SetRadiusMeshCylinder(&GetMeshCylinder()[g_aGCData[nCntGimmick].nIdxMeshCylinder],
 				Lerp(g_fRadiusGCMin, g_fRadiusGCMax, g_aGCData[nCntGimmick].s));
+
+			// シリンダーの色を変換
+			g_aGCData[nCntGimmick].fAngle = RepairRot(g_aGCData[nCntGimmick].fAngle + 0.07f);
+			SetColorMeshCylinder(&GetMeshCylinder()[g_aGCData[nCntGimmick].nIdxMeshCylinder],
+				GetColLerp(g_aGCData[nCntGimmick].col, CONVERSION_A(g_aGCData[nCntGimmick].col, 1.0f),
+					sinf(g_aGCData[nCntGimmick].fAngle)));
 		}
 		else
 		{ // プレイヤーが離れていれば、半径減少
@@ -1388,8 +1373,28 @@ void UpdateGimmickCylinder(void)
 			// シリンダーの半径を適用
 			SetRadiusMeshCylinder(&GetMeshCylinder()[g_aGCData[nCntGimmick].nIdxMeshCylinder],
 				Lerp(g_fRadiusGCMin, g_fRadiusGCMax, g_aGCData[nCntGimmick].s));
+
+			// シリンダーの色を元に戻す
+			SetColorMeshCylinder(&GetMeshCylinder()[g_aGCData[nCntGimmick].nIdxMeshCylinder], 
+				g_aGCData[nCntGimmick].col);
 		}
 	}
+}
+
+//==================================================================================
+// --- ギミックエリアを取得 ---
+//==================================================================================
+GC_DATA *GetGCData(void)
+{
+	return &g_aGCData[0];
+}
+
+//==================================================================================
+// --- ギミックエリアの色を取得 ---
+//==================================================================================
+D3DXCOLOR GetGimmickColor(GIMMICKCYLINDER type)
+{
+	return g_aGCData[type].col;
 }
 
 //==================================================================================

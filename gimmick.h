@@ -52,6 +52,17 @@ typedef enum
 } COULD_PLAYER;
 
 //**********************************************************************************
+//*** ギミックシリンダーの種類 ***
+//**********************************************************************************
+typedef enum
+{
+	GC_STATUE = 0,		// 銅像のシリンダー
+	GC_FALLENTREE,		// 倒木のシリンダー
+	GC_BIGBUTTON,		// 駅前のボタンのシリンダー
+	GC_MAX
+}GIMMICKCYLINDER;
+
+//**********************************************************************************
 //*** ギミック構造体 ***
 //**********************************************************************************
 START_UNABLE
@@ -91,6 +102,21 @@ typedef struct
 	int nFrameBlend;			// ブレンドフレーム数
 	int nCounterBlend;			// ブレンドカウンター
 }Gimmick, * LPGIMMICK;
+
+//**********************************************************************************
+//*** ギミックシリンダー構造体 ***
+//**********************************************************************************
+typedef struct
+{
+	D3DXCOLOR col;				// 初期色
+	float s;					// Lerp変換用変数
+	float fAngle;				// sin波用変数
+	GIMMICKTYPE type;			// 対象のギミック
+	GIMMICKTYPE typeDetection;	// 範囲検知対象のギミック
+	int nIdxMeshCylinder;		// メッシュシリンダーのインデックス
+	bool bEnable;				// 有効判定
+}GC_DATA;
+
 END_UNABLE
 
 //**********************************************************************************
@@ -112,5 +138,8 @@ bool CollisionGimmick(D3DXVECTOR3 *pPos,
 	float fHeight);
 Gimmick* GetGimmick(void);	// ギミック情報の譲渡
 bool IsTutorialreveal(void);	// チュートリアルが表示されているかどうか
+
+GC_DATA *GetGCData(void);
+D3DXCOLOR GetGimmickColor(GIMMICKCYLINDER type);
 
 #endif	// !_GIMMICK_H_

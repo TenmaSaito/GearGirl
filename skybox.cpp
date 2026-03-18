@@ -10,6 +10,7 @@
 #include "skybox.h"
 #include "tCamera.h"
 #include "mathUtil.h"
+#include "mode.h"
 
 using namespace MyMathUtil;
 
@@ -129,20 +130,24 @@ void DrawSkybox(void)
 	pDevice->GetTransform(D3DTS_VIEW, &mtxView);
 	pDevice->GetTransform(D3DTS_PROJECTION, &mtxProj);
 
-	D3DXMatrixIdentity(&mtxView);
-
 	// カメラの情報を取得
 	LPTCAMERA pCam = GetTCamera();
 
-	// 角度
-	static float fAng = 0.0f;
-	fAng += 0.0005f;
+	if (GetMode() == MODE_TITLE)
+	{
+		D3DXMatrixIdentity(&mtxView);
 
-	// ビューマトリックスの作成
-	V3 rot = Arc(100.0f, fAng);
-	rot = V3(rot.x, pCam->posR.y - 42.0f, rot.y);
+		// 角度
+		static float fAng = 0.0f;
+		fAng += 0.0005f;
 
-	D3DXMatrixLookAtLH(&mtxView, &CParamVector::V3NULL, &rot, &pCam->vecU);
+		// ビューマトリックスの作成
+		V3 rot = Arc(100.0f, fAng);
+		rot = V3(rot.x, pCam->posR.y - 42.0f, rot.y);
+
+		D3DXMatrixLookAtLH(&mtxView, &CParamVector::V3NULL, &rot, &pCam->vecU);
+
+	}
 
 	// カメラのワールドマトリックスを作成
 	CalcWorldMatrix(&mtxWorld, pCam->posV, VECNULL);

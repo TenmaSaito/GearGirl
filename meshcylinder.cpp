@@ -367,7 +367,42 @@ bool SetRadiusMeshCylinder(P_MESH pMesh, float fRadius)
 //=========================================================================================
 bool SetColorMeshCylinder(P_MESH pMesh, D3DXCOLOR col)
 {
+	// NULLCHECK
+	if (pMesh == nullptr)
+	{
+		OutputDebugString(TEXT("メッシュのポインタ取得に失敗"));
+		return false;
+	}
 
+	// USECHECK
+	if (pMesh->bUse == false)
+	{
+		OutputDebugString(TEXT("メッシュが未使用状態です"));
+		return false;
+	}
+
+	//**************************************************************
+	// 変数宣言
+	VERTEX_3D* pVtx = (VERTEX_3D*)NULL;	// 頂点情報へのポインタ
+	
+	//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+	// 頂点バッファをロックし、頂点情報へのポインタを取得
+	pMesh->pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+
+	for (int nCntHeight = 0, nCntVer = 0; nCntHeight <= pMesh->nHeightDivision; nCntHeight++)
+	{
+		for (int nCntCircle = 0; nCntCircle <= pMesh->nCircleDivision; nCntCircle++, nCntVer++)
+		{
+			// 頂点座標を設定
+			pVtx[nCntVer].col = col;
+		}
+	}
+
+	// 頂点バッファのロック解除
+	pMesh->pVtxBuff->Unlock();
+	//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+	return true;
 }
 
 //=========================================================================================

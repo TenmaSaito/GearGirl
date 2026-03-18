@@ -35,6 +35,7 @@ STRUCT(_3DMODEL)
 	bool bUse;				// 格納状況
 	bool bEnable;			// 描画するかどうか
 	bool bAlpha;			// α値を変更するか
+	bool bZFunc;			// Zテストを行うか
 } _3DMODEL;
 
 typedef struct _3DMODEL *P3DMODEL, *LP3DMODEL;
@@ -52,5 +53,6 @@ void SetPosition3DModel(IDX_3DMODEL Idx, D3DXVECTOR3 pos);
 void SetRotation3DModel(IDX_3DMODEL Idx, D3DXVECTOR3 rot);
 void SetEnable3DModel(IDX_3DMODEL Idx, bool bEnable); 
 void SetColor3DModel(IDX_3DMODEL Idx, D3DXCOLOR col, bool bAlpha);
+void SetZFunc3DModel(IDX_3DMODEL Idx, bool bEnable);
 LP3DMODEL Get3DModel(IDX_3DMODEL nIdxModel);
 #endif
