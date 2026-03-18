@@ -115,6 +115,8 @@ typedef struct
 	PlayerType playertype;		// 操作対象
 	float fMove;				// プレイヤーの速度
 	bool bDash;					// ダッシュ状態かどうか
+	bool bArea;					// 切り替え不可能エリアにいるかどうか
+	bool bChangeable;			// 切り替え事態が可能かどうか
 
 	// モーションの要素
 	MOTION_INFO aMotionInfo[MOTIONTYPE_MAX];	// モーション情報
