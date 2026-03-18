@@ -787,7 +787,7 @@ void SelectItem(void)
 				case 1:// 提出
 					if (GetFade() != FADE_NONE) return; // フェード中なら無視
 
-					for (int nCnt = 0, nNum = 0; nCnt < NUM_PUTOUTITEM; nCnt++)
+					for (int nCnt = 0; nCnt < NUM_PUTOUTITEM; nCnt++)
 					{
 						if (g_aPutOut[nCnt].bUse)
 						{
@@ -843,6 +843,7 @@ void SelectItem(void)
 						g_aPutQuota[nCnt].nSave = g_nSelectPut;
 						g_aPutQuota[nCnt].nType = g_aItemQuota[g_nSelectPut].nType;
 						g_aPutOut[nCnt].type = (ITEMTYPE)g_aPutQuota[nCnt].nType;
+						g_aPutOut[nCnt].bUse = true;
 						g_aPutQuota[nCnt].bUse = true;
 						break;
 					}
