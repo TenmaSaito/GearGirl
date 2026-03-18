@@ -33,6 +33,7 @@
 #include "UImenu.h"
 #include "MathUtil.h"
 #include "wall.h"
+#include "2Dpolygon.h"
 
 using namespace MyMathUtil;
 
@@ -409,6 +410,7 @@ void UpdatePlayer(void)
 			pPlayer->pos.x = MAX_XMOVE2;
 		}
 
+		// 駅とガラスの当たり判定のダブり解決用
 		if (pPlayer->pos.x < 710.0f && pPlayer->pos.x >= 690.0f && pPlayer->pos.z <= -700.0f)
 		{
 			pPlayer->pos.x = 690.0f;
@@ -474,11 +476,7 @@ void UpdatePlayer(void)
 			}
 		}
 
-		if (GAME_NOW)
-		{// ゲーム本編中
-			// アイテムとの当たり判定
-			CollisionItem(pPlayer->pos, PLAYER_RANGE, nCntPlayer);
-		}
+
 
 		// === ギミックとの当たり判定 === //
 		if (nCntPlayer == PLAYERTYPE_GIRL || (nCntPlayer == PLAYERTYPE_MOUSE && GetActivePlayer() == PLAYERTYPE_MOUSE) || GetNumPlayer() == 2)
@@ -503,6 +501,15 @@ void UpdatePlayer(void)
 			}
 		}
 
+		// === アイテムとの当たり判定 === //
+		if (GetNumPlayer() == 2)
+		{// 2人プレイ時
+			if (GAME_NOW)
+			{// ゲーム本編中
+				CollisionItem(pPlayer->pos, PLAYER_RANGE, nCntPlayer);
+			}
+		}
+
 		// === 壁との当たり判定 === //
 		CollisionWall(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move);
 
@@ -510,6 +517,23 @@ void UpdatePlayer(void)
 		if (g_Functionkey != 0)
 		{
 			PrintDebugProc("\nPlayer座標 : [%~3f]\n", pPlayer->pos.x, pPlayer->pos.y, pPlayer->pos.z);
+		}
+	}
+
+	// === 操作している対象以外がアイテムをとってしまうのを防ぐ === //
+	if (GetNumPlayer() == 1)
+	{// 1人プレイ時
+		if (GAME_NOW)
+		{// ゲーム本編中
+			// アイテムとの当たり判定
+			if (GetActivePlayer() == PLAYERTYPE_GIRL)
+			{
+				CollisionItem(g_aPlayer[PLAYERTYPE_GIRL].pos, PLAYER_RANGE, PLAYERTYPE_GIRL);
+			}
+			else if (GetActivePlayer() == PLAYERTYPE_MOUSE)
+			{
+				CollisionItem(g_aPlayer[PLAYERTYPE_MOUSE].pos, PLAYER_RANGE, PLAYERTYPE_MOUSE);
+			}
 		}
 	}
 
@@ -1934,7 +1958,7 @@ void MouseKeepUp(void)
 		{// 離れすぎていると切り替え不可能状態に
 			pGirl->bChangeable = false;
 		}
-		else if(50.0f >= fPlayerDist)
+		else if (50.0f >= fPlayerDist)
 		{// 一定距離以内なら切り替え可能に
 			pGirl->bChangeable = true;
 		}

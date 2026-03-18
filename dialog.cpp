@@ -234,6 +234,7 @@ bool g_bIsEndTutorial;			// チュートリアルの終了判定
 bool g_bIsShowAnyDialog;		// 何か一つでもダイアログが表示されているか
 bool g_bIsMovableTutorial;		// チュートリアルの動ける状態か
 bool g_bShowMoveTex;			// テクスチャ表示済みか
+bool g_bSkip;					// スキップしたかどうか
 bool g_bSKipLog;				// 現在再生中のログをスキップ可能か
 IDX_2DPOLYGON g_IdxLeftStick;	// 左スティックのチュートリアルポリゴン
 IDX_2DPOLYGON g_IdxRightStick;	// 右スティックのチュートリアルポリゴン
@@ -262,6 +263,7 @@ void InitDialog(void)
 	g_IdxLeftStick = -1;
 	g_IdxRightStick = -1;
 	g_IdxField = -1;
+	g_bSkip = false;
 
 	// 値をコピー
 	for (int nCntDialog = 0; nCntDialog < DIALOG_NUM; nCntDialog++)
@@ -334,7 +336,16 @@ void UninitDialog(void)
 // --- 更新 ---
 //==================================================================================
 void UpdateDialog(void)
-{
+{	
+	Player* pPlayer = GetPlayer();
+	D3DXVECTOR3 Tutorialpos = D3DXVECTOR3(1450.0f, 100.0f, -473.0f);
+
+	if (GetCommonFade() == FADE_IN && pPlayer->pos != Tutorialpos && g_bSkip == true)
+	{
+		// チュートリアルスキップ時に店の前へワープ
+		pPlayer->pos = Tutorialpos;
+	}
+
 	if (g_bIsEndTutorial == true) return;
 
 	Log* pLogInfo = &g_apLog[g_CurrentID];
@@ -348,6 +359,7 @@ void UpdateDialog(void)
 		g_bIsEndTutorial = true;
 		g_bIsShowAnyDialog = false;
 		g_bIsMovableTutorial = false;
+		g_bSkip = true;
 
 		SetEnable2DPolygon(g_aDialog[0].polygon, false);
 		SetEnable2DPolygon(g_aDialog[1].polygon, false);
@@ -361,17 +373,8 @@ void UpdateDialog(void)
 
 		Destroy2DPolygon(g_IdxLeftStick);
 		Destroy2DPolygon(g_IdxRightStick);
-
-		if (GetCommonFade() != FADE_OUT)
-		{
-			D3DXVECTOR3 pos = D3DXVECTOR3(1450.0f, 100.0f, -473.0f);
-
-			// チュートリアルスキップ時に店の前へワープ
-			Player* pPlayer = GetPlayer();
-			pPlayer->pos = pos;
-
-		}
 	}
+
 
 	if (g_bIsMovableTutorial == true)
 	{
