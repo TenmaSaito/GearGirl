@@ -39,6 +39,7 @@ USE_PARAM;
 #define SHOP_POS		D3DXVECTOR3(1450.0f, 100.0f, -475.0f)	// 店前の座標
 #define ANIMTEX_NUM		(3)			// 動くテクスチャの数
 #define START_ANIMTEX	(3)			// アニメーションテクスチャの開始ログID
+#define WAIT_COUNT		(120)		// 待機時間
 
 //**********************************************************************************
 //*** 型宣言 ***
@@ -240,7 +241,7 @@ IDX_2DPOLYGON g_IdxLeftStick;	// 左スティックのチュートリアルポリゴン
 IDX_2DPOLYGON g_IdxRightStick;	// 右スティックのチュートリアルポリゴン
 IDX_FIELD g_IdxField;			// フィールドのインデックス
 Tutorial_TexAnim g_aAnimTex[TUTORIAL_TEX_MAX];	// テクスチャのポリゴン情報
-
+int g_nCountWaiting;			// 初回待機時間
 #pragma endregion
 
 #pragma region ダイアログの基本処理
@@ -263,6 +264,7 @@ void InitDialog(void)
 	g_IdxLeftStick = -1;
 	g_IdxRightStick = -1;
 	g_IdxField = -1;
+	g_nCountWaiting = WAIT_COUNT;
 	g_bSkip = false;
 
 	// 値をコピー
@@ -337,8 +339,11 @@ void UninitDialog(void)
 //==================================================================================
 void UpdateDialog(void)
 {	
+	g_nCountWaiting--;
+	if (g_nCountWaiting > 0) return;
+
 	Player* pPlayer = GetPlayer();
-	D3DXVECTOR3 Tutorialpos = D3DXVECTOR3(1450.0f, 100.0f, -473.0f);
+	D3DXVECTOR3 Tutorialpos = D3DXVECTOR3(1450.0f, 100.0f, -480.0f);
 
 	if (GetCommonFade() == FADE_IN && pPlayer->pos != Tutorialpos && g_bSkip == true)
 	{
@@ -351,9 +356,10 @@ void UpdateDialog(void)
 	Log* pLogInfo = &g_apLog[g_CurrentID];
 	const LPMESSAGELOG pMessageLog = GetMessageLogPointer();
 
-	if (GetKeyboardTrigger(DIK_BACK)
+	if ((GetKeyboardTrigger(DIK_BACK)
 		|| GetJoypadTrigger(0, JOYKEY_BACK)
 		|| GetJoypadTrigger(1, JOYKEY_BACK))
+		&& g_nCountWaiting < 0)
 	{ // チュートリアルスキップ
 		SetCommonFade(30, 30, 30);
 		g_bIsEndTutorial = true;

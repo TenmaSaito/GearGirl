@@ -27,6 +27,8 @@ void DrawGame(void);
 void SetEnablePause(bool bPouse);
 
 void SetGameEnding(int nCountWait = DEFAULT_WAITING);
+bool GetEnableUI(void);
+bool GetEnablePause(void);
 int GetIdxShopPrompt(void);
 int GetScore(void);		// スコア(タイム)情報の譲渡
 

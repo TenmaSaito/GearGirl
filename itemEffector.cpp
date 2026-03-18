@@ -98,7 +98,7 @@ void UpdateItemEffector(void)
 	ItemEffector* pEffector = &g_aEffector[0];
 	Player* pMouse = &GetPlayer()[PLAYERTYPE_MOUSE];
 
-	_3DVibration(pEffector);
+	//_3DVibration(pEffector);
 
 	for (int nCntEffector = 0; nCntEffector < ITEMTYPE_MAX; nCntEffector++, pEffector++)
 	{
@@ -136,6 +136,7 @@ IDX_EFFECTOR SetItemEffector(D3DXVECTOR3 pos, D3DXCOLOR col)
 			pEffector->nIdxSphere = SetMeshSphere(pos, VECNULL, g_fStartRadius, 16, 16);
 			SetColorMeshSphere(&GetMeshSphere()[pEffector->nIdxSphere], col);
 			pEffector->bUse = true;
+			pEffector->bFinish = false;
 
 			error = nCntEffector;
 			break;
