@@ -120,6 +120,7 @@ void InitPlayer(void)
 		g_aPlayer[nCntPlayer].bFinishMotion = true;
 		g_aPlayer[nCntPlayer].fMove = PLAYER_MOVE;
 		g_aPlayer[nCntPlayer].bDash = false;
+		g_aPlayer[nCntPlayer].bArea = false;
 
 		if (nCntPlayer == PLAYERTYPE_GIRL)
 		{
@@ -480,7 +481,7 @@ void UpdatePlayer(void)
 		}
 
 		// === ギミックとの当たり判定 === //
-		if (nCntPlayer == PLAYERTYPE_GIRL || (nCntPlayer == PLAYERTYPE_MOUSE && GetActivePlayer() == PLAYERTYPE_MOUSE))
+		if (nCntPlayer == PLAYERTYPE_GIRL || (nCntPlayer == PLAYERTYPE_MOUSE && GetActivePlayer() == PLAYERTYPE_MOUSE) || GetNumPlayer() == 2)
 		{// 少女に対してと、ネズミは操作しているときのみ
 			if (CollisionGimmick(&pPlayer->pos, &pPlayer->posOld, &pPlayer->move, &g_aPlayer[nCntPlayer], 5.0f, 20.0f - (nCntPlayer * 18.0f)))
 			{
@@ -528,12 +529,18 @@ void UpdatePlayer(void)
 						&& g_aPlayer[PLAYERTYPE_GIRL].motionType != MOTIONTYPE_CUTTING && g_aPlayer[PLAYERTYPE_GIRL].motionTypeBlend != MOTIONTYPE_CUTTING
 						&& g_aPlayer[PLAYERTYPE_GIRL].motionType != MOTIONTYPE_VALVE && g_aPlayer[PLAYERTYPE_GIRL].motionTypeBlend != MOTIONTYPE_VALVE)
 					{
-						if (g_aPlayer[PLAYERTYPE_MOUSE].pos.z <= -774.0f && g_aPlayer[PLAYERTYPE_MOUSE].pos.x <= 700.0f)
+						if (g_aPlayer[PLAYERTYPE_MOUSE].pos.z <= -774.0f && g_aPlayer[PLAYERTYPE_MOUSE].pos.x <= 700.0f || g_aPlayer[PLAYERTYPE_GIRL].bChangeable == false)
 						{// 駅の範囲内なら切り替えを行わないようにする
-							// 駅のガラス張りのところでは切り替え不可
+							// 切り替え状態を不可にする
+							g_aPlayer[PLAYERTYPE_GIRL].bArea = true;
+							g_aPlayer[PLAYERTYPE_MOUSE].bArea = true;
 						}
 						else
 						{
+							// 切り替え可能状態にする
+							g_aPlayer[PLAYERTYPE_GIRL].bArea = false;
+							g_aPlayer[PLAYERTYPE_MOUSE].bArea = false;
+
 							if (g_aPlayer[PLAYERTYPE_GIRL].state != PLAYERSTATE_THROWWAITING && g_bShotMouse == false)
 							{
 								PlaySound(SOUND_LABEL_SE_G_CHARACHANGE);
@@ -1923,10 +1930,17 @@ void MouseKeepUp(void)
 		// ２人の距離
 		float fPlayerDist = GetPTPLength3D(pGirl->pos, pMouse->pos);
 
+		if (50.0f < fPlayerDist)
+		{// 離れすぎていると切り替え不可能状態に
+			pGirl->bChangeable = false;
+		}
+		else if(50.0f >= fPlayerDist)
+		{// 一定距離以内なら切り替え可能に
+			pGirl->bChangeable = true;
+		}
+
 		if (5 < fPlayerDist)
 		{
-			g_nKeepUpCounter++;
-
 			// ネズミがいてほしい座標
 			D3DXVECTOR3 mousePosDest = D3DXVECTOR3(pGirl->pos.x + (sinf(pGirl->rot.y) * 5), pGirl->pos.y, pGirl->pos.z + (cosf(pGirl->rot.y) * 5));
 
@@ -1937,17 +1951,8 @@ void MouseKeepUp(void)
 			pMouse->rot.y = atan2f(pMouse->posOld.x - pMouse->pos.x, pMouse->posOld.z - pMouse->pos.z);
 
 			CheckMotionMove(PLAYERTYPE_MOUSE, &g_aPlayer[PLAYERTYPE_MOUSE]);
+		}
 
-			if (g_nKeepUpCounter >= 300)
-			{// 5秒間で追いつけなかった場合、強制移動
-				//pMouse->pos = pGirl->pos;
-				g_nKeepUpCounter = 0;	// リセット
-			}
-		}
-		else
-		{
-			g_nKeepUpCounter = 0;	// リセット
-		}
 	}
 }
 

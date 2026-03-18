@@ -67,55 +67,88 @@ void DrawJudgeEnd(void)
 //==================================================================================
 // --- エンディング判定 ---
 //==================================================================================
-int JudgmentEnding(ITEMTYPE *pIn, UINT size)
+int JudgmentEnding(ITEMTYPE* pIn, UINT size)
 {
+	// === 変数を宣言 === //
 	ENDTYPE result = ENDTYPE_BAD;		// エンディングタイプ
 	ITEMTYPE aType[ITEMTYPE_MAX];		// 総合のアイテム種類
 	ITEMTYPE aTypeTrue[ITEMTYPE_MAX];	// アイテムの種類
 	UINT nCntTrue = 0;					// 正しいアイテムの数
 	ITEMTYPE aTypeFalse[ITEMTYPE_MAX];	// アイテムの種類
 	UINT nCntFalse = 0;					// 間違ったアイテムの数
+	int nSendItem = GetSendItemNum();	// 提出したアイテム数を取得
+	bool bGetHighMag = false;			// 高倍率アイテムをとったか
+	int nGetHighMag = 0;				// 高倍率アイテムをとった個数を保管
 
 	// 現在のスコアをリセット
 	g_nScoreJudge = 0;
 	g_nItemScore = 0;
 
 	// 値保存
-	for (UINT nCntItem = 0; nCntItem < size; nCntItem++)
-	{
-		if (pIn[nCntItem] < 5)
-		{
+	for (UINT nCntItem = 0; nCntItem < nSendItem; nCntItem++)
+	{// 提出した回数分回す
+		if (pIn[nCntItem] < ITEMTYPE_SPRING_TRUE)
+		{// trueアイテムの処理
 			aTypeTrue[nCntTrue] = pIn[nCntItem];
 			nCntTrue++;
 			g_nScoreJudge++;
 		}
 		else
-		{
+		{// falseアイテムの処理
 			aTypeFalse[nCntFalse] = pIn[nCntItem];
 			nCntFalse++;
 		}
-
+		// 用意したローカル変数に情報を代入
 		aType[nCntItem] = pIn[nCntItem];
+
+		// 入手に時間のかかるものには高倍率にする
+		if (pIn[nCntItem] == ITEMTYPE_GEARL_TRUE)
+		{// 駅のガラスにあるアイテム
+			bGetHighMag = true;	// ゲットしたフラグを立てる
+			nGetHighMag++;	// 個数を増やす
+		}
+		if (pIn[nCntItem] == ITEMTYPE_SPRING_TRUE)
+		{// 教会の敷地内にあるアイテム(裏口)
+			bGetHighMag = true;	// ゲットしたフラグを立てる
+			nGetHighMag++;	// 個数を増やす
+		}
 	}
 
+	// === 変数宣言 === //
+	float fItemMag = 1.0f + (((float)nCntTrue * 2 + nCntFalse) / 10.0f);	// 倍率を保存(最大で1.5倍)
+	float fHighMag = 0.0f;						// 高倍率アイテム取得フラグが立っているときの特殊倍率
+
+	if (bGetHighMag == true)
+	{// 高倍率フラグが立っているときのみ宣言
+		fHighMag = fItemMag + 0.5 * nGetHighMag;	// この時最大で2.5倍
+	}
+
+	// 残った時間を取得
+	int nClearTime = GetTimer();
+
 	// === スコア計算 === //
-	g_nItemScore += nCntFalse * 400;	// 最大で2000点
-	g_nItemScore += nCntTrue * 4000;	// 最大で20000点
+	// クリアタイム(残ったフレーム数)に倍率を掛けて、スコアに加算
+	if (bGetHighMag == true)
+	{// 高倍率
+		g_nTimeScore += nClearTime * fHighMag;
+	}
+	else
+	{// 通常倍率
+		g_nTimeScore += nClearTime * fItemMag;
+	}
 
 	if (nCntTrue == 5)
 	{// すべて正しいアイテムならば追加点
 		g_nItemScore += 10000;
 	}
 
-	// かかった時間を取得
-	int nClearTime = GetTimer();
-
-	// 基準値からクリアタイムを引いた値をスコアに加算
-	g_nTimeScore +=  30000 - nClearTime;
-
 	// アイテムスコアとタイムスコアを合算
 	g_nTotalScore = g_nItemScore + g_nTimeScore;	// 最大で60000点(不可能ではある)
 
+	if (nSendItem == 0)
+	{// アイテムを獲得せず提出すると0点に
+		g_nTotalScore = 0;
+	}
 
 	// バッドエンド判定[1]
 	if (nCntFalse >= CONTRAINDICATION_LINE)
@@ -128,9 +161,9 @@ int JudgmentEnding(ITEMTYPE *pIn, UINT size)
 	int nCountTrue = 0;
 
 	// バッドエンド判定[2]
-	for (UINT nCntItem = 0; nCntItem < size; nCntItem++)
+	for (UINT nCntItem = 0; nCntItem < nSendItem; nCntItem++)
 	{
-		for (UINT nCntItemCover = nCntItem; nCntItemCover < size; nCntItemCover++)
+		for (UINT nCntItemCover = nCntItem; nCntItemCover < nSendItem; nCntItemCover++)
 		{
 			if (nCntItem == nCntItemCover) continue;
 
@@ -166,4 +199,12 @@ int JudgmentEnding(ITEMTYPE *pIn, UINT size)
 	SetEndingType(result);
 
 	return ENDTYPE_BAD;
+}
+
+//==================================================================================
+// --- 獲得スコアを渡す ---
+//==================================================================================
+int GetScore(void)
+{
+	return g_nTotalScore;
 }

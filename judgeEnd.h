@@ -28,4 +28,6 @@ void DrawJudgeEnd(void);
 #endif
 
 int JudgmentEnding(ITEMTYPE *pIn, UINT size);
+int GetScore(void);		// Šl“¾ƒXƒRƒA‚ğ“n‚·
+	
 #endif
