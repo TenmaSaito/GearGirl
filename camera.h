@@ -24,7 +24,7 @@
 #define CAMERA_V_DEFPOS			(0.0f, 350.0f, 500.0f)	// 視点のデフォ位置
 #define CAMERA_R_DEFPOS			(0.0f, 0.0f, 0.0f)		// 注視点のデフォ位置
 #define CAMERA_1P_DISTANS		(55.0f)					// 少女の,カメラと注視点の距離
-#define CAMERA_2P_DISTANS		(10.0f)					// ネズミの,カメラと注視点の距離
+#define CAMERA_2P_DISTANS		(20.0f)					// ネズミの,カメラと注視点の距離
 #define CAMERA_1P_ROT			vec3(1.8f, 0.0f, 0.0f)	// 少女のカメラの角度
 #define CAMERA_2P_ROT			vec3(1.6f, 0.0f, 0.0f)	// ネズミのカメラの角度
 #define CAMERA_MOVE				(10.0f)					// カメラの移動速度
