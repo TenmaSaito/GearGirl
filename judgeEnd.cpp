@@ -76,7 +76,6 @@ int JudgmentEnding(ITEMTYPE* pIn, UINT size)
 	UINT nCntTrue = 0;					// 正しいアイテムの数
 	ITEMTYPE aTypeFalse[ITEMTYPE_MAX];	// アイテムの種類
 	UINT nCntFalse = 0;					// 間違ったアイテムの数
-	int nSendItem = GetSendItemNum();	// 提出したアイテム数を取得
 	bool bGetHighMag = false;			// 高倍率アイテムをとったか
 	int nGetHighMag = 0;				// 高倍率アイテムをとった個数を保管
 
@@ -85,7 +84,7 @@ int JudgmentEnding(ITEMTYPE* pIn, UINT size)
 	g_nItemScore = 0;
 
 	// 値保存
-	for (UINT nCntItem = 0; nCntItem < nSendItem; nCntItem++)
+	for (UINT nCntItem = 0; nCntItem < size; nCntItem++)
 	{// 提出した回数分回す
 		if (pIn[nCntItem] < ITEMTYPE_SPRING_TRUE)
 		{// trueアイテムの処理
@@ -145,7 +144,7 @@ int JudgmentEnding(ITEMTYPE* pIn, UINT size)
 	// アイテムスコアとタイムスコアを合算
 	g_nTotalScore = g_nItemScore + g_nTimeScore;	// 最大で60000点(不可能ではある)
 
-	if (nSendItem == 0)
+	if (size == 0)
 	{// アイテムを獲得せず提出すると0点に
 		g_nTotalScore = 0;
 	}
@@ -161,9 +160,9 @@ int JudgmentEnding(ITEMTYPE* pIn, UINT size)
 	int nCountTrue = 0;
 
 	// バッドエンド判定[2]
-	for (UINT nCntItem = 0; nCntItem < nSendItem; nCntItem++)
+	for (UINT nCntItem = 0; nCntItem < size; nCntItem++)
 	{
-		for (UINT nCntItemCover = nCntItem; nCntItemCover < nSendItem; nCntItemCover++)
+		for (UINT nCntItemCover = nCntItem; nCntItemCover < size; nCntItemCover++)
 		{
 			if (nCntItem == nCntItemCover) continue;
 
