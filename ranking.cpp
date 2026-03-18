@@ -30,7 +30,7 @@ int						g_nThisRank;								// 今回の順位
 int						g_nScoreMoveCouter;							// 今回のスコアが動くフレームカウンター
 int						g_aHighScore[MAX_NUMSCORE] =				// ランキング
 {
-	50000,30000,20000,15000,10000,
+	500,300,200,150,100,
 };
 const char*				g_aResultTexFile[] =
 {
@@ -54,6 +54,8 @@ void UpdateScore(void);
 void UpdateRank(void);
 void UpdateResultFade(void);
 void UpdateVtxResult(P_RESULT pResult);
+void LoadRanking(void);
+void SaveRanking(void);
 
 //=========================================================================================
 // リザルト初期化
@@ -68,11 +70,12 @@ void InitRanking(void)
 	colX				col;
 	int					nCntResult = 0;
 	int					nCntRanking = 0;
-	int					nThisScore = 40000;// GetScore();
+	int					nThisScore = 40;// GetScore();
 	int					nThisRank;
 
 	//**************************************************************
 	// 変数初期化
+	LoadRanking();		// ランキング読込
 	memset(&g_aResult[0], 0, sizeof(RESULT) * MAX_RESULT);
 	memset(&g_aRanking[0], 0, sizeof(RESULT) * MAX_RESULT);
 	g_resultMode = RESULT_NONE;
@@ -80,7 +83,7 @@ void InitRanking(void)
 	g_resultFade = RESULTFADE_NONE;
 	g_nScoreMoveCouter = SCOREMOVE;
 	g_nSelectResult = 0;
-	g_nThisScore = 40000;// GetScore();
+	g_nThisScore = nThisScore;
 	nThisRank = SortRanking(g_nThisScore);
 	g_pThisRanking = NULL;
 
@@ -301,6 +304,7 @@ void UpdateRank(void)
 	{
 		if (GetFade() == FADE_NONE)
 		{
+			SaveRanking();
 			SetFade(MODE_TEAMLOGO);
 			StopSound();
 		}
@@ -582,4 +586,45 @@ P_RESULT SetResult(vec3 pos, vec3 size, vec3 rot, colX col, int nTex, int nTexPo
 		}
 	}
 	return NULL;
+}
+
+//=========================================================================================
+// ランキングファイル読み込み
+void LoadRanking(void)
+{
+	//**************************************************************
+	// 変数宣言
+	FILE* pFile;
+
+	pFile = fopen(RANKINGFILE, "rb");
+	if (pFile != NULL)
+	{
+		fread(&g_aHighScore[0], sizeof(int), MAX_NUMSCORE, pFile);
+		fclose(pFile);
+	}
+	else
+	{
+		// 例外処理
+	}
+}
+
+//=========================================================================================
+// ランキング保存
+void SaveRanking(void)
+{
+	//**************************************************************
+	// 変数宣言
+	FILE* pFile;
+
+	pFile = fopen(RANKINGFILE, "wb");
+	if (pFile != NULL)
+	{
+		fwrite(&g_aHighScore[0], sizeof(int), MAX_NUMSCORE, pFile);
+		fclose(pFile);
+	}
+	else
+	{
+		// 例外処理
+	}
+
 }
