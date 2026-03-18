@@ -70,7 +70,7 @@ void InitRanking(void)
 	colX				col;
 	int					nCntResult = 0;
 	int					nCntRanking = 0;
-	int					nThisScore = 40;// GetScore();
+	int					nThisScore = GetScore();
 	int					nThisRank;
 
 	//**************************************************************
