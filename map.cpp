@@ -31,6 +31,7 @@ USE_PARAM;
 #include "UImenu.h"
 #include "dialog.h"
 #include "gimmick.h"
+#include "item.h"
 
 //**********************************************************************************
 //*** マクロ定義 ***
@@ -247,7 +248,7 @@ void UninitMap(void)
 //==================================================================================
 void UpdateMap(void)
 {
-	if (!GetEnableUI())
+	if (!GetEnableUI() || IsEnableItemPut() == false)
 	{ // UI非表示の場合、無効にする
 		SetEnable2DPolygon(g_IdxUIMap, false);
 	}

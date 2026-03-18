@@ -589,7 +589,8 @@ void DrawGame(void)
 		&& GetCommonFade() == FADE_NONE
 		&& g_bPause == false
 		&& IsEnableItemPut() == false
-		&& g_bEnableUI == true)
+		&& g_bEnableUI == true
+		&& GetActivePlayer() == PLAYERTYPE_GIRL)
 	{
 		DrawUIarm();
 	}

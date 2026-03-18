@@ -340,7 +340,6 @@ void UninitDialog(void)
 void UpdateDialog(void)
 {	
 	g_nCountWaiting--;
-	if (g_nCountWaiting > 0) return;
 
 	Player* pPlayer = GetPlayer();
 	D3DXVECTOR3 Tutorialpos = D3DXVECTOR3(1450.0f, 100.0f, -480.0f);
