@@ -24,4 +24,6 @@ void InitGuide(void);
 void UninitGuide(void);
 void UpdateGuide(void);
 
+void SetEnableGuide(bool bEnable);
+bool GetEnableGuide(void);
 #endif

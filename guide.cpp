@@ -131,7 +131,7 @@ void UpdateGuide(void)
 		if (type == GIMMICKTYPE_MAX)
 		{
 			fAngle = GetPosToPos(g_posShop, pPlayer->pos);
-			SetColor3DModel(pGuide->Idx3DModel, COLOR_UNUSED, false);
+			col = COLOR_UNUSED;
 		}
 
 		D3DXVECTOR3 pos;
@@ -143,4 +143,21 @@ void UpdateGuide(void)
 		SetRotation3DModel(pGuide->Idx3DModel, VEC_Y(fAngle));
 		SetColor3DModel(pGuide->Idx3DModel, col, false);
 	}
+}
+
+//==================================================================================
+// --- 描画フラグ変更 ---
+//==================================================================================
+void SetEnableGuide(bool bEnable)
+{
+	SetEnable3DModel(g_aGuide[PLAYERTYPE_GIRL].Idx3DModel, bEnable);
+	SetEnable3DModel(g_aGuide[PLAYERTYPE_MOUSE].Idx3DModel, bEnable);
+}
+
+//==================================================================================
+// --- 描画フラグ取得 ---
+//==================================================================================
+bool GetEnableGuide(void)
+{
+	return GetEnable3DModel(g_aGuide[PLAYERTYPE_GIRL].Idx3DModel);
 }
