@@ -910,7 +910,10 @@ bool CollisionGimmick(
 						}
 					}
 
-					if (g_aGimmick[nCntModel].bClear == false && g_aGimmick[nCntModel].myType == GIMMICKTYPE_BIGBUTTON && GetActivePlayer() == PLAYERTYPE_GIRL)
+					if (g_aGimmick[nCntModel].bClear == false 
+						&& g_aGimmick[nCntModel].myType == GIMMICKTYPE_BIGBUTTON 
+						&& GetActivePlayer() == PLAYERTYPE_GIRL 
+						&& pPlayer->playertype != PLAYERTYPE_MOUSE)
 					{// ‚Å‚©ƒ{ƒ^ƒ“‚ð‰Ÿ‚·
 						SetMotionType(MOTIONTYPE_ACTION, false, 0, GIMMICKTYPE_BIGBUTTON);
 						ClearGimmick(GIMMICKTYPE_BIGBUTTON);

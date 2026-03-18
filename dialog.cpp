@@ -342,12 +342,14 @@ void UpdateDialog(void)
 	g_nCountWaiting--;
 
 	Player* pPlayer = GetPlayer();
+	Player* pMouse = GetPlayer() + 1;
 	D3DXVECTOR3 Tutorialpos = D3DXVECTOR3(1450.0f, 100.0f, -480.0f);
 
 	if (GetCommonFade() == FADE_IN && pPlayer->pos != Tutorialpos && g_bSkip == true)
 	{
 		// チュートリアルスキップ時に店の前へワープ
 		pPlayer->pos = Tutorialpos;
+		pMouse->pos = Tutorialpos;
 	}
 
 	if (g_bIsEndTutorial == true) return;

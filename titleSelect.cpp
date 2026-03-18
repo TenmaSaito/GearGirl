@@ -60,7 +60,7 @@ const char* c_apFilenameTitle[MAX_TITLE] =
 {
 	"data\\TEXTURE\\TitleTapToStart.png",
 	"data\\TEXTURE\\Title_Start.png",
-	"data\\TEXTURE\\Title_Settings.png",
+	//"data\\TEXTURE\\Title_Settings.png",
 	"data\\TEXTURE\\Title_Quit.png",
 	"data\\TEXTURE\\Title1Player.png",
 	"data\\TEXTURE\\Title2Player.png",
@@ -77,9 +77,9 @@ int g_nPlayerNum;					// プレイヤーの人数
 const D3DXVECTOR3 g_aPosSelect[TITLE_MENU_MAX] =		// 各選択肢の初期位置
 {
 	D3DXVECTOR3(1020, 615, 0),
-	D3DXVECTOR3(1020, 560, 0),
-	D3DXVECTOR3(1020, 615, 0),
-	D3DXVECTOR3(1020, 670, 0),
+	D3DXVECTOR3(1020, 580, 0),
+	//D3DXVECTOR3(1020, 615, 0),
+	D3DXVECTOR3(1020, 650, 0),
 	D3DXVECTOR3(1020, 587, 0),
 	D3DXVECTOR3(1020, 642, 0),
 };
@@ -87,9 +87,9 @@ const D3DXVECTOR3 g_aPosSelect[TITLE_MENU_MAX] =		// 各選択肢の初期位置
 const D3DXVECTOR3 g_aPosSelectInvisible[TITLE_MENU_MAX] =		// 各選択肢の見えなくなる位置
 {
 	D3DXVECTOR3(640, 615, 0),
-	D3DXVECTOR3(640, 560, 0),
-	D3DXVECTOR3(640, 615, 0),
-	D3DXVECTOR3(640, 670, 0),
+	D3DXVECTOR3(640, 580, 0),
+	//D3DXVECTOR3(640, 615, 0),
+	D3DXVECTOR3(640, 650, 0),
 	D3DXVECTOR3(640, 587, 0),
 	D3DXVECTOR3(640, 642, 0),
 };
@@ -299,9 +299,9 @@ void ChangePhase(void)
 						break;
 
 						// 設定
-					case TITLE_MENU_OPTION:
-						ToSetting();
-						break;
+					//case TITLE_MENU_OPTION:
+					//	ToSetting();
+					//	break;
 
 						// 退出
 					case TITLE_MENU_OUTGAME:

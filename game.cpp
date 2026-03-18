@@ -590,7 +590,7 @@ void DrawGame(void)
 		&& g_bPause == false
 		&& IsEnableItemPut() == false
 		&& g_bEnableUI == true
-		&& GetActivePlayer() == PLAYERTYPE_GIRL)
+		&& (GetActivePlayer() == PLAYERTYPE_GIRL || GetNumPlayer() == 2))
 	{
 		DrawUIarm();
 	}

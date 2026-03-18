@@ -156,10 +156,10 @@ void UninitPlayer(void);	// 終了処理
 void UpdatePlayer(void);	// 更新処理
 void DrawPlayer(void);		// 描画処理
 Player *GetPlayer(void);	// プレイヤー情報を渡す
-int GetNumPlayer(void);			// プレイ人数情報を渡す
-int GetActivePlayer(void);		// 操作しているプレイヤー情報を渡す
-void SetPlayer(D3DXVECTOR3* pPosGirl, D3DXVECTOR3* pPosMouse);	// プレイヤーの位置情報を渡す
-void ChangeNumPlayer(void);		// プレイ人数を切り替える(デバッグ用)
-void SetRotShop(D3DXVECTOR3 pos);
+int GetNumPlayer(void);		// プレイ人数情報を渡す
+int GetActivePlayer(void);	// 操作しているプレイヤー情報を渡す
+void SetPlayer(D3DXVECTOR3* pPosGirl, D3DXVECTOR3* pPosMouse);	// プレイヤーの位置を移動させる
+void ChangeNumPlayer(void);			// プレイ人数を切り替える(デバッグ用)
+void SetRotShop(D3DXVECTOR3 pos);	// プレイヤーの体の向きをpos(引数)の方向に決める
 
 #endif
