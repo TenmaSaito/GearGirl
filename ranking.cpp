@@ -65,6 +65,7 @@ void InitRanking(void)
 	LPDIRECT3DDEVICE9	pDevice = GetDevice();			// デバイスへのポインタ
 	P_RESULT			pResult = GetThisScore();		// リザルト情報ポインタ
 	vec3				pos, size;
+	colX				col;
 	int					nCntResult = 0;
 	int					nCntRanking = 0;
 	int					nThisScore = 40000;// GetScore();
@@ -123,16 +124,18 @@ void InitRanking(void)
 	//**************************************************************
 	//  ランキング初期化
 	// "RANKING"
+	col = colX(1.0f, 1.0f, 1.0f, 0.0f);
+
 	pos = vec3(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.15f, 0.0f);
 	size = vec3(SCREEN_WIDTH * 0.25f, SCREEN_HEIGHT * 0.1f, 0.0f);
-	SetResult(pos, size, vec3_ZERO, colX_WHITE, RESULTTEX_RANK, -1, GetRanking());
+	SetResult(pos, size, vec3_ZERO, col, RESULTTEX_RANK, -1, GetRanking());
 
 	// 順位
 	for (int nCntRank = 0; nCntRank < MAX_NUMSCORE; nCntRank++)
 	{
 		pos = vec3(SCREEN_WIDTH * 0.35f, SCREEN_HEIGHT * (nCntRank + 2) * 0.15f, 0.0f);
 		size = vec3(SCREEN_WIDTH * 0.043f, SCREEN_HEIGHT * 0.08f, 0.0f);
-		SetResult(pos, size, vec3_ZERO, colX_WHITE, RESULTTEX_RANKNUM, nCntRank, GetRanking());
+		SetResult(pos, size, vec3_ZERO, col, RESULTTEX_RANKNUM, nCntRank, GetRanking());
 	}
 
 	// スコア
@@ -145,11 +148,11 @@ void InitRanking(void)
 			size = vec3(SCREEN_WIDTH * 0.03f, SCREEN_HEIGHT * 0.06f, 0.0f);
 			if (nCntNum == MAX_SCOREDIGIT - 1 && nThisRank == nCntRank)
 			{// 今回のスコアの順位の一つ目のアドレス
-				g_pThisRanking = SetResult(pos, size, vec3_ZERO, colX_WHITE, RESULTTEX_NUM, nThisScore % 10, GetRanking());
+				g_pThisRanking = SetResult(pos, size, vec3_ZERO, col, RESULTTEX_NUM, nThisScore % 10, GetRanking());
 			}
 			else
 			{
-				SetResult(pos, size, vec3_ZERO, colX_WHITE, RESULTTEX_NUM, nThisScore % 10, GetRanking());
+				SetResult(pos, size, vec3_ZERO, col, RESULTTEX_NUM, nThisScore % 10, GetRanking());
 			}
 			nThisScore *= 0.1f;
 		}
@@ -317,11 +320,11 @@ void UpdateRank(void)
 			else
 			{
 				(g_pThisRanking + nCntNum)->rot.z = 0.0f;
+				(g_pThisRanking + nCntNum)->pos.y += sinf((g_pThisRanking + nCntNum)->rot.x + nCntNum) * 0.3f;
 			}
 
 			// 色の変化
 			(g_pThisRanking + nCntNum)->rot.x += 0.05f;
-			(g_pThisRanking + nCntNum)->pos.y += sinf((g_pThisRanking + nCntNum)->rot.x + nCntNum) * 0.3f;
 
 			(g_pThisRanking + nCntNum)->col.r = 1 - sinf((g_pThisRanking + nCntNum)->rot.x) * 0.3f;
 			(g_pThisRanking + nCntNum)->col.g = 1 - sinf((g_pThisRanking + nCntNum)->rot.x) * 0.3f;
@@ -343,7 +346,18 @@ void UpdateResultFade(void)
 	
 	if (g_resultFade == RESULTFADE_IN)
 	{
-		g_resultFade = RESULTFADE_NONE;
+		if (pResult)
+		{
+			for (int nCnt = 0; nCnt < MAX_RESULT; nCnt++, pResult++)
+			{
+				if (pResult->bUse)
+				{
+					pResult->col.a += 0.02f;
+					if (1.0f <= pResult->col.a && g_resultFade == RESULTFADE_IN)
+						g_resultFade = RESULTFADE_NONE;
+				}
+			}
+		}
 	}
 	else if (g_resultFade == RESULTFADE_OUT)
 	{
@@ -352,10 +366,20 @@ void UpdateResultFade(void)
 			g_resultMode = g_resultNext;
 			g_resultFade = RESULTFADE_IN;
 		}
-		else if(pResult)
+		else if (pResult)
 		{
-			g_resultMode = g_resultNext;
-			g_resultFade = RESULTFADE_IN;
+			for (int nCnt = 0; nCnt < MAX_RESULT; nCnt++, pResult++)
+			{
+				if (pResult->bUse)
+				{
+					pResult->col.a -= 0.02f;
+					if (pResult->col.a <= 0.0f && g_resultFade == RESULTFADE_OUT)
+					{
+						g_resultMode = g_resultNext;
+						g_resultFade = RESULTFADE_IN;
+					}
+				}
+			}
 		}
 	}
 
