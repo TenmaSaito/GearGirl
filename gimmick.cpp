@@ -100,14 +100,14 @@ const D3DXVECTOR3 g_aVecParticle[2] =								// パーティクルの上下限ベクトル
 
 const char* g_apGimmickPromptTexture[GIMMICKTYPE_MAX] =		// 各ギミックのプロンプト
 {
-	"data/TEXTURE/TestPrompt.png",		// 人間用ボタン
-	"data/TEXTURE/TestPrompt.png",		// ネズミ用ボタン
-	"data/TEXTURE/TestPrompt.png",		// 倒木1
-	"data/TEXTURE/TestPrompt.png",		// 倒木2
-	"data/TEXTURE/TestPrompt.png",		// 倒木3
-	"UNUSED",							// UNUSED
-	"UNUSED",							// UNUSED
-	"data/TEXTURE/TestPrompt.png",		// バルブ
+	"data/TEXTURE/UIprompt/promptMouse.png",	// 人間用ボタン
+	"UNUSED",									// UNUSED	
+	"data/TEXTURE/UIprompt/promptWood.png",		// 倒木1
+	"data/TEXTURE/UIprompt/promptWood.png",		// 倒木2
+	"data/TEXTURE/UIprompt/promptWood.png",		// 倒木3
+	"UNUSED",									// UNUSED
+	"UNUSED",									// UNUSED
+	"data/TEXTURE/UIprompt/promptBulb.png",		// バルブ
 };
 
 //**********************************************************************************
@@ -187,7 +187,7 @@ void InitGimmick(void)
 				if (C_FAILED(g_apGimmickPromptTexture[nCntMotion], "UNUSED"))
 				{
 					IDX_TEXTURE Tex;
-					LoadTexture("data/TEXTURE/TestPrompt.png", &Tex);
+					LoadTexture(g_apGimmickPromptTexture[nCntMotion], &Tex);
 					g_aGimmick[nCntMotion].nIdxPrompt = SetPrompt(g_aGimmick[nCntMotion].pos, D3DXVECTOR2(15.0f, 8.0f), Tex, false);
 					SetEnablePrompt(true, g_aGimmick[nCntMotion].nIdxPrompt);
 				}
@@ -314,6 +314,7 @@ void UpdateGimmick(void)
 	if (g_aGimmick[GIMMICKTYPE_STATUE].bClear == true)
 	{
 		SetColorMeshCylinder(&GetMeshCylinder()[g_aGCData[GC_STATUE].nIdxMeshCylinder], COLOR_INV);
+		ReleaseMesh(GetMeshCylinder(), g_aGCData[GC_STATUE].nIdxMeshCylinder, GetNumMeshCylinder());
 		g_aGCData[GC_STATUE].bEnable = false;
 	}
 
@@ -321,6 +322,7 @@ void UpdateGimmick(void)
 	if (g_aGimmick[GIMMICKTYPE_FALLENTREE].bClear == true)
 	{
 		SetColorMeshCylinder(&GetMeshCylinder()[g_aGCData[GC_FALLENTREE].nIdxMeshCylinder], COLOR_INV);
+		ReleaseMesh(GetMeshCylinder(), g_aGCData[GC_FALLENTREE].nIdxMeshCylinder, GetNumMeshCylinder());
 		g_aGCData[GC_FALLENTREE].bEnable = false;
 	}
 
@@ -328,6 +330,7 @@ void UpdateGimmick(void)
 	if (g_aGimmick[GIMMICKTYPE_CLOSEDDOOR].bClear == true)
 	{
 		SetColorMeshCylinder(&GetMeshCylinder()[g_aGCData[GC_BIGBUTTON].nIdxMeshCylinder], COLOR_INV);
+		ReleaseMesh(GetMeshCylinder(), g_aGCData[GC_BIGBUTTON].nIdxMeshCylinder, GetNumMeshCylinder());
 		g_aGCData[GC_BIGBUTTON].bEnable = false;
 	}
 
@@ -1329,6 +1332,8 @@ void UpdateGimmickCylinder(void)
 	{
 		for (int nCntGimmick = 0; nCntGimmick < GC_MAX; nCntGimmick++)
 		{
+			if (g_aGCData[nCntGimmick].bEnable == false) continue;
+
 			LPGIMMICK pGimmick = &GetGimmick()[g_aGCData[nCntGimmick].typeDetection];
 
 			// 半径を確認
@@ -1343,6 +1348,8 @@ void UpdateGimmickCylinder(void)
 	for (int nCntGimmick = 0; nCntGimmick < GC_MAX; nCntGimmick++)
 	{
 		LPGIMMICK pGimmick = &GetGimmick()[g_aGCData[nCntGimmick].typeDetection];
+
+		if (g_aGCData[nCntGimmick].bEnable == false && g_aGCData[nCntGimmick].s == 0.0f) continue;
 
 		if (aAlreadyDetection[nCntGimmick])
 		{ // プレイヤーが近いなら、半径増加

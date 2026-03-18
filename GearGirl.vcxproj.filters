@@ -288,6 +288,9 @@
     <ClCompile Include="ranking.cpp">
       <Filter>ソース ファイル\Mode\Result</Filter>
     </ClCompile>
+    <ClCompile Include="UIShop.cpp">
+      <Filter>ソース ファイル\Mode\Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dpolygon.h">
@@ -487,6 +490,9 @@
     </ClInclude>
     <ClInclude Include="ranking.h">
       <Filter>ヘッダー ファイル\Mode\Result</Filter>
+    </ClInclude>
+    <ClInclude Include="UIShop.h">
+      <Filter>ヘッダー ファイル\Mode\Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

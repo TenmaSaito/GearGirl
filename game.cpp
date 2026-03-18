@@ -46,6 +46,7 @@
 #include "UIplayer.h"
 #include "UIcollect.h"
 #include "UIGet.h"
+#include "UIShop.h"
 #include "2Dpolygon.h"
 #include "3Dmodel.h"
 
@@ -152,6 +153,9 @@ void InitGame(void)
 	/*** UIゲット初期化 ***/
 	InitUIGet();
 
+	/*** UIショップの初期化 ***/
+	InitUIShop();
+
 	/*** エフェクトの初期化 ***/
 	InitEffect();
 
@@ -188,7 +192,7 @@ void InitGame(void)
 
 	g_nCounterGame = 0;
 	IDX_TEXTURE Tex;
-	LoadTexture("data/TEXTURE/TestPrompt.png", &Tex);
+	LoadTexture("data/TEXTURE/UIprompt/promptTalk.png", &Tex);
 	g_nIdxShopPrompt = SetPrompt(D3DXVECTOR3(1463, 116, -455), D3DXVECTOR2(10.0f, 5.0f), Tex, true);
 	SetEnablePrompt(true, g_nIdxShopPrompt);
 
@@ -269,6 +273,9 @@ void UninitGame(void)
 
 	/*** UIコレクト終了 ***/
 	UninitUIcollect();
+
+	/*** UIショップの終了 ***/
+	UninitUIShop();
 
 	/*** ギミックの終了 ***/
 	UninitGimmick();
@@ -388,6 +395,9 @@ void UpdateGame(void)
 			/*** UIゲット更新 ***/
 			UpdateUIGet();
 
+			/*** UIショップの更新 ***/
+			UpdateUIShop();
+
 			/*** パーティクルの更新 ***/
 			UpdateParticle();
 
@@ -487,19 +497,6 @@ void DrawGame(void)
 			DrawItem();
 		}
 
-		/*** メッシュの描画 ***/
-		if ((nCntDraw == PLAYERTYPE_MOUSE || GetActivePlayer() == PLAYERTYPE_MOUSE))
-		{ // ネズミの場合のみZFuncを無効に
-			SetEnableZFunction(pDevice, false);
-			DrawMeshSphere();
-			SetEnableZFunction(pDevice, true);
-			DrawMeshCylinder();
-		}
-		else
-		{
-			DrawMesh();
-		}
-
 		/*** メッシュオービットの描画 ***/
 		DrawMeshOrbit();
 
@@ -517,6 +514,19 @@ void DrawGame(void)
 
 		/*** 3Dモデルの描画 ***/
 		Draw3DModel();
+
+		/*** メッシュの描画 ***/
+		if ((nCntDraw == PLAYERTYPE_MOUSE || GetActivePlayer() == PLAYERTYPE_MOUSE))
+		{ // ネズミの場合のみZFuncを無効に
+			SetEnableZFunction(pDevice, false);
+			DrawMeshSphere();
+			SetEnableZFunction(pDevice, true);
+			DrawMeshCylinder();
+		}
+		else
+		{
+			DrawMesh();
+		}
 
 		/*** フォグをクリア ***/
 		CleanFog();
