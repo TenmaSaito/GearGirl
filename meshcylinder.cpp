@@ -367,7 +367,7 @@ bool SetRadiusMeshCylinder(P_MESH pMesh, float fRadius)
 //=========================================================================================
 bool SetColorMeshCylinder(P_MESH pMesh, D3DXCOLOR col)
 {
-
+	return false;
 }
 
 //=========================================================================================
