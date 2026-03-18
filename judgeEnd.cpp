@@ -76,7 +76,6 @@ int JudgmentEnding(ITEMTYPE* pIn, UINT size)
 	UINT nCntTrue = 0;					// 正しいアイテムの数
 	ITEMTYPE aTypeFalse[ITEMTYPE_MAX];	// アイテムの種類
 	UINT nCntFalse = 0;					// 間違ったアイテムの数
-	bool bGetHighMag = false;			// 高倍率アイテムをとったか
 	int nGetHighMag = 0;				// 高倍率アイテムをとった個数を保管
 
 	// 現在のスコアをリセット
@@ -97,46 +96,40 @@ int JudgmentEnding(ITEMTYPE* pIn, UINT size)
 			aTypeFalse[nCntFalse] = pIn[nCntItem];
 			nCntFalse++;
 		}
+
 		// 用意したローカル変数に情報を代入
 		aType[nCntItem] = pIn[nCntItem];
 
-		// 入手に時間のかかるものには高倍率にする
-		if (pIn[nCntItem] == ITEMTYPE_GEARL_TRUE)
-		{// 駅のガラスにあるアイテム
-			bGetHighMag = true;	// ゲットしたフラグを立てる
+		// 特定のアイテムは特殊倍率に
+		if (pIn[nCntItem] == ITEMTYPE_SCREW_TRUE)
+		{// 高級なネジ
 			nGetHighMag++;	// 個数を増やす
+			nCntTrue--;
 		}
-		if (pIn[nCntItem] == ITEMTYPE_SPRING_TRUE)
-		{// 教会の敷地内にあるアイテム(裏口)
-			bGetHighMag = true;	// ゲットしたフラグを立てる
-			nGetHighMag++;	// 個数を増やす
+
+		if (pIn[nCntItem] == ITEMTYPE_SCREW_FALSE)
+		{// ノーマルネジ
+			// 個数調整
+			nCntFalse--;
+			nCntTrue++;
 		}
 	}
 
 	// === 変数宣言 === //
-	float fItemMag = 1.0f + (((float)nCntTrue * 2 + nCntFalse) / 10.0f);	// 倍率を保存(最大で1.5倍)
-	float fHighMag = 0.0f;						// 高倍率アイテム取得フラグが立っているときの特殊倍率
+	float fInfMag = 1.0f + (((float)nCntTrue * 3) / 10.0f);	// 倍率を保存(最大で2.5倍)
+	float fSupMag = 1.0f + ((float)nCntFalse / 10.0f);		// 倍率を保存(最大で1.5倍)
+	float fHighMag = 1.0f + ((float)nGetHighMag * 5) / 10.0f;	// 高倍率アイテム取得フラグが立っているときの特殊倍率
 
-	if (bGetHighMag == true)
-	{// 高倍率フラグが立っているときのみ宣言
-		fHighMag = fItemMag + 0.5 * nGetHighMag;	// この時最大で2.5倍
-	}
+	float fTotalMag = fInfMag + fSupMag + fHighMag;
 
 	// 残った時間を取得
-	int nClearTime = GetTimer();
+	g_nTimeScore = GetTimer();
 
 	// === スコア計算 === //
 	// クリアタイム(残ったフレーム数)に倍率を掛けて、スコアに加算
-	if (bGetHighMag == true)
-	{// 高倍率
-		g_nTimeScore += nClearTime * fHighMag;
-	}
-	else
-	{// 通常倍率
-		g_nTimeScore += nClearTime * fItemMag;
-	}
+	g_nTimeScore = g_nTimeScore * fTotalMag;
 
-	if (nCntTrue == 5)
+	if (nCntTrue == 4 && nGetHighMag == 1)
 	{// すべて正しいアイテムならば追加点
 		g_nItemScore += 10000;
 	}
