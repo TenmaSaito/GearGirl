@@ -278,6 +278,15 @@ void UpdatePlayer(void)
 				{
 					MovePlayer((PlayerType)nCntPlayer);	// 移動に関する処理
 				}
+				else if((g_aPlayer[PLAYERTYPE_GIRL].motionType == MOTIONTYPE_CUTTING
+					|| g_aPlayer[PLAYERTYPE_GIRL].motionTypeBlend == MOTIONTYPE_CUTTING
+					|| g_aPlayer[PLAYERTYPE_GIRL].motionType == MOTIONTYPE_VALVE
+					|| g_aPlayer[PLAYERTYPE_GIRL].motionTypeBlend == MOTIONTYPE_VALVE)
+					&& Fade == FADE_NONE)
+				{
+					MovePlayer(PLAYERTYPE_MOUSE);	// 移動に関する処理
+
+				}
 
 				// 左スティックを押し込むとダッシュ状態(速度)に
 				if (pPlayer->motionType == MOTIONTYPE_MOVE && nCntPlayer == PLAYERTYPE_GIRL && GetJoypadTrigger(0, JOYKEY_LEFT_PUSH) == true)
@@ -1454,7 +1463,9 @@ void JumpPlayer(PlayerType nPlayer)
 	// プレイヤー構造体をポインタ化
 	Player* pPlayer = &g_aPlayer[nPlayer];
 
-	if (ITEMPROMPT_OFF && ITEM_OFF)
+	if (ITEMPROMPT_OFF 
+		&& ITEM_OFF 
+		&& DIAROG_OFF)
 	{
 		if (nPlayer == 0)
 		{// 少女
@@ -2016,7 +2027,7 @@ void ChangeArmType(ArmType Type)
 }
 
 // =================================================
-// ネズミを発射 未完成
+// ネズミを発射 
 // =================================================
 void ShotMouse(void)
 {
@@ -2039,8 +2050,6 @@ void ShotMouse(void)
 			pPlayer->rot.y = pCamera->rot.y + D3DX_PI;
 			pMouse->rot.y = pCamera->rot.y + D3DX_PI;
 
-			// 手にくっつける
-			D3DXVec3TransformCoord(&pMouse->pos, &offset, &pPlayer->PartsInfo.aParts[19].mtxWorld);
 		}
 
 		if (pPlayer->state != PLAYERSTATE_THROWWAITING)
@@ -2066,6 +2075,9 @@ void ShotMouse(void)
 				{
 					pCamera->rot.y += D3DX_PI * 2.0f;
 				}
+
+				// 手にくっつける
+				D3DXVec3TransformCoord(&pMouse->pos, &offset, &pPlayer->PartsInfo.aParts[19].mtxWorld);
 			}
 
 			if (GetKeyboardTrigger(DIK_RETURN) == true || GetJoypadTrigger(0, JOYKEY_B) == true)
@@ -2110,7 +2122,9 @@ void ShotMouse(void)
 	}
 }
 
-
+// =================================================
+// プレイヤーの体の向きをpos(引数)の方向に決める
+// =================================================
 void SetRotShop(D3DXVECTOR3 pos)
 {
 	Player* pPlayer = GetPlayer();

@@ -20,6 +20,7 @@
 #include "particle.h"
 #include "player.h"
 #include "prompt.h"
+#include "sound.h"
 #include "Texture.h"
 #include "timer.h"
 #include "UImenu.h"
@@ -241,8 +242,10 @@ void UpdateItem(void)
 		{
 			if (GetKeyboardTrigger(DIK_RETURN) || GetKeyboardTrigger(DIK_F) || GetJoypadTrigger(PLAYERTYPE_GIRL, JOYKEY_A))
 			{
+				PlaySound(SOUND_LABEL_SE_G_TUTORIAL);
 				// 提出画面に移行の際、強制的に店の方に体を向ける
 				SetRotShop(D3DXVECTOR3(1450.0f, 100.0f, -460.0f));
+				CameraReset();
 
 				g_bPutOut = true;
 				g_nCoutItemFram = 10;
@@ -251,6 +254,7 @@ void UpdateItem(void)
 
 		if (GetKeyboardTrigger(DIK_BACK) || GetJoypadTrigger(0, JOYKEY_B))
 		{
+			PlaySound(SOUND_LABEL_SE_G_CANCEL);
 			g_bPutOut = false;
 		}
 		if (g_bPutOut == false)
@@ -589,6 +593,8 @@ void CollisionItem(vec3 pos, float fRange, int type)
 				pItem->bGet = true;
 				SetParticle(pItem->pos, colX(0.5f, 0.1f, 0.1f, 0.3f), vec3(-0.5f, -0.5f, -0.5f), vec3(1.0f, 1.0f, 1.0f), 1, 5.0f, 20, 10, false);
 				SetGetEffect(pItem->nIdxEffector);
+				// 獲得音再生
+				PlaySound(SOUND_LABEL_SE_G_GETITEM);
 
 				// シリンダーを非表示に
 				SetEnableMeshCylinder(pItem->nIdxMesh, false);
@@ -645,6 +651,8 @@ void PutOut(void)
 	if (GetKeyboardRepeat(DIK_D) || GetKeyboardRepeat(DIK_RIGHT)
 		|| GetJoypadRepeat(0, JOYKEY_RIGHT) || GetJoypadRepeat(0, JOYKEY_LEFT_STICK_RIGHT))
 	{
+		PlaySound(SOUND_LABEL_SE_G_ARMSWITCH);
+
 		// カーソルが上段にいたら
 		if (-1 < g_nChoisePut && g_nChoisePut < NUM_PUTOUTITEM)
 		{
@@ -672,6 +680,8 @@ void PutOut(void)
 	if (GetKeyboardRepeat(DIK_A) || GetKeyboardRepeat(DIK_LEFT)
 		|| GetJoypadRepeat(0, JOYKEY_LEFT) || GetJoypadRepeat(0, JOYKEY_LEFT_STICK_LEFT))
 	{
+		PlaySound(SOUND_LABEL_SE_G_ARMSWITCH);
+
 		// カーソルが上段にいたら
 		if (-1 < g_nChoisePut && g_nChoisePut < NUM_PUTOUTITEM)
 		{
@@ -701,6 +711,8 @@ void PutOut(void)
 	if (GetKeyboardRepeat(DIK_W) || GetKeyboardRepeat(DIK_UP)
 		|| GetJoypadRepeat(0, JOYKEY_UP) || GetJoypadRepeat(0, JOYKEY_LEFT_STICK_UP))
 	{
+		PlaySound(SOUND_LABEL_SE_G_ARMSWITCH);
+		
 		if (NUM_PUTOUTITEM <= g_nChoisePut)
 			g_nChoisePut = -1;
 		else if (g_nChoisePut == -1)
@@ -709,6 +721,8 @@ void PutOut(void)
 	if (GetKeyboardRepeat(DIK_S) || GetKeyboardRepeat(DIK_DOWN)
 		|| GetJoypadRepeat(0, JOYKEY_DOWN) || GetJoypadRepeat(0, JOYKEY_LEFT_STICK_DOWN))
 	{
+		PlaySound(SOUND_LABEL_SE_G_ARMSWITCH);
+		
 		if (g_nChoisePut < 0)
 			g_nChoisePut = NUM_PUTOUTITEM;
 		else if (g_nChoisePut < NUM_PUTOUTITEM)

@@ -116,11 +116,11 @@ int JudgmentEnding(ITEMTYPE* pIn, UINT size)
 	}
 
 	// === •Ï”éŒ¾ === //
-	float fInfMag = 1.0f + (((float)nCntTrue * 3) / 10.0f);	// ”{—¦‚ğ•Û‘¶(Å‘å‚Å2.5”{)
-	float fSupMag = 1.0f + ((float)nCntFalse / 10.0f);		// ”{—¦‚ğ•Û‘¶(Å‘å‚Å1.5”{)
-	float fHighMag = 1.0f + ((float)nGetHighMag * 5) / 10.0f;	// ‚”{—¦ƒAƒCƒeƒ€æ“¾ƒtƒ‰ƒO‚ª—§‚Á‚Ä‚¢‚é‚Æ‚«‚Ì“Áê”{—¦
+	float fInfMag = (((float)nCntTrue * 3) / 10.0f);	// ”{—¦‚ğ•Û‘¶(Å‘å‚Å2.5”{)
+	float fSupMag = (float)nCntFalse / 10.0f;		// ”{—¦‚ğ•Û‘¶(Å‘å‚Å1.5”{)
+	float fHighMag = ((float)nGetHighMag * 5) / 10.0f;	// ‚”{—¦ƒAƒCƒeƒ€æ“¾ƒtƒ‰ƒO‚ª—§‚Á‚Ä‚¢‚é‚Æ‚«‚Ì“Áê”{—¦
 
-	float fTotalMag = fInfMag + fSupMag + fHighMag;
+	float fTotalMag = 1.0f + fInfMag + fSupMag + fHighMag;
 
 	// c‚Á‚½ŠÔ‚ğæ“¾
 	g_nTimeScore = GetTimer();
