@@ -812,10 +812,13 @@ void SelectItem(void)
 						}
 					}
 
-					if (nNum <= 0)
+					if (0 < nNum)
 					{
 						JudgmentEnding(&PutOut[0], nNum);
 						SetFade(MODE_RESULT);
+					}
+					else
+					{
 						PlaySound(SOUND_LABEL_SE_G_ARMSWITCH);
 					}
 					break;
