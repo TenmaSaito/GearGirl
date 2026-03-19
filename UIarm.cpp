@@ -155,7 +155,7 @@ void UpdateUIarm(void)
 		&& DIAROG_OFF 
 		&& TUTORIALTEX_OFF
 		&& MAP_OFF 
-		&& GetActivePlayer() == PLAYERTYPE_GIRL
+		&& (GetActivePlayer() == PLAYERTYPE_GIRL || GetNumPlayer() ==2)
 		&& pPlayer->state != PLAYERSTATE_THROWWAITING 
 		&& pPlayer->motionType != MOTIONTYPE_CUTTING 
 		&& pPlayer->motionType != MOTIONTYPE_VALVE)

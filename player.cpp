@@ -285,7 +285,6 @@ void UpdatePlayer(void)
 					&& Fade == FADE_NONE)
 				{
 					MovePlayer(PLAYERTYPE_MOUSE);	// 移動に関する処理
-
 				}
 
 				// 左スティックを押し込むとダッシュ状態(速度)に
@@ -336,7 +335,7 @@ void UpdatePlayer(void)
 			}
 
 			// === 少女操作時のねずみの処理 === //
-			if (GetActivePlayer() == PLAYERTYPE_GIRL && nCntPlayer == PLAYERTYPE_MOUSE)
+			if (GetActivePlayer() == PLAYERTYPE_GIRL && nCntPlayer == PLAYERTYPE_MOUSE && GetNumPlayer() == 1)
 			{
 				// 少女にネズミが追従する処理
 				MouseKeepUp();
@@ -2001,7 +2000,7 @@ void MouseKeepUp(void)
 // =================================================
 void UpdateArm(void)
 {
-	if (g_aPlayer[PLAYERTYPE_GIRL].state != PLAYERSTATE_THROWWAITING && GetActivePlayer() == PLAYERTYPE_GIRL)
+	if (g_aPlayer[PLAYERTYPE_GIRL].state != PLAYERSTATE_THROWWAITING && GetActivePlayer() == PLAYERTYPE_GIRL || GetNumPlayer() == 2)
 	{
 		if (GetKeyboardTrigger(DIK_0) == true || GetJoypadTrigger(0, JOYKEY_RB) == true)
 		{
@@ -2059,7 +2058,7 @@ void ShotMouse(void)
 
 		if (g_nMotionCounter < 0)
 		{
-			if (g_nMotionCounter == -5)
+			if (g_nMotionCounter == -4)
 			{
 				// ネズミ投げ待機状態にする
 				pPlayer->state = PLAYERSTATE_THROWWAITING;
@@ -2083,6 +2082,7 @@ void ShotMouse(void)
 			if (GetKeyboardTrigger(DIK_RETURN) == true || GetJoypadTrigger(0, JOYKEY_B) == true)
 			{// 投げる
 				pPlayer->state = PLAYERSTATE_NEUTRAL;
+				pMouse->state = PLAYERSTATE_NEUTRAL;
 				PlaySound(SOUND_LABEL_SE_G_THROW);
 
 				// ネズミを操作対象に

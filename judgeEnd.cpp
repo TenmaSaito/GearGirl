@@ -123,7 +123,7 @@ int JudgmentEnding(ITEMTYPE* pIn, UINT size)
 	float fTotalMag = 1.0f + fInfMag + fSupMag + fHighMag;
 
 	// 残った時間を取得
-	g_nTimeScore = GetTimer();
+	g_nTimeScore = 20000 * (float)GetTimer() / 10000.0f;
 
 	// === スコア計算 === //
 	// クリアタイム(残ったフレーム数)に倍率を掛けて、スコアに加算

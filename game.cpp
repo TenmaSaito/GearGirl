@@ -545,8 +545,7 @@ void DrawGame(void)
 		/*** メッシュオービットの描画 ***/
 		DrawMeshOrbit();
 
-		/*** ギミックの描画 ***/
-		DrawGimmick();
+
 
 		/*** プロンプトの描画 ***/
 		DrawPrompt();
@@ -560,6 +559,9 @@ void DrawGame(void)
 		/*** 3Dモデルの描画 ***/
 		Draw3DModel();
 
+		/*** ギミックの描画 ***/
+		DrawGimmick();
+
 		/*** メッシュの描画 ***/
 		if ((nCntDraw == PLAYERTYPE_MOUSE 
 			|| (GetNumPlayer() == 1 && GetActivePlayer() == PLAYERTYPE_MOUSE)))
@@ -572,7 +574,9 @@ void DrawGame(void)
 		else
 		{
 			DrawMesh();
-		}
+		}	
+		
+
 
 		/*** フォグをクリア ***/
 		CleanFog();
