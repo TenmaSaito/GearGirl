@@ -549,8 +549,6 @@ void DrawGame(void)
 		/*** メッシュオービットの描画 ***/
 		DrawMeshOrbit();
 
-
-
 		/*** プロンプトの描画 ***/
 		DrawPrompt();
 
@@ -623,7 +621,7 @@ void DrawGame(void)
 	/*** マップの描画 ***/
 	if (IsEndDialog() == true
 		&& GetCommonFade() == FADE_NONE
-		&& GetActivePlayer() == PLAYERTYPE_GIRL
+		&& (GetActivePlayer() == PLAYERTYPE_GIRL ||  GetNumPlayer() == 2) 
 		&& g_bPause == false
 		&& IsEnableItemPut() == false
 		&& g_bEnableUI == true)
