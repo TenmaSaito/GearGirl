@@ -154,19 +154,19 @@ void InitItem(void)
 		{// Œˆ’è
 			pUI->pos = vec3(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.7f, 0.0f);
 			pUI->size = vec2(SCREEN_WIDTH * 0.15f, SCREEN_WIDTH * 0.06f);
-			pUI->col = colX(1.0f, 1.0f, 1.0f, 0.8f);
+			pUI->col = colX(0.8f, 0.8f, 0.8f, 0.5f);
 		}
 		else if (nCntUI == 2)
 		{// ‰ðœ
 			pUI->pos = vec3(SCREEN_WIDTH * 0.3f, SCREEN_HEIGHT * 0.7f, 0.0f);
 			pUI->size = vec2(SCREEN_WIDTH * 0.1f, SCREEN_WIDTH * 0.04f);
-			pUI->col = colX(1.0f, 1.0f, 1.0f, 0.8f);
+			pUI->col = colX(0.8f, 0.8f, 0.8f, 0.5f);
 		}
 		else
 		{// ‚â‚ß‚é
 			pUI->pos = vec3(SCREEN_WIDTH * 0.15f, SCREEN_HEIGHT * 0.7f, 0.0f);
 			pUI->size = vec2(SCREEN_WIDTH * 0.1f, SCREEN_WIDTH * 0.04f);
-			pUI->col = colX(1.0f, 1.0f, 1.0f, 0.8f);
+			pUI->col = colX(0.8f, 0.8f, 0.8f, 0.5f);
 		}
 		pUI->nType = g_aItemUIInfo[nCntUI].nNumGet;
 		pUI->nIdxBox = Set2DPolygon(pUI->pos, vec3_ZERO, pUI->size, pUI->nType, pUI->col);

@@ -461,7 +461,11 @@ void UpdateGame(void)
 				AddTimer(-1);
 			}
 
-			if ((GetKeyboardTrigger(DIK_5) || GetJoypadTrigger(0, JOYKEY_BACK)) && IsEndDialog() == true && GetCommonFade() == FADE_NONE)
+			if ((GetKeyboardTrigger(DIK_5)
+				|| GetJoypadTrigger(0, JOYKEY_BACK))
+				&& IsEndDialog() == true 
+				&& GetCommonFade() == FADE_NONE
+				&& IsEnableItemPut() == false)
 			{
 				SetEnableUImenu(!GetEnableUImenu(), 0);
 			}

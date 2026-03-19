@@ -25,7 +25,7 @@ typedef int IDX_3DMODEL;		// 3Dモデルのインデックス
 //**********************************************************************************
 //*** モデル情報構造体の定義 ***
 //**********************************************************************************
-STRUCT(_3DMODEL)
+typedef struct _3DMODEL
 {
 	D3DXCOLOR col;			// 色
 	D3DXVECTOR3 pos;		// 3Dモデルの位置
@@ -54,5 +54,12 @@ void SetRotation3DModel(IDX_3DMODEL Idx, D3DXVECTOR3 rot);
 void SetEnable3DModel(IDX_3DMODEL Idx, bool bEnable); 
 void SetColor3DModel(IDX_3DMODEL Idx, D3DXCOLOR col, bool bAlpha);
 void SetZFunc3DModel(IDX_3DMODEL Idx, bool bEnable);
-LP3DMODEL Get3DModel(IDX_3DMODEL nIdxModel);
+
+LP3DMODEL Get3DModel(IDX_3DMODEL nIdxModel);			// 将来的に破棄(以下の関数で値を取得するように変更)
+bool GetPosition3DModel(IDX_3DMODEL nIdx, D3DXVECTOR3 *pOut);
+bool GetRotation3DModel(IDX_3DMODEL nIdx, D3DXVECTOR3 *pOut);
+bool GetColor3DModel(IDX_3DMODEL nIdx, D3DXCOLOR *pOut);
+bool GetEnable3DModel(IDX_3DMODEL nIdx);
+bool GetZFunc3DModel(IDX_3DMODEL nIdx);
+bool GetUse3DModel(IDX_3DMODEL nIdx);
 #endif

@@ -248,9 +248,10 @@ void UninitMap(void)
 //==================================================================================
 void UpdateMap(void)
 {
-	if (!GetEnableUI() || IsEnableItemPut() == false)
+	if (!GetEnableUI() || IsEnableItemPut() != false)
 	{ // UI非表示の場合、無効にする
 		SetEnable2DPolygon(g_IdxUIMap, false);
+		return;
 	}
 	else
 	{
@@ -263,13 +264,16 @@ void UpdateMap(void)
 	// マップカメラの取得
 	LPMAPCAMERA pMCam = GetMapCamera();
 
-	if (GetActivePlayer() == PLAYERTYPE_MOUSE)
+	if (GetActivePlayer() == PLAYERTYPE_MOUSE
+		&& GetNumPlayer() == 1)
 	{
 		SetEnable2DPolygon(g_IdxUIMap, false);
 		return;
 	}
 
-	if (g_map.bEnable == true && IsEndDialog() && UIMENU_OFF)
+	if (g_map.bEnable == true
+		&& IsEndDialog()
+		&& UIMENU_OFF)
 	{
 		SetEnable2DPolygon(g_IdxUIMap, true);
 	}

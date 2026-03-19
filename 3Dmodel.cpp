@@ -187,6 +187,7 @@ void SetPosition3DModel(IDX_3DMODEL Idx, D3DXVECTOR3 pos)
 	// もしインデックス外なら
 	if (Idx < 0 || Idx >= MAX_3DMODEL) return;
 	
+	// 使用状態を取得
 	LP3DMODEL p3DModel = &g_aModel[Idx];
 	if (p3DModel->bUse == false) return;
 
@@ -201,6 +202,7 @@ void SetRotation3DModel(IDX_3DMODEL Idx, D3DXVECTOR3 rot)
 	// もしインデックス外なら
 	if (Idx < 0 || Idx >= MAX_3DMODEL) return;
 
+	// 使用状態を取得
 	LP3DMODEL p3DModel = &g_aModel[Idx];
 	if (p3DModel->bUse == false) return;
 
@@ -215,6 +217,7 @@ void SetEnable3DModel(IDX_3DMODEL Idx, bool bEnable)
 	// もしインデックス外なら
 	if (Idx < 0 || Idx >= MAX_3DMODEL) return;
 
+	// 使用状態を取得
 	LP3DMODEL p3DModel = &g_aModel[Idx];
 	if (p3DModel->bUse == false) return;
 
@@ -229,6 +232,7 @@ void SetColor3DModel(IDX_3DMODEL Idx, D3DXCOLOR col, bool bAlpha)
 	// もしインデックス外なら
 	if (Idx < 0 || Idx >= MAX_3DMODEL) return;
 
+	// 使用状態を取得
 	LP3DMODEL p3DModel = &g_aModel[Idx];
 	if (p3DModel->bUse == false) return;
 
@@ -244,6 +248,7 @@ void SetZFunc3DModel(IDX_3DMODEL Idx, bool bEnable)
 	// もしインデックス外なら
 	if (Idx < 0 || Idx >= MAX_3DMODEL) return;
 
+	// 使用状態を取得
 	LP3DMODEL p3DModel = &g_aModel[Idx];
 	if (p3DModel->bUse == false) return;
 
@@ -257,5 +262,107 @@ LP3DMODEL Get3DModel(IDX_3DMODEL nIdxModel)
 {
 	// もしインデックス外なら
 	if (nIdxModel < 0 || nIdxModel >= MAX_3DMODEL) return NULL;
-	return &g_aModel[nIdxModel];
+
+	// 使用状態を取得
+	LP3DMODEL p3DModel = &g_aModel[nIdxModel];
+	if (p3DModel->bUse == false) return NULL;
+
+	return p3DModel;
+}
+
+//=================================================================================================
+// --- 位置取得 ---
+//=================================================================================================
+bool GetPosition3DModel(IDX_3DMODEL nIdx, D3DXVECTOR3 *pOut)
+{
+	// もしインデックス外なら
+	if (nIdx < 0 || nIdx >= MAX_3DMODEL) return false;
+	if (pOut == NULL) return false;	// 書き出し先がNULL
+
+	// 使用状態を取得
+	LP3DMODEL p3DModel = &g_aModel[nIdx];
+	if (p3DModel->bUse == false) return false;		// 未使用
+
+	*pOut = p3DModel->pos;
+
+	return true;
+}
+
+//=================================================================================================
+// --- 角度取得 ---
+//=================================================================================================
+bool GetRotation3DModel(IDX_3DMODEL nIdx, D3DXVECTOR3 *pOut)
+{
+	// もしインデックス外なら
+	if (nIdx < 0 || nIdx >= MAX_3DMODEL) return false;
+	if (pOut == NULL) return false;	// 書き出し先がNULL
+
+	// 使用状態を取得
+	LP3DMODEL p3DModel = &g_aModel[nIdx];
+	if (p3DModel->bUse == false) return false;
+
+	*pOut = p3DModel->rot;
+
+	return true;
+}
+
+//=================================================================================================
+// --- 色取得 ---
+//=================================================================================================
+bool GetColor3DModel(IDX_3DMODEL nIdx, D3DXCOLOR *pOut)
+{
+	// もしインデックス外なら
+	if (nIdx < 0 || nIdx >= MAX_3DMODEL) return false;
+	if (pOut == NULL) return false;	// 書き出し先がNULL
+
+	// 使用状態を取得
+	LP3DMODEL p3DModel = &g_aModel[nIdx];
+	if (p3DModel->bUse == false) return false;
+
+	*pOut = p3DModel->col;
+
+	return true;
+}
+
+//=================================================================================================
+// --- 描画フラグ取得 ---
+//=================================================================================================
+bool GetEnable3DModel(IDX_3DMODEL nIdx)
+{
+	// もしインデックス外なら
+	if (nIdx < 0 || nIdx >= MAX_3DMODEL) return false;
+
+	// 使用状態を取得
+	LP3DMODEL p3DModel = &g_aModel[nIdx];
+	if (p3DModel->bUse == false) return false;
+
+	return p3DModel->bEnable;
+}
+
+//=================================================================================================
+// --- Zテストフラグ取得 ---
+//=================================================================================================
+bool GetZFunc3DModel(IDX_3DMODEL nIdx)
+{
+	// もしインデックス外なら
+	if (nIdx < 0 || nIdx >= MAX_3DMODEL) return false;
+
+	// 使用状態を取得
+	LP3DMODEL p3DModel = &g_aModel[nIdx];
+	if (p3DModel->bUse == false) return false;
+
+	return p3DModel->bAlpha;
+}
+
+//=================================================================================================
+// --- 使用状態取得 ---
+//=================================================================================================
+bool GetUse3DModel(IDX_3DMODEL nIdx)
+{
+	// もしインデックス外なら
+	if (nIdx < 0 || nIdx >= MAX_3DMODEL) return false;
+
+	// 使用状態を取得
+	LP3DMODEL p3DModel = &g_aModel[nIdx];
+	return p3DModel->bUse;
 }
