@@ -762,20 +762,22 @@ void CameraReset(void)
 	//**************************************************************
 	// 変数宣言
 	P_CAMERA pCamera = GetCamera();				// カメラ情報
-	Player* pPlayer = GetPlayer();
+	Player* pPlayer[2];
+	pPlayer[0] = GetPlayer();
+	pPlayer[1] = GetPlayer() + 1;
 	float	fPlayerRot;
 
-	for (int nCntCamera = 0; nCntCamera < PLAYERTYPE_MAX; nCntCamera++, pCamera++, pPlayer++)
+	for (int nCntCamera = 0; nCntCamera < PLAYERTYPE_MAX; nCntCamera++, pCamera++)
 	{
-		if (GetJoypadTrigger(nCntCamera, CAM_RESETJOY) || GetKeyboardTrigger(CAM_RESETKEY(nCntCamera)) || pPlayer->motionType == MOTIONTYPE_VALVE || ITEM_ON)
+		if (GetJoypadTrigger(nCntCamera, CAM_RESETJOY) || GetKeyboardTrigger(CAM_RESETKEY(nCntCamera)) || pPlayer[nCntCamera]->motionType == MOTIONTYPE_VALVE || ITEM_ON)
 		{
 			if (GetNumPlayer() == 1 && GetActivePlayer() == PLAYERTYPE_MOUSE)
 			{// 1人プレイでネズミがアクティブなら
 				pCamera++;
-				pPlayer++;
+				nCntCamera++;
 			}
 
-			pCamera->rotDest.y = pPlayer->rot.y - D3DX_PI;	// プレイヤーの背後(180度)へ回転させる、目標の角度
+			pCamera->rotDest.y = pPlayer[nCntCamera]->rot.y - D3DX_PI;	// プレイヤーの背後(180度)へ回転させる、目標の角度
 			pCamera->rotDest.y = RepairRot(pCamera->rotDest.y);	// 正規化
 			pCamera->bCamRotation = true;
 		}
