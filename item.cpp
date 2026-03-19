@@ -25,6 +25,7 @@
 #include "timer.h"
 #include "UImenu.h"
 #include "itemEffector.h"
+#include "sound.h"
 
 using  namespace MyMathUtil;
 
@@ -810,9 +811,13 @@ void SelectItem(void)
 							nNum++;
 						}
 					}
-					JudgmentEnding(&PutOut[0], nNum);
-					SetFade(MODE_RESULT);
 
+					if (nNum <= 0)
+					{
+						JudgmentEnding(&PutOut[0], nNum);
+						SetFade(MODE_RESULT);
+						PlaySound(SOUND_LABEL_SE_G_ARMSWITCH);
+					}
 					break;
 
 				case 2:// Žæ‚èÁ‚µ
