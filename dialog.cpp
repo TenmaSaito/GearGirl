@@ -198,7 +198,7 @@ Log g_apLog[] =
 {
 	{L"久しぶりにこの町に来た。懐かしいな。", LOGTYPE_GIRL},
 	{L"お～い嬢ちゃん、久しぶり！ちとこっちに来てくれねぇか！", LOGTYPE_OLDMAN},
-	{L"ん？呼ばれてる気がする。", LOGTYPE_GIRL},
+	{L"ん？懐かしい声がする。", LOGTYPE_GIRL},
 	{L"気になるし、行ってみよう。", LOGTYPE_GIRL},
 };
 
@@ -208,9 +208,13 @@ Log g_apTutorialLog[] =
 	{L"よぉ。久しぶりだな、嬢ちゃん。少しお願い聞いてくれねぇか。", LOGTYPE_OLDMAN},
 	{L"この街のシンボルの時計台が壊れちまって、\n直さなきゃならないんだ。", LOGTYPE_OLDMAN},
 	{L"その為に街から時計台のパーツを集めてきてほしい。", LOGTYPE_OLDMAN},
-	{L"うちのネズミとアームを貸してやる。\n大事に使ってくれよ。", LOGTYPE_OLDMAN},
-	{L"困った時は、矢印の方に行くといい。", LOGTYPE_OLDMAN},
+	{L"体が壊れてるから、一人じゃできないかも。", LOGTYPE_GIRL},
+	{L"なるほどな。\nそれなら、うちのネズミとアームを貸してやる。", LOGTYPE_OLDMAN},
+	{L"うちのネズミはパーツの場所が何となく分かるんだ。\n緑の光源のところに行ってみるといい。", LOGTYPE_OLDMAN},
+	{L"それと、パーツのありそうな場所には、\n天高く円柱が伸びていることがある。\n大きくなっていたら、ネズミかアンタがいる証拠だ。", LOGTYPE_OLDMAN},
+	{L"何処に行けばいいか困った時は、矢印の方に行くといいぞ。", LOGTYPE_OLDMAN},
 	{L"分かった。", LOGTYPE_GIRL},
+	{L"最後に。時間内に持ってきてくれないとゲームオーバーだ。\n沢山パーツを集めて、ハイスコア更新を狙ってくれよ。", LOGTYPE_OLDMAN},
 };
 
 #pragma endregion
